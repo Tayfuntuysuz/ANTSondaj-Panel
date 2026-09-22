@@ -1,5 +1,5 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu */
-var CACHE = "sondaj-panel-v1";
+var CACHE = "sondaj-panel-v2";
 var SHELL = [
   "./",
   "./index.html",
