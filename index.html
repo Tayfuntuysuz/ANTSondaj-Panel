@@ -24,7 +24,7 @@
   --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
   color-scheme:dark;}}
 *{box-sizing:border-box}
-html,body{height:100%}
+html,body{height:100%;overflow-x:hidden}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
 h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
 .num{font-variant-numeric:tabular-nums}
@@ -42,7 +42,7 @@ nav.tabs button[aria-pressed="true"]{color:var(--accent-ink);border-top-color:va
 label{font-size:12.5px;color:var(--ink-2);font-weight:500}
 label .req{color:var(--bad);font-weight:700}
 input,select,textarea,button{font:inherit;color:inherit}
-input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;min-height:46px}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;min-height:48px;font-size:16px}
 input.missing,select.missing{border-color:var(--bad);background:var(--bad-soft)}
 textarea{min-height:70px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -89,7 +89,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
 [hidden]{display:none!important}
 .center{max-width:420px;margin:0 auto;padding:28px 18px;display:flex;flex-direction:column;gap:14px}
 /* özet şerit */
-.summary{position:sticky;top:calc(52px + env(safe-area-inset-top,0px));z-index:15;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.summary{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .summary .row1{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px}
 .summary .big{font-family:"Barlow Condensed",sans-serif;font-size:20px}
 .summary .todo{font-size:12px;color:var(--warn)}
@@ -427,13 +427,23 @@ $("#btn-new-well").addEventListener("click", function(){
   ok.addEventListener("click", function(){
     var c = wrap.querySelector("#nw-code").value.trim();
     if(!c) return;
-    if(!navigator.onLine){ msg($("#step-msg"), "Yeni kuyu açmak için bağlantı gerekiyor.", "err"); wrap.remove(); return; }
     ok.disabled = true;
-    sb.rpc("create_well", {p_project:$("#f-project").value, p_code:c, p_dip:Number($("#f-dip").value)}).then(function(r){
-      wrap.remove();
-      if(r.error){ msg($("#step-msg"), r.error.message, "err"); return; }
-      loadMaster(true).then(function(){ $("#f-well").value = r.data; syncDepth(); refreshState(); });
-    });
+    var pid = $("#f-project").value, dip = Number($("#f-dip").value);
+    var exists = (MASTER.wells||[]).some(function(w){ return w.project_id === pid && w.code.toLowerCase() === c.toLowerCase(); });
+    if(exists){ msg($("#step-msg"), "Bu kuyu zaten listede.", "err"); wrap.remove(); return; }
+
+    // Çevrimdışı da olsa kuyu hemen açılır; kaydı kuyruğa alınır.
+    var localId = "local:" + uuid();
+    (MASTER.wells = MASTER.wells || []).push({id:localId, project_id:pid, code:c, current_depth:0, status:"drilling"});
+    try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
+    wrap.remove();
+    fillWells();
+    $("#f-well").value = localId;
+    syncDepth(); refreshState();
+    msg($("#step-msg"), navigator.onLine ? "" : "Kuyu cihazda oluşturuldu, bağlantı gelince merkeze gidecek.", "warn");
+    enqueue({ id:uuid(), kind:"well", created:Date.now(),
+      title:"Yeni kuyu · " + c, sub:"oluşturulacak",
+      payload:{ local_id:localId, project_id:pid, code:c, dip:dip } });
   });
 });
 
@@ -732,13 +742,40 @@ function syncAll(){
     items.sort(function(a,b){ return a.created - b.created; });
     return items.reduce(function(ch, it){ return ch.then(function(){ return sendItem(it, tenant); }); }, Promise.resolve());
   }).then(function(){
-    syncing = false; msg($("#sync-msg"), "Tüm kayıtlar gönderildi.", "ok"); return refreshQueue();
+    syncing = false; msg($("#sync-msg"), "Tüm kayıtlar gönderildi.", "ok");
+    return loadMaster(true).then(refreshQueue);
   }).catch(function(e){
     syncing = false; msg($("#sync-msg"), "Gönderilemedi: " + (e && e.message ? e.message : e), "err"); return refreshQueue();
   });
 }
+/* yerel kuyu kimliklerini gerçek kimliklerle eşleştirme */
+function wellMap(){ try { return JSON.parse(localStorage.getItem("sp_wellmap") || "{}"); } catch(e){ return {}; } }
+function wellMapSet(localId, realId){
+  var m = wellMap(); m[localId] = realId;
+  try { localStorage.setItem("sp_wellmap", JSON.stringify(m)); } catch(e){}
+  if(MASTER && MASTER.wells){
+    MASTER.wells.forEach(function(w){ if(w.id === localId) w.id = realId; });
+    try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
+  }
+  var sel = $("#f-well");
+  if(sel && sel.value === localId){ fillWells(); sel.value = realId; }
+}
+function realWellId(id){
+  if(!id || id.indexOf("local:") !== 0) return id;
+  return wellMap()[id] || null;
+}
+
 function sendItem(it, tenant){
+  if(it.kind === "well"){
+    return sb.rpc("create_well", {p_project:it.payload.project_id, p_code:it.payload.code, p_dip:it.payload.dip})
+      .then(function(r){ if(r.error) throw r.error;
+        wellMapSet(it.payload.local_id, r.data);
+        return obDel(it.id); });
+  }
   if(it.kind === "shift"){
+    var wid = realWellId(it.payload.well_id);
+    if(!wid) throw new Error("Kuyu henüz oluşturulmadı, sonraki denemede gönderilecek.");
+    it.payload.well_id = wid;
     return sb.from("shifts").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .select("id").single().then(function(r){
         if(r.error) throw r.error;
