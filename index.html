@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sondaj Panel</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#123146">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef2f4;--card:#fff;--card-2:#f7fafb;--line:#d9e2e7;--line-soft:#e8eef1;
+  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
+  --accent:#12708f;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
+  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0c1820;--card:#122530;--card-2:#162c38;--line:#25404e;--line-soft:#1d3542;
+  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
+  --accent:#4bb3d6;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
+  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
+  color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--card)}
+header.bar{background:var(--navy);color:#eaf4f8;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20}
+header.bar b{font-family:"Barlow Condensed",sans-serif;font-size:19px;letter-spacing:.04em;text-transform:uppercase;flex:1}
+.netchip{display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:4px 10px;font-size:12px;background:none;color:#cfe3ec;cursor:pointer}
+.netchip .dot{width:8px;height:8px;border-radius:50%;background:#4cbb8c}
+.netchip[data-off="true"] .dot{background:#d8a44b}
+main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+nav.tabs{display:flex;border-top:1px solid var(--line);background:var(--card-2);position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs button{flex:1;border:0;background:none;color:var(--ink-3);font:inherit;font-size:12px;padding:10px 2px 12px;cursor:pointer;border-top:2px solid transparent;margin-top:-1px}
+nav.tabs button[aria-pressed="true"]{color:var(--accent-ink);border-top-color:var(--accent);font-weight:600}
+.field{display:flex;flex-direction:column;gap:5px}
+label{font-size:12.5px;color:var(--ink-2);font-weight:500}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;min-height:46px}
+textarea{min-height:70px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:10px;padding:13px 14px;font-weight:600;cursor:pointer;width:100%}
+.btn.ghost{background:none;color:var(--accent-ink);border-color:var(--line)}
+.btn.sm{padding:8px 12px;font-size:13px;width:auto}
+.btn:disabled{opacity:.5}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card-2);display:flex;flex-direction:column;gap:12px}
+.eyebrow{font-family:"Barlow Condensed",sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.readout>div{background:var(--card);padding:11px}
+.readout .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.readout .v{font-family:"Barlow Condensed",sans-serif;font-size:27px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);text-align:right;padding:6px 8px}
+th:first-child{text-align:left}
+td{padding:7px 8px;border-top:1px solid var(--line-soft);text-align:right}
+td:first-child{text-align:left;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 9px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:600}
+.chip[aria-pressed="true"]::before{content:"✓ "}
+.steps{display:flex;gap:6px;overflow-x:auto}
+.steps button{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--ink-2);cursor:pointer}
+.steps button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.msg.ok{border-left-color:var(--good);background:var(--good-soft);color:var(--good)}
+.li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.li:last-child{border-bottom:0}
+.hint{font-size:12px;color:var(--ink-3)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:96px 1fr auto;gap:8px;align-items:center;font-size:12.5px}
+.track{background:var(--line-soft);border-radius:4px;height:13px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+[hidden]{display:none!important}
+.center{max-width:420px;margin:0 auto;padding:28px 18px;display:flex;flex-direction:column;gap:14px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="bar">
+    <b>Sondaj Panel</b>
+    <span id="who" class="hint" style="color:#9fc4d3"></span>
+    <button class="netchip" id="netchip" type="button"><span class="dot"></span><span id="nettext">—</span></button>
+  </header>
+
+  <!-- KURULUM -->
+  <main id="scr-setup" hidden>
+    <div class="center">
+      <h2 style="font-size:24px">Bağlantı ayarları</h2>
+      <p class="hint">Supabase projenizin adresi ve anon anahtarı. Supabase panelinde Project Settings → API Keys altında.</p>
+      <div class="field"><label for="in-url">Project URL</label><input id="in-url" placeholder="https://xxxx.supabase.co" autocomplete="off"></div>
+      <div class="field"><label for="in-key">Anon (publishable) key</label><textarea id="in-key" placeholder="eyJ... veya sb_publishable_..."></textarea></div>
+      <button class="btn" id="btn-save-cfg">Kaydet</button>
+      <div id="cfg-msg"></div>
+    </div>
+  </main>
+
+  <!-- GİRİŞ -->
+  <main id="scr-login" hidden>
+    <div class="center">
+      <h2 style="font-size:24px">Giriş</h2>
+      <div class="field"><label for="in-mail">E-posta</label><input id="in-mail" type="email" autocomplete="username"></div>
+      <div class="field"><label for="in-pass">Parola</label><input id="in-pass" type="password" autocomplete="current-password"></div>
+      <button class="btn" id="btn-login">Giriş yap</button>
+      <div id="login-msg"></div>
+      <button class="btn ghost" id="btn-reset-cfg" type="button">Bağlantı ayarlarını değiştir</button>
+    </div>
+  </main>
+
+  <!-- UYGULAMA -->
+  <main id="scr-app" hidden>
+
+    <!-- VARDİYA -->
+    <section id="tab-vardiya">
+      <div class="steps" role="group" aria-label="Adım">
+        <button type="button" data-step="1" aria-pressed="true">1 · Vardiya</button>
+        <button type="button" data-step="2" aria-pressed="false">2 · Ekip</button>
+        <button type="button" data-step="3" aria-pressed="false">3 · Kontroller</button>
+        <button type="button" data-step="4" aria-pressed="false">4 · Delgi</button>
+        <button type="button" data-step="5" aria-pressed="false">5 · Tüketim</button>
+      </div>
+
+      <div class="card" data-pane="1" style="margin-top:14px">
+        <div class="field"><label for="f-project">Proje</label><select id="f-project"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="f-date">Tarih</label><input type="date" id="f-date"></div>
+          <div class="field"><label for="f-shift">Vardiya</label><select id="f-shift"><option value="gunduz">Gündüz</option><option value="gece">Gece</option></select></div>
+        </div>
+        <div class="field"><label for="f-machine">Makine</label><select id="f-machine"></select></div>
+        <div class="field"><label for="f-well">Kuyu</label><select id="f-well"></select></div>
+        <button class="btn ghost sm" id="btn-new-well" type="button">Yeni kuyu ekle</button>
+        <div class="grid2">
+          <div class="field"><label for="f-paper">Kâğıt form no</label><input id="f-paper" inputmode="numeric" placeholder="001369"></div>
+          <div class="field"><label for="f-dip">Eğim</label><select id="f-dip"><option>90</option><option>70</option><option>60</option><option>50</option><option>45</option></select></div>
+        </div>
+      </div>
+
+      <div class="card" data-pane="2" hidden style="margin-top:14px">
+        <div class="field"><label for="f-driller1">Sondör 1</label><select id="f-driller1"></select></div>
+        <div class="field"><label for="f-driller2">Sondör 2</label><select id="f-driller2"></select></div>
+        <div class="field"><label for="f-helper">Yardımcı / işçi</label><select id="f-helper"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="f-eng1">Motor başlangıç</label><input id="f-eng1" type="time" value="08:00"></div>
+          <div class="field"><label for="f-eng2">Motor bitiş</label><input id="f-eng2" type="time" value="20:00"></div>
+        </div>
+      </div>
+
+      <div class="card" data-pane="3" hidden style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Çalışma öncesi kontroller</span>
+          <button class="btn ghost sm" id="btn-check-all" type="button">Tümü uygun</button>
+        </div>
+        <div class="chips" id="checks"></div>
+        <div class="hint" id="check-count"></div>
+      </div>
+
+      <div class="card" data-pane="4" hidden style="margin-top:14px">
+        <div class="readout">
+          <div><div class="k">Vardiya metrajı</div><div class="v num" id="ro-m">0,00 m</div></div>
+          <div><div class="k">Kuyu derinliği</div><div class="v num" id="ro-d">0,00 m</div></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="f-dia">Çap</label><select id="f-dia"><option>HQ</option><option>PQ</option><option>NQ</option><option>PW</option></select></div>
+          <div class="field"><label for="f-to">Bitiş metresi</label><input id="f-to" type="number" step="0.01" inputmode="decimal"></div>
+        </div>
+        <div class="field"><label for="f-runner">Bu manevrayı yapan sondör</label><select id="f-runner"></select></div>
+        <button class="btn" id="btn-add-run" type="button">Manevra ekle</button>
+        <div id="run-msg"></div>
+        <table><thead><tr><th>Çap</th><th>Baş.</th><th>Bitiş</th><th>Manevra</th><th></th></tr></thead><tbody id="runs"></tbody></table>
+        <div class="field"><label for="f-end">Kuyu durumu</label><select id="f-end"><option value="">Devam ediyor</option><option value="kuyu_sonu">Kuyu sonu</option><option value="kuyu_iptali">Kuyu iptali</option></select></div>
+      </div>
+
+      <div class="card" data-pane="5" hidden style="margin-top:14px">
+        <div class="field"><label for="f-fuel">Mazot (litre)</label><input id="f-fuel" type="number" inputmode="decimal"></div>
+        <div class="field"><label for="f-note">Vardiya açıklaması</label><textarea id="f-note" placeholder="Takım inildi, ilerlemeye devam edildi"></textarea></div>
+        <div class="field"><label for="f-photo">Fotoğraf (kâğıt form, özel durum)</label><input id="f-photo" type="file" accept="image/*" multiple></div>
+        <button class="btn" id="btn-save-shift" type="button">Vardiyayı kaydet</button>
+        <div id="shift-msg"></div>
+      </div>
+    </section>
+
+    <!-- YAKIT -->
+    <section id="tab-yakit" hidden>
+      <div class="card">
+        <span class="eyebrow">Akaryakıt girişi</span>
+        <div class="field"><label for="y-project">Proje</label><select id="y-project"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="y-date">Tarih</label><input id="y-date" type="date"></div>
+          <div class="field"><label for="y-type">Cins</label><select id="y-type"><option>mazot</option><option>benzin</option><option>adblue</option><option>madeni_yag</option></select></div>
+        </div>
+        <div class="field"><label for="y-machine">Makine</label><select id="y-machine"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="y-liters">Litre</label><input id="y-liters" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="y-amount">Tutar (₺)</label><input id="y-amount" type="number" inputmode="decimal"></div>
+        </div>
+        <button class="btn" id="btn-save-fuel" type="button">Kaydet</button>
+        <div id="fuel-msg"></div>
+      </div>
+    </section>
+
+    <!-- NAKİT -->
+    <section id="tab-nakit" hidden>
+      <div class="card">
+        <span class="eyebrow">Nakit harcama</span>
+        <div class="field"><label for="e-project">Proje</label><select id="e-project"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="e-date">Tarih</label><input id="e-date" type="date"></div>
+          <div class="field"><label for="e-amount">Tutar (₺)</label><input id="e-amount" type="number" inputmode="decimal"></div>
+        </div>
+        <div class="field"><label for="e-cat">Kategori</label><select id="e-cat"><option>Yakıt</option><option>Yedek parça</option><option>Gıda</option><option>Nakliye</option><option>Tamir bakım</option><option>Diğer</option></select></div>
+        <div class="field"><label for="e-desc">Açıklama</label><input id="e-desc"></div>
+        <div class="field"><label for="e-photo">Fiş fotoğrafı</label><input id="e-photo" type="file" accept="image/*"></div>
+        <button class="btn" id="btn-save-exp" type="button">Kaydet</button>
+        <div id="exp-msg"></div>
+      </div>
+    </section>
+
+    <!-- BEKLEYEN -->
+    <section id="tab-kuyruk" hidden>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Bekleyen kayıtlar</span><span class="pill" id="q-count">0</span>
+        </div>
+        <div id="q-list"></div>
+        <button class="btn ghost" id="btn-sync" type="button">Şimdi senkronize et</button>
+        <div id="sync-msg"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <span class="eyebrow">Hesap</span>
+        <div class="hint" id="acct-info"></div>
+        <button class="btn ghost" id="btn-refresh" type="button">Ana verileri yenile</button>
+        <button class="btn ghost" id="btn-logout" type="button">Çıkış yap</button>
+      </div>
+    </section>
+
+    <!-- ÖZET -->
+    <section id="tab-ozet" hidden>
+      <div class="card">
+        <div class="field"><label for="s-project">Proje</label><select id="s-project"></select></div>
+        <div class="field"><label for="s-month">Ay</label><input id="s-month" type="month"></div>
+        <button class="btn ghost" id="btn-summary" type="button">Özeti getir</button>
+        <div id="sum-msg"></div>
+      </div>
+      <div id="sum-out" style="margin-top:14px;display:flex;flex-direction:column;gap:14px"></div>
+    </section>
+  </main>
+
+  <nav class="tabs" id="tabs" hidden>
+    <button type="button" data-tab="vardiya" aria-pressed="true">Vardiya</button>
+    <button type="button" data-tab="yakit" aria-pressed="false">Yakıt</button>
+    <button type="button" data-tab="nakit" aria-pressed="false">Nakit</button>
+    <button type="button" data-tab="ozet" aria-pressed="false">Özet</button>
+    <button type="button" data-tab="kuyruk" aria-pressed="false">Bekleyen</button>
+  </nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+"use strict";
+var $ = function(s){ return document.querySelector(s); };
+var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+var tl = function(n){ return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}); };
+var money = function(n){ return "₺" + Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); };
+var uuid = function(){ return (crypto.randomUUID ? crypto.randomUUID()
+  : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){
+      var r=Math.random()*16|0, v=c==="x"?r:(r&0x3|0x8); return v.toString(16);})); };
+function msg(el, text, kind){ el.innerHTML = text ? '<div class="msg ' + (kind||"") + '">' + text + '</div>' : ""; }
+
+/* ---------------- IndexedDB (outbox) ---------------- */
+var DB;
+function db(){
+  return new Promise(function(res, rej){
+    if(DB) return res(DB);
+    var r = indexedDB.open("sondaj-panel", 1);
+    r.onupgradeneeded = function(){
+      var d = r.result;
+      if(!d.objectStoreNames.contains("outbox")) d.createObjectStore("outbox", {keyPath:"id"});
+    };
+    r.onsuccess = function(){ DB = r.result; res(DB); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function tx(mode){ return db().then(function(d){ return d.transaction("outbox", mode).objectStore("outbox"); }); }
+function obAdd(item){ return tx("readwrite").then(function(s){ return new Promise(function(res,rej){
+  var q = s.add(item); q.onsuccess = function(){ res(); }; q.onerror = function(){ rej(q.error); }; }); }); }
+function obAll(){ return tx("readonly").then(function(s){ return new Promise(function(res,rej){
+  var q = s.getAll(); q.onsuccess = function(){ res(q.result || []); }; q.onerror = function(){ rej(q.error); }; }); }); }
+function obDel(id){ return tx("readwrite").then(function(s){ return new Promise(function(res,rej){
+  var q = s.delete(id); q.onsuccess = function(){ res(); }; q.onerror = function(){ rej(q.error); }; }); }); }
+
+/* ---------------- config & client ---------------- */
+var cfg = { url: localStorage.getItem("sp_url") || "", key: localStorage.getItem("sp_key") || "" };
+var sb = null, ME = null, MASTER = null;
+
+function show(id){
+  ["scr-setup","scr-login","scr-app"].forEach(function(s){ $("#"+s).hidden = (s !== id); });
+  $("#tabs").hidden = (id !== "scr-app");
+}
+function makeClient(){
+  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
+}
+
+$("#btn-save-cfg").addEventListener("click", function(){
+  var u = $("#in-url").value.trim().replace(/\/+$/,"");
+  var k = $("#in-key").value.trim();
+  if(!/^https:\/\/.+/.test(u) || k.length < 20){ msg($("#cfg-msg"), "Adres https ile başlamalı, anahtar eksik görünüyor.", "err"); return; }
+  localStorage.setItem("sp_url", u); localStorage.setItem("sp_key", k);
+  cfg.url = u; cfg.key = k; makeClient(); show("scr-login");
+});
+$("#btn-reset-cfg").addEventListener("click", function(){
+  localStorage.removeItem("sp_url"); localStorage.removeItem("sp_key"); location.reload();
+});
+
+$("#btn-login").addEventListener("click", function(){
+  var b = $("#btn-login"); b.disabled = true; msg($("#login-msg"), "Giriş yapılıyor…");
+  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value})
+    .then(function(r){
+      b.disabled = false;
+      if(r.error){ msg($("#login-msg"), "Giriş başarısız: " + r.error.message, "err"); return; }
+      msg($("#login-msg"), "");
+      start();
+    });
+});
+$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+
+/* ---------------- master data ---------------- */
+function loadMaster(force){
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem("sp_master") || "null"); } catch(e){}
+  if(cached && !force){ MASTER = cached; fillSelects(); }
+  if(!navigator.onLine) return Promise.resolve();
+  return sb.rpc("bootstrap_data").then(function(r){
+    if(r.error){ console.warn(r.error); return; }
+    MASTER = r.data;
+    try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
+    fillSelects();
+  });
+}
+function opt(sel, items, valueKey, labelFn, allowEmpty){
+  var el = $(sel); if(!el) return;
+  var cur = el.value;
+  el.innerHTML = "";
+  if(allowEmpty){ var o0 = document.createElement("option"); o0.value=""; o0.textContent="—"; el.appendChild(o0); }
+  (items||[]).forEach(function(it){
+    var o = document.createElement("option");
+    o.value = it[valueKey]; o.textContent = labelFn(it);
+    el.appendChild(o);
+  });
+  if(cur) el.value = cur;
+}
+function fillSelects(){
+  if(!MASTER) return;
+  var pr = MASTER.projects || [], ma = MASTER.machines || [], pe = MASTER.personnel || [];
+  ["#f-project","#y-project","#e-project","#s-project"].forEach(function(s){
+    opt(s, pr, "id", function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); });
+  });
+  opt("#f-machine", ma, "id", function(m){ return m.code; });
+  opt("#y-machine", ma, "id", function(m){ return m.code; });
+  var drillers = pe.filter(function(p){ return p.kind === "sondor"; });
+  opt("#f-driller1", drillers, "id", function(p){ return p.full_name; }, true);
+  opt("#f-driller2", drillers, "id", function(p){ return p.full_name; }, true);
+  opt("#f-runner",  drillers, "id", function(p){ return p.full_name; }, true);
+  opt("#f-helper", pe.filter(function(p){ return p.kind !== "sondor"; }), "id", function(p){ return p.full_name; }, true);
+  fillWells();
+  $("#acct-info").textContent = (MASTER.tenant ? MASTER.tenant.name : "") + " · " +
+    (MASTER.profile ? MASTER.profile.full_name + " (" + MASTER.profile.role + ")" : "");
+  $("#who").textContent = MASTER.profile ? MASTER.profile.full_name.split(" ")[0] : "";
+}
+function fillWells(){
+  var pid = $("#f-project").value;
+  var wells = (MASTER.wells || []).filter(function(w){ return w.project_id === pid; });
+  opt("#f-well", wells, "id", function(w){ return w.code + " · " + tl(w.current_depth) + " m"; });
+  syncDepth();
+}
+function currentWell(){
+  return (MASTER.wells || []).filter(function(w){ return w.id === $("#f-well").value; })[0] || null;
+}
+$("#f-project").addEventListener("change", fillWells);
+$("#f-well").addEventListener("change", function(){ runs = []; renderRuns(); });
+
+$("#btn-new-well").addEventListener("click", function(){
+  var code = window.prompt ? null : null;
+  var name = (function(){ var el = document.createElement("div"); return null; })();
+  // prompt() artık tarayıcıda kısıtlı olabildiği için basit bir satır içi giriş kullanıyoruz
+  var wrap = document.createElement("div");
+  wrap.className = "card";
+  wrap.innerHTML = '<div class="field"><label>Yeni kuyu adı</label><input id="nw-code" placeholder="EBA-10"></div>';
+  var ok = document.createElement("button"); ok.className = "btn"; ok.textContent = "Kuyuyu oluştur";
+  wrap.appendChild(ok);
+  $("#btn-new-well").after(wrap);
+  ok.addEventListener("click", function(){
+    var c = wrap.querySelector("#nw-code").value.trim();
+    if(!c) return;
+    if(!navigator.onLine){ msg($("#shift-msg"), "Yeni kuyu açmak için bağlantı gerekiyor.", "err"); wrap.remove(); return; }
+    sb.rpc("create_well", {p_project:$("#f-project").value, p_code:c, p_dip:Number($("#f-dip").value)})
+      .then(function(r){
+        wrap.remove();
+        if(r.error){ msg($("#shift-msg"), r.error.message, "err"); return; }
+        loadMaster(true).then(function(){ $("#f-well").value = r.data; syncDepth(); });
+      });
+  });
+});
+
+/* ---------------- kontroller ---------------- */
+var CHECKS = ["Vinç halatı","Kilit kablo","Wire-line","Sondaj malzemeleri","Hidrolik hortumlar","Makine düzeni","Hareketli parça muhafazası","Kablo ve prizler","İlk yardım çantası","Yangın tüpü","İSG levhaları","Emniyet şeridi","İSG dolabı","Emniyet kemeri","Aydınlatma","Yakıt seviyesi","Motor yağı","Hidrolik yağ","Radyatör","Su pompası","Kompresör yağı"];
+CHECKS.forEach(function(c, i){
+  var b = document.createElement("button");
+  b.type="button"; b.className="chip"; b.textContent=c; b.setAttribute("aria-pressed","false"); b.dataset.k = "c"+i;
+  b.addEventListener("click", function(){
+    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed")==="true" ? "false":"true"); countChecks(); });
+  $("#checks").appendChild(b);
+});
+function countChecks(){
+  var n = $$("#checks .chip[aria-pressed='true']").length;
+  $("#check-count").textContent = n + " / " + CHECKS.length + " uygun işaretlendi.";
+}
+$("#btn-check-all").addEventListener("click", function(){
+  var all = $$("#checks .chip[aria-pressed='true']").length === CHECKS.length;
+  $$("#checks .chip").forEach(function(b){ b.setAttribute("aria-pressed", all ? "false" : "true"); });
+  countChecks();
+});
+countChecks();
+function checksPayload(){
+  var o = {};
+  $$("#checks .chip").forEach(function(b){ o[b.textContent] = b.getAttribute("aria-pressed") === "true"; });
+  return o;
+}
+
+/* ---------------- manevralar ---------------- */
+var runs = [];
+function baseDepth(){ var w = currentWell(); return w ? Number(w.current_depth||0) : 0; }
+function depth(){ return runs.length ? runs[runs.length-1].to_m : baseDepth(); }
+function totalM(){ return runs.reduce(function(s,r){ return s + (r.to_m - r.from_m); }, 0); }
+function syncDepth(){ $("#ro-m").textContent = tl(totalM()) + " m"; $("#ro-d").textContent = tl(depth()) + " m"; }
+function renderRuns(){
+  var tb = $("#runs"); tb.innerHTML = "";
+  runs.forEach(function(r, i){
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>"+r.diameter+"</td><td class='num'>"+tl(r.from_m)+"</td><td class='num'>"+tl(r.to_m)+
+      "</td><td class='num'><b>"+tl(r.to_m-r.from_m)+"</b></td><td><button class='chip' type='button'>×</button></td>";
+    tr.querySelector("button").addEventListener("click", function(){ runs.splice(i,1); renderRuns(); });
+    tb.appendChild(tr);
+  });
+  syncDepth();
+}
+$("#btn-add-run").addEventListener("click", function(){
+  var v = parseFloat(String($("#f-to").value).replace(",","."));
+  if(isNaN(v)){ msg($("#run-msg"), "Bitiş metresini girin.", "err"); return; }
+  if(v <= depth()){ msg($("#run-msg"), "Bitiş metresi mevcut derinlikten (" + tl(depth()) + " m) büyük olmalı.", "err"); return; }
+  msg($("#run-msg"), (v - depth() > 12) ? "Dikkat: tek manevrada " + tl(v-depth()) + " m girdiniz." : "", "err");
+  runs.push({seq:runs.length+1, diameter:$("#f-dia").value, from_m:depth(), to_m:v, personnel_id:$("#f-runner").value || null});
+  $("#f-to").value = ""; renderRuns();
+});
+
+/* ---------------- kaydetme ---------------- */
+function filesOf(input){
+  var out = [];
+  for(var i=0;i<input.files.length;i++) out.push(input.files[i]);
+  return out;
+}
+$("#btn-save-shift").addEventListener("click", function(){
+  if(!runs.length){ msg($("#shift-msg"), "Delgi satırı olmadan vardiya kaydedilemez.", "err"); return; }
+  var crew = [];
+  [["#f-driller1","sondor"],["#f-driller2","sondor"],["#f-helper","alt_eleman"]].forEach(function(p){
+    var v = $(p[0]).value; if(v && crew.filter(function(c){return c.personnel_id===v;}).length===0)
+      crew.push({personnel_id:v, crew_role:p[1]});
+  });
+  var item = {
+    id: uuid(), kind: "shift", created: Date.now(),
+    title: "Vardiya · " + ($("#f-well").selectedOptions[0] ? $("#f-well").selectedOptions[0].textContent.split(" ·")[0] : "") ,
+    sub: tl(totalM()) + " m · " + $("#f-date").value,
+    payload: {
+      client_uuid: uuid(),
+      project_id: $("#f-project").value,
+      well_id: $("#f-well").value,
+      machine_id: $("#f-machine").value,
+      work_date: $("#f-date").value,
+      shift: $("#f-shift").value,
+      paper_no: $("#f-paper").value || null,
+      engine_start: $("#f-eng1").value || null,
+      engine_stop: $("#f-eng2").value || null,
+      pre_checks: checksPayload(),
+      operation_note: $("#f-note").value || null,
+      end_state: $("#f-end").value || null,
+      fuel_liters: $("#f-fuel").value ? Number($("#f-fuel").value) : null
+    },
+    runs: runs.slice(),
+    crew: crew,
+    photos: filesOf($("#f-photo"))
+  };
+  obAdd(item).then(function(){
+    // yerel kuyu derinliğini güncelle
+    var w = currentWell(); if(w){ w.current_depth = depth(); try{ localStorage.setItem("sp_master", JSON.stringify(MASTER)); }catch(e){} }
+    runs = []; renderRuns(); $("#f-photo").value = ""; $("#f-note").value = ""; $("#f-fuel").value = "";
+    msg($("#shift-msg"), "Kaydedildi. " + (navigator.onLine ? "Gönderiliyor…" : "Bağlantı gelince gönderilecek."), "ok");
+    refreshQueue().then(function(){ if(navigator.onLine) syncAll(); });
+  });
+});
+
+$("#btn-save-fuel").addEventListener("click", function(){
+  var l = Number($("#y-liters").value);
+  if(!l){ msg($("#fuel-msg"), "Litre girin.", "err"); return; }
+  obAdd({ id:uuid(), kind:"fuel", created:Date.now(),
+    title:"Yakıt · " + ($("#y-machine").selectedOptions[0]||{textContent:""}).textContent,
+    sub: tl(l) + " lt",
+    payload:{ client_uuid:uuid(), project_id:$("#y-project").value, log_date:$("#y-date").value,
+      machine_id:$("#y-machine").value, fuel_type:$("#y-type").value, liters:l,
+      amount: $("#y-amount").value ? Number($("#y-amount").value) : null }
+  }).then(function(){
+    $("#y-liters").value=""; $("#y-amount").value="";
+    msg($("#fuel-msg"), "Kaydedildi.", "ok");
+    refreshQueue().then(function(){ if(navigator.onLine) syncAll(); });
+  });
+});
+
+$("#btn-save-exp").addEventListener("click", function(){
+  var a = Number($("#e-amount").value);
+  if(!a){ msg($("#exp-msg"), "Tutar girin.", "err"); return; }
+  obAdd({ id:uuid(), kind:"expense", created:Date.now(),
+    title:"Nakit · " + $("#e-cat").value, sub: money(a),
+    payload:{ client_uuid:uuid(), project_id:$("#e-project").value, expense_date:$("#e-date").value,
+      category:$("#e-cat").value, amount:a, method:"nakit", description:$("#e-desc").value || null },
+    photos: filesOf($("#e-photo"))
+  }).then(function(){
+    $("#e-amount").value=""; $("#e-desc").value=""; $("#e-photo").value="";
+    msg($("#exp-msg"), "Kaydedildi.", "ok");
+    refreshQueue().then(function(){ if(navigator.onLine) syncAll(); });
+  });
+});
+
+/* ---------------- kuyruk & senkron ---------------- */
+function refreshQueue(){
+  return obAll().then(function(items){
+    $("#q-count").textContent = items.length;
+    $("#nettext").textContent = (navigator.onLine ? "Çevrimiçi" : "Çevrimdışı") + " · " + items.length;
+    $("#netchip").setAttribute("data-off", String(!navigator.onLine));
+    var box = $("#q-list"); box.innerHTML = "";
+    if(!items.length){ box.innerHTML = '<div class="hint">Bekleyen kayıt yok.</div>'; return; }
+    items.sort(function(a,b){ return a.created - b.created; }).forEach(function(it){
+      var d = document.createElement("div"); d.className = "li";
+      d.innerHTML = "<span><b>"+it.title+"</b><br><span class='hint'>"+it.sub+"</span></span>" +
+        "<span class='pill "+(navigator.onLine?"":"warn")+"'>"+(navigator.onLine?"gönderilecek":"bekliyor")+"</span>";
+      box.appendChild(d);
+    });
+  });
+}
+
+function uploadPhotos(files, tenant, projectId, entity, entityId){
+  if(!files || !files.length) return Promise.resolve();
+  var jobs = files.map(function(f){
+    var path = tenant + "/" + projectId + "/" + entityId + "/" + uuid() + "." + (f.name.split(".").pop() || "jpg");
+    return sb.storage.from("saha-fotograf").upload(path, f, {contentType:f.type || "image/jpeg", upsert:true})
+      .then(function(r){
+        if(r.error) throw r.error;
+        return sb.from("attachments").insert({ tenant_id:tenant, entity:entity, entity_id:entityId,
+          storage_path:path, kind:"saha" });
+      });
+  });
+  return Promise.all(jobs);
+}
+
+var syncing = false;
+function syncAll(){
+  if(syncing || !navigator.onLine || !sb || !MASTER) return Promise.resolve();
+  syncing = true;
+  var tenant = MASTER.profile.tenant_id;
+  return obAll().then(function(items){
+    items.sort(function(a,b){ return a.created - b.created; });
+    return items.reduce(function(chain, it){
+      return chain.then(function(){ return sendItem(it, tenant); });
+    }, Promise.resolve());
+  }).then(function(){
+    syncing = false; msg($("#sync-msg"), "Tüm kayıtlar gönderildi.", "ok");
+    return refreshQueue();
+  }).catch(function(e){
+    syncing = false;
+    msg($("#sync-msg"), "Gönderilemedi: " + (e && e.message ? e.message : e), "err");
+    return refreshQueue();
+  });
+}
+
+function sendItem(it, tenant){
+  if(it.kind === "shift"){
+    var body = Object.assign({tenant_id:tenant}, it.payload);
+    return sb.from("shifts").upsert(body, {onConflict:"tenant_id,client_uuid"}).select("id").single()
+      .then(function(r){
+        if(r.error) throw r.error;
+        var sid = r.data.id;
+        return sb.from("shift_runs").delete().eq("shift_id", sid).then(function(){
+          return sb.from("shift_runs").insert(it.runs.map(function(x, i){
+            return {tenant_id:tenant, shift_id:sid, seq:i+1, diameter:x.diameter,
+                    from_m:x.from_m, to_m:x.to_m, personnel_id:x.personnel_id};
+          }));
+        }).then(function(){
+          if(!it.crew.length) return null;
+          return sb.from("shift_crew").upsert(it.crew.map(function(c){
+            return {shift_id:sid, personnel_id:c.personnel_id, crew_role:c.crew_role};
+          }), {onConflict:"shift_id,personnel_id"});
+        }).then(function(){
+          return uploadPhotos(it.photos, tenant, it.payload.project_id, "shift", sid);
+        }).then(function(){ return obDel(it.id); });
+      });
+  }
+  if(it.kind === "fuel"){
+    return sb.from("fuel_logs").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  if(it.kind === "expense"){
+    return sb.from("expenses").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
+      .select("id").single()
+      .then(function(r){ if(r.error) throw r.error;
+        return uploadPhotos(it.photos, tenant, it.payload.project_id, "expense", r.data.id)
+          .then(function(){ return obDel(it.id); });
+      });
+  }
+  return obDel(it.id);
+}
+
+$("#btn-sync").addEventListener("click", function(){ msg($("#sync-msg"), "Gönderiliyor…"); syncAll(); });
+$("#btn-refresh").addEventListener("click", function(){ loadMaster(true).then(function(){ msg($("#sync-msg"), "Ana veriler yenilendi.", "ok"); }); });
+$("#netchip").addEventListener("click", function(){ refreshQueue().then(function(){ if(navigator.onLine) syncAll(); }); });
+window.addEventListener("online", function(){ refreshQueue().then(syncAll); });
+window.addEventListener("offline", refreshQueue);
+
+/* ---------------- özet ---------------- */
+$("#btn-summary").addEventListener("click", function(){
+  if(!navigator.onLine){ msg($("#sum-msg"), "Özet için bağlantı gerekiyor.", "err"); return; }
+  msg($("#sum-msg"), "Hesaplanıyor…");
+  var m = $("#s-month").value ? $("#s-month").value + "-01" : new Date().toISOString().slice(0,8) + "01";
+  sb.rpc("monthly_summary", {p_project:$("#s-project").value, p_month:m}).then(function(r){
+    if(r.error){ msg($("#sum-msg"), r.error.message, "err"); return; }
+    msg($("#sum-msg"), "");
+    var d = r.data, out = $("#sum-out");
+    function bars(title, rows, key){
+      if(!rows || !rows.length) return "";
+      var max = Math.max.apply(null, rows.map(function(x){ return Number(x.meters); }));
+      return '<div class="card"><span class="eyebrow">'+title+'</span><div class="bars">' +
+        rows.map(function(x){
+          return '<div class="bar"><span>'+x[key]+'</span><span class="track"><i style="width:'+
+            (Number(x.meters)/max*100)+'%"></i></span><span class="num">'+tl(x.meters)+' m</span></div>';
+        }).join("") + '</div></div>';
+    }
+    out.innerHTML =
+      '<div class="readout">' +
+        '<div><div class="k">Delinen metraj</div><div class="v num">'+tl(d.meters)+'</div></div>' +
+        '<div><div class="k">Teslim edilen</div><div class="v num">'+tl(d.delivered)+'</div></div>' +
+        '<div><div class="k">Vardiya sayısı</div><div class="v num">'+d.shifts+'</div></div>' +
+        '<div><div class="k">Mazot</div><div class="v num">'+tl(d.fuel_liters)+'</div></div>' +
+        '<div><div class="k">Nakit harcama</div><div class="v num">'+money(d.cash)+'</div></div>' +
+        '<div><div class="k">Banka harcama</div><div class="v num">'+money(d.bank)+'</div></div>' +
+      '</div>' +
+      bars("Makine metrajı", d.by_machine, "machine") +
+      bars("Sondör metrajı", d.by_driller, "driller");
+  });
+});
+
+/* ---------------- tabs & steps ---------------- */
+$$("#tabs button").forEach(function(b){
+  b.addEventListener("click", function(){
+    $$("#tabs button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
+    ["vardiya","yakit","nakit","ozet","kuyruk"].forEach(function(t){ $("#tab-"+t).hidden = (t !== b.dataset.tab); });
+    if(b.dataset.tab === "kuyruk") refreshQueue();
+    window.scrollTo(0,0);
+  });
+});
+$$(".steps button").forEach(function(b){
+  b.addEventListener("click", function(){
+    $$(".steps button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
+    $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== b.dataset.step); });
+  });
+});
+
+/* ---------------- boot ---------------- */
+function todayStr(){ var d = new Date(); return d.toISOString().slice(0,10); }
+function start(){
+  show("scr-app");
+  ["#f-date","#y-date","#e-date"].forEach(function(s){ if(!$(s).value) $(s).value = todayStr(); });
+  $("#s-month").value = todayStr().slice(0,7);
+  loadMaster(false).then(refreshQueue).then(function(){ if(navigator.onLine) syncAll(); });
+}
+if(!cfg.url || !cfg.key){ show("scr-setup"); }
+else {
+  makeClient();
+  sb.auth.getSession().then(function(r){
+    if(r.data && r.data.session){ start(); } else { show("scr-login"); }
+  });
+}
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(function(){}); }
+})();
+</script>
+</body>
+</html>

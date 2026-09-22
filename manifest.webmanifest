@@ -1,0 +1,12 @@
+{
+  "name": "Sondaj Panel",
+  "short_name": "Sondaj",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#eef2f4",
+  "theme_color": "#123146",
+  "lang": "tr",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
