@@ -154,6 +154,12 @@ function boot(){
     var ms=$("#f-month");
     AYLAR.forEach(function(a,i){ var o=document.createElement("option"); o.value=i+1; o.textContent=a[0]+a.slice(1).toLowerCase(); ms.appendChild(o); });
     ms.value = now.getMonth()+1;
+    var h = decodeURIComponent((location.hash||"").replace(/^#/,"")).split("|");
+    if(h.length >= 2 && h[0]){
+      if(Array.prototype.some.call(sel.options, function(o){ return o.value === h[0]; })) sel.value = h[0];
+      if(h[1]) ys.value = h[1];
+      if(h[2]) ms.value = h[2];
+    }
     load();
   });
 }
