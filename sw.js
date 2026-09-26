@@ -1,8 +1,9 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu */
-var CACHE = "sondaj-panel-v5";
+var CACHE = "sondaj-panel-v7";
 var SHELL = [
   "./",
   "./index.html",
+  "./panel.html",
   "./manifest.webmanifest",
   "./icon.svg",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
