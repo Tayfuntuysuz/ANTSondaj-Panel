@@ -168,6 +168,11 @@ tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
       <div class="card"><h3>Matkap tüketimi</h3><div class="note">Marka ve çapa göre</div><div class="scroll" id="bits"></div></div>
     </div>
 
+    <div class="grid g2">
+      <div class="card"><h3>Stok durumu</h3><div class="note">Sahaya giren, kullanılan ve kalan malzeme</div><div class="scroll" id="stock"></div></div>
+      <div class="card"><h3>Takılı matkaplar</h3><div class="note">Şu an makinelerde bulunanlar</div><div class="scroll" id="openbits"></div></div>
+    </div>
+
     <div class="sechead"><h2>Puantaj</h2><span>Çalışılan gün, izin, avans</span></div>
     <div class="card"><div class="scroll" id="attendance"></div></div>
 
@@ -250,11 +255,26 @@ function load(){
   msg("Yükleniyor…");
   Promise.all([
     sb.rpc("dashboard", {p_project:proj, p_from:p.from, p_to:p.to}),
-    sb.rpc("report_charts", {p_project:proj, p_year:p.y, p_month:p.m})
+    sb.rpc("report_charts", {p_project:proj, p_year:p.y, p_month:p.m}),
+    sb.rpc("stock_status", {p_project:proj}),
+    sb.rpc("open_bits", {p_machine:null})
   ]).then(function(res){
-    var a = res[0], b = res[1];
+    var a = res[0], b = res[1], c = res[2], e = res[3];
     if(a.error || b.error){ msg(esc((a.error||b.error).message), "err"); return; }
     msg(""); renderDash(a.data); renderCharts(b.data, p);
+    table($("#stock"), [
+      ["Malzeme",function(r){return esc(r.material);}],
+      ["Giriş",function(r){return '<span class="num">'+tl(r.giris,0)+' '+esc(r.unit)+'</span>';}],
+      ["Çıkış",function(r){return '<span class="num">'+tl(r.cikis,0)+'</span>';}],
+      ["Kalan",function(r){return '<span class="num"><b>'+tl(r.kalan,0)+'</b></span>';}]
+    ], (c && c.data) || [], "Stok hareketi girilmemiş.");
+    table($("#openbits"), [
+      ["Marka",function(r){return esc(r.brand);}],
+      ["Çap",function(r){return esc(r.diameter);}],
+      ["Makine",function(r){return esc(r.machine);}],
+      ["Kuyu",function(r){return esc(r.well||'—');}],
+      ["Takıldığı m",function(r){return '<span class="num">'+tl(r.from_m)+'</span>';}]
+    ], (e && e.data) || [], "Takılı matkap yok.");
   });
 }
 

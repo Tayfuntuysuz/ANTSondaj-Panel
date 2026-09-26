@@ -208,8 +208,15 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
 
       <div class="card" data-pane="5" hidden style="margin-top:12px">
-        <div class="field"><label for="f-fuel">Mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" inputmode="decimal" data-req="5"></div>
-        <div class="hint">Bu vardiyada mazot alınmadıysa 0 yazın.</div>
+        <div class="grid2">
+          <div class="field"><label for="f-fuel">Mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" inputmode="decimal" data-req="5"></div>
+          <div class="field"><label for="f-survey">Kuyu ölçümü (adet)</label><input id="f-survey" type="number" inputmode="numeric" value="0"></div>
+        </div>
+        <div class="hint">Mazot alınmadıysa 0 yazın. Kuyu ölçümü hakedişte adet olarak fiyatlanır.</div>
+        <div class="grid2">
+          <div class="field"><label for="f-lost-mat">Kuyuda kalan malzeme</label><select id="f-lost-mat"></select></div>
+          <div class="field"><label for="f-lost-qty">Miktar</label><input id="f-lost-qty" type="number" inputmode="decimal" placeholder="0"></div>
+        </div>
         <div class="field"><label for="f-note">Vardiya açıklaması</label><textarea id="f-note" placeholder="Takım inildi, ilerlemeye devam edildi"></textarea></div>
         <div class="field"><label for="f-photo">Fotoğraf (kâğıt form, özel durum)</label><input id="f-photo" type="file" accept="image/*" multiple></div>
         <button class="btn" id="btn-save-shift" type="button">Vardiyayı kaydet</button>
@@ -260,6 +267,59 @@ td:first-child{text-align:left;color:var(--ink-2)}
         <div class="field"><label for="e-photo">Fiş fotoğrafı</label><input id="e-photo" type="file" accept="image/*"></div>
         <button class="btn" id="btn-save-exp" type="button">Kaydet</button>
         <div id="exp-msg"></div>
+      </div>
+    </section>
+
+    <!-- MALZEME & MATKAP -->
+    <section id="tab-malzeme" hidden>
+      <div class="card">
+        <span class="eyebrow">Takılı matkaplar</span>
+        <div id="bit-list"><div class="hint">Yükleniyor…</div></div>
+        <button class="btn ghost sm" id="btn-bits-refresh" type="button">Listeyi yenile</button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <span class="eyebrow">Yeni matkap tak</span>
+        <div class="grid2">
+          <div class="field"><label for="b-machine">Makine <span class="req">*</span></label><select id="b-machine"></select></div>
+          <div class="field"><label for="b-dia">Çap <span class="req">*</span></label>
+            <select id="b-dia"><option value="">— seçin —</option><option>HQ</option><option>PQ</option><option>NQ</option><option>PW</option></select></div>
+        </div>
+        <div class="field"><label for="b-well">Kuyu</label><select id="b-well"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="b-brand">Marka <span class="req">*</span></label>
+            <select id="b-brand"><option value="">— seçin —</option><option>Terekalmaz 5/7</option><option>Terekalmaz 5/7 (çıkma)</option>
+            <option>Geo MRA 2 Yeşil</option><option>Geo MRA 3 Mavi</option><option>Wattel Bordo</option><option>Wattel Bordo Turbo</option><option>Neolit 5/7</option><option>Diğer</option></select></div>
+          <div class="field"><label for="b-serial">Seri no</label><input id="b-serial" placeholder="varsa"></div>
+        </div>
+        <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label><input id="b-from" type="number" inputmode="decimal"></div>
+        <button class="btn" id="btn-bit-install" type="button">Matkabı tak</button>
+        <div id="bit-msg"></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <span class="eyebrow">Matkap çıkar</span>
+        <div class="field"><label for="b-open">Takılı matkap <span class="req">*</span></label><select id="b-open"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="b-to">Çıktığı metre <span class="req">*</span></label><input id="b-to" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="b-status">Durum <span class="req">*</span></label>
+            <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option></select></div>
+        </div>
+        <button class="btn" id="btn-bit-remove" type="button">Matkabı çıkar</button>
+        <div id="bit-msg2"></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <span class="eyebrow">Stok hareketi</span>
+        <div class="field"><label for="st-material">Malzeme <span class="req">*</span></label><select id="st-material"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="st-dir">Hareket <span class="req">*</span></label>
+            <select id="st-dir"><option value="giris">Sahaya giriş</option><option value="cikis">Kullanım / çıkış</option><option value="iade">İade</option></select></div>
+          <div class="field"><label for="st-qty">Miktar <span class="req">*</span></label><input id="st-qty" type="number" inputmode="decimal"></div>
+        </div>
+        <div class="field"><label for="st-note">Not</label><input id="st-note" placeholder="isteğe bağlı"></div>
+        <button class="btn" id="btn-stock" type="button">Stok hareketini kaydet</button>
+        <div id="stock-msg"></div>
       </div>
     </section>
 
@@ -337,8 +397,8 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
   <nav class="tabs" id="tabs" hidden>
     <button type="button" data-tab="vardiya" aria-pressed="true">Vardiya</button>
-    <button type="button" data-tab="yakit" aria-pressed="false">Yakıt</button>
-    <button type="button" data-tab="nakit" aria-pressed="false">Nakit</button>
+    <button type="button" data-tab="malzeme" aria-pressed="false">Malzeme</button>
+    <button type="button" data-tab="gider" aria-pressed="false">Gider</button>
     <button type="button" data-tab="puantaj" aria-pressed="false">Puantaj</button>
     <button type="button" data-tab="ozet" aria-pressed="false">Özet</button>
     <button type="button" data-tab="kuyruk" aria-pressed="false">Bekleyen</button>
@@ -438,6 +498,10 @@ function fillSelects(){
   opt("#f-driller2", drillers, function(p){ return p.full_name; }, "— yok —");
   opt("#f-runner",  drillers, function(p){ return p.full_name; });
   opt("#f-helper", pe.filter(function(p){ return p.kind !== "sondor"; }), function(p){ return p.full_name; }, "— yok —");
+  opt("#b-machine", ma, function(m){ return m.code; });
+  var mats = MASTER.materials || [];
+  opt("#f-lost-mat", mats, function(m){ return m.name + " (" + m.unit + ")"; }, "— yok —");
+  opt("#st-material", mats, function(m){ return m.name + " (" + m.unit + ")"; });
   if(pr.length === 1) $("#f-project").value = pr[0].id;
   fillWells();
   $("#acct-info").textContent = (MASTER.tenant ? MASTER.tenant.name : "") + " · " +
@@ -449,6 +513,7 @@ function fillWells(){
   var pid = $("#f-project").value;
   var wells = (MASTER.wells||[]).filter(function(w){ return w.project_id === pid; });
   opt("#f-well", wells, function(w){ return w.code + " · " + tl(w.current_depth) + " m"; });
+  opt("#b-well", wells, function(w){ return w.code + " · " + tl(w.current_depth) + " m"; }, "— yok —");
   if(wells.length === 1) $("#f-well").value = wells[0].id;
   syncDepth(); refreshState();
 }
@@ -461,7 +526,10 @@ $("#btn-new-well").addEventListener("click", function(){
   if(!$("#f-project").value){ msg($("#step-msg"), "Önce proje seçin.", "err"); return; }
   var wrap = document.createElement("div");
   wrap.className = "card"; wrap.id = "nw-box";
-  wrap.innerHTML = '<div class="field"><label for="nw-code">Yeni kuyu adı</label><input id="nw-code" placeholder="EBA-10"></div>';
+  wrap.innerHTML = '<div class="field"><label for="nw-code">Yeni kuyu adı</label><input id="nw-code" placeholder="EBA-10"></div>' +
+    '<div class="field"><label for="nw-prog">Program</label><select id="nw-prog">' +
+    '<option value="">— seçin —</option><option value="arama">Maden arama</option><option value="planlama">Maden planlama</option></select></div>' +
+    '<div class="field"><label for="nw-planned">Planlanan derinlik (m)</label><input id="nw-planned" type="number" inputmode="decimal" placeholder="örn. 300"></div>';
   var ok = document.createElement("button"); ok.className="btn"; ok.type="button"; ok.textContent="Kuyuyu oluştur";
   var no = document.createElement("button"); no.className="btn ghost"; no.type="button"; no.textContent="Vazgeç";
   wrap.appendChild(ok); wrap.appendChild(no);
@@ -476,8 +544,10 @@ $("#btn-new-well").addEventListener("click", function(){
     if(exists){ msg($("#step-msg"), "Bu kuyu zaten listede.", "err"); wrap.remove(); return; }
 
     // Çevrimdışı da olsa kuyu hemen açılır; kaydı kuyruğa alınır.
+    var prog = wrap.querySelector("#nw-prog").value;
+    var planned = wrap.querySelector("#nw-planned").value ? Number(wrap.querySelector("#nw-planned").value) : null;
     var localId = "local:" + uuid();
-    (MASTER.wells = MASTER.wells || []).push({id:localId, project_id:pid, code:c, current_depth:0, status:"drilling"});
+    (MASTER.wells = MASTER.wells || []).push({id:localId, project_id:pid, code:c.toUpperCase(), current_depth:0, status:"drilling", program:prog});
     try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
     wrap.remove();
     fillWells();
@@ -486,7 +556,7 @@ $("#btn-new-well").addEventListener("click", function(){
     msg($("#step-msg"), navigator.onLine ? "" : "Kuyu cihazda oluşturuldu, bağlantı gelince merkeze gidecek.", "warn");
     enqueue({ id:uuid(), kind:"well", created:Date.now(),
       title:"Yeni kuyu · " + c, sub:"oluşturulacak",
-      payload:{ local_id:localId, project_id:pid, code:c, dip:dip } });
+      payload:{ local_id:localId, project_id:pid, code:c, dip:dip, program:prog, planned:planned } });
   });
 });
 
@@ -694,6 +764,9 @@ $("#btn-save-shift").addEventListener("click", function(){
     },
     runs: runs.slice(),
     crew: crew,
+    surveys: Number($("#f-survey").value || 0),
+    lost: ($("#f-lost-mat").value && Number($("#f-lost-qty").value) > 0)
+            ? {material_id:$("#f-lost-mat").value, qty:Number($("#f-lost-qty").value)} : null,
     photos: filesOf($("#f-photo"))
   };
   var savedDepth = depth();
@@ -726,6 +799,7 @@ function showDone(wellCode, metraj, fuel, date, shift){
 function resetForm(){
   runs = [];
   $("#f-to").value = ""; $("#f-fuel").value = ""; $("#f-note").value = "";
+  $("#f-survey").value = "0"; $("#f-lost-qty").value = "";
   $("#f-photo").value = ""; $("#f-paper").value = ""; $("#f-end").value = "";
   $("#f-check-note").value = "";
   $$("#checks .chip").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
@@ -786,7 +860,7 @@ function syncAll(){
     return items.reduce(function(ch, it){ return ch.then(function(){ return sendItem(it, tenant); }); }, Promise.resolve());
   }).then(function(){
     syncing = false; msg($("#sync-msg"), "Tüm kayıtlar gönderildi.", "ok");
-    return loadMaster(true).then(refreshQueue);
+    return loadMaster(true).then(refreshQueue).then(function(){ if(!$("#tab-malzeme").hidden) loadBits(); });
   }).catch(function(e){
     syncing = false; msg($("#sync-msg"), "Gönderilemedi: " + (e && e.message ? e.message : e), "err"); return refreshQueue();
   });
@@ -810,7 +884,8 @@ function realWellId(id){
 
 function sendItem(it, tenant){
   if(it.kind === "well"){
-    return sb.rpc("create_well", {p_project:it.payload.project_id, p_code:it.payload.code, p_dip:it.payload.dip})
+    return sb.rpc("create_well2", {p_project:it.payload.project_id, p_code:it.payload.code, p_dip:it.payload.dip,
+                                  p_program:it.payload.program || null, p_planned:it.payload.planned || null})
       .then(function(r){ if(r.error) throw r.error;
         wellMapSet(it.payload.local_id, r.data);
         return obDel(it.id); });
@@ -831,9 +906,40 @@ function sendItem(it, tenant){
           if(!it.crew.length) return null;
           return sb.from("shift_crew").upsert(it.crew.map(function(c){
             return {shift_id:sid, personnel_id:c.personnel_id, crew_role:c.crew_role}; }), {onConflict:"shift_id,personnel_id"});
+        }).then(function(){
+          if(!it.surveys) return null;
+          return sb.rpc("add_surveys", {p_well:wid, p_count:it.surveys, p_date:it.payload.work_date});
+        }).then(function(){
+          if(!it.lost) return null;
+          return sb.rpc("lost_in_hole", {p_shift:sid, p_material:it.lost.material_id, p_qty:it.lost.qty});
         }).then(function(){ return uploadPhotos(it.photos, tenant, it.payload.project_id, "shift", sid); })
           .then(function(){ return obDel(it.id); });
       });
+  }
+  if(it.kind === "bit_install"){
+    return sb.rpc("bit_install", {p_machine:it.payload.machine_id, p_well:realWellId(it.payload.well_id),
+      p_brand:it.payload.brand, p_hardness:it.payload.hardness, p_diameter:it.payload.diameter,
+      p_serial:it.payload.serial, p_from:it.payload.from_m, p_date:it.payload.date})
+      .then(function(r){ if(r.error) throw r.error;
+        var m = {}; try { m = JSON.parse(localStorage.getItem("sp_bitmap") || "{}"); } catch(e){}
+        m[it.payload.local_id] = r.data;
+        try { localStorage.setItem("sp_bitmap", JSON.stringify(m)); } catch(e){}
+        return obDel(it.id); });
+  }
+  if(it.kind === "bit_remove"){
+    var bid = it.payload.bit_id;
+    if(String(bid).indexOf("localbit:") === 0){
+      var mm = {}; try { mm = JSON.parse(localStorage.getItem("sp_bitmap") || "{}"); } catch(e){}
+      bid = mm[bid];
+      if(!bid) throw new Error("Matkap henüz merkeze gitmedi, sonraki denemede gönderilecek.");
+    }
+    return sb.rpc("bit_remove", {p_bit:bid, p_to:it.payload.to_m, p_status:it.payload.status, p_date:it.payload.date})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  if(it.kind === "stock"){
+    return sb.rpc("stock_move", {p_project:it.payload.project_id, p_material:it.payload.material_id,
+      p_dir:it.payload.dir, p_qty:it.payload.qty, p_date:it.payload.date, p_note:it.payload.note})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
   }
   if(it.kind === "attendance"){
     return sb.rpc("save_attendance", {p_project:it.payload.project_id, p_date:it.payload.work_date, p_rows:it.payload.rows})
@@ -909,6 +1015,86 @@ $("#btn-summary").addEventListener("click", function(){
         '<div><div class="k">Banka harcama</div><div class="v num">'+money(d.bank)+'</div></div>' +
       '</div>' + bars("Makine metrajı", d.by_machine, "machine") + bars("Sondör metrajı", d.by_driller, "driller");
   });
+});
+
+/* ---------------- matkap & stok ---------------- */
+var OPENBITS = [];
+function cacheBits(list){ OPENBITS = list || []; try{ localStorage.setItem("sp_openbits", JSON.stringify(OPENBITS)); }catch(e){} renderBits(); }
+try { OPENBITS = JSON.parse(localStorage.getItem("sp_openbits") || "[]"); } catch(e){ OPENBITS = []; }
+
+function renderBits(){
+  var box = $("#bit-list");
+  if(!OPENBITS.length){ box.innerHTML = '<div class="hint">Takılı matkap yok.</div>'; }
+  else {
+    box.innerHTML = OPENBITS.map(function(b){
+      return '<div class="li"><span><b>' + b.brand + '</b> · ' + b.diameter +
+        '<br><span class="hint">' + (b.machine||"") + (b.well ? " · " + b.well : "") +
+        ' · ' + tl(b.from_m) + ' m\'den takılı' + (b.pending ? " · gönderilmeyi bekliyor" : "") + '</span></span>' +
+        '<span class="hint">' + (b.installed_at||"") + '</span></div>';
+    }).join("");
+  }
+  var sel = $("#b-open"); var cur = sel.value; sel.innerHTML = "";
+  var o0 = document.createElement("option"); o0.value=""; o0.textContent="— seçin —"; sel.appendChild(o0);
+  OPENBITS.forEach(function(b){
+    var o = document.createElement("option"); o.value = b.bit_id;
+    o.textContent = b.brand + " · " + b.diameter + " · " + (b.machine||"") + " (" + tl(b.from_m) + " m)";
+    sel.appendChild(o);
+  });
+  if(cur) sel.value = cur;
+}
+function loadBits(){
+  renderBits();
+  if(!navigator.onLine || !sb) return;
+  sb.rpc("open_bits", {p_machine:null}).then(function(r){
+    if(r.error){ msg($("#bit-msg"), r.error.message, "err"); return; }
+    var pending = OPENBITS.filter(function(b){ return b.pending; });
+    cacheBits((r.data||[]).concat(pending));
+  });
+}
+$("#btn-bits-refresh").addEventListener("click", loadBits);
+
+$("#btn-bit-install").addEventListener("click", function(){
+  var mach = $("#b-machine").value, dia = $("#b-dia").value, brand = $("#b-brand").value;
+  var from = $("#b-from").value === "" ? null : Number($("#b-from").value);
+  if(!mach || !dia || !brand || from === null){ msg($("#bit-msg"), "Makine, çap, marka ve takıldığı metre zorunlu.", "err"); return; }
+  var localId = "localbit:" + uuid();
+  var machName = ($("#b-machine").selectedOptions[0]||{textContent:""}).textContent;
+  var wellName = $("#b-well").value ? ($("#b-well").selectedOptions[0].textContent.split(" ·")[0]) : null;
+  OPENBITS.push({bit_id:localId, brand:brand, diameter:dia, machine:machName, well:wellName,
+                 from_m:from, installed_at:todayStr(), pending:true});
+  cacheBits(OPENBITS);
+  enqueue({ id:uuid(), kind:"bit_install", created:Date.now(),
+    title:"Matkap takıldı · " + brand, sub: machName + " · " + tl(from) + " m",
+    payload:{ local_id:localId, machine_id:mach, well_id:$("#b-well").value || null, brand:brand,
+              hardness:null, diameter:dia, serial:$("#b-serial").value || "", from_m:from, date:todayStr() } })
+  .then(function(){ $("#b-serial").value=""; $("#b-from").value="";
+    msg($("#bit-msg"), "Matkap kaydedildi.", "ok"); });
+});
+
+$("#btn-bit-remove").addEventListener("click", function(){
+  var bit = $("#b-open").value, to = $("#b-to").value === "" ? null : Number($("#b-to").value);
+  if(!bit || to === null){ msg($("#bit-msg2"), "Matkap ve çıktığı metre zorunlu.", "err"); return; }
+  var rec = OPENBITS.filter(function(b){ return b.bit_id === bit; })[0];
+  if(rec && to < Number(rec.from_m)){ msg($("#bit-msg2"), "Çıkış metresi takıldığı metreden küçük olamaz.", "err"); return; }
+  OPENBITS = OPENBITS.filter(function(b){ return b.bit_id !== bit; });
+  cacheBits(OPENBITS);
+  enqueue({ id:uuid(), kind:"bit_remove", created:Date.now(),
+    title:"Matkap çıkarıldı", sub: (rec ? rec.brand + " · " : "") + tl(to) + " m",
+    payload:{ bit_id:bit, to_m:to, status:$("#b-status").value, date:todayStr() } })
+  .then(function(){ $("#b-to").value = "";
+    msg($("#bit-msg2"), "Kaydedildi." + (rec ? " Yaptığı metre: " + tl(to - Number(rec.from_m)) : ""), "ok"); });
+});
+
+$("#btn-stock").addEventListener("click", function(){
+  var mat = $("#st-material").value, qty = Number($("#st-qty").value);
+  if(!mat || !qty){ msg($("#stock-msg"), "Malzeme ve miktar zorunlu.", "err"); return; }
+  enqueue({ id:uuid(), kind:"stock", created:Date.now(),
+    title:"Stok · " + ($("#st-material").selectedOptions[0]||{textContent:""}).textContent,
+    sub: $("#st-dir").value + " · " + tl(qty),
+    payload:{ project_id:$("#f-project").value, material_id:mat, dir:$("#st-dir").value,
+              qty:qty, date:todayStr(), note:$("#st-note").value || null } })
+  .then(function(){ $("#st-qty").value=""; $("#st-note").value="";
+    msg($("#stock-msg"), "Kaydedildi.", "ok"); });
 });
 
 /* ---------------- puantaj ---------------- */
@@ -1052,9 +1238,14 @@ $("#btn-att-summary").addEventListener("click", function(){
 $$("#tabs button").forEach(function(b){
   b.addEventListener("click", function(){
     $$("#tabs button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
-    ["vardiya","yakit","nakit","puantaj","ozet","kuyruk"].forEach(function(t){ $("#tab-"+t).hidden = (t !== b.dataset.tab); });
+    var map = {vardiya:["vardiya"], malzeme:["malzeme"], gider:["yakit","nakit"],
+               puantaj:["puantaj"], ozet:["ozet"], kuyruk:["kuyruk"]};
+    var acik = map[b.dataset.tab] || [];
+    ["vardiya","malzeme","yakit","nakit","puantaj","ozet","kuyruk"].forEach(function(t){
+      $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
     if(b.dataset.tab === "kuyruk") refreshQueue();
     if(b.dataset.tab === "puantaj" && !$("#att-list").innerHTML) renderAttendance({});
+    if(b.dataset.tab === "malzeme") loadBits();
     window.scrollTo(0,0);
   });
 });
