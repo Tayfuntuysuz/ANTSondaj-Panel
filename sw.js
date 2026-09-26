@@ -1,12 +1,10 @@
-/* Sondaj Panel — çevrimdışı uygulama kabuğu */
-var CACHE = "sondaj-panel-v10";
+/* Sondaj Panel — çevrimdışı uygulama kabuğu
+   Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
+   Diğer dosyalar: önce önbellek. */
+var CACHE = "sondaj-panel-v11";
 var SHELL = [
-  "./",
-  "./index.html",
-  "./panel.html",
-  "./rapor.html",
-  "./manifest.webmanifest",
-  "./icon.svg",
+  "./", "./index.html", "./panel.html", "./rapor.html",
+  "./manifest.webmanifest", "./icon.svg",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
 ];
 
@@ -24,18 +22,38 @@ self.addEventListener("activate", function(e){
   }).then(function(){ return self.clients.claim(); }));
 });
 
+function isPage(req){
+  return req.mode === "navigate" ||
+         (req.headers.get("accept") || "").indexOf("text/html") > -1;
+}
+
 self.addEventListener("fetch", function(e){
   var req = e.request;
-  if(req.method !== "GET") return;                      // API çağrılarına karışma
+  if(req.method !== "GET") return;
   var url = new URL(req.url);
   if(url.pathname.indexOf("/rest/v1") === 0 || url.pathname.indexOf("/auth/v1") === 0 ||
-     url.pathname.indexOf("/storage/v1") === 0) return; // Supabase istekleri doğrudan gitsin
+     url.pathname.indexOf("/storage/v1") === 0) return;   // Supabase doğrudan gitsin
+
+  if(isPage(req)){
+    // önce ağ: yeni sürüm varsa hemen görünür
+    e.respondWith(
+      fetch(req).then(function(res){
+        var copy = res.clone();
+        caches.open(CACHE).then(function(c){ c.put(req, copy); });
+        return res;
+      }).catch(function(){
+        return caches.match(req).then(function(hit){ return hit || caches.match("./index.html"); });
+      })
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(req).then(function(hit){
       if(hit) return hit;
       return fetch(req).then(function(res){
-        if(res && res.status === 200 && (url.origin === location.origin || url.host.indexOf("jsdelivr") > -1 || url.host.indexOf("gstatic") > -1 || url.host.indexOf("googleapis") > -1)){
+        if(res && res.status === 200 && (url.origin === location.origin ||
+           url.host.indexOf("jsdelivr") > -1 || url.host.indexOf("gstatic") > -1 || url.host.indexOf("googleapis") > -1)){
           var copy = res.clone();
           caches.open(CACHE).then(function(c){ c.put(req, copy); });
         }
