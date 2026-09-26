@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sondaj Panel · Şirket Performansı</title>
+<meta name="theme-color" content="#123146">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef2f4;--card:#fff;--line:#d9e2e7;--line-soft:#e8eef1;
+  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
+  --accent:#12708f;--accent-2:#7fb9cd;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
+  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
+  --shadow:0 1px 2px rgba(15,34,48,.06), 0 8px 22px rgba(15,34,48,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0b161d;--card:#112430;--line:#25404e;--line-soft:#1c3340;
+  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
+  --accent:#4bb3d6;--accent-2:#2c6b82;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
+  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
+  color-scheme:dark;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
+h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+header{background:var(--navy);color:#eaf4f8;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+header b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase}
+header .sub{font-size:12px;color:#9fc4d3;letter-spacing:.08em;text-transform:uppercase}
+header .sp{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:12.5px;color:#cfe3ec}
+header a{color:#cfe3ec}
+.wrap{max-width:1240px;margin:0 auto;padding:18px 24px 60px}
+@media (max-width:640px){ .wrap{padding:16px} header{padding:12px 16px} }
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+select,input,button{font:inherit;color:inherit}
+select{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;font-size:15px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:40px}
+.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line);text-decoration:none;display:inline-flex;align-items:center}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;margin-top:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow)}
+.tile .k{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tile .v{font-family:"Barlow Condensed",sans-serif;font-size:31px;line-height:1.05;margin-top:3px}
+.tile .v small{font-size:14px;color:var(--ink-3);margin-left:3px}
+.tile .s{font-size:12px;color:var(--ink-2);margin-top:2px}
+.tile.iyi .v{color:var(--good)} .tile.kotu .v{color:var(--bad)}
+.grid{display:grid;gap:14px;margin-top:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h3{font-size:18px}
+.card .note{font-size:12px;color:var(--ink-3);margin:2px 0 12px}
+.sechead{display:flex;align-items:baseline;gap:10px;margin:26px 0 2px}
+.sechead h2{font-size:21px}
+.sechead span{font-size:12px;color:var(--ink-3)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:8px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+td:first-child{text-align:left;color:var(--ink-2)}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
+.scroll{overflow-x:auto}
+.pill{display:inline-flex;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:150px 1fr 110px;gap:10px;align-items:center;font-size:13px}
+.bar .lab{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{background:var(--line-soft);border-radius:3px;height:12px;overflow:hidden;display:flex}
+.track i{display:block;height:100%}
+.bar .val{text-align:right;font-weight:600}
+.chart{width:100%;height:210px;display:block}
+.chart text{font-size:10px;fill:var(--ink-3);font-family:"IBM Plex Sans",sans-serif}
+.chart .grid-line{stroke:var(--line-soft);stroke-width:1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:8px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.center{max-width:400px;margin:60px auto;display:flex;flex-direction:column;gap:12px}
+.center input{padding:10px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:var(--card)}
+[hidden]{display:none!important}
+.foot{margin-top:24px;font-size:12px;color:var(--ink-3);max-width:80ch}
+</style>
+</head>
+<body>
+
+<header>
+  <span><b>Sondaj Panel</b><br><span class="sub">Şirket performansı</span></span>
+  <span class="sp">
+    <span id="who"></span>
+    <a href="maaslar.html">Maaş tablosu</a>
+    <a href="ofis.html">Merkez ofis</a>
+    <a href="panel.html">Şantiye paneli</a>
+    <a href="rapor.html">Aylık rapor</a>
+    <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
+  </span>
+</header>
+
+<div class="wrap">
+  <div id="scr-login" hidden>
+    <div class="center">
+      <h2 style="font-size:26px">Giriş</h2>
+      <input id="in-mail" type="email" placeholder="E-posta" autocomplete="username">
+      <input id="in-pass" type="password" placeholder="Parola" autocomplete="current-password">
+      <button class="btn" id="btn-login" type="button">Giriş yap</button>
+      <div id="login-msg"></div>
+    </div>
+  </div>
+
+  <div id="scr-main" hidden>
+    <div class="filters">
+      <div class="field"><label for="f-year">Yıl</label><select id="f-year"></select></div>
+      <div class="field"><label for="f-month">Dönem</label><select id="f-month"></select></div>
+      <button class="btn" id="btn-load" type="button">Getir</button>
+      <a class="btn ghost" href="panel.html">Şantiye ayrıntısı</a>
+      <span id="range-label" style="font-size:12px;color:var(--ink-3)"></span>
+    </div>
+    <div id="msg" style="margin-top:12px"></div>
+
+    <div class="tiles" id="tiles"></div>
+
+    <div class="sechead"><h2>Projeler</h2><span>Gelir, maliyet ve marj karşılaştırması</span></div>
+    <div class="card">
+      <div class="scroll" id="proje-tablo"></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h3>Gelir ve maliyet</h3><div class="note">Her projede kazanılan ve harcanan</div><div class="bars" id="gelir-bars"></div></div>
+      <div class="card"><h3>Brüt marj oranı</h3><div class="note">Gelirin yüzde kaçı kâr olarak kalıyor</div><div class="bars" id="marj-bars"></div></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3>Maliyet kırılımı</h3>
+      <div class="note">Toplam maliyetin dağılımı</div>
+      <div class="bars" id="maliyet-bars"></div>
+    </div>
+
+    <div class="sechead"><h2>İşverenler</h2><span>Birim fiyat ile metre başı maliyetin karşılaştırması</span></div>
+    <div class="card">
+      <div class="scroll" id="isveren-tablo"></div>
+      <div id="isveren-chart" style="margin-top:14px"></div>
+    </div>
+
+    <div class="sechead"><h2>Şirket seyri</h2><span>Yıl içindeki aylık gidiş</span></div>
+    <div class="grid g2">
+      <div class="card"><h3>Aylık gelir ve maliyet</h3><div class="note">Tüm projeler toplamı</div><div id="aylik-chart"></div></div>
+      <div class="card"><h3>Aylık metraj</h3><div class="note">Delinen metre</div><div id="metraj-chart"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Proje bazında aylık metraj</h3>
+      <div class="note">Hangi proje hangi ay ne kadar ilerledi</div>
+      <div class="scroll" id="proje-aylik"></div>
+    </div>
+
+    <div class="sechead"><h2>Makineler</h2><span>Projeler arası dağılım</span></div>
+    <div class="card"><div class="scroll" id="makine-tablo"></div></div>
+
+    <p class="foot">Gelir, projenin fiyat listesinden hesaplanır: her manevranın çapı ve derinlik kademesi karşılığındaki birim fiyatla çarpılır, kuyu ölçümleri adet fiyatıyla eklenir. İptal edilen kuyular gelire girmez. Maliyet; yakıt, işçilik ve nakit/banka harcamalarının toplamıdır. İşçilik puantaj ile maaş tablosunun kesişiminden hesaplanır: günlükçüde çalışılan gün, aylıkçıda ayın gün oranı esas alınır.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
+var money=function(n){ return "₺"+Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); };
+var AYLAR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+var AY3=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];}); }
+function msg(t,k){ $("#msg").innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
+
+var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
+var sb=null;
+function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
+
+if(!cfg.url || !cfg.key){
+  $("#msg").innerHTML = '<div class="msg err">Bağlantı ayarları yok. Önce saha uygulamasına girip Supabase bilgilerini kaydedin.</div>';
+} else {
+  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
+  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
+}
+$("#btn-login").addEventListener("click", function(){
+  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
+    if(r.error){ $("#login-msg").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    boot();
+  });
+});
+$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+$("#btn-load").addEventListener("click", load);
+["#f-year","#f-month"].forEach(function(s){ $(s).addEventListener("change", load); });
+
+function boot(){
+  show("scr-main");
+  sb.rpc("bootstrap_data").then(function(r){
+    if(!r.error && r.data){
+      $("#who").textContent = (r.data.tenant ? r.data.tenant.name + " · " : "") + (r.data.profile ? r.data.profile.full_name : "");
+    }
+    var now=new Date(), ys=$("#f-year");
+    for(var y=now.getFullYear()+1; y>=now.getFullYear()-3; y--){ var o=document.createElement("option"); o.value=y; o.textContent=y; ys.appendChild(o); }
+    ys.value = now.getFullYear();
+    var ms=$("#f-month");
+    var o0=document.createElement("option"); o0.value=""; o0.textContent="Yıl geneli"; ms.appendChild(o0);
+    AYLAR.forEach(function(a,i){ var o=document.createElement("option"); o.value=i+1; o.textContent=a; ms.appendChild(o); });
+    ms.value = "";
+    load();
+  });
+}
+
+function load(){
+  var y=Number($("#f-year").value), m=$("#f-month").value?Number($("#f-month").value):null;
+  $("#range-label").textContent = m ? AYLAR[m-1]+" "+y : y+" yılı tamamı";
+  msg("Hesaplanıyor…");
+  sb.rpc("company_overview", {p_year:y, p_month:m}).then(function(r){
+    if(r.error){ msg(esc(r.error.message), "err"); return; }
+    render(r.data);
+  });
+}
+
+/* ---------- çizim ---------- */
+function table(el, cols, rows, empty, foot){
+  if(!rows || !rows.length){ el.innerHTML = '<div class="note">'+empty+'</div>'; return; }
+  el.innerHTML = '<table><thead><tr>'+cols.map(function(c){return '<th>'+c[0]+'</th>';}).join("")+'</tr></thead><tbody>'+
+    rows.map(function(r){ return '<tr>'+cols.map(function(c){ return '<td>'+c[1](r)+'</td>'; }).join("")+'</tr>'; }).join("")+
+    '</tbody>'+(foot?'<tfoot><tr>'+foot+'</tr></tfoot>':'')+'</table>';
+}
+function stacked(el, rows, aKey, bKey, aLabel, bLabel, fmt){
+  if(!rows || !rows.length){ el.innerHTML='<div class="note">Veri yok.</div>'; return; }
+  var max = Math.max.apply(null, rows.map(function(r){ return Math.max(Number(r[aKey]||0), Number(r[bKey]||0)); })) || 1;
+  el.innerHTML = rows.map(function(r){
+    return '<div class="bar"><span class="lab">'+esc(r.proje||r.isveren)+'</span>' +
+      '<span class="track">' +
+        '<i style="width:'+(Number(r[aKey]||0)/max*100)+'%;background:var(--accent)"></i>' +
+      '</span><span class="val num">'+fmt(r[aKey])+'</span></div>' +
+      '<div class="bar" style="margin-top:-4px"><span class="lab"></span>' +
+      '<span class="track"><i style="width:'+(Number(r[bKey]||0)/max*100)+'%;background:var(--accent-2)"></i></span>' +
+      '<span class="val num" style="color:var(--ink-2)">'+fmt(r[bKey])+'</span></div>';
+  }).join("") + '<div class="legend"><span><i style="background:var(--accent)"></i>'+aLabel+
+    '</span><span><i style="background:var(--accent-2)"></i>'+bLabel+'</span></div>';
+}
+function simpleBars(el, rows, key, fmt, colorFn){
+  if(!rows || !rows.length){ el.innerHTML='<div class="note">Veri yok.</div>'; return; }
+  var max = Math.max.apply(null, rows.map(function(r){ return Math.abs(Number(r[key])||0); })) || 1;
+  el.innerHTML = rows.map(function(r){
+    var v = Number(r[key])||0;
+    return '<div class="bar"><span class="lab">'+esc(r.proje||r.isveren)+'</span>' +
+      '<span class="track"><i style="width:'+(Math.abs(v)/max*100)+'%;background:'+(colorFn?colorFn(v):'var(--accent)')+'"></i></span>' +
+      '<span class="val num">'+fmt(v)+'</span></div>';
+  }).join("");
+}
+function vbars(el, rows, opts){
+  opts = opts || {};
+  if(!rows || !rows.length){ el.innerHTML='<div class="note">Veri yok.</div>'; return; }
+  var W=720,H=210,padL=54,padR=10,padT=14,padB=28;
+  var vals=[]; rows.forEach(function(r){ vals.push(Number(r.a)||0); if(opts.two) vals.push(Number(r.b)||0); });
+  var max=Math.max.apply(null,vals)||1, step=(W-padL-padR)/rows.length, n=opts.two?2:1;
+  var bw=Math.max(3,Math.min(opts.two?14:26,(step-6)/n));
+  var o=['<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(opts.aria||"grafik")+'">'];
+  [0,max/2,max].forEach(function(t){
+    var yy=padT+(H-padT-padB)*(1-t/max);
+    o.push('<line class="grid-line" x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+yy.toFixed(1)+'"/>');
+    o.push('<text x="'+(padL-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end">'+(opts.money?money(t):tl(t,0))+'</text>');
+  });
+  rows.forEach(function(r,i){
+    var x0=padL+i*step+(step-bw*n-(opts.two?3:0))/2;
+    [["a","var(--accent)"],["b","var(--accent-2)"]].slice(0,n).forEach(function(sr,k){
+      var v=Number(r[sr[0]])||0, h=(H-padT-padB)*(v/max), x=x0+k*(bw+3), yy=H-padB-h;
+      o.push('<rect x="'+x.toFixed(1)+'" y="'+yy.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,h).toFixed(1)+
+        '" rx="2" fill="'+sr[1]+'"><title>'+esc(r.label)+' · '+(opts.money?money(v):tl(v))+'</title></rect>');
+    });
+    o.push('<text x="'+(padL+i*step+step/2).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle">'+esc(r.short||r.label)+'</text>');
+  });
+  o.push('</svg>');
+  el.innerHTML = o.join("") + (opts.two ? '<div class="legend"><span><i style="background:var(--accent)"></i>'+esc(opts.aLabel)+
+    '</span><span><i style="background:var(--accent-2)"></i>'+esc(opts.bLabel)+'</span></div>' : '');
+}
+
+function render(d){
+  var t = d.toplam || {};
+  if(!Number(t.gelir)){
+    msg("Gelir hesaplanamadı: projelerin fiyat listesi girilmemiş olabilir. Fiyatlar girilince bu sayfa dolar.", "warn");
+  } else { msg(""); }
+
+  $("#tiles").innerHTML = [
+    ['Delinen metraj', tl(t.metraj)+'<small>m</small>', t.proje_sayisi+' proje · '+t.biten_kuyu+' kuyu bitti',''],
+    ['Hakediş geliri', money(t.gelir), 'Fiyat listelerinden hesaplandı',''],
+    ['Maliyet', money(t.maliyet), 'Yakıt + harcamalar',''],
+    ['Brüt marj', money(t.marj), (t.marj_yuzde==null?'—':('%'+tl(t.marj_yuzde,1))+' oran'), (Number(t.marj)>=0?'iyi':'kotu')],
+    ['Metre başı gelir', t.birim_fiyat==null?'—':money(t.birim_fiyat), 'Ortalama birim fiyat',''],
+    ['Metre başı maliyet', t.metre_maliyet==null?'—':money(t.metre_maliyet), 'Yakıt + işçilik + harcama',''],
+    ['İşçilik', money(t.iscilik||0), (t.metre_iscilik==null?'':money(t.metre_iscilik)+' / metre'),''],
+    ['Merkez ofis payı', money(t.merkez||0), 'Sözleşme büyüklüğü oranında dağıtıldı','']
+  ].map(function(x){
+    return '<div class="tile '+x[3]+'"><div class="k">'+x[0]+'</div><div class="v num">'+x[1]+'</div><div class="s">'+x[2]+'</div></div>';
+  }).join("");
+
+  var pr = d.projeler || [];
+  table($("#proje-tablo"), [
+    ["Proje",function(r){return '<b>'+esc(r.proje)+'</b>';}],
+    ["İşveren",function(r){return esc(r.isveren);}],
+    ["Metraj",function(r){return '<span class="num">'+tl(r.metraj)+' m</span>';}],
+    ["Teslim",function(r){return '<span class="num">'+tl(r.teslim)+' m</span>';}],
+    ["Birim fiyat",function(r){return '<span class="num">'+(r.birim_fiyat==null?'—':money(r.birim_fiyat))+'</span>';}],
+    ["Metre maliyeti",function(r){return '<span class="num">'+(r.metre_maliyet==null?'—':money(r.metre_maliyet))+'</span>';}],
+    ["İşçilik",function(r){return '<span class="num">'+money(r.iscilik||0)+'</span>';}],
+    ["Merkez payı",function(r){return '<span class="num">'+money(r.merkez_pay||0)+'</span>';}],
+    ["lt/m",function(r){return '<span class="num">'+(r.lt_per_m==null?'—':tl(r.lt_per_m))+'</span>';}],
+    ["Gelir",function(r){return '<span class="num">'+money(r.gelir)+'</span>';}],
+    ["Maliyet",function(r){return '<span class="num">'+money(r.maliyet)+'</span>';}],
+    ["Marj",function(r){
+      var p = r.marj_yuzde;
+      var cls = p==null ? '' : (p >= 30 ? 'good' : (p >= 10 ? 'warn' : 'bad'));
+      return '<span class="num"><b>'+money(r.marj)+'</b></span> '+(p==null?'':'<span class="pill '+cls+'">%'+tl(p,1)+'</span>');}]
+  ], pr, "Bu dönemde proje verisi yok.",
+     pr.length ? '<td>Toplam</td><td></td><td class="num">'+tl(t.metraj)+' m</td><td class="num">'+tl(t.teslim)+
+       ' m</td><td class="num">'+(t.birim_fiyat==null?'—':money(t.birim_fiyat))+'</td><td class="num">'+
+       (t.metre_maliyet==null?'—':money(t.metre_maliyet))+'</td><td class="num">'+money(t.iscilik||0)+
+       '</td><td class="num">'+money(t.merkez||0)+'</td><td></td><td class="num">'+money(t.gelir)+
+       '</td><td class="num">'+money(t.maliyet)+'</td><td class="num">'+money(t.marj)+'</td>' : null);
+
+  stacked($("#gelir-bars"), pr, "gelir", "maliyet", "Gelir", "Maliyet", money);
+
+  var mk = d.maliyet_kirilimi || {};
+  simpleBars($("#maliyet-bars"), [
+    {proje:"Yakıt", v:mk.yakit||0}, {proje:"İşçilik", v:mk.iscilik||0},
+    {proje:"Merkez ofis", v:mk.merkez||0},
+    {proje:"Nakit harcama", v:mk.nakit||0}, {proje:"Banka harcama", v:mk.banka||0}
+  ].filter(function(x){ return Number(x.v) > 0; }), "v", money);
+  simpleBars($("#marj-bars"), pr.filter(function(r){ return r.marj_yuzde != null; }), "marj_yuzde",
+    function(v){ return "%"+tl(v,1); },
+    function(v){ return v >= 30 ? "var(--good)" : (v >= 10 ? "var(--warn)" : "var(--bad)"); });
+
+  var isv = d.isverenler || [];
+  table($("#isveren-tablo"), [
+    ["İşveren",function(r){return '<b>'+esc(r.isveren)+'</b>';}],
+    ["Metraj",function(r){return '<span class="num">'+tl(r.metraj)+' m</span>';}],
+    ["Ortalama birim fiyat",function(r){return '<span class="num">'+(r.birim_fiyat==null?'—':money(r.birim_fiyat))+'</span>';}],
+    ["Metre başı maliyet",function(r){return '<span class="num">'+(r.metre_maliyet==null?'—':money(r.metre_maliyet))+'</span>';}],
+    ["Metre başı kâr",function(r){
+      var k = (r.birim_fiyat==null||r.metre_maliyet==null) ? null : (Number(r.birim_fiyat)-Number(r.metre_maliyet));
+      return '<span class="num"><b>'+(k==null?'—':money(k))+'</b></span>';}],
+    ["Gelir",function(r){return '<span class="num">'+money(r.gelir)+'</span>';}],
+    ["Marj",function(r){return r.marj_yuzde==null?'—':('<span class="num">%'+tl(r.marj_yuzde,1)+'</span>');}]
+  ], isv, "Bu dönemde işveren verisi yok.");
+
+  vbars($("#isveren-chart"), isv.map(function(r){
+    return {label:r.isveren, short:String(r.isveren).slice(0,10), a:r.birim_fiyat||0, b:r.metre_maliyet||0}; }),
+    {two:true, money:true, aLabel:"Metre başı gelir", bLabel:"Metre başı maliyet", aria:"İşveren karşılaştırması"});
+
+  var ay = d.aylik || [];
+  vbars($("#aylik-chart"), ay.map(function(r){ return {label:AYLAR[r.ay-1], short:AY3[r.ay-1], a:r.gelir, b:r.maliyet}; }),
+    {two:true, money:true, aLabel:"Gelir", bLabel:"Maliyet", aria:"Aylık gelir ve maliyet"});
+  vbars($("#metraj-chart"), ay.map(function(r){ return {label:AYLAR[r.ay-1], short:AY3[r.ay-1], a:r.metraj}; }),
+    {aria:"Aylık metraj"});
+
+  var pa = d.proje_aylik || [];
+  var cols = [["Proje", function(r){ return '<b>'+esc(r.proje)+'</b>'; }]];
+  for(var i=1;i<=12;i++){ (function(mm){ cols.push([AY3[mm-1], function(r){
+    var v = r.aylar && r.aylar[String(mm)]; return '<span class="num">'+(v?tl(v,0):'—')+'</span>'; }]); })(i); }
+  cols.push(["Toplam", function(r){ return '<span class="num"><b>'+tl(r.toplam,0)+'</b></span>'; }]);
+  table($("#proje-aylik"), cols, pa, "Bu yıl için veri yok.");
+
+  table($("#makine-tablo"), [
+    ["Makine",function(r){return esc(r.makine);}],
+    ["Proje",function(r){return esc(r.proje);}],
+    ["Metraj",function(r){return '<span class="num">'+tl(r.metraj)+' m</span>';}]
+  ], d.makineler || [], "Bu dönemde makine verisi yok.");
+}
+})();
+</script>
+</body>
+</html>

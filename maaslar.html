@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sondaj Panel · Maaş Tablosu</title>
+<meta name="theme-color" content="#123146">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef2f4;--card:#fff;--line:#d9e2e7;--line-soft:#e8eef1;
+  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
+  --accent:#12708f;--accent-2:#7fb9cd;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
+  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
+  --shadow:0 1px 2px rgba(15,34,48,.06), 0 8px 22px rgba(15,34,48,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0b161d;--card:#112430;--line:#25404e;--line-soft:#1c3340;
+  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
+  --accent:#4bb3d6;--accent-2:#2c6b82;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
+  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
+  color-scheme:dark;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
+h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+header{background:var(--navy);color:#eaf4f8;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+header b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase}
+header .sub{font-size:12px;color:#9fc4d3;letter-spacing:.08em;text-transform:uppercase}
+header .sp{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:12.5px;color:#cfe3ec}
+header a{color:#cfe3ec}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 24px 60px}
+@media (max-width:640px){ .wrap{padding:16px} header{padding:12px 16px} }
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h3{font-size:18px}
+.card .note{font-size:12px;color:var(--ink-3);margin:2px 0 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+select,input,button{font:inherit;color:inherit}
+select,input{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;font-size:15px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:40px}
+.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line);text-decoration:none;display:inline-flex;align-items:center}
+.btn.sm{padding:6px 11px;min-height:0;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:7px 8px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+td:first-child{text-align:left;color:var(--ink)}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
+td input,td select{padding:5px 7px;min-height:32px;font-size:14px;width:110px;text-align:right}
+td select{width:104px;text-align:left}
+.scroll{overflow-x:auto}
+.pill{display:inline-flex;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink);margin-top:10px}
+.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.msg.ok{border-left-color:var(--good);background:var(--good-soft);color:var(--good)}
+.msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile .k{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tile .v{font-family:"Barlow Condensed",sans-serif;font-size:27px}
+.center{max-width:380px;margin:60px auto;display:flex;flex-direction:column;gap:12px}
+[hidden]{display:none!important}
+.hist{font-size:11.5px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+
+<header>
+  <span><b>Sondaj Panel</b><br><span class="sub">Maaş tablosu</span></span>
+  <span class="sp">
+    <span id="who"></span>
+    <a href="sirket.html">Şirket performansı</a>
+    <a href="ofis.html">Merkez ofis</a>
+    <a href="panel.html">Şantiye paneli</a>
+    <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
+  </span>
+</header>
+
+<div class="wrap">
+  <div id="scr-login" hidden>
+    <div class="center">
+      <h2 style="font-size:24px">Giriş</h2>
+      <input id="in-mail" type="email" placeholder="E-posta" autocomplete="username">
+      <input id="in-pass" type="password" placeholder="Parola" autocomplete="current-password">
+      <button class="btn" id="btn-login" type="button">Giriş yap</button>
+      <div id="login-msg"></div>
+    </div>
+  </div>
+
+  <div id="scr-main" hidden>
+    <div class="card">
+      <h3>Maaşlar</h3>
+      <div class="note">Değişiklikler yeni geçerlilik tarihiyle kaydedilir; geçmiş dönemler eski maaşla hesaplanmaya devam eder.</div>
+      <div class="row">
+        <div class="field"><label for="f-date">Hangi tarihteki maaşlar</label><input id="f-date" type="date"></div>
+        <div class="field"><label for="f-valid">Yeni kayıtların geçerlilik tarihi</label><input id="f-valid" type="date"></div>
+        <button class="btn ghost" id="btn-reload" type="button">Yenile</button>
+        <button class="btn" id="btn-save-all" type="button">Değişiklikleri kaydet</button>
+      </div>
+      <div id="msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Toplu zam</h3>
+      <div class="note">Seçilen gruba yüzde zam uygular; herkesin mevcut maaşı üzerinden yeni satır açar.</div>
+      <div class="row">
+        <div class="field"><label for="z-kind">Kime</label>
+          <select id="z-kind">
+            <option value="">Tüm personel</option>
+            <option value="santiye_sefi">Şantiye şefleri</option>
+            <option value="sondor">Sondörler</option>
+            <option value="sondor_yardimcisi">Sondör yardımcıları</option>
+            <option value="alt_eleman">Sondaj alt elemanları</option>
+            <option value="sofor">Şoförler</option>
+            <option value="destek">Destek personeli</option>
+          </select></div>
+        <div class="field"><label for="z-pct">Yüzde</label><input id="z-pct" type="number" inputmode="decimal" style="width:100px" placeholder="25"></div>
+        <div class="field"><label for="z-date">Geçerlilik</label><input id="z-date" type="date"></div>
+        <button class="btn" id="btn-raise" type="button">Zammı uygula</button>
+      </div>
+      <div id="zam-msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Personel maaş listesi</h3>
+      <div class="note">Tutarı değiştirip "Değişiklikleri kaydet" deyin. Katsayı, işverene maliyeti (SGK vb.) için çarpandır.</div>
+      <div class="scroll" id="tablo"></div>
+    </div>
+
+    <div class="card">
+      <h3>İşçilik maliyeti</h3>
+      <div class="note">Puantaj ile maaşların kesişimi. Günlükçüde çalışılan gün, aylıkçıda ayın gün oranı esas alınır.</div>
+      <div class="row">
+        <div class="field"><label for="c-project">Proje</label><select id="c-project"></select></div>
+        <div class="field"><label for="c-from">Başlangıç</label><input id="c-from" type="date"></div>
+        <div class="field"><label for="c-to">Bitiş</label><input id="c-to" type="date"></div>
+        <button class="btn ghost" id="btn-cost" type="button">Hesapla</button>
+      </div>
+      <div id="cost-out" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
+var money=function(n){ return "₺"+Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
+function msg(el,t,k){ el.innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
+var GOREV={santiye_sefi:"Şantiye şefi",sondor:"Sondör",sondor_yardimcisi:"Sondör yrd.",alt_eleman:"Alt eleman",sofor:"Şoför",destek:"Destek",diger:"Diğer"};
+function iso(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+
+var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
+var sb=null, ROWS=[];
+function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
+
+if(!cfg.url || !cfg.key){
+  document.body.insertAdjacentHTML("beforeend",
+    '<div class="wrap"><div class="card"><div class="msg err">Bağlantı ayarları yok. Önce saha uygulamasına girin.</div></div></div>');
+} else {
+  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
+  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
+}
+$("#btn-login").addEventListener("click", function(){
+  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
+    if(r.error){ $("#login-msg").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    boot();
+  });
+});
+$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+
+function boot(){
+  show("scr-main");
+  var today = iso(new Date());
+  var ayBasi = today.slice(0,8) + "01";
+  $("#f-date").value = today; $("#f-valid").value = ayBasi;
+  $("#z-date").value = ayBasi; $("#c-from").value = ayBasi; $("#c-to").value = today;
+  sb.rpc("bootstrap_data").then(function(r){
+    if(!r.error && r.data){
+      $("#who").textContent = (r.data.tenant?r.data.tenant.name+" · ":"") + (r.data.profile?r.data.profile.full_name:"");
+      var sel = $("#c-project");
+      (r.data.projects||[]).forEach(function(p){
+        var o=document.createElement("option"); o.value=p.id; o.textContent=(p.site_name||p.name); sel.appendChild(o); });
+    }
+    loadTable();
+  });
+}
+
+function loadTable(){
+  msg($("#msg"), "Yükleniyor…");
+  sb.rpc("wage_table", {p_date:$("#f-date").value}).then(function(r){
+    if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
+    ROWS = r.data || [];
+    msg($("#msg"), "");
+    render();
+  });
+}
+$("#btn-reload").addEventListener("click", loadTable);
+$("#f-date").addEventListener("change", loadTable);
+
+function render(){
+  if(!ROWS.length){ $("#tablo").innerHTML = '<div class="note">Personel bulunamadı.</div>'; return; }
+  var eksik = ROWS.filter(function(r){ return r.amount == null; }).length;
+  var html = '<table><thead><tr><th>Ad Soyad</th><th>Görev</th><th>Tür</th><th>Tutar (brüt)</th>' +
+    '<th>Katsayı</th><th>İşverene maliyet</th><th>Geçerlilik</th><th>Geçmiş</th></tr></thead><tbody>';
+  ROWS.forEach(function(r, i){
+    html += '<tr data-i="'+i+'">' +
+      '<td>'+esc(r.name)+'</td>' +
+      '<td class="hist">'+(GOREV[r.kind]||r.kind)+'</td>' +
+      '<td><select data-f="wage_type"><option value="aylik"'+(r.wage_type==="gunluk"?"":" selected")+'>Aylık</option>' +
+          '<option value="gunluk"'+(r.wage_type==="gunluk"?" selected":"")+'>Günlük</option></select></td>' +
+      '<td><input data-f="amount" type="number" inputmode="decimal" value="'+(r.amount==null?"":r.amount)+'" placeholder="girilmedi"></td>' +
+      '<td><input data-f="factor" type="number" step="0.01" style="width:78px" value="'+(r.factor==null?"1":r.factor)+'"></td>' +
+      '<td class="num">'+(r.maliyet==null?"—":money(r.maliyet))+'</td>' +
+      '<td class="hist">'+(r.valid_from||"—")+'</td>' +
+      '<td class="hist">'+((r.onceki&&r.onceki.length)?(r.onceki.slice(0,2).map(function(h){
+            return h.tarih+": "+money(h.tutar); }).join("<br>")):"—")+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  $("#tablo").innerHTML = html;
+  if(eksik) msg($("#msg"), eksik + " kişinin maaşı girilmemiş. İşçilik maliyeti bu kişiler için sıfır sayılır.", "warn");
+}
+
+$("#btn-save-all").addEventListener("click", function(){
+  var valid = $("#f-valid").value;
+  if(!valid){ msg($("#msg"), "Geçerlilik tarihi seçin.", "err"); return; }
+  var jobs = [];
+  $$("#tablo tbody tr").forEach(function(tr){
+    var i = Number(tr.dataset.i), r = ROWS[i];
+    var amount = tr.querySelector("[data-f='amount']").value;
+    var type = tr.querySelector("[data-f='wage_type']").value;
+    var factor = Number(tr.querySelector("[data-f='factor']").value || 1);
+    if(amount === "") return;
+    var degisti = (Number(amount) !== Number(r.amount)) || (type !== r.wage_type) ||
+                  (factor !== Number(r.factor||1)) || (r.valid_from == null);
+    if(!degisti) return;
+    jobs.push(sb.rpc("set_wage", {p_person:r.personnel_id, p_type:type, p_amount:Number(amount),
+                                  p_from:valid, p_factor:factor, p_note:null}));
+  });
+  if(!jobs.length){ msg($("#msg"), "Değişiklik yok.", "ok"); return; }
+  msg($("#msg"), jobs.length + " kayıt gönderiliyor…");
+  Promise.all(jobs).then(function(res){
+    var hata = res.filter(function(x){ return x.error; });
+    if(hata.length){ msg($("#msg"), esc(hata[0].error.message), "err"); return; }
+    msg($("#msg"), jobs.length + " maaş kaydedildi (" + valid + " tarihinden geçerli).", "ok");
+    loadTable();
+  });
+});
+
+$("#btn-raise").addEventListener("click", function(){
+  var pct = Number($("#z-pct").value), d = $("#z-date").value;
+  if(!pct || !d){ msg($("#zam-msg"), "Yüzde ve geçerlilik tarihi gerekli.", "err"); return; }
+  msg($("#zam-msg"), "Uygulanıyor…");
+  sb.rpc("raise_wages", {p_percent:pct, p_from:d, p_kind:$("#z-kind").value || null}).then(function(r){
+    if(r.error){ msg($("#zam-msg"), esc(r.error.message), "err"); return; }
+    msg($("#zam-msg"), r.data + " kişiye %" + pct + " zam uygulandı (" + d + " tarihinden geçerli).", "ok");
+    $("#f-date").value = d; loadTable();
+  });
+});
+
+$("#btn-cost").addEventListener("click", function(){
+  if(!$("#c-project").value){ msg($("#msg"), "Proje seçin.", "err"); return; }
+  $("#cost-out").innerHTML = '<div class="note">Hesaplanıyor…</div>';
+  sb.rpc("labor_cost", {p_project:$("#c-project").value, p_from:$("#c-from").value, p_to:$("#c-to").value})
+    .then(function(r){
+      if(r.error){ $("#cost-out").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+      var d = r.data;
+      var html = '<div class="tiles">' +
+        '<div class="tile"><div class="k">Toplam işçilik</div><div class="v num">'+money(d.toplam)+'</div></div>' +
+        '<div class="tile"><div class="k">Kişi</div><div class="v num">'+d.kisi+'</div></div>' +
+        '<div class="tile"><div class="k">Maaşı girilmemiş</div><div class="v num">'+d.maassiz+'</div></div>' +
+        '</div>';
+      if((d.gorev_bazli||[]).length){
+        html += '<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Görev</th><th>Kişi</th><th>Maliyet</th></tr></thead><tbody>' +
+          d.gorev_bazli.map(function(x){
+            return '<tr><td>'+(GOREV[x.kind]||x.kind)+'</td><td class="num">'+x.kisi+'</td><td class="num">'+money(x.maliyet)+'</td></tr>';
+          }).join("") + '</tbody></table></div>';
+      }
+      if((d.satirlar||[]).length){
+        html += '<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Ad</th><th>Tür</th><th>Tutar</th>' +
+          '<th>Çalıştı</th><th>Kayıtlı gün</th><th>Maliyet</th></tr></thead><tbody>' +
+          d.satirlar.map(function(x){
+            return '<tr><td>'+esc(x.name)+'</td><td>'+(x.wage_type==="gunluk"?"Günlük":"Aylık")+'</td>' +
+              '<td class="num">'+(x.amount==null?'<span class="pill warn">girilmedi</span>':money(x.amount))+'</td>' +
+              '<td class="num">'+x.calisti+'</td><td class="num">'+x.gun+'</td>' +
+              '<td class="num"><b>'+money(x.maliyet)+'</b></td></tr>';
+          }).join("") + '</tbody></table></div>';
+      }
+      $("#cost-out").innerHTML = html;
+    });
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sondaj Panel · Merkez Ofis</title>
+<meta name="theme-color" content="#123146">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef2f4;--card:#fff;--line:#d9e2e7;--line-soft:#e8eef1;
+  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
+  --accent:#12708f;--accent-2:#7fb9cd;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
+  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
+  --shadow:0 1px 2px rgba(15,34,48,.06), 0 8px 22px rgba(15,34,48,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0b161d;--card:#112430;--line:#25404e;--line-soft:#1c3340;
+  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
+  --accent:#4bb3d6;--accent-2:#2c6b82;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
+  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
+  color-scheme:dark;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
+h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+header{background:var(--navy);color:#eaf4f8;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+header b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase}
+header .sub{font-size:12px;color:#9fc4d3;letter-spacing:.08em;text-transform:uppercase}
+header .sp{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:12.5px;color:#cfe3ec}
+header a{color:#cfe3ec}
+.wrap{max-width:1140px;margin:0 auto;padding:18px 24px 60px}
+@media (max-width:640px){ .wrap{padding:16px} header{padding:12px 16px} }
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h3{font-size:18px}
+.card .note{font-size:12px;color:var(--ink-3);margin:2px 0 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+select,input,button{font:inherit;color:inherit}
+select,input{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;font-size:15px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:40px}
+.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line);text-decoration:none;display:inline-flex;align-items:center}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:7px 8px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+td:first-child{text-align:left;color:var(--ink)}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
+td input{padding:5px 7px;min-height:32px;font-size:14px;width:130px;text-align:right}
+.scroll{overflow-x:auto}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile .k{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tile .v{font-family:"Barlow Condensed",sans-serif;font-size:26px}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink);margin-top:10px}
+.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.msg.ok{border-left-color:var(--good);background:var(--good-soft);color:var(--good)}
+.msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar{display:grid;grid-template-columns:170px 1fr 120px;gap:10px;align-items:center;font-size:13px}
+.track{background:var(--line-soft);border-radius:3px;height:12px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent)}
+.bar .val{text-align:right;font-weight:600}
+.center{max-width:380px;margin:60px auto;display:flex;flex-direction:column;gap:12px}
+[hidden]{display:none!important}
+.hint{font-size:12px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+
+<header>
+  <span><b>Sondaj Panel</b><br><span class="sub">Merkez ofis</span></span>
+  <span class="sp">
+    <span id="who"></span>
+    <a href="sirket.html">Şirket performansı</a>
+    <a href="maaslar.html">Maaş tablosu</a>
+    <a href="panel.html">Şantiye paneli</a>
+    <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
+  </span>
+</header>
+
+<div class="wrap">
+  <div id="scr-login" hidden>
+    <div class="center">
+      <h2 style="font-size:24px">Giriş</h2>
+      <input id="in-mail" type="email" placeholder="E-posta" autocomplete="username">
+      <input id="in-pass" type="password" placeholder="Parola" autocomplete="current-password">
+      <button class="btn" id="btn-login" type="button">Giriş yap</button>
+      <div id="login-msg"></div>
+    </div>
+  </div>
+
+  <div id="scr-main" hidden>
+    <div class="card">
+      <div class="row">
+        <div class="field"><label for="f-year">Yıl</label><select id="f-year"></select></div>
+        <div class="field"><label for="f-month">Dönem</label><select id="f-month"></select></div>
+        <button class="btn" id="btn-load" type="button">Getir</button>
+      </div>
+      <div id="msg"></div>
+      <div class="tiles" id="tiles" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Merkez ofis personeli</h3>
+      <div class="note">Maaşları maaş tablosundan girilir. Bu kişilerin gideri projelere dağıtılır.</div>
+      <div class="scroll" id="personel"></div>
+      <div class="row" style="margin-top:12px">
+        <div class="field"><label for="p-name">Yeni kişi</label><input id="p-name" placeholder="Ad Soyad"></div>
+        <div class="field"><label for="p-role">Görevi</label><input id="p-role" placeholder="Muhasebe, idari, yönetici…"></div>
+        <button class="btn ghost" id="btn-add-person" type="button">Ekle</button>
+        <div class="field"><label for="p-existing">Mevcut personeli merkez ofise al</label>
+          <select id="p-existing"></select></div>
+        <button class="btn ghost" id="btn-mark" type="button">İşaretle</button>
+      </div>
+      <div id="p-msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Merkez ofis genel giderleri</h3>
+      <div class="note">Kira, elektrik, muhasebe, araç, danışmanlık gibi projeye özel olmayan giderler.</div>
+      <div class="row">
+        <div class="field"><label for="g-date">Tarih</label><input id="g-date" type="date"></div>
+        <div class="field"><label for="g-cat">Kategori</label>
+          <select id="g-cat"><option>Kira</option><option>Elektrik / su / doğalgaz</option><option>İletişim</option>
+          <option>Muhasebe / danışmanlık</option><option>Ofis giderleri</option><option>Araç</option>
+          <option>Vergi / harç</option><option>Sigorta</option><option>Diğer</option></select></div>
+        <div class="field"><label for="g-amount">Tutar (₺)</label><input id="g-amount" type="number" inputmode="decimal"></div>
+        <div class="field"><label for="g-method">Ödeme</label>
+          <select id="g-method"><option value="banka">Banka</option><option value="nakit">Nakit</option></select></div>
+        <div class="field" style="flex:1;min-width:200px"><label for="g-desc">Açıklama</label><input id="g-desc" placeholder="isteğe bağlı"></div>
+        <button class="btn" id="btn-add-gider" type="button">Gideri ekle</button>
+      </div>
+      <div id="g-msg"></div>
+      <div class="scroll" id="giderler" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Sözleşme bedelleri</h3>
+      <div class="note">Merkez ofis gideri projelere bu bedellerin oranında dağıtılır. Boş bırakılan projede o ayın hakediş geliri ağırlık olarak kullanılır.</div>
+      <div class="scroll" id="sozlesmeler"></div>
+      <button class="btn" id="btn-save-contracts" type="button" style="margin-top:12px">Sözleşme bedellerini kaydet</button>
+      <div id="s-msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Aylık dağıtım</h3>
+      <div class="note">Her ayın merkez ofis gideri ve projelere düşen paylar</div>
+      <div id="dagitim"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
+var money=function(n){ return "₺"+Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); };
+var AYLAR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
+function msg(el,t,k){ el.innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
+function iso(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+var GOREV={santiye_sefi:"Şantiye şefi",sondor:"Sondör",sondor_yardimcisi:"Sondör yrd.",alt_eleman:"Alt eleman",sofor:"Şoför",destek:"Destek",diger:"Diğer"};
+
+var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
+var sb=null, DATA=null, SOZ=[];
+function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
+
+if(!cfg.url || !cfg.key){
+  document.body.insertAdjacentHTML("beforeend",
+    '<div class="wrap"><div class="card"><div class="msg err">Bağlantı ayarları yok. Önce saha uygulamasına girin.</div></div></div>');
+} else {
+  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
+  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
+}
+$("#btn-login").addEventListener("click", function(){
+  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
+    if(r.error){ $("#login-msg").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    boot();
+  });
+});
+$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+$("#btn-load").addEventListener("click", load);
+["#f-year","#f-month"].forEach(function(s){ $(s).addEventListener("change", load); });
+
+function boot(){
+  show("scr-main");
+  $("#g-date").value = iso(new Date());
+  var now=new Date(), ys=$("#f-year");
+  for(var y=now.getFullYear()+1; y>=now.getFullYear()-3; y--){ var o=document.createElement("option"); o.value=y; o.textContent=y; ys.appendChild(o); }
+  ys.value = now.getFullYear();
+  var ms=$("#f-month");
+  var o0=document.createElement("option"); o0.value=""; o0.textContent="Yıl geneli"; ms.appendChild(o0);
+  AYLAR.forEach(function(a,i){ var o=document.createElement("option"); o.value=i+1; o.textContent=a; ms.appendChild(o); });
+  ms.value = now.getMonth()+1;
+  sb.rpc("bootstrap_data").then(function(r){
+    if(!r.error && r.data){
+      $("#who").textContent = (r.data.tenant?r.data.tenant.name+" · ":"") + (r.data.profile?r.data.profile.full_name:"");
+      var sel = $("#p-existing"); sel.innerHTML = '<option value="">— seçin —</option>';
+      (r.data.personnel||[]).forEach(function(p){
+        var o=document.createElement("option"); o.value=p.id;
+        o.textContent = p.full_name + " (" + (GOREV[p.kind]||p.kind) + ")"; sel.appendChild(o); });
+    }
+    load();
+  });
+}
+
+function load(){
+  var y=Number($("#f-year").value), m=$("#f-month").value?Number($("#f-month").value):null;
+  msg($("#msg"), "Yükleniyor…");
+  sb.rpc("overhead_summary", {p_year:y, p_month:m}).then(function(r){
+    if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
+    DATA = r.data; msg($("#msg"), ""); render();
+  });
+}
+
+function render(){
+  var d = DATA;
+  $("#tiles").innerHTML = [
+    ['Merkez ofis işçiliği', money(d.toplam_iscilik)],
+    ['Genel giderler', money(d.toplam_gider)],
+    ['Toplam dağıtılan', money(d.toplam)],
+    ['Ofis personeli', (d.personel||[]).length]
+  ].map(function(x){ return '<div class="tile"><div class="k">'+x[0]+'</div><div class="v num">'+x[1]+'</div></div>'; }).join("");
+
+  var pe = d.personel || [];
+  $("#personel").innerHTML = pe.length ?
+    ('<table><thead><tr><th>Ad Soyad</th><th>Görev</th><th>Tür</th><th>Tutar</th><th>Aylık maliyet</th></tr></thead><tbody>' +
+      pe.map(function(p){
+        return '<tr><td>'+esc(p.name)+'</td><td>'+esc(p.role)+'</td>' +
+          '<td>'+(p.wage_type==="gunluk"?"Günlük":(p.wage_type?"Aylık":"—"))+'</td>' +
+          '<td class="num">'+(p.amount==null?'<span class="hint">maaş girilmedi</span>':money(p.amount))+'</td>' +
+          '<td class="num"><b>'+(p.aylik_maliyet==null?'—':money(p.aylik_maliyet))+'</b></td></tr>';
+      }).join("") + '</tbody></table>')
+    : '<div class="hint">Merkez ofis personeli tanımlanmamış.</div>';
+
+  var g = d.giderler || [];
+  $("#giderler").innerHTML = g.length ?
+    ('<table><thead><tr><th>Tarih</th><th>Kategori</th><th>Ödeme</th><th>Açıklama</th><th>Tutar</th></tr></thead><tbody>' +
+      g.map(function(x){
+        return '<tr><td>'+x.tarih+'</td><td>'+esc(x.kategori)+'</td><td>'+(x.yontem==="nakit"?"Nakit":"Banka")+'</td>' +
+          '<td class="hint">'+esc(x.aciklama||"—")+'</td><td class="num">'+money(x.tutar)+'</td></tr>';
+      }).join("") + '</tbody><tfoot><tr><td colspan="4">Toplam</td><td class="num">'+money(d.toplam_gider)+'</td></tr></tfoot></table>')
+    : '<div class="hint">Bu dönemde genel gider kaydı yok.</div>';
+
+  SOZ = d.sozlesmeler || [];
+  $("#sozlesmeler").innerHTML = SOZ.length ?
+    ('<table><thead><tr><th>Proje</th><th>Sözleşme bedeli (₺)</th></tr></thead><tbody>' +
+      SOZ.map(function(s,i){
+        return '<tr><td>'+esc(s.proje)+'</td><td><input data-i="'+i+'" type="number" inputmode="decimal" style="width:170px" value="'+
+          (s.tutar==null?"":s.tutar)+'" placeholder="girilmedi"></td></tr>';
+      }).join("") + '</tbody></table>')
+    : '<div class="hint">Aktif proje yok.</div>';
+
+  var ay = d.aylar || [];
+  $("#dagitim").innerHTML = ay.length ? ay.map(function(a){
+    var pay = a.dagitim || [];
+    var max = pay.length ? Math.max.apply(null, pay.map(function(x){ return Number(x.pay)||0; })) : 1;
+    var agTop = pay.reduce(function(s,x){ return s + (Number(x.agirlik)||0); }, 0);
+    return '<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:baseline">' +
+      '<b>'+AYLAR[Number(String(a.ay).slice(5,7))-1]+' '+String(a.ay).slice(0,4)+'</b>' +
+      '<span class="hint">işçilik '+money(a.iscilik)+' + gider '+money(a.gider)+' = <b>'+money(a.toplam)+'</b> · '+a.proje+' proje</span></div>' +
+      (pay.length ? '<div class="bars" style="margin-top:8px">' + pay.map(function(x){
+          var oran = agTop > 0 ? (Number(x.agirlik)||0)/agTop*100 : 0;
+          return '<div class="bar"><span>'+esc(x.proje)+'<small class="hint"> %'+tl(oran,1)+'</small></span>' +
+            '<span class="track"><i style="width:'+((Number(x.pay)||0)/(max||1)*100)+'%"></i></span>' +
+            '<span class="val num">'+money(x.pay)+'</span></div>';
+        }).join("") + '</div>'
+        : '<div class="hint" style="margin-top:6px">Bu ay çalışan proje yok, dağıtım yapılmadı.</div>') +
+      '</div>';
+  }).join("") : '<div class="hint">Veri yok.</div>';
+}
+
+$("#btn-add-person").addEventListener("click", function(){
+  var name = $("#p-name").value.trim();
+  if(!name){ msg($("#p-msg"), "Ad soyad girin.", "err"); return; }
+  sb.rpc("add_personnel", {p_name:name, p_kind:"destek", p_head_office:true, p_role:$("#p-role").value.trim()||null})
+    .then(function(r){
+      if(r.error){ msg($("#p-msg"), esc(r.error.message), "err"); return; }
+      $("#p-name").value=""; $("#p-role").value="";
+      msg($("#p-msg"), "Eklendi. Maaşını maaş tablosundan girin.", "ok"); load();
+    });
+});
+$("#btn-mark").addEventListener("click", function(){
+  var id = $("#p-existing").value;
+  if(!id){ msg($("#p-msg"), "Personel seçin.", "err"); return; }
+  sb.rpc("set_head_office", {p_person:id, p_flag:true, p_role:$("#p-role").value.trim()||null}).then(function(r){
+    if(r.error){ msg($("#p-msg"), esc(r.error.message), "err"); return; }
+    msg($("#p-msg"), "Merkez ofis personeli olarak işaretlendi.", "ok"); load();
+  });
+});
+
+$("#btn-add-gider").addEventListener("click", function(){
+  var amount = Number($("#g-amount").value);
+  if(!amount || !$("#g-date").value){ msg($("#g-msg"), "Tarih ve tutar zorunlu.", "err"); return; }
+  sb.rpc("add_overhead", {p_date:$("#g-date").value, p_category:$("#g-cat").value, p_amount:amount,
+                          p_method:$("#g-method").value, p_desc:$("#g-desc").value||null}).then(function(r){
+    if(r.error){ msg($("#g-msg"), esc(r.error.message), "err"); return; }
+    $("#g-amount").value=""; $("#g-desc").value="";
+    msg($("#g-msg"), "Gider kaydedildi.", "ok"); load();
+  });
+});
+
+$("#btn-save-contracts").addEventListener("click", function(){
+  var jobs = [];
+  $$("#sozlesmeler input[data-i]").forEach(function(inp){
+    var s = SOZ[Number(inp.dataset.i)];
+    var v = inp.value === "" ? null : Number(inp.value);
+    if(Number(v) !== Number(s.tutar)) jobs.push(sb.rpc("set_contract_amount", {p_project:s.proje_id, p_amount:v}));
+  });
+  if(!jobs.length){ msg($("#s-msg"), "Değişiklik yok.", "ok"); return; }
+  Promise.all(jobs).then(function(res){
+    var hata = res.filter(function(x){ return x.error; });
+    msg($("#s-msg"), hata.length ? esc(hata[0].error.message) : (jobs.length+" proje güncellendi."), hata.length?"err":"ok");
+    if(!hata.length) load();
+  });
+});
+})();
+</script>
+</body>
+</html>
