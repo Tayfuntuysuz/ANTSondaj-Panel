@@ -900,6 +900,7 @@ $("#btn-summary").addEventListener("click", function(){
     $("#sum-out").innerHTML =
       '<div class="readout">' +
         '<div><div class="k">Delinen metraj</div><div class="v num">'+tl(d.meters)+'</div></div>' +
+        (Number(d.cancelled) > 0 ? '<div><div class="k">İptal kuyu</div><div class="v num">'+tl(d.cancelled)+'</div></div>' : '') +
         '<div><div class="k">Teslim edilen</div><div class="v num">'+tl(d.delivered)+'</div></div>' +
         '<div><div class="k">Vardiya sayısı</div><div class="v num">'+d.shifts+'</div></div>' +
         '<div><div class="k">Mazot</div><div class="v num">'+tl(d.fuel_liters)+'</div></div>' +
