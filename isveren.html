@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sondaj Raporu · İşveren</title>
+<meta name="theme-color" content="#123146">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef2f4;--card:#fff;--line:#d9e2e7;--line-soft:#e8eef1;
+  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
+  --accent:#12708f;--accent-2:#7fb9cd;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
+  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
+  --shadow:0 1px 2px rgba(15,34,48,.06), 0 8px 22px rgba(15,34,48,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0b161d;--card:#112430;--line:#25404e;--line-soft:#1c3340;
+  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
+  --accent:#4bb3d6;--accent-2:#2c6b82;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
+  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
+  color-scheme:dark;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
+h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+header{background:var(--navy);color:#eaf4f8;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+header b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase}
+header .sub{font-size:12px;color:#9fc4d3;letter-spacing:.08em;text-transform:uppercase}
+header .sp{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:12.5px;color:#cfe3ec}
+header a{color:#cfe3ec}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 24px 60px}
+@media (max-width:640px){ .wrap{padding:16px} header{padding:12px 16px} }
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h3{font-size:18px}
+.card .note{font-size:12px;color:var(--ink-3);margin:2px 0 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+select,input,button{font:inherit;color:inherit}
+select,input{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;font-size:15px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:40px}
+.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line);text-decoration:none;display:inline-flex;align-items:center}
+.btn.sm{padding:6px 11px;min-height:0;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:7px 8px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+td:first-child{text-align:left;color:var(--ink)}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
+td input,td select{padding:5px 7px;min-height:32px;font-size:14px;width:110px;text-align:right}
+td select{width:104px;text-align:left}
+.scroll{overflow-x:auto}
+.pill{display:inline-flex;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink);margin-top:10px}
+.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.msg.ok{border-left-color:var(--good);background:var(--good-soft);color:var(--good)}
+.msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile .k{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tile .v{font-family:"Barlow Condensed",sans-serif;font-size:27px}
+.center{max-width:380px;margin:60px auto;display:flex;flex-direction:column;gap:12px}
+[hidden]{display:none!important}
+.hist{font-size:11.5px;color:var(--ink-3)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:999px;padding:8px 15px;font-weight:600;cursor:pointer;font-size:13.5px}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.hint{font-size:12px;color:var(--ink-3)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:minmax(110px,1fr) 1fr auto;gap:9px;align-items:center;font-size:13px}
+.bar .track{background:var(--line-soft);border-radius:6px;height:16px;overflow:hidden}
+.bar .track i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.bar .val{font-variant-numeric:tabular-nums;color:var(--ink-2);min-width:82px;text-align:right}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gal a{display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-decoration:none;color:inherit}
+.gal img{width:100%;height:120px;object-fit:cover;display:block;background:var(--line-soft)}
+.gal .cap{padding:6px 8px;font-size:11.5px;color:var(--ink-3)}
+.vard{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.vard h4{font-family:"Barlow Condensed",sans-serif;font-size:17px;margin:0 0 6px;font-weight:600}
+@media print{
+  header,.tabs,.no-print,#scr-login{display:none!important}
+  body{background:#fff;font-size:11.5px}
+  .wrap{max-width:none;padding:0}
+  .card{border:0;box-shadow:none;padding:0 0 10px;page-break-inside:avoid}
+  .tile{border:1px solid #bbb}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span><b id="firma">Sondaj Raporu</b><br><span class="sub" id="isveren">İşveren paneli</span></span>
+  <span class="sp">
+    <span id="who"></span>
+    <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
+  </span>
+</header>
+
+<div class="wrap">
+  <div id="scr-login" hidden>
+    <div class="center">
+      <h2 style="font-size:24px">İşveren girişi</h2>
+      <input id="in-mail" type="email" placeholder="E-posta" autocomplete="username">
+      <input id="in-pass" type="password" placeholder="Parola" autocomplete="current-password">
+      <button class="btn" id="btn-login" type="button">Giriş yap</button>
+      <div id="login-msg"></div>
+    </div>
+  </div>
+
+  <div id="scr-main" hidden>
+    <div class="card no-print">
+      <div class="row">
+        <div class="field" style="flex:1;min-width:200px"><label>Saha / proje</label><select id="f-proj"></select></div>
+      </div>
+      <div id="msg"></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button data-t="gun" class="on">Günlük rapor</button>
+      <button data-t="donem">Dönem raporu</button>
+      <button data-t="foto">Fotoğraflar</button>
+    </div>
+
+    <!-- GÜNLÜK -->
+    <section data-p="gun">
+      <div class="card no-print">
+        <div class="row">
+          <div class="field"><label>Tarih</label><input id="g-date" type="date"></div>
+          <button class="btn" id="btn-gun" type="button">Getir</button>
+          <button class="btn ghost" id="btn-gun-dun" type="button">Önceki gün</button>
+          <button class="btn ghost" id="btn-gun-yaz" type="button">Yazdır / PDF</button>
+        </div>
+      </div>
+      <div id="gun-out"></div>
+    </section>
+
+    <!-- DÖNEM -->
+    <section data-p="donem" hidden>
+      <div class="card no-print">
+        <div class="row">
+          <div class="field"><label>Başlangıç</label><input id="d-from" type="date"></div>
+          <div class="field"><label>Bitiş</label><input id="d-to" type="date"></div>
+          <button class="btn" id="btn-donem" type="button">Getir</button>
+          <button class="btn ghost" id="btn-d-ay" type="button">Bu ay</button>
+          <button class="btn ghost" id="btn-d-excel" type="button">Excel (CSV)</button>
+          <button class="btn ghost" id="btn-d-yaz" type="button">Yazdır / PDF</button>
+        </div>
+      </div>
+      <div id="donem-out"></div>
+    </section>
+
+    <!-- FOTO -->
+    <section data-p="foto" hidden>
+      <div class="card no-print">
+        <div class="row">
+          <div class="field"><label>Başlangıç</label><input id="p-from" type="date"></div>
+          <div class="field"><label>Bitiş</label><input id="p-to" type="date"></div>
+          <button class="btn" id="btn-foto" type="button">Getir</button>
+        </div>
+        <div id="p-msg"></div>
+      </div>
+      <div class="card"><div class="gal" id="foto-out"></div></div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
+function msg(el,t,k){ el.innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
+function iso(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function trd(s){ if(!s) return "—"; var p=String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+var VARD={gunduz:"Gündüz", gece:"Gece"};
+var KDURUM={planned:"Planlandı", drilling:"Devam ediyor", completed:"Tamamlandı", cancelled:"İptal"};
+var PROGRAM={arama:"Maden arama", planlama:"Maden planlama"};
+
+var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
+var sb=null, BOOT=null, DONEM=null;
+function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
+
+// İşveren kullanıcısı uygulamayı ilk açtığında bağlantı bilgisi yoksa adresten okunur:
+// isveren.html?u=<proje-url>&k=<anon-key>  — bir kez girilir, tarayıcıya kaydedilir.
+(function(){
+  var q=new URLSearchParams(location.search);
+  if(q.get("u") && q.get("k")){
+    localStorage.setItem("sp_url", q.get("u")); localStorage.setItem("sp_key", q.get("k"));
+    cfg.url=q.get("u"); cfg.key=q.get("k");
+    history.replaceState(null,"",location.pathname);
+  }
+})();
+
+if(!cfg.url || !cfg.key){
+  document.body.insertAdjacentHTML("beforeend",
+    '<div class="wrap"><div class="card"><div class="msg err">Bağlantı ayarları yok. Size gönderilen bağlantıyı kullanarak girin.</div></div></div>');
+} else {
+  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
+  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
+}
+$("#btn-login").addEventListener("click", function(){
+  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
+    if(r.error){ $("#login-msg").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    boot();
+  });
+});
+$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+
+$$("#tabs button").forEach(function(b){
+  b.addEventListener("click", function(){
+    $$("#tabs button").forEach(function(x){ x.classList.remove("on"); });
+    b.classList.add("on");
+    $$("section[data-p]").forEach(function(s){ s.hidden = (s.dataset.p !== b.dataset.t); });
+  });
+});
+
+function boot(){
+  show("scr-main");
+  var d=new Date(); d.setDate(d.getDate()-1);
+  $("#g-date").value=iso(d);
+  var first=new Date(); first.setDate(1);
+  $("#d-from").value=iso(first); $("#d-to").value=iso(new Date());
+  $("#p-from").value=iso(first); $("#p-to").value=iso(new Date());
+  sb.rpc("employer_bootstrap").then(function(r){
+    if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
+    BOOT=r.data;
+    $("#firma").textContent = BOOT.firma || "Sondaj Raporu";
+    $("#isveren").textContent = BOOT.isveren || "İşveren paneli";
+    $("#who").textContent = BOOT.kullanici || "";
+    var s=$("#f-proj");
+    s.innerHTML=(BOOT.projeler||[]).map(function(p){
+      return '<option value="'+p.id+'">'+esc(p.ad)+(p.il?' — '+esc(p.il):'')+'</option>'; }).join("");
+    if(!(BOOT.projeler||[]).length){ msg($("#msg"), "Hesabınıza tanımlı saha bulunmuyor.", "warn"); return; }
+    gun();
+  });
+}
+$("#f-proj").addEventListener("change", function(){ gun(); DONEM=null; $("#donem-out").innerHTML=""; });
+
+function tbl(cols, rows, empty, foot){
+  if(!rows || !rows.length) return '<div class="hint">'+empty+'</div>';
+  return '<div class="scroll"><table><thead><tr>'+cols.map(function(c){ return '<th>'+c[0]+'</th>'; }).join("")+
+    '</tr></thead><tbody>'+rows.map(function(r){ return '<tr>'+cols.map(function(c){ return '<td>'+c[1](r)+'</td>'; }).join("")+'</tr>'; }).join("")+
+    '</tbody>'+(foot?'<tfoot><tr>'+foot+'</tr></tfoot>':'')+'</table></div>';
+}
+function tiles(list){
+  return '<div class="tiles">'+list.map(function(x){
+    return '<div class="tile"><div class="k">'+x[0]+'</div><div class="v num">'+x[1]+
+      '</div><div class="hint">'+(x[2]||"")+'</div></div>'; }).join("")+'</div>';
+}
+function barsHtml(rows, key, lbl, fmt){
+  if(!rows || !rows.length) return '<div class="hint">Veri yok.</div>';
+  var max=Math.max.apply(null, rows.map(function(r){ return Number(r[key])||0; })) || 1;
+  return '<div class="bars">'+rows.map(function(r){
+    return '<div class="bar"><span>'+esc(r[lbl])+'</span><span class="track"><i style="width:'+
+      ((Number(r[key])||0)/max*100)+'%"></i></span><span class="val">'+fmt(r[key])+'</span></div>'; }).join("")+'</div>';
+}
+
+// ---------------- GÜNLÜK ----------------
+function gun(){
+  var pj=$("#f-proj").value; if(!pj) return;
+  $("#gun-out").innerHTML='<div class="card"><div class="hint">Yükleniyor…</div></div>';
+  sb.rpc("employer_daily", {p_project:pj, p_date:$("#g-date").value}).then(function(r){
+    if(r.error){ $("#gun-out").innerHTML='<div class="card"><div class="msg err">'+esc(r.error.message)+'</div></div>'; return; }
+    var d=r.data, v=d.vardiyalar||[];
+    var h='<div class="card"><h3>'+esc(d.proje||"")+' · '+trd(d.tarih)+'</h3>'+
+      '<div class="note">Gece vardiyası, rapor kuralı gereği ertesi güne yazılır.</div>'+
+      tiles([["Günün metrajı", tl(d.toplam_metraj)+' <small>m</small>'],
+             ["Vardiya", String(v.length)],
+             ["Mazot", tl(d.toplam_mazot,0)+' <small>lt</small>']])+'</div>';
+    if(!v.length){ h+='<div class="card"><div class="hint">Bu tarihte kayıt bulunmuyor.</div></div>'; }
+    v.forEach(function(s){
+      h+='<div class="card"><div class="vard"><h4>'+(VARD[s.vardiya]||s.vardiya)+' vardiyası — '+
+        esc(s.kuyu)+' · '+esc(s.makine)+(s.form_no?' <span class="hint">form '+esc(s.form_no)+'</span>':'')+'</h4>'+
+        '<div class="hint">Kuyu derinliği '+tl(s.kuyu_derinlik)+' m · '+(KDURUM[s.kuyu_durum]||s.kuyu_durum)+
+        (s.motor_bas?' · motor '+String(s.motor_bas).slice(0,5)+'–'+String(s.motor_bit||"").slice(0,5):'')+
+        ' · vardiya metrajı <b>'+tl(s.metraj)+' m</b>'+(s.olcum?' · '+s.olcum+' ölçüm':'')+'</div>'+
+        ((s.ekip||[]).length?'<div class="hint">Ekip: '+(s.ekip||[]).map(esc).join(", ")+'</div>':'')+
+        '</div>'+
+        tbl([["Sıra",function(x){return x.sira;}],
+             ["Çap",function(x){return esc(x.cap);}],
+             ["Başlangıç",function(x){return '<span class="num">'+tl(x.baslangic)+'</span>';}],
+             ["Bitiş",function(x){return '<span class="num">'+tl(x.bitis)+'</span>';}],
+             ["Metre",function(x){return '<span class="num"><b>'+tl(x.metre)+'</b></span>';}],
+             ["Sondör",function(x){return esc(x.sondor||"—");}]],
+            s.manevralar, "Manevra kaydı yok.") +
+        (s["not"]?'<div class="hint" style="margin-top:8px">Not: '+esc(s["not"])+'</div>':'')+
+        (s.bitis?'<div class="msg warn" style="margin-top:8px">'+(s.bitis==="kuyu_iptali"?"Kuyu iptal edildi":"Kuyu tamamlandı")+'</div>':'')+
+        '</div>';
+    });
+    $("#gun-out").innerHTML=h;
+  });
+}
+$("#btn-gun").addEventListener("click", gun);
+$("#g-date").addEventListener("change", gun);
+$("#btn-gun-dun").addEventListener("click", function(){
+  var d=new Date($("#g-date").value||new Date()); d.setDate(d.getDate()-1);
+  $("#g-date").value=iso(d); gun();
+});
+$("#btn-gun-yaz").addEventListener("click", function(){ window.print(); });
+
+// ---------------- DÖNEM ----------------
+function donem(){
+  var pj=$("#f-proj").value; if(!pj) return;
+  $("#donem-out").innerHTML='<div class="card"><div class="hint">Yükleniyor…</div></div>';
+  sb.rpc("employer_report", {p_project:pj, p_from:$("#d-from").value, p_to:$("#d-to").value}).then(function(r){
+    if(r.error){ $("#donem-out").innerHTML='<div class="card"><div class="msg err">'+esc(r.error.message)+'</div></div>'; return; }
+    DONEM=r.data; var d=r.data, t=d.toplam||{}, p=d.proje||{};
+    var h='<div class="card"><h3>'+esc(p.ad||"")+'</h3>'+
+      '<div class="note">'+esc(p.tam_ad||"")+(p.il?' · '+esc(p.il)+(p.ilce?' / '+esc(p.ilce):''):'')+
+      ' · '+trd(d.donem.baslangic)+' – '+trd(d.donem.bitis)+'</div>'+
+      tiles([["Delinen metraj", tl(t.metraj)+' <small>m</small>', (Number(t.iptal)>0?'iptal '+tl(t.iptal)+' m hariç geçerli '+tl(t.gecerli)+' m':'')],
+             ["Çalışılan gün", String(t.gun)],
+             ["Kuyu", String(t.kuyu), t.biten+' tamamlandı'],
+             ["Ölçüm", String(t.olcum)],
+             ["Mazot", tl(t.mazot,0)+' <small>lt</small>']])+'</div>';
+
+    h+='<div class="card"><h3>Günlük metraj</h3>'+
+      tbl([["Tarih",function(x){return trd(x.tarih);}],
+           ["Metraj",function(x){return '<span class="num">'+tl(x.metraj)+' m</span>';}],
+           ["Geçerli",function(x){return '<span class="num">'+tl(x.gecerli)+' m</span>';}],
+           ["Makine",function(x){return x.makine;}],
+           ["Kuyu",function(x){return x.kuyu;}]],
+          d.gunler, "Kayıt yok.",
+          '<td>Toplam</td><td class="num">'+tl(t.metraj)+' m</td><td class="num">'+tl(t.gecerli)+
+          ' m</td><td></td><td></td>')+'</div>';
+
+    h+='<div class="card"><h3>Kuyu bilgileri</h3>'+
+      tbl([["Kuyu",function(x){return '<b>'+esc(x.kuyu)+'</b>';}],
+           ["Program",function(x){return PROGRAM[x.program]||esc(x.program||"—");}],
+           ["PQ",function(x){return '<span class="num">'+tl(x.pq)+'</span>';}],
+           ["HQ",function(x){return '<span class="num">'+tl(x.hq)+'</span>';}],
+           ["NQ",function(x){return '<span class="num">'+tl(x.nq)+'</span>';}],
+           ["Dönem metrajı",function(x){return '<span class="num"><b>'+tl(x.metraj)+'</b></span>';}],
+           ["Kuyu derinliği",function(x){return '<span class="num">'+tl(x.derinlik)+'</span>';}],
+           ["Ölçüm",function(x){return x.olcum;}],
+           ["İlk–son",function(x){return '<span class="hint">'+trd(x.ilk)+' – '+trd(x.son)+'</span>';}],
+           ["Durum",function(x){return '<span class="pill'+(x.durum==="cancelled"?" warn":"")+'">'+(KDURUM[x.durum]||x.durum)+'</span>';}]],
+          d.kuyular, "Kayıt yok.")+'</div>';
+
+    h+='<div class="card"><h3>Makine performansı</h3>'+
+      tbl([["Makine",function(x){return '<b>'+esc(x.makine)+'</b>';}],
+           ["Metraj",function(x){return '<span class="num">'+tl(x.metraj)+' m</span>';}],
+           ["Gün",function(x){return x.gun;}],
+           ["Günlük ortalama",function(x){return '<span class="num">'+tl(x.gunluk_ort)+' m</span>';}]],
+          d.makineler, "Kayıt yok.")+'</div>';
+
+    h+='<div class="card"><h3>Çap dağılımı</h3>'+barsHtml(d.caplar||[], "metraj", "cap",
+        function(v){ return tl(v)+" m"; })+'</div>';
+
+    $("#donem-out").innerHTML=h;
+  });
+}
+$("#btn-donem").addEventListener("click", donem);
+$("#btn-d-ay").addEventListener("click", function(){
+  var f=new Date(); f.setDate(1); $("#d-from").value=iso(f); $("#d-to").value=iso(new Date()); donem();
+});
+$("#btn-d-yaz").addEventListener("click", function(){ if(!DONEM) donem(); else window.print(); });
+$("#btn-d-excel").addEventListener("click", function(){
+  if(!DONEM){ donem(); return; }
+  var d=DONEM, L=[];
+  var q=function(v){ return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'; };
+  L.push([q(d.proje.ad), q(trd(d.donem.baslangic)+" - "+trd(d.donem.bitis))].join(";"));
+  L.push("");
+  L.push(["Tarih","Metraj","Gecerli","Makine","Kuyu"].map(q).join(";"));
+  (d.gunler||[]).forEach(function(x){ L.push([q(trd(x.tarih)), tl(x.metraj), tl(x.gecerli), x.makine, x.kuyu].join(";")); });
+  L.push("");
+  L.push(["Kuyu","Program","PQ","HQ","NQ","Donem metraji","Kuyu derinligi","Olcum","Durum"].map(q).join(";"));
+  (d.kuyular||[]).forEach(function(x){ L.push([q(x.kuyu), q(PROGRAM[x.program]||x.program||""), tl(x.pq), tl(x.hq),
+      tl(x.nq), tl(x.metraj), tl(x.derinlik), x.olcum, q(KDURUM[x.durum]||x.durum)].join(";")); });
+  L.push("");
+  L.push(["Makine","Metraj","Gun","Gunluk ortalama"].map(q).join(";"));
+  (d.makineler||[]).forEach(function(x){ L.push([q(x.makine), tl(x.metraj), x.gun, tl(x.gunluk_ort)].join(";")); });
+  L.push("");
+  L.push([q("TOPLAM"), tl(d.toplam.metraj)].join(";"));
+  var blob=new Blob(["﻿"+L.join("\r\n")], {type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=(d.proje.ad||"rapor").replace(/[^\wğüşıöçĞÜŞİÖÇ -]/g,"")+" "+d.donem.baslangic+"_"+d.donem.bitis+".csv";
+  a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+});
+
+// ---------------- FOTOĞRAF ----------------
+$("#btn-foto").addEventListener("click", function(){
+  var pj=$("#f-proj").value; if(!pj) return;
+  msg($("#p-msg"), "Yükleniyor…");
+  sb.rpc("employer_files", {p_project:pj, p_from:$("#p-from").value, p_to:$("#p-to").value}).then(function(r){
+    if(r.error){ msg($("#p-msg"), esc(r.error.message), "err"); return; }
+    var list=r.data||[];
+    if(!list.length){ msg($("#p-msg"), ""); $("#foto-out").innerHTML='<div class="hint">Bu aralıkta dosya yok.</div>'; return; }
+    var paths=list.map(function(x){ return x.yol; }).filter(Boolean);
+    sb.storage.from("saha-fotograf").createSignedUrls(paths, 1800).then(function(su){
+      msg($("#p-msg"), "");
+      var urls={};
+      if(!su.error) (su.data||[]).forEach(function(u){ if(u.path) urls[u.path]=u.signedUrl; });
+      $("#foto-out").innerHTML = list.map(function(x){
+        var u=urls[x.yol];
+        return '<a href="'+(u||"#")+'" target="_blank" rel="noopener">'+
+          (u?'<img src="'+u+'" alt="" loading="lazy">':'<div class="gal"><div class="hint" style="padding:30px">önizleme yok</div></div>')+
+          '<div class="cap">'+(x.kuyu?esc(x.kuyu)+' · ':'')+trd(x.tarih)+'</div></a>'; }).join("");
+    });
+  });
+});
+})();
+</script>
+</body>
+</html>

@@ -1,11 +1,12 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "sondaj-panel-v14";
+var CACHE = "sondaj-panel-v15";
 var SHELL = [
-  "./", "./index.html", "./panel.html", "./rapor.html", "./sirket.html", "./maaslar.html", "./ofis.html",
+  "./", "./index.html", "./panel.html", "./rapor.html", "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
   "./manifest.webmanifest", "./icon.svg",
-  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
 ];
 
 self.addEventListener("install", function(e){
@@ -53,7 +54,7 @@ self.addEventListener("fetch", function(e){
       if(hit) return hit;
       return fetch(req).then(function(res){
         if(res && res.status === 200 && (url.origin === location.origin ||
-           url.host.indexOf("jsdelivr") > -1 || url.host.indexOf("gstatic") > -1 || url.host.indexOf("googleapis") > -1)){
+           url.host.indexOf("jsdelivr") > -1 || url.host.indexOf("cdnjs") > -1 || url.host.indexOf("gstatic") > -1 || url.host.indexOf("googleapis") > -1)){
           var copy = res.clone();
           caches.open(CACHE).then(function(c){ c.put(req, copy); });
         }

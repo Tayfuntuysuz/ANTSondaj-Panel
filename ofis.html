@@ -80,6 +80,7 @@ td input{padding:5px 7px;min-height:32px;font-size:14px;width:130px;text-align:r
   <span class="sp">
     <span id="who"></span>
     <a href="sirket.html">Şirket performansı</a>
+    <a href="muhasebe.html">Muhasebe</a>
     <a href="maaslar.html">Maaş tablosu</a>
     <a href="panel.html">Şantiye paneli</a>
     <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
@@ -155,6 +156,20 @@ td input{padding:5px 7px;min-height:32px;font-size:14px;width:130px;text-align:r
       <div class="note">Her ayın merkez ofis gideri ve projelere düşen paylar</div>
       <div id="dagitim"></div>
     </div>
+
+    <div class="card">
+      <h3>İşveren kullanıcıları</h3>
+      <div class="note">Kullanıcıyı önce Supabase &gt; Authentication &gt; Users içinde e-posta ve parola ile aç, sonra UUID'sini buraya yapıştırıp işvereni seç. Bu kullanıcı yalnızca kendi sahalarının günlük ve dönem raporlarını görür; fiyat, maliyet ve personel verisi kapalıdır.</div>
+      <div class="row">
+        <div class="field" style="flex:1;min-width:250px"><label for="iv-user">Kullanıcı UUID</label>
+          <input id="iv-user" placeholder="00000000-0000-0000-0000-000000000000"></div>
+        <div class="field"><label for="iv-name">Ad Soyad / yetkili</label><input id="iv-name" placeholder="örn. Acacia — Proje Müdürü"></div>
+        <div class="field" style="min-width:180px"><label for="iv-emp">İşveren</label><select id="iv-emp"></select></div>
+        <button class="btn" id="btn-iv-add" type="button">Tanımla</button>
+      </div>
+      <div id="iv-msg"></div>
+      <div class="scroll" id="iv-liste" style="margin-top:12px"></div>
+    </div>
   </div>
 </div>
 
@@ -212,6 +227,7 @@ function boot(){
         o.textContent = p.full_name + " (" + (GOREV[p.kind]||p.kind) + ")"; sel.appendChild(o); });
     }
     load();
+    loadEmployerUsers();
   });
 }
 
@@ -308,6 +324,46 @@ $("#btn-add-gider").addEventListener("click", function(){
     if(r.error){ msg($("#g-msg"), esc(r.error.message), "err"); return; }
     $("#g-amount").value=""; $("#g-desc").value="";
     msg($("#g-msg"), "Gider kaydedildi.", "ok"); load();
+  });
+});
+
+// ---------- işveren kullanıcıları ----------
+function loadEmployerUsers(){
+  sb.from("employers").select("id,name").order("name").then(function(r){
+    var s=$("#iv-emp");
+    s.innerHTML = (r.data||[]).map(function(e){
+      return '<option value="'+e.id+'">'+esc(e.name)+'</option>'; }).join("");
+  });
+  sb.rpc("employer_users").then(function(r){
+    if(r.error){ $("#iv-liste").innerHTML='<div class="hint">'+esc(r.error.message)+'</div>'; return; }
+    var L=r.data||[];
+    $("#iv-liste").innerHTML = L.length
+      ? '<table><thead><tr><th>İşveren</th><th>Yetkili</th><th>Kullanıcı</th><th>Durum</th><th></th></tr></thead><tbody>'+
+        L.map(function(u){
+          return '<tr><td><b>'+esc(u.isveren)+'</b></td><td>'+esc(u.ad)+'</td>'+
+            '<td class="hint">'+esc(String(u.user_id).slice(0,8))+'…</td>'+
+            '<td>'+(u.aktif?'<span class="pill">aktif</span>':'<span class="hint">kapalı</span>')+'</td>'+
+            '<td>'+(u.aktif?'<button class="btn ghost" style="padding:4px 10px;min-height:0;font-size:12.5px" data-iv-off="'+u.user_id+'">kapat</button>':'')+'</td></tr>';
+        }).join("")+'</tbody></table>'
+      : '<div class="hint">Tanımlı işveren kullanıcısı yok.</div>';
+  });
+}
+$("#btn-iv-add").addEventListener("click", function(){
+  var u=$("#iv-user").value.trim(), n=$("#iv-name").value.trim(), e=$("#iv-emp").value;
+  if(!/^[0-9a-f-]{36}$/i.test(u)){ msg($("#iv-msg"), "Geçerli bir kullanıcı UUID'si girin.", "err"); return; }
+  if(!n || !e){ msg($("#iv-msg"), "Ad ve işveren zorunlu.", "err"); return; }
+  sb.rpc("link_employer_user", {p_user:u, p_employer:e, p_name:n}).then(function(r){
+    if(r.error){ msg($("#iv-msg"), esc(r.error.message), "err"); return; }
+    $("#iv-user").value=""; $("#iv-name").value="";
+    msg($("#iv-msg"), "İşveren kullanıcısı tanımlandı. Giriş adresi: isveren.html", "ok");
+    loadEmployerUsers();
+  });
+});
+$("#iv-liste").addEventListener("click", function(ev){
+  var b=ev.target.closest("[data-iv-off]"); if(!b) return;
+  sb.rpc("unlink_employer_user", {p_user:b.dataset.ivOff}).then(function(r){
+    if(r.error){ msg($("#iv-msg"), esc(r.error.message), "err"); return; }
+    loadEmployerUsers();
   });
 });
 
