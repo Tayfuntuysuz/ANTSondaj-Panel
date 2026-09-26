@@ -263,6 +263,25 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
     </section>
 
+    <!-- PUANTAJ -->
+    <section id="tab-puantaj" hidden>
+      <div class="card">
+        <span class="eyebrow">Puantaj</span>
+        <div class="field"><label for="p-project">Proje <span class="req">*</span></label><select id="p-project"></select></div>
+        <div class="field"><label for="p-date">Tarih <span class="req">*</span></label><input id="p-date" type="date"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost sm" id="btn-att-load" type="button">Günü getir</button>
+          <button class="btn ghost sm" id="btn-att-all" type="button">Tümü çalıştı</button>
+        </div>
+        <div class="hint">Varsayılan "çalıştı". Sadece istisnaları değiştirin. Avans girecekseniz tutarı yazın.</div>
+      </div>
+      <div id="att-list" style="margin-top:12px"></div>
+      <div class="card" style="margin-top:12px">
+        <button class="btn" id="btn-att-save" type="button">Puantajı kaydet</button>
+        <div id="att-msg"></div>
+      </div>
+    </section>
+
     <!-- BEKLEYEN -->
     <section id="tab-kuyruk" hidden>
       <div class="card">
@@ -290,6 +309,28 @@ td:first-child{text-align:left;color:var(--ink-2)}
         <div id="sum-msg"></div>
       </div>
       <div id="sum-out" style="margin-top:14px;display:flex;flex-direction:column;gap:14px"></div>
+
+      <div class="card" style="margin-top:14px">
+        <span class="eyebrow">Prim kuralı</span>
+        <div class="field"><label for="b-threshold">Prim barajı (çarpanlı metraj)</label><input id="b-threshold" type="number" inputmode="decimal" placeholder="örn. 900"></div>
+        <div class="hint">Derinlik çarpanları: her satır "başlangıç metresi, bitiş metresi, çarpan". Boş bırakırsanız çarpan 1 kabul edilir.</div>
+        <div id="mult-rows"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost sm" id="btn-mult-add" type="button">Çarpan satırı ekle</button>
+          <button class="btn ghost sm" id="btn-bonus-save" type="button">Kuralı kaydet</button>
+          <button class="btn ghost sm" id="btn-bonus-report" type="button">Prim raporu</button>
+        </div>
+        <div id="bonus-msg"></div>
+      </div>
+      <div id="bonus-out" style="margin-top:12px;display:flex;flex-direction:column;gap:12px"></div>
+
+      <div class="card" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Aylık puantaj özeti</span>
+          <button class="btn ghost sm" id="btn-att-summary" type="button">Getir</button>
+        </div>
+        <div id="att-summary"></div>
+      </div>
     </section>
   </main>
 
@@ -297,6 +338,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
     <button type="button" data-tab="vardiya" aria-pressed="true">Vardiya</button>
     <button type="button" data-tab="yakit" aria-pressed="false">Yakıt</button>
     <button type="button" data-tab="nakit" aria-pressed="false">Nakit</button>
+    <button type="button" data-tab="puantaj" aria-pressed="false">Puantaj</button>
     <button type="button" data-tab="ozet" aria-pressed="false">Özet</button>
     <button type="button" data-tab="kuyruk" aria-pressed="false">Bekleyen</button>
   </nav>
@@ -386,7 +428,7 @@ function opt(sel, items, labelFn, emptyLabel){
 function fillSelects(){
   if(!MASTER) return;
   var pr = MASTER.projects||[], ma = MASTER.machines||[], pe = MASTER.personnel||[];
-  ["#f-project","#y-project","#e-project","#s-project"].forEach(function(s){
+  ["#f-project","#y-project","#e-project","#p-project","#s-project"].forEach(function(s){
     opt(s, pr, function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); }); });
   opt("#f-machine", ma, function(m){ return m.code; });
   opt("#y-machine", ma, function(m){ return m.code; });
@@ -792,6 +834,10 @@ function sendItem(it, tenant){
           .then(function(){ return obDel(it.id); });
       });
   }
+  if(it.kind === "attendance"){
+    return sb.rpc("save_attendance", {p_project:it.payload.project_id, p_date:it.payload.work_date, p_rows:it.payload.rows})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
   if(it.kind === "fuel"){
     return sb.from("fuel_logs").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
@@ -863,12 +909,150 @@ $("#btn-summary").addEventListener("click", function(){
   });
 });
 
+/* ---------------- puantaj ---------------- */
+var ATT_STATUS = [["calisti","Çalıştı"],["izin","İzin"],["rapor","Rapor"],["ucretsiz_izin","Ücretsiz izin"],["bayram","Bayram"],["ozel_durum","Özel durum"]];
+function renderAttendance(existing){
+  var box = $("#att-list"); box.innerHTML = "";
+  var people = (MASTER && MASTER.personnel || []);
+  if(!people.length){ box.innerHTML = '<div class="card hint">Personel listesi boş.</div>'; return; }
+  var card = document.createElement("div"); card.className = "card";
+  people.forEach(function(p){
+    var cur = existing[p.id] || {};
+    var row = document.createElement("div");
+    row.style.cssText = "display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--line-soft)";
+    row.innerHTML = "<div style='display:flex;justify-content:space-between;gap:8px'><b>" + p.full_name +
+      "</b><span class='hint'>" + p.kind.replace(/_/g," ") + "</span></div>";
+    var line = document.createElement("div");
+    line.style.cssText = "display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center";
+    var sel = document.createElement("select");
+    sel.dataset.att = p.id;
+    ATT_STATUS.forEach(function(s){ var o=document.createElement("option"); o.value=s[0]; o.textContent=s[1]; sel.appendChild(o); });
+    sel.value = cur.status || "calisti";
+    var adv = document.createElement("input");
+    adv.type = "number"; adv.inputMode = "decimal"; adv.placeholder = "avans ₺";
+    adv.dataset.adv = p.id;
+    if(cur.advance_amount) adv.value = cur.advance_amount;
+    line.appendChild(sel); line.appendChild(adv);
+    var tek = document.createElement("label");
+    tek.style.cssText = "display:flex;align-items:center;gap:8px;font-size:13px";
+    var cb = document.createElement("input");
+    cb.type = "checkbox"; cb.dataset.tek = p.id; cb.style.cssText = "width:20px;min-height:20px";
+    cb.checked = !!cur.single_shift;
+    tek.appendChild(cb); tek.appendChild(document.createTextNode("Tek çalışma"));
+    row.appendChild(line); row.appendChild(tek);
+    card.appendChild(row);
+  });
+  box.appendChild(card);
+}
+$("#btn-att-all").addEventListener("click", function(){
+  $$("[data-att]").forEach(function(s){ s.value = "calisti"; });
+  msg($("#att-msg"), "Herkes çalıştı olarak işaretlendi.", "ok");
+});
+$("#btn-att-load").addEventListener("click", function(){
+  if(!$("#p-project").value || !$("#p-date").value){ msg($("#att-msg"), "Proje ve tarih seçin.", "err"); return; }
+  if(!navigator.onLine){ renderAttendance({}); msg($("#att-msg"), "Bağlantı yok; boş liste açıldı.", "warn"); return; }
+  msg($("#att-msg"), "Getiriliyor…");
+  sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value}).then(function(r){
+    if(r.error){ msg($("#att-msg"), r.error.message, "err"); return; }
+    var map = {};
+    (r.data||[]).forEach(function(x){ map[x.personnel_id] = x; });
+    renderAttendance(map);
+    msg($("#att-msg"), (r.data||[]).length ? "Bu güne ait kayıt yüklendi, üzerine yazabilirsiniz." : "Bu gün için kayıt yok.", "ok");
+  });
+});
+$("#btn-att-save").addEventListener("click", function(){
+  if(!$("#p-project").value || !$("#p-date").value){ msg($("#att-msg"), "Proje ve tarih seçin.", "err"); return; }
+  var rows = $$("[data-att]").map(function(s){
+    var id = s.dataset.att;
+    var adv = document.querySelector("[data-adv='" + id + "']");
+    var tek = document.querySelector("[data-tek='" + id + "']");
+    return { personnel_id:id, status:s.value, single_shift: tek ? tek.checked : false,
+             advance_amount: (adv && adv.value) ? Number(adv.value) : null };
+  });
+  if(!rows.length){ msg($("#att-msg"), "Personel listesi boş.", "err"); return; }
+  enqueue({ id:uuid(), kind:"attendance", created:Date.now(),
+    title:"Puantaj · " + $("#p-date").value, sub: rows.length + " personel",
+    payload:{ project_id:$("#p-project").value, work_date:$("#p-date").value, rows:rows } }).then(function(){
+    msg($("#att-msg"), "Puantaj kaydedildi." + (navigator.onLine ? "" : " Bağlantı gelince gönderilecek."), "ok");
+  });
+});
+
+/* ---------------- prim ---------------- */
+function multRow(v){
+  var d = document.createElement("div");
+  d.style.cssText = "display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-top:6px";
+  d.innerHTML = "<input type='number' inputmode='decimal' placeholder='başl. m' data-mf value='" + ((v&&v.from)||"") +
+    "'><input type='number' inputmode='decimal' placeholder='bitiş m' data-mt value='" + ((v&&v.to)||"") +
+    "'><input type='number' inputmode='decimal' step='0.01' placeholder='çarpan' data-mx value='" + ((v&&v.x)||"") + "'>";
+  var x = document.createElement("button"); x.className="chip"; x.type="button"; x.textContent="×";
+  x.addEventListener("click", function(){ d.remove(); });
+  d.appendChild(x);
+  $("#mult-rows").appendChild(d);
+}
+$("#btn-mult-add").addEventListener("click", function(){ multRow(null); });
+function multPayload(){
+  return $$("#mult-rows > div").map(function(d){
+    return { from: Number(d.querySelector("[data-mf]").value || 0),
+             to:   Number(d.querySelector("[data-mt]").value || 1000000),
+             x:    Number(d.querySelector("[data-mx]").value || 1) };
+  }).filter(function(m){ return m.x > 0; });
+}
+$("#btn-bonus-save").addEventListener("click", function(){
+  if(!navigator.onLine){ msg($("#bonus-msg"), "Bu işlem için bağlantı gerekiyor.", "err"); return; }
+  if(!$("#s-project").value){ msg($("#bonus-msg"), "Yukarıdan proje seçin.", "err"); return; }
+  var thr = $("#b-threshold").value ? Number($("#b-threshold").value) : null;
+  sb.rpc("set_bonus_rule", {p_project:$("#s-project").value, p_threshold:thr, p_mult:multPayload()}).then(function(r){
+    msg($("#bonus-msg"), r.error ? r.error.message : "Prim kuralı kaydedildi.", r.error ? "err" : "ok");
+  });
+});
+$("#btn-bonus-report").addEventListener("click", function(){
+  if(!navigator.onLine){ msg($("#bonus-msg"), "Bu işlem için bağlantı gerekiyor.", "err"); return; }
+  if(!$("#s-project").value){ msg($("#bonus-msg"), "Yukarıdan proje seçin.", "err"); return; }
+  var m = $("#s-month").value ? $("#s-month").value + "-01" : todayStr().slice(0,8) + "01";
+  msg($("#bonus-msg"), "Hesaplanıyor…");
+  sb.rpc("bonus_report", {p_project:$("#s-project").value, p_month:m}).then(function(r){
+    if(r.error){ msg($("#bonus-msg"), r.error.message, "err"); return; }
+    msg($("#bonus-msg"), "");
+    var d = r.data;
+    $("#b-threshold").value = d.threshold || $("#b-threshold").value;
+    if(!$$("#mult-rows > div").length && (d.multipliers||[]).length) (d.multipliers||[]).forEach(multRow);
+    function tbl(title, rows){
+      if(!rows || !rows.length) return '<div class="card hint">' + title + ': veri yok.</div>';
+      return '<div class="card"><span class="eyebrow">' + title + '</span><table><thead><tr><th>Ad</th><th>Metraj</th><th>Çarpanlı</th><th></th></tr></thead><tbody>' +
+        rows.map(function(x){
+          return "<tr><td>" + x.name + "</td><td class='num'>" + tl(x.meters) + "</td><td class='num'><b>" + tl(x.weighted) +
+            "</b></td><td>" + (x.over ? "<span class='pill warn'>baraj aşıldı</span>" : "") + "</td></tr>";
+        }).join("") + '</tbody></table></div>';
+    }
+    $("#bonus-out").innerHTML =
+      (d.threshold ? '<div class="msg">Baraj: ' + tl(d.threshold) + ' m (çarpanlı)</div>'
+                   : '<div class="msg warn">Baraj tanımlı değil. Üstteki alana yazıp kuralı kaydedin.</div>') +
+      tbl("Sondör primi", d.drillers) + tbl("Makine bazında", d.machines);
+  });
+});
+$("#btn-att-summary").addEventListener("click", function(){
+  if(!navigator.onLine){ $("#att-summary").innerHTML = '<div class="hint">Bağlantı gerekiyor.</div>'; return; }
+  if(!$("#s-project").value){ $("#att-summary").innerHTML = '<div class="hint">Yukarıdan proje seçin.</div>'; return; }
+  var m = $("#s-month").value ? $("#s-month").value + "-01" : todayStr().slice(0,8) + "01";
+  sb.rpc("attendance_summary", {p_project:$("#s-project").value, p_month:m}).then(function(r){
+    if(r.error){ $("#att-summary").innerHTML = '<div class="hint">' + r.error.message + '</div>'; return; }
+    var rows = r.data || [];
+    if(!rows.length){ $("#att-summary").innerHTML = '<div class="hint">Bu ay için puantaj kaydı yok.</div>'; return; }
+    $("#att-summary").innerHTML = '<div style="overflow-x:auto"><table><thead><tr><th>Ad</th><th>Çalıştı</th><th>İzin</th><th>Rapor</th><th>Tek</th><th>Avans</th></tr></thead><tbody>' +
+      rows.map(function(x){
+        return "<tr><td>" + x.name + "</td><td class='num'>" + x.calisti + "</td><td class='num'>" + x.izin +
+          "</td><td class='num'>" + x.rapor + "</td><td class='num'>" + x.tek_calisma + "</td><td class='num'>" + money(x.avans) + "</td></tr>";
+      }).join("") + '</tbody></table></div>';
+  });
+});
+
 /* ---------------- sekmeler ---------------- */
 $$("#tabs button").forEach(function(b){
   b.addEventListener("click", function(){
     $$("#tabs button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
-    ["vardiya","yakit","nakit","ozet","kuyruk"].forEach(function(t){ $("#tab-"+t).hidden = (t !== b.dataset.tab); });
+    ["vardiya","yakit","nakit","puantaj","ozet","kuyruk"].forEach(function(t){ $("#tab-"+t).hidden = (t !== b.dataset.tab); });
     if(b.dataset.tab === "kuyruk") refreshQueue();
+    if(b.dataset.tab === "puantaj" && !$("#att-list").innerHTML) renderAttendance({});
     window.scrollTo(0,0);
   });
 });
@@ -877,7 +1061,7 @@ $$("#tabs button").forEach(function(b){
 function todayStr(){ var d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function start(){
   show("scr-app");
-  ["#f-date","#y-date","#e-date"].forEach(function(s){ if(!$(s).value) $(s).value = todayStr(); });
+  ["#f-date","#y-date","#e-date","#p-date"].forEach(function(s){ if(!$(s).value) $(s).value = todayStr(); });
   $("#s-month").value = todayStr().slice(0,7);
   loadMaster(false).then(refreshQueue).then(function(){ if(navigator.onLine){ syncAll(); loadRecent(); } });
 }
