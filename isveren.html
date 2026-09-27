@@ -85,8 +85,13 @@ td select{width:104px;text-align:left}
 .gal .cap{padding:6px 8px;font-size:11.5px;color:var(--ink-3)}
 .vard{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
 .vard h4{font-family:"Barlow Condensed",sans-serif;font-size:17px;margin:0 0 6px;font-weight:600}
+.antet{display:none;align-items:center;gap:12px;border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:14px}
+.antet img{height:38px;width:auto;max-width:150px;object-fit:contain}
+.antet .ad{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.antet .sag{margin-left:auto;font-size:10.5px;color:var(--ink-3);text-align:right}
 @media print{
-  header,.tabs,.no-print,#scr-login{display:none!important}
+  header,.tabs,.no-print,#scr-login,#scr-setup{display:none!important}
+  .antet{display:flex!important}
   body{background:#fff;font-size:11.5px}
   .wrap{max-width:none;padding:0}
   .card{border:0;box-shadow:none;padding:0 0 10px;page-break-inside:avoid}
@@ -129,6 +134,7 @@ td select{width:104px;text-align:left}
   </div>
 
   <div id="scr-main" hidden>
+    <div class="antet" id="antet"></div>
     <div class="card no-print">
       <div class="row">
         <div class="field" style="flex:1;min-width:200px"><label>Saha / proje</label><select id="f-proj"></select></div>
@@ -303,6 +309,10 @@ function boot(){
     if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
     BOOT=r.data;
     $("#firma").textContent = BOOT.firma || "Sondaj Raporu";
+    var lg = (BOOT.logo || "logo-mark.png");
+    $("#antet").innerHTML = '<img src="'+lg+'" alt="" onerror="this.onerror=null;this.src=\'icon.svg\'">' +
+      '<div class="ad">'+esc(BOOT.firma||"")+'</div>' +
+      '<div class="sag">'+esc(BOOT.isveren||"")+'</div>';
     $("#isveren").textContent = BOOT.isveren || "İşveren paneli";
     $("#who").textContent = BOOT.kullanici || "";
     var s=$("#f-proj");

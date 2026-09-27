@@ -83,6 +83,19 @@ td select{width:104px;text-align:left}
 .bar .val{font-variant-numeric:tabular-nums;color:var(--ink-2);min-width:88px;text-align:right}
 .hint{font-size:12px;color:var(--ink-3)}
 .mini{font-size:12px;color:var(--ink-3);font-weight:400}
+.antet{display:none;align-items:center;gap:12px;border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:14px}
+.antet img{height:38px;width:auto;max-width:150px;object-fit:contain}
+.antet .ad{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.antet .sag{margin-left:auto;font-size:10.5px;color:var(--ink-3);text-align:right}
+@media print{
+  header,.tabs,.no-print,#scr-login,.btn{display:none!important}
+  .antet{display:flex!important}
+  body{background:#fff;font-size:11.5px}
+  .wrap{max-width:none;padding:0}
+  .card{border:0;box-shadow:none;padding:0 0 10px;page-break-inside:avoid}
+  section[data-p]{page-break-before:auto}
+  @page{size:A4 portrait;margin:12mm}
+}
 </style>
 </head>
 <body>
@@ -111,6 +124,7 @@ td select{width:104px;text-align:left}
   </div>
 
   <div id="scr-main" hidden>
+    <div class="antet" id="antet"></div>
     <div class="card">
       <div class="row">
         <div class="field"><label>Yıl</label><select id="f-year"></select></div>
@@ -371,6 +385,10 @@ function boot(){
     if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
     BOOT=r.data;
     $("#who").textContent = (BOOT.tenant?BOOT.tenant.name+" · ":"") + (BOOT.profile?BOOT.profile.full_name:"");
+    var ad = BOOT.tenant ? BOOT.tenant.name : "";
+    var lg = (BOOT.tenant && BOOT.tenant.logo) ? BOOT.tenant.logo : "logo-mark.png";
+    $("#antet").innerHTML = '<img src="'+lg+'" alt="" onerror="this.onerror=null;this.src=\'icon.svg\'">' +
+      '<div class="ad">'+esc(ad)+'</div><div class="sag">Muhasebe dökümü</div>';
     TENANT = BOOT.tenant ? BOOT.tenant.id : null;
     fillCats(); fillProjects(); ensureCats();
     load();
