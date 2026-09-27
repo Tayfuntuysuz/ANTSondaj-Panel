@@ -39,7 +39,7 @@ select,input,button{font:inherit}
   padding-bottom:8px;margin:0 0 14px}
 .antet img{height:34px;width:auto;max-width:150px;object-fit:contain}
 .antet .ad{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:700;
-  letter-spacing:.03em;line-height:1.1;text-transform:uppercase}
+  letter-spacing:.03em;line-height:1.1;}
 .antet .sag{margin-left:auto;font-size:10.5px;color:var(--ink-3);text-align:right;line-height:1.35}
 .kapak{text-align:center;padding:70px 30px}
 .kapak img{max-width:320px;max-height:230px;width:auto;height:auto;object-fit:contain}
@@ -271,7 +271,7 @@ function render(d, c, prim, y, m){
 
   /* kapak */
   P.push('<div class="page kapak">'+logoImg()+
-    '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:10px">'+
+    '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:23px;font-weight:700;letter-spacing:.03em;margin-top:10px">'+
     esc(FIRMA)+'</div>' +
     '<h1 style="margin-top:22px">'+esc(proje.site||proje.name)+'</h1>' +
     '<div style="font-size:15px;color:var(--ink-2);margin-top:4px">'+esc(proje.name)+'</div>' +
