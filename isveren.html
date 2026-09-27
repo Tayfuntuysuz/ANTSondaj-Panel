@@ -189,6 +189,17 @@ td select{width:104px;text-align:left}
 <script>
 (function(){
 "use strict";
+if(location.protocol === "file:"){
+  document.body.insertAdjacentHTML("beforeend",
+    '<div class="wrap"><div class="card"><div class="msg err">' +
+    '<b>Bu sayfa bilgisayardaki bir dosyadan açılmış.</b><br>' +
+    'Tarayıcı, dosyadan açılan sayfaların sunucuya bağlanmasına güvenlik gereği izin vermez; ' +
+    'giriş yapmayı denerseniz "Failed to fetch" hatası alırsınız.<br><br>' +
+    'Dosyaları siteye yükleyip <b>https://</b> ile başlayan adresten açın.' +
+    '</div></div></div>');
+  return;
+}
+
 window.addEventListener("error", function(ev){
   if(document.getElementById("fatal")) return;
   var d=document.createElement("div"); d.id="fatal"; d.className="wrap";

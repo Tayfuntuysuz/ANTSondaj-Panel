@@ -411,6 +411,17 @@ td:first-child{text-align:left;color:var(--ink-2)}
 <script>
 (function(){
 "use strict";
+if(location.protocol === "file:"){
+  document.body.insertAdjacentHTML("beforeend",
+    '<div class="wrap"><div class="card"><div class="msg err">' +
+    '<b>Bu sayfa bilgisayardaki bir dosyadan açılmış.</b><br>' +
+    'Tarayıcı, dosyadan açılan sayfaların sunucuya bağlanmasına güvenlik gereği izin vermez; ' +
+    'giriş yapmayı denerseniz "Failed to fetch" hatası alırsınız.<br><br>' +
+    'Dosyaları siteye yükleyip <b>https://</b> ile başlayan adresten açın.' +
+    '</div></div></div>');
+  return;
+}
+
 var $ = function(s){ return document.querySelector(s); };
 var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
 var tl = function(n){ return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}); };
