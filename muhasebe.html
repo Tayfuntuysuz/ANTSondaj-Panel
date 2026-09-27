@@ -116,8 +116,6 @@ td select{width:104px;text-align:left}
         <div class="field"><label>Yıl</label><select id="f-year"></select></div>
         <div class="field"><label>Ay</label><select id="f-month"></select></div>
         <button class="btn" id="btn-load" type="button">Getir</button>
-        <span style="flex:1"></span>
-        <button class="btn ghost" id="btn-seed" type="button">Kategori listesini kur</button>
       </div>
       <div id="msg"></div>
       <div class="tiles" id="tiles" style="margin-top:14px"></div>
@@ -344,7 +342,7 @@ function boot(){
     BOOT=r.data;
     $("#who").textContent = (BOOT.tenant?BOOT.tenant.name+" · ":"") + (BOOT.profile?BOOT.profile.full_name:"");
     TENANT = BOOT.tenant ? BOOT.tenant.id : null;
-    fillCats(); fillProjects();
+    fillCats(); fillProjects(); ensureCats();
     load();
   });
 }
@@ -362,7 +360,6 @@ function fillCats(){
     });
     sel.appendChild(og);
   });
-  if(!(BOOT.kategoriler||[]).length){ msg($("#e-msg"), "Kategori listesi boş. Yukarıdan \"Kategori listesini kur\" düğmesine bas.", "warn"); }
 }
 $("#e-cat").addEventListener("change", function(){
   var o=$("#e-cat").selectedOptions[0];
@@ -379,13 +376,17 @@ function fillProjects(){
   ["#e-proj","#i-proj","#t-proj","#c-proj"].forEach(function(s){ $(s).innerHTML=opts; });
 }
 
-$("#btn-seed").addEventListener("click", function(){
+// Kategori listesi normalde 14. adım SQL'i çalıştırıldığında kurulur.
+// Herhangi bir sebeple boşsa sessizce kurulur, kullanıcıya iş çıkmaz.
+function ensureCats(){
+  if((BOOT.kategoriler||[]).length) return;
   sb.rpc("seed_expense_categories").then(function(r){
-    if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
-    msg($("#msg"), r.data+" kategori hazır.", "ok");
-    sb.rpc("accounting_bootstrap").then(function(x){ if(!x.error){ BOOT=x.data; fillCats(); fillProjects(); } });
+    if(r.error){ msg($("#e-msg"), "Kategori listesi kurulamadı: "+esc(r.error.message), "err"); return; }
+    sb.rpc("accounting_bootstrap").then(function(x){
+      if(!x.error){ BOOT=x.data; fillCats(); fillProjects(); msg($("#e-msg"), ""); }
+    });
   });
-});
+}
 
 function load(){
   var y=Number($("#f-year").value), m=$("#f-month").value?Number($("#f-month").value):null;
