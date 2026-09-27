@@ -285,6 +285,13 @@ td select{width:104px;text-align:left}
 <script>
 (function(){
 "use strict";
+window.addEventListener("error", function(ev){
+  if(document.getElementById("fatal")) return;
+  var d=document.createElement("div"); d.id="fatal"; d.className="wrap";
+  d.innerHTML='<div class="card"><div class="msg err"><b>Sayfa hatası</b><br>'+
+    String(ev.message||"bilinmeyen hata")+'</div></div>';
+  (document.body||document.documentElement).appendChild(d);
+});
 var $=function(s){return document.querySelector(s);};
 var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
 var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
@@ -301,12 +308,24 @@ var sb=null, BOOT=null, DATA=null, TENANT=null;
 var RAW=null, ROWS=null, HEAD=null;   // banka ekstresi
 function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
 
-if(!cfg.url || !cfg.key){
+function uyar(t){
   document.body.insertAdjacentHTML("beforeend",
-    '<div class="wrap"><div class="card"><div class="msg err">Bağlantı ayarları yok. Önce saha uygulamasına girin.</div></div></div>');
+    '<div class="wrap"><div class="card"><div class="msg err">'+t+'</div></div></div>');
+}
+if(!window.supabase){
+  uyar("Supabase kitaplığı yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
+} else if(!cfg.url || !cfg.key){
+  uyar("Bağlantı ayarları yok. Önce saha uygulamasına (index.html) girip ayarları kaydedin.");
 } else {
-  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
-  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
+  try{
+    sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
+    sb.auth.getSession().then(function(r){
+      if(r.error) throw r.error;
+      if(r.data && r.data.session){ boot(); } else { show("scr-login"); }
+    }).catch(function(e){ uyar("Sunucuya ulaşılamadı: "+esc(e && e.message ? e.message : String(e))); });
+  }catch(e){
+    uyar("Bağlantı bilgisi geçersiz: "+esc(e && e.message ? e.message : String(e)));
+  }
 }
 $("#btn-login").addEventListener("click", function(){
   sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){

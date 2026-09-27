@@ -1,7 +1,7 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "sondaj-panel-v16";
+var CACHE = "sondaj-panel-v17";
 var SHELL = [
   "./", "./index.html", "./panel.html", "./rapor.html", "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
   "./manifest.webmanifest", "./icon.svg",

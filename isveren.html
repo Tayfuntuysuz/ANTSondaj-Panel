@@ -105,6 +105,19 @@ td select{width:104px;text-align:left}
 </header>
 
 <div class="wrap">
+  <div id="scr-setup" hidden>
+    <div class="center">
+      <h2 style="font-size:24px">Bağlantı kurulumu</h2>
+      <div class="hint">Bu adım yalnızca bir kez yapılır; bilgiler bu tarayıcıya kaydedilir.
+        Değerleri size sondaj firması verir.</div>
+      <input id="cfg-url" type="url" placeholder="Proje adresi — https://xxxx.supabase.co" autocomplete="off">
+      <input id="cfg-key" type="text" placeholder="Erişim anahtarı (anon public)" autocomplete="off">
+      <button class="btn" id="btn-cfg" type="button">Kaydet ve devam et</button>
+      <button class="btn ghost" id="btn-cfg-clear" type="button">Kayıtlı bilgileri temizle</button>
+      <div id="cfg-msg"></div>
+    </div>
+  </div>
+
   <div id="scr-login" hidden>
     <div class="center">
       <h2 style="font-size:24px">İşveren girişi</h2>
@@ -176,6 +189,13 @@ td select{width:104px;text-align:left}
 <script>
 (function(){
 "use strict";
+window.addEventListener("error", function(ev){
+  if(document.getElementById("fatal")) return;
+  var d=document.createElement("div"); d.id="fatal"; d.className="wrap";
+  d.innerHTML='<div class="card"><div class="msg err"><b>Sayfa hatası</b><br>'+
+    String(ev.message||"bilinmeyen hata")+'</div></div>';
+  (document.body||document.documentElement).appendChild(d);
+});
 var $=function(s){return document.querySelector(s);};
 var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
 var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
@@ -189,7 +209,7 @@ var PROGRAM={arama:"Maden arama", planlama:"Maden planlama"};
 
 var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
 var sb=null, BOOT=null, DONEM=null;
-function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
+function show(id){ ["scr-setup","scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
 
 // İşveren kullanıcısı uygulamayı ilk açtığında bağlantı bilgisi yoksa adresten okunur:
 // isveren.html?u=<proje-url>&k=<anon-key>  — bir kez girilir, tarayıcıya kaydedilir.
@@ -202,20 +222,56 @@ function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden
   }
 })();
 
-if(!cfg.url || !cfg.key){
-  document.body.insertAdjacentHTML("beforeend",
-    '<div class="wrap"><div class="card"><div class="msg err">Bağlantı ayarları yok. Size gönderilen bağlantıyı kullanarak girin.</div></div></div>');
-} else {
-  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
-  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
+function setupEkrani(hata){
+  show("scr-setup");
+  $("#cfg-url").value = cfg.url || "";
+  $("#cfg-key").value = cfg.key || "";
+  msg($("#cfg-msg"), hata ? esc(hata) : "", hata ? "err" : "");
 }
+
+function baglan(){
+  if(!window.supabase){
+    setupEkrani("Supabase kitaplığı yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
+    return;
+  }
+  if(!cfg.url || !cfg.key){ setupEkrani(""); return; }
+  try{
+    sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
+  }catch(e){
+    setupEkrani("Bağlantı bilgisi geçersiz: " + (e && e.message ? e.message : e));
+    return;
+  }
+  sb.auth.getSession().then(function(r){
+    if(r.error) throw r.error;
+    if(r.data && r.data.session){ boot(); } else { show("scr-login"); }
+  }).catch(function(e){
+    setupEkrani("Sunucuya ulaşılamadı: " + (e && e.message ? e.message : e) +
+                " — proje adresi ve anahtarı doğru mu?");
+  });
+}
+
+$("#btn-cfg").addEventListener("click", function(){
+  var u=$("#cfg-url").value.trim().replace(/\/+$/,""), k=$("#cfg-key").value.trim();
+  if(!/^https:\/\/.+/.test(u)){ msg($("#cfg-msg"), "Proje adresi https:// ile başlamalı.", "err"); return; }
+  if(k.length < 30){ msg($("#cfg-msg"), "Erişim anahtarı eksik görünüyor.", "err"); return; }
+  try{ localStorage.setItem("sp_url", u); localStorage.setItem("sp_key", k); }catch(e){}
+  cfg.url=u; cfg.key=k; msg($("#cfg-msg"), ""); baglan();
+});
+$("#btn-cfg-clear").addEventListener("click", function(){
+  try{ localStorage.removeItem("sp_url"); localStorage.removeItem("sp_key"); }catch(e){}
+  cfg.url=""; cfg.key=""; $("#cfg-url").value=""; $("#cfg-key").value="";
+  msg($("#cfg-msg"), "Temizlendi.", "ok");
+});
+
+baglan();
 $("#btn-login").addEventListener("click", function(){
+  if(!sb){ baglan(); return; }
   sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
     if(r.error){ $("#login-msg").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
     boot();
   });
 });
-$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+$("#btn-logout").addEventListener("click", function(){ if(!sb){ location.reload(); return; } sb.auth.signOut().then(function(){ location.reload(); }); });
 
 $$("#tabs button").forEach(function(b){
   b.addEventListener("click", function(){
