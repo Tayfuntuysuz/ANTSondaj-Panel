@@ -11,16 +11,17 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
-  --bg:#eef2f4;--card:#fff;--card-2:#f7fafb;--line:#d9e2e7;--line-soft:#e8eef1;
-  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
-  --accent:#12708f;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
-  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
+  --bg:#f4f7f9;--card:#fff;--card-2:#fafcfd;--line:#e2eaef;--line-soft:#eef3f6;
+  --ink:#0d1f2b;--ink-2:#4a6575;--ink-3:#7e9aa8;
+  --accent:#12708f;--accent-2:#4bb3d6;--accent-soft:#e6f2f7;--accent-ink:#0b4d64;--navy:#0f2537;
+  --pq:#0f2537;--hq:#12708f;--nq:#4bb3d6;--pw:#7cc9e3;--kaya:#a8815a;--kaya-2:#c6a988;
+  --good:#1f7a55;--good-soft:#e3f3ec;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae6e3;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#0c1820;--card:#122530;--card-2:#162c38;--line:#25404e;--line-soft:#1d3542;
+  --bg:#0b161d;--card:#112430;--card-2:#16303d;--line:#25404e;--line-soft:#1c3340;
   --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
-  --accent:#4bb3d6;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
+  --accent:#4bb3d6;--accent-2:#7cc9e3;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#081720;
   --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
   color-scheme:dark;}}
 *{box-sizing:border-box}
@@ -355,9 +356,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
       <div class="card" style="margin-top:14px">
         <span class="eyebrow">Hesap</span>
         <div class="hint" id="acct-info"></div>
-        <a class="btn ghost" href="panel.html" style="display:block;text-align:center;text-decoration:none">Yönetici panelini aç</a>
         <a class="btn ghost" href="rapor.html" style="display:block;text-align:center;text-decoration:none">Aylık raporu aç</a>
-        <a class="btn ghost" href="sirket.html" style="display:block;text-align:center;text-decoration:none">Şirket performansı</a>
         <button class="btn ghost" id="btn-refresh" type="button">Ana verileri yenile</button>
         <button class="btn ghost" id="btn-logout" type="button">Çıkış yap</button>
       </div>

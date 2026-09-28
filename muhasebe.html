@@ -9,121 +9,21 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css">
 <style>
-:root{
-  --bg:#eef2f4;--card:#fff;--line:#d9e2e7;--line-soft:#e8eef1;
-  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
-  --accent:#12708f;--accent-2:#7fb9cd;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
-  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
-  --shadow:0 1px 2px rgba(15,34,48,.06), 0 8px 22px rgba(15,34,48,.05);
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0b161d;--card:#112430;--line:#25404e;--line-soft:#1c3340;
-  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
-  --accent:#4bb3d6;--accent-2:#2c6b82;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
-  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
-  color-scheme:dark;}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
-h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
-.num{font-variant-numeric:tabular-nums}
-header{background:var(--navy);color:#eaf4f8;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
-header b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase}
-header .sub{font-size:12px;color:#9fc4d3;letter-spacing:.08em;text-transform:uppercase}
-header .sp{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:12.5px;color:#cfe3ec}
-header a{color:#cfe3ec}
-.wrap{max-width:1100px;margin:0 auto;padding:18px 24px 60px}
-@media (max-width:640px){ .wrap{padding:16px} header{padding:12px 16px} }
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
-.card h3{font-size:18px}
-.card .note{font-size:12px;color:var(--ink-3);margin:2px 0 12px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-.field{display:flex;flex-direction:column;gap:4px}
-label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-select,input,button{font:inherit;color:inherit}
-select,input{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;font-size:15px}
-.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:40px}
-.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line);text-decoration:none;display:inline-flex;align-items:center}
-.btn.sm{padding:6px 11px;min-height:0;font-size:13px}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-th:first-child{text-align:left}
-td{padding:7px 8px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
-td:first-child{text-align:left;color:var(--ink)}
-tbody tr:last-child td{border-bottom:0}
-tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
-td input,td select{padding:5px 7px;min-height:32px;font-size:14px;width:110px;text-align:right}
-td select{width:104px;text-align:left}
-.scroll{overflow-x:auto}
-.pill{display:inline-flex;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
-.pill.warn{background:var(--warn-soft);color:var(--warn)}
-.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink);margin-top:10px}
-.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
-.msg.ok{border-left-color:var(--good);background:var(--good-soft);color:var(--good)}
-.msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-.tile{border:1px solid var(--line);border-radius:12px;padding:12px}
-.tile .k{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-.tile .v{font-family:"Barlow Condensed",sans-serif;font-size:27px}
-.center{max-width:380px;margin:60px auto;display:flex;flex-direction:column;gap:12px}
-[hidden]{display:none!important}
-.hist{font-size:11.5px;color:var(--ink-3)}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:999px;padding:8px 15px;font-weight:600;cursor:pointer;font-size:13.5px}
-.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-.drop{border:2px dashed var(--accent-2);border-radius:14px;padding:26px 16px;text-align:center;color:var(--ink-2);background:var(--accent-soft)}
-.drop.hot{background:var(--good-soft);border-color:var(--good);color:var(--good)}
-.bars{display:flex;flex-direction:column;gap:6px}
-.bar{display:grid;grid-template-columns:minmax(120px,1.4fr) 1fr auto;gap:9px;align-items:center;font-size:13px}
-.bar .track{background:var(--line-soft);border-radius:6px;height:16px;overflow:hidden}
-.bar .track i{display:block;height:100%;background:var(--accent);border-radius:6px}
-.bar .val{font-variant-numeric:tabular-nums;color:var(--ink-2);min-width:88px;text-align:right}
-.hint{font-size:12px;color:var(--ink-3)}
-.mini{font-size:12px;color:var(--ink-3);font-weight:400}
-.antet{display:none;align-items:center;gap:12px;border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:14px}
-.antet img{height:38px;width:auto;max-width:150px;object-fit:contain}
-.antet .ad{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:700;letter-spacing:.03em;}
+/* sayfaya özel: app.css'te olmayan kurallar */
 .antet .sag{margin-left:auto;font-size:10.5px;color:var(--ink-3);text-align:right}
 @media print{
-  header,.tabs,.no-print,#scr-login,.btn{display:none!important}
-  .antet{display:flex!important}
-  body{background:#fff;font-size:11.5px}
-  .wrap{max-width:none;padding:0}
+  .tabs{display:none!important}
   .card{border:0;box-shadow:none;padding:0 0 10px;page-break-inside:avoid}
   section[data-p]{page-break-before:auto}
-  @page{size:A4 portrait;margin:12mm}
 }
 </style>
 </head>
 <body>
 
-<header>
-  <span><b>Sondaj Panel</b><br><span class="sub">Muhasebe</span></span>
-  <span class="sp">
-    <span id="who"></span>
-    <a href="panel.html">Şantiye paneli</a>
-    <a href="sirket.html">Şirket performansı</a>
-    <a href="ofis.html">Merkez ofis</a>
-    <a href="maaslar.html">Maaşlar</a>
-    <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
-  </span>
-</header>
-
-<div class="wrap">
-  <div id="scr-login" hidden>
-    <div class="center">
-      <h2 style="font-size:24px">Giriş</h2>
-      <input id="in-mail" type="email" placeholder="E-posta" autocomplete="username">
-      <input id="in-pass" type="password" placeholder="Parola" autocomplete="current-password">
-      <button class="btn" id="btn-login" type="button">Giriş yap</button>
-      <div id="login-msg"></div>
-    </div>
-  </div>
-
-  <div id="scr-main" hidden>
+<div id="sp-icerik">
+  <div id="scr-main">
     <div class="antet" id="antet"></div>
     <div class="card">
       <div class="row">
@@ -295,21 +195,11 @@ td select{width:104px;text-align:left}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function(){
 "use strict";
-if(location.protocol === "file:"){
-  document.body.insertAdjacentHTML("beforeend",
-    '<div class="wrap"><div class="card"><div class="msg err">' +
-    '<b>Bu sayfa bilgisayardaki bir dosyadan açılmış.</b><br>' +
-    'Tarayıcı, dosyadan açılan sayfaların sunucuya bağlanmasına güvenlik gereği izin vermez; ' +
-    'giriş yapmayı denerseniz "Failed to fetch" hatası alırsınız.<br><br>' +
-    'Dosyaları siteye yükleyip <b>https://</b> ile başlayan adresten açın.' +
-    '</div></div></div>');
-  return;
-}
-
 window.addEventListener("error", function(ev){
   if(document.getElementById("fatal")) return;
   var d=document.createElement("div"); d.id="fatal"; d.className="wrap";
@@ -328,37 +218,16 @@ function iso(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOS
 var DURUM={taslak:"Taslak",kesildi:"Kesildi",kismi_tahsil:"Kısmi tahsil",tahsil_edildi:"Tahsil edildi",iptal:"İptal"};
 var YONTEM={nakit:"Nakit",banka:"Banka",cek:"Çek",senet:"Senet",mahsup:"Mahsup"};
 
-var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
 var sb=null, BOOT=null, DATA=null, TENANT=null;
 var RAW=null, ROWS=null, HEAD=null;   // banka ekstresi
-function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
 
-function uyar(t){
-  document.body.insertAdjacentHTML("beforeend",
-    '<div class="wrap"><div class="card"><div class="msg err">'+t+'</div></div></div>');
-}
-if(!window.supabase){
-  uyar("Supabase kitaplığı yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
-} else if(!cfg.url || !cfg.key){
-  uyar("Bağlantı ayarları yok. Önce saha uygulamasına (index.html) girip ayarları kaydedin.");
-} else {
-  try{
-    sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
-    sb.auth.getSession().then(function(r){
-      if(r.error) throw r.error;
-      if(r.data && r.data.session){ boot(); } else { show("scr-login"); }
-    }).catch(function(e){ uyar("Sunucuya ulaşılamadı: "+esc(e && e.message ? e.message : String(e))); });
-  }catch(e){
-    uyar("Bağlantı bilgisi geçersiz: "+esc(e && e.message ? e.message : String(e)));
-  }
-}
-$("#btn-login").addEventListener("click", function(){
-  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
-    if(r.error){ $("#login-msg").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
-    boot();
-  });
-});
-$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+SP.boot({sayfa:"muhasebe", baslik:"Muhasebe", hazir:function(){
+  sb = SP.sb;
+  if(!SP.girebilir()) SP.$$("#sp-icerik button.btn").forEach(function(b){
+    if(b.id && b.id.indexOf("btn-") === 0 && b.id !== "btn-load") b.disabled = true; });
+  boot();
+}});
+
 $("#btn-load").addEventListener("click", load);
 ["#f-year","#f-month"].forEach(function(s){ $(s).addEventListener("change", load); });
 
@@ -371,7 +240,6 @@ $$("#tabs button").forEach(function(b){
 });
 
 function boot(){
-  show("scr-main");
   var t=iso(new Date());
   ["#e-date","#i-date","#t-date","#c-date"].forEach(function(s){ $(s).value=t; });
   var now=new Date(), ys=$("#f-year");
@@ -384,7 +252,6 @@ function boot(){
   sb.rpc("accounting_bootstrap").then(function(r){
     if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
     BOOT=r.data;
-    $("#who").textContent = (BOOT.tenant?BOOT.tenant.name+" · ":"") + (BOOT.profile?BOOT.profile.full_name:"");
     var ad = BOOT.tenant ? BOOT.tenant.name : "";
     var lg = (BOOT.tenant && BOOT.tenant.logo) ? BOOT.tenant.logo : "logo-mark.png";
     $("#antet").innerHTML = '<img src="'+lg+'" alt="" onerror="this.onerror=null;this.src=\'icon.svg\'">' +

@@ -9,119 +9,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<style>
-:root{
-  --bg:#eef2f4;--card:#fff;--card-2:#f7fafb;--line:#d9e2e7;--line-soft:#e8eef1;
-  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
-  --accent:#12708f;--accent-2:#7fb9cd;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
-  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
-  --shadow:0 1px 2px rgba(15,34,48,.06), 0 8px 22px rgba(15,34,48,.05);
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0b161d;--card:#112430;--card-2:#152a36;--line:#25404e;--line-soft:#1c3340;
-  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
-  --accent:#4bb3d6;--accent-2:#2c6b82;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
-  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
-  color-scheme:dark;}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
-h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600;text-wrap:balance}
-.num{font-variant-numeric:tabular-nums}
-header{background:var(--navy);color:#eaf4f8;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
-header b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase}
-header .sub{font-size:12px;color:#9fc4d3;letter-spacing:.08em;text-transform:uppercase}
-header .sp{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:12.5px;color:#cfe3ec}
-header a{color:#cfe3ec}
-.wrap{max-width:1240px;margin:0 auto;padding:18px 24px 60px}
-@media (max-width:640px){ .wrap{padding:16px} header{padding:12px 16px} }
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:var(--card);border:1px solid var(--line);
-  border-radius:14px;padding:14px;box-shadow:var(--shadow);position:sticky;top:58px;z-index:15}
-.field{display:flex;flex-direction:column;gap:4px}
-label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-select,input,button{font:inherit;color:inherit}
-select,input{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;font-size:15px}
-.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:40px}
-.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line)}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:12px;margin-top:16px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow)}
-.tile .k{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-.tile .v{font-family:"Barlow Condensed",sans-serif;font-size:31px;line-height:1.05;margin-top:3px}
-.tile .v small{font-size:14px;color:var(--ink-3);margin-left:3px}
-.tile .s{font-size:12px;color:var(--ink-2);margin-top:2px}
-.grid{display:grid;gap:14px;margin-top:14px}
-.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
-.card h3{font-size:18px}
-.card .note{font-size:12px;color:var(--ink-3);margin:2px 0 12px}
-.sechead{display:flex;align-items:baseline;gap:10px;margin:26px 0 2px}
-.sechead h2{font-size:21px}
-.sechead span{font-size:12px;color:var(--ink-3)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-th:first-child{text-align:left}
-td{padding:8px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
-td:first-child{text-align:left;color:var(--ink-2)}
-tbody tr:last-child td{border-bottom:0}
-tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
-.scroll{overflow-x:auto}
-.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
-.pill.good{background:var(--good-soft);color:var(--good)}
-.pill.warn{background:var(--warn-soft);color:var(--warn)}
-.pill.bad{background:var(--bad-soft);color:var(--bad)}
-.bars{display:flex;flex-direction:column;gap:10px}
-.bar{display:grid;grid-template-columns:130px 1fr 96px;gap:10px;align-items:center;font-size:13px}
-.bar .lab{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.track{background:var(--line-soft);border-radius:3px;height:12px;overflow:hidden;position:relative}
-.track i{display:block;height:100%;background:var(--accent);border-radius:0 3px 3px 0}
-.track .avg{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--warn)}
-.bar .val{text-align:right;font-weight:600}
-.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
-.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
-.center{max-width:400px;margin:60px auto;display:flex;flex-direction:column;gap:12px}
-.chart{width:100%;height:210px;display:block}
-.chart text{font-size:10px;fill:var(--ink-3);font-family:"IBM Plex Sans",sans-serif}
-.chart .grid-line{stroke:var(--line-soft);stroke-width:1}
-.chart .avgline{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:4 3}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:8px}
-.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-[hidden]{display:none!important}
-.foot{margin-top:24px;font-size:12px;color:var(--ink-3);max-width:80ch}
-</style>
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
 
-<header>
-  <span><b>Sondaj Panel</b><br><span class="sub">Yönetici</span></span>
-  <span class="sp">
-    <span id="who"></span>
-    <a href="sirket.html">Şirket performansı</a>
-    <a href="maaslar.html">Maaşlar</a>
-    <a href="muhasebe.html">Muhasebe</a>
-    <a href="ofis.html">Merkez ofis</a>
-    <a href="./">Saha uygulaması</a>
-    <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
-  </span>
-</header>
 
-<div class="wrap">
+<div id="sp-icerik">
 
-  <div id="scr-login" hidden>
-    <div class="center">
-      <h2 style="font-size:26px">Yönetici girişi</h2>
-      <div id="cfg-wrap" hidden>
-        <div class="field"><label for="in-url">Supabase Project URL</label><input id="in-url" placeholder="https://xxxx.supabase.co"></div>
-        <div class="field" style="margin-top:8px"><label for="in-key">Anon key</label><input id="in-key"></div>
-      </div>
-      <div class="field"><label for="in-mail">E-posta</label><input id="in-mail" type="email" autocomplete="username"></div>
-      <div class="field"><label for="in-pass">Parola</label><input id="in-pass" type="password" autocomplete="current-password"></div>
-      <button class="btn" id="btn-login" type="button">Giriş yap</button>
-      <div id="login-msg"></div>
-    </div>
-  </div>
-
-  <div id="scr-panel" hidden>
+  <div id="scr-panel">
     <div class="filters">
       <div class="field" style="min-width:250px"><label for="f-project">Proje</label><select id="f-project"></select></div>
       <div class="field"><label for="f-year">Yıl</label><select id="f-year"></select></div>
@@ -133,6 +28,8 @@ tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
     <div id="msg" style="margin-top:12px"></div>
 
     <div class="tiles" id="tiles"></div>
+
+    <div class="kuleler" id="kuleler"></div>
 
     <div class="sechead"><h2>Metraj</h2><span>Delgi ve teslim</span></div>
     <div class="grid g2">
@@ -157,7 +54,23 @@ tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
       <div class="scroll" id="yearly"></div>
     </div>
 
-    <div class="sechead"><h2>Kuyular</h2><span>Durum ve biten kuyu takibi</span></div>
+    <div class="sechead" id="kuyular"><h2>Kuyular</h2><span>Durum ve biten kuyu takibi</span></div>
+
+    <div class="card">
+      <div class="row" style="align-items:center">
+        <h3 style="margin-right:auto">Kuyu kesiti</h3>
+        <div class="sel">Kuyu <select id="k-sec"></select></div>
+        <span class="capler">
+          <span><i class="cap-pq"></i>PQ</span><span><i class="cap-hq"></i>HQ</span>
+          <span><i class="cap-nq"></i>NQ</span><span><i class="cap-pw"></i>PW</span>
+        </span>
+      </div>
+      <div class="kesitalan" style="margin-top:12px">
+        <div id="k-cizim"><div class="hint">Kuyu seçin.</div></div>
+        <div id="k-bilgi"></div>
+      </div>
+    </div>
+
     <div class="grid g2">
       <div class="card"><h3>Kuyu durumu</h3><div class="note">Derinlik, eğim, ölçüm sayısı</div><div class="scroll" id="wells"></div></div>
       <div class="card"><h3>Biten kuyular</h3><div class="note">Dönem içinde tamamlananlar</div><div class="scroll" id="done-wells"></div></div>
@@ -186,20 +99,10 @@ tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js"></script>
 <script>
 (function(){
 "use strict";
-if(location.protocol === "file:"){
-  document.body.insertAdjacentHTML("beforeend",
-    '<div class="wrap"><div class="card"><div class="msg err">' +
-    '<b>Bu sayfa bilgisayardaki bir dosyadan açılmış.</b><br>' +
-    'Tarayıcı, dosyadan açılan sayfaların sunucuya bağlanmasına güvenlik gereği izin vermez; ' +
-    'giriş yapmayı denerseniz "Failed to fetch" hatası alırsınız.<br><br>' +
-    'Dosyaları siteye yükleyip <b>https://</b> ile başlayan adresten açın.' +
-    '</div></div></div>');
-  return;
-}
-
 var $=function(s){return document.querySelector(s);};
 var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
 var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
@@ -208,34 +111,19 @@ var AYLAR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos"
 function msg(t,k){ $("#msg").innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
 function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];}); }
 
-var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
 var sb=null, MASTER=null;
-if(!cfg.url || !cfg.key){ $("#cfg-wrap").hidden = false; }
-function client(){ sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}}); }
-function show(id){ ["scr-login","scr-panel"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
 
-$("#btn-login").addEventListener("click", function(){
-  if(!cfg.url || !cfg.key){
-    cfg.url = $("#in-url").value.trim().replace(/\/+$/,""); cfg.key = $("#in-key").value.trim();
-    if(!/^https:\/\/.+/.test(cfg.url) || cfg.key.length < 20){
-      $("#login-msg").innerHTML = '<div class="msg err">Adres ve anahtarı kontrol edin.</div>'; return; }
-    localStorage.setItem("sp_url", cfg.url); localStorage.setItem("sp_key", cfg.key); client();
-  }
-  $("#btn-login").disabled = true;
-  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
-    $("#btn-login").disabled = false;
-    if(r.error){ $("#login-msg").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
-    boot();
-  });
-});
-$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+SP.boot({sayfa:"panel", baslik:"Genel bakış", hazir:function(){
+  sb = SP.sb;
+  boot();
+  $("#k-sec").addEventListener("change", kuyuCiz);
+  $("#f-project").addEventListener("change", function(){ if(MASTER) kuyuListesi(); });
+}});
 
 function boot(){
-  show("scr-panel");
   sb.rpc("bootstrap_data").then(function(r){
     if(r.error){ msg(esc(r.error.message), "err"); return; }
     MASTER = r.data;
-    $("#who").textContent = (MASTER.tenant ? MASTER.tenant.name + " · " : "") + (MASTER.profile ? MASTER.profile.full_name : "");
     var sel = $("#f-project"); sel.innerHTML = "";
     (MASTER.projects||[]).forEach(function(p){
       var o=document.createElement("option"); o.value=p.id;
@@ -250,6 +138,7 @@ function boot(){
     var o0=document.createElement("option"); o0.value=""; o0.textContent="Tüm yıl"; ms.appendChild(o0);
     AYLAR.forEach(function(a,i){ var o=document.createElement("option"); o.value=i+1; o.textContent=a; ms.appendChild(o); });
     ms.value = now.getMonth()+1;
+    kuyuListesi();
     load();
   });
 }
@@ -262,6 +151,47 @@ function period(){
   var to   = m ? new Date(y, m, 0)   : new Date(y, 11, 31);
   var iso = function(d){ return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
   return {y:y, m:m, from:iso(from), to:iso(to)};
+}
+
+function kuyuListesi(){
+  var pid = $("#f-project").value;
+  var sel = $("#k-sec");
+  var liste = (MASTER.wells||[]).filter(function(w){ return !pid || w.project_id === pid; });
+  sel.innerHTML = '<option value="">— seçin —</option>' + liste.map(function(w){
+    return '<option value="'+w.id+'">'+esc(w.code)+' · '+tl(w.current_depth)+' m</option>'; }).join("");
+  $("#k-cizim").innerHTML = '<div class="hint">Kuyu seçin.</div>';
+  $("#k-bilgi").innerHTML = '';
+}
+
+function kuyuCiz(){
+  var id = $("#k-sec").value;
+  if(!id){ $("#k-cizim").innerHTML='<div class="hint">Kuyu seçin.</div>'; $("#k-bilgi").innerHTML=''; return; }
+  $("#k-cizim").innerHTML = '<div class="hint">Yükleniyor…</div>';
+  sb.rpc("well_profile", {p_well:id}).then(function(r){
+    if(r.error || !r.data){ $("#k-cizim").innerHTML='<div class="hint">Kesit okunamadı.</div>'; return; }
+    var p = r.data;
+    $("#k-cizim").innerHTML = SP.kuyuKesiti(p);
+    var oran = (p.planlanan && Number(p.planlanan) > 0)
+      ? Math.min(100, Number(p.derinlik)/Number(p.planlanan)*100) : null;
+    var kutu = function(l,v){ return '<div class="tile"><div class="k">'+l+'</div><div class="v num">'+v+'</div></div>'; };
+    $("#k-bilgi").innerHTML =
+      '<div class="tiles" style="margin-bottom:10px">' +
+        kutu("Mevcut derinlik", tl(p.derinlik)+'<small> m</small>') +
+        kutu("Planlanan", p.planlanan==null?'—':tl(p.planlanan)+'<small> m</small>') +
+        kutu("Ölçüm", (p.olcumler||[]).length) +
+      '</div>' +
+      (oran==null ? '' :
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2)">' +
+        '<span>İlerleme</span><span class="num"><b>%'+tl(oran,1)+'</b></span></div>' +
+        '<div class="ilerle"><i style="width:'+oran+'%"></i></div>') +
+      '<div class="scroll" style="margin-top:12px">' + SP.tablo([
+        ["Çap", function(x){ return '<span class="pill">'+esc(x.cap)+'</span>'; }],
+        ["Başlangıç", function(x){ return '<span class="num">'+tl(x.bas)+'</span>'; }],
+        ["Bitiş", function(x){ return '<span class="num">'+tl(x.son)+'</span>'; }],
+        ["Metre", function(x){ return '<span class="num"><b>'+tl(x.metre)+'</b></span>'; }],
+        ["Gün", function(x){ return x.gun; }]
+      ], p.caplar, "Manevra kaydı yok.") + '</div>';
+  });
 }
 
 function load(){
@@ -358,8 +288,33 @@ var WSTAT={drilling:['Devam',''],completed:['Bitti','good'],cancelled:['İptal',
 var PROG={arama:'Maden arama',planlama:'Maden planlama',belirsiz:'Belirsiz'};
 
 /* ---------------- panel ---------------- */
+function kuleleriCiz(d){
+  var mak = {};
+  (d.by_machine||[]).forEach(function(m){
+    mak[m.makine||m.code||m.machine] = {kod:(m.makine||m.code||m.machine), metraj:m.metraj||m.meters};
+  });
+  (d.wells||[]).forEach(function(w){
+    var k = w.makine || w.machine;
+    if(!k) return;
+    if(!mak[k]) mak[k] = {kod:k};
+    var acik = (w.durum || w.status) === "drilling";
+    if(acik || !mak[k].kuyu){
+      mak[k].kuyu = w.kuyu || w.code;
+      mak[k].derinlik = w.derinlik != null ? w.derinlik : w.current_depth;
+      mak[k].acik = acik;
+    }
+  });
+  var liste = Object.keys(mak).map(function(k){ return mak[k]; });
+  $("#kuleler").innerHTML = liste.length ? liste.map(function(m){
+    return SP.kuleKart({kod:m.kod, kuyu:m.kuyu, derinlik:m.derinlik,
+      durum: m.acik ? "calisiyor" : "bosta",
+      etiket: m.acik ? "Çalışıyor" : "Boşta"});
+  }).join("") : "";
+}
+
 function renderDash(d){
   var t=d.totals;
+  kuleleriCiz(d);
   var ltPerM = t.meters>0 ? t.fuel_liters/t.meters : 0;
   var costPerM = t.meters>0 ? (Number(t.fuel_amount)+Number(t.cash)+Number(t.bank))/t.meters : 0;
   $("#tiles").innerHTML=[
@@ -475,10 +430,6 @@ function renderCharts(c, p){
        tl((c.biten_kuyular||[]).reduce(function(s,x){ return s+Number(x.derinlik); },0)) + ' m</td><td></td>' : null);
 }
 
-if(cfg.url && cfg.key){
-  client();
-  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
-} else { show("scr-login"); }
 })();
 </script>
 </body>

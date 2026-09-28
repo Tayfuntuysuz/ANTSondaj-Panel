@@ -9,114 +9,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css">
 <style>
-:root{
-  --bg:#eef2f4;--card:#fff;--line:#d9e2e7;--line-soft:#e8eef1;
-  --ink:#0f2230;--ink-2:#44606f;--ink-3:#74909e;
-  --accent:#12708f;--accent-2:#7fb9cd;--accent-soft:#e3f0f5;--accent-ink:#0b4d64;--navy:#123146;
-  --good:#1f7a55;--good-soft:#e2f2ea;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae5e2;
-  --shadow:0 1px 2px rgba(15,34,48,.06), 0 8px 22px rgba(15,34,48,.05);
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0b161d;--card:#112430;--line:#25404e;--line-soft:#1c3340;
-  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
-  --accent:#4bb3d6;--accent-2:#2c6b82;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#0d2634;
-  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
-  color-scheme:dark;}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
-h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600;text-wrap:balance}
-.num{font-variant-numeric:tabular-nums}
-header{background:var(--navy);color:#eaf4f8;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
-header b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase}
-header .sub{font-size:12px;color:#9fc4d3;letter-spacing:.08em;text-transform:uppercase}
-header .sp{margin-left:auto;display:flex;gap:12px;align-items:center;font-size:12.5px;color:#cfe3ec}
-header a{color:#cfe3ec}
-.wrap{max-width:1240px;margin:0 auto;padding:18px 24px 60px}
-@media (max-width:640px){ .wrap{padding:16px} header{padding:12px 16px} }
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
-.field{display:flex;flex-direction:column;gap:4px}
-label{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-select,input,button{font:inherit;color:inherit}
-select{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;font-size:15px}
-.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:40px}
-.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line);text-decoration:none;display:inline-flex;align-items:center}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;margin-top:16px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow)}
-.tile .k{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-.tile .v{font-family:"Barlow Condensed",sans-serif;font-size:31px;line-height:1.05;margin-top:3px}
-.tile .v small{font-size:14px;color:var(--ink-3);margin-left:3px}
-.tile .s{font-size:12px;color:var(--ink-2);margin-top:2px}
-.tile.iyi .v{color:var(--good)} .tile.kotu .v{color:var(--bad)}
-.grid{display:grid;gap:14px;margin-top:14px}
+/* sayfaya özel: app.css'te olmayan kurallar */
+.grid{gap:14px;margin-bottom:15px}
 .g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
-.card h3{font-size:18px}
-.card .note{font-size:12px;color:var(--ink-3);margin:2px 0 12px}
-.sechead{display:flex;align-items:baseline;gap:10px;margin:26px 0 2px}
+.sechead{display:flex;align-items:baseline;gap:10px;margin:22px 0 8px}
 .sechead h2{font-size:21px}
 .sechead span{font-size:12px;color:var(--ink-3)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-th:first-child{text-align:left}
-td{padding:8px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
-td:first-child{text-align:left;color:var(--ink-2)}
-tbody tr:last-child td{border-bottom:0}
-tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
-.scroll{overflow-x:auto}
-.pill{display:inline-flex;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
-.pill.good{background:var(--good-soft);color:var(--good)}
-.pill.warn{background:var(--warn-soft);color:var(--warn)}
-.pill.bad{background:var(--bad-soft);color:var(--bad)}
-.bars{display:flex;flex-direction:column;gap:10px}
-.bar{display:grid;grid-template-columns:150px 1fr 110px;gap:10px;align-items:center;font-size:13px}
 .bar .lab{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.track{background:var(--line-soft);border-radius:3px;height:12px;overflow:hidden;display:flex}
-.track i{display:block;height:100%}
-.bar .val{text-align:right;font-weight:600}
 .chart{width:100%;height:210px;display:block}
 .chart text{font-size:10px;fill:var(--ink-3);font-family:"IBM Plex Sans",sans-serif}
 .chart .grid-line{stroke:var(--line-soft);stroke-width:1}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:8px}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
-.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
-.msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
-.center{max-width:400px;margin:60px auto;display:flex;flex-direction:column;gap:12px}
-.center input{padding:10px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:var(--card)}
-[hidden]{display:none!important}
-.foot{margin-top:24px;font-size:12px;color:var(--ink-3);max-width:80ch}
+.foot{margin-top:20px;font-size:12px;color:var(--ink-3);max-width:80ch}
 </style>
 </head>
 <body>
 
-<header>
-  <span><b>Sondaj Panel</b><br><span class="sub">Şirket performansı</span></span>
-  <span class="sp">
-    <span id="who"></span>
-    <a href="maaslar.html">Maaş tablosu</a>
-    <a href="muhasebe.html">Muhasebe</a>
-    <a href="ofis.html">Merkez ofis</a>
-    <a href="panel.html">Şantiye paneli</a>
-    <a href="rapor.html">Aylık rapor</a>
-    <button class="btn ghost" id="btn-logout" type="button" style="padding:6px 12px;min-height:0">Çıkış</button>
-  </span>
-</header>
 
-<div class="wrap">
-  <div id="scr-login" hidden>
-    <div class="center">
-      <h2 style="font-size:26px">Giriş</h2>
-      <input id="in-mail" type="email" placeholder="E-posta" autocomplete="username">
-      <input id="in-pass" type="password" placeholder="Parola" autocomplete="current-password">
-      <button class="btn" id="btn-login" type="button">Giriş yap</button>
-      <div id="login-msg"></div>
-    </div>
-  </div>
-
-  <div id="scr-main" hidden>
+<div id="sp-icerik">
+  <div id="scr-main">
     <div class="filters">
       <div class="field"><label for="f-year">Yıl</label><select id="f-year"></select></div>
       <div class="field"><label for="f-month">Dönem</label><select id="f-month"></select></div>
@@ -168,20 +82,10 @@ tfoot td{font-weight:600;border-top:1px solid var(--line);border-bottom:0}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js"></script>
 <script>
 (function(){
 "use strict";
-if(location.protocol === "file:"){
-  document.body.insertAdjacentHTML("beforeend",
-    '<div class="wrap"><div class="card"><div class="msg err">' +
-    '<b>Bu sayfa bilgisayardaki bir dosyadan açılmış.</b><br>' +
-    'Tarayıcı, dosyadan açılan sayfaların sunucuya bağlanmasına güvenlik gereği izin vermez; ' +
-    'giriş yapmayı denerseniz "Failed to fetch" hatası alırsınız.<br><br>' +
-    'Dosyaları siteye yükleyip <b>https://</b> ile başlayan adresten açın.' +
-    '</div></div></div>');
-  return;
-}
-
 var $=function(s){return document.querySelector(s);};
 var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
 var money=function(n){ return "₺"+Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); };
@@ -190,32 +94,18 @@ var AY3=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ar
 function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];}); }
 function msg(t,k){ $("#msg").innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
 
-var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
 var sb=null;
-function show(id){ ["scr-login","scr-main"].forEach(function(s){ $("#"+s).hidden = (s!==id); }); }
 
-if(!cfg.url || !cfg.key){
-  $("#msg").innerHTML = '<div class="msg err">Bağlantı ayarları yok. Önce saha uygulamasına girip Supabase bilgilerini kaydedin.</div>';
-} else {
-  sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
-  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { show("scr-login"); } });
-}
-$("#btn-login").addEventListener("click", function(){
-  sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
-    if(r.error){ $("#login-msg").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
-    boot();
-  });
-});
-$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+SP.boot({sayfa:"sirket", baslik:"Şirket performansı", hazir:function(){
+  sb = SP.sb;
+  boot();
+}});
+
 $("#btn-load").addEventListener("click", load);
 ["#f-year","#f-month"].forEach(function(s){ $(s).addEventListener("change", load); });
 
 function boot(){
-  show("scr-main");
   sb.rpc("bootstrap_data").then(function(r){
-    if(!r.error && r.data){
-      $("#who").textContent = (r.data.tenant ? r.data.tenant.name + " · " : "") + (r.data.profile ? r.data.profile.full_name : "");
-    }
     var now=new Date(), ys=$("#f-year");
     for(var y=now.getFullYear()+1; y>=now.getFullYear()-3; y--){ var o=document.createElement("option"); o.value=y; o.textContent=y; ys.appendChild(o); }
     ys.value = now.getFullYear();
