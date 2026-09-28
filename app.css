@@ -177,12 +177,15 @@ td select{text-align:left}
 .kule{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 13px;
   box-shadow:var(--shadow);display:flex;gap:11px;align-items:flex-start;position:relative}
 .kule .sil{width:36px;height:44px;flex:none;color:var(--accent);opacity:.9}
-.kule .kod{font-family:"Barlow Condensed",sans-serif;font-size:16.5px;font-weight:700;line-height:1.1}
-.kule .kuyu{font-size:12px;color:var(--ink-2)}
+.kule .gvd{flex:1;min-width:0}
+.kule .ust{display:flex;align-items:center;gap:8px}
+.kule .kod{font-family:"Barlow Condensed",sans-serif;font-size:16.5px;font-weight:700;line-height:1.1;
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kule .kuyu{font-size:12px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kule .der{font-family:"Barlow Condensed",sans-serif;font-size:21px;margin-top:3px}
 .kule .der small{font-size:11.5px;color:var(--ink-3);font-family:"IBM Plex Sans",sans-serif}
-.kule .drm{position:absolute;top:10px;right:11px;display:flex;align-items:center;gap:5px;
-  font-size:10.5px;font-weight:600}
+.kule .drm{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;
+  white-space:nowrap;flex:none}
 .kule .drm i{width:8px;height:8px;border-radius:50%;background:currentColor}
 .kule.calisiyor .drm{color:var(--good)}
 .kule.calisiyor .drm i{box-shadow:0 0 0 3px rgba(31,122,85,.15)}

@@ -204,9 +204,11 @@ function load(){
     sb.rpc("dashboard", {p_project:proj, p_from:p.from, p_to:p.to}),
     sb.rpc("report_charts", {p_project:proj, p_year:p.y, p_month:p.m}),
     sb.rpc("stock_status", {p_project:proj}),
-    sb.rpc("open_bits", {p_machine:null})
+    sb.rpc("open_bits", {p_machine:null}),
+    sb.rpc("rig_status", {p_project:proj, p_from:p.from, p_to:p.to})
   ]).then(function(res){
-    var a = res[0], b = res[1], c = res[2], e = res[3];
+    var a = res[0], b = res[1], c = res[2], e = res[3], k = res[4];
+    if(k && !k.error) kuleleriCiz(k.data);
     if(a.error || b.error){ msg(esc((a.error||b.error).message), "err"); return; }
     msg(""); renderDash(a.data); renderCharts(b.data, p);
     table($("#stock"), [
@@ -288,33 +290,22 @@ var WSTAT={drilling:['Devam',''],completed:['Bitti','good'],cancelled:['İptal',
 var PROG={arama:'Maden arama',planlama:'Maden planlama',belirsiz:'Belirsiz'};
 
 /* ---------------- panel ---------------- */
-function kuleleriCiz(d){
-  var mak = {};
-  (d.by_machine||[]).forEach(function(m){
-    mak[m.makine||m.code||m.machine] = {kod:(m.makine||m.code||m.machine), metraj:m.metraj||m.meters};
-  });
-  (d.wells||[]).forEach(function(w){
-    var k = w.makine || w.machine;
-    if(!k) return;
-    if(!mak[k]) mak[k] = {kod:k};
-    var acik = (w.durum || w.status) === "drilling";
-    if(acik || !mak[k].kuyu){
-      mak[k].kuyu = w.kuyu || w.code;
-      mak[k].derinlik = w.derinlik != null ? w.derinlik : w.current_depth;
-      mak[k].acik = acik;
-    }
-  });
-  var liste = Object.keys(mak).map(function(k){ return mak[k]; });
-  $("#kuleler").innerHTML = liste.length ? liste.map(function(m){
-    return SP.kuleKart({kod:m.kod, kuyu:m.kuyu, derinlik:m.derinlik,
-      durum: m.acik ? "calisiyor" : "bosta",
-      etiket: m.acik ? "Çalışıyor" : "Boşta"});
-  }).join("") : "";
+function kuleleriCiz(liste){
+  var el = $("#kuleler");
+  if(!liste || !liste.length){ el.innerHTML = ""; return; }
+  el.innerHTML = liste.map(function(m){
+    return SP.kuleKart({
+      kod: m.kod,
+      kuyu: m.kuyu ? (m.kuyu + (m.metraj ? " · " + tl(m.metraj) + " m dönem" : "")) : "—",
+      derinlik: m.derinlik,
+      durum: m.durum,
+      etiket: m.etiket
+    });
+  }).join("");
 }
 
 function renderDash(d){
   var t=d.totals;
-  kuleleriCiz(d);
   var ltPerM = t.meters>0 ? t.fuel_liters/t.meters : 0;
   var costPerM = t.meters>0 ? (Number(t.fuel_amount)+Number(t.cash)+Number(t.bank))/t.meters : 0;
   $("#tiles").innerHTML=[

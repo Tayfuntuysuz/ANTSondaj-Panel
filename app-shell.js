@@ -330,9 +330,12 @@ function kuleKart(k){
     '<path d="M11.5 26h17M13.5 20h13M15.5 14h9"/><path d="M4 33h32"/><path d="M20 33v6"/>' +
     '<path d="M14 39h12l-1.6 6H15.6z" fill="currentColor" fill-opacity=".14"/></svg>';
   return '<div class="kule '+(k.durum||"bosta")+'">'+svg+
-    '<div><div class="kod">'+esc(k.kod)+'</div><div class="kuyu">'+esc(k.kuyu||"—")+'</div>' +
-    '<div class="der num">'+(k.derinlik ? tl(k.derinlik)+'<small> m</small>' : "—")+'</div></div>' +
-    '<div class="drm"><i></i>'+esc(k.etiket||"")+'</div></div>';
+    '<div class="gvd">' +
+      '<div class="ust"><span class="kod">'+esc(k.kod)+'</span>' +
+        '<span class="drm"><i></i>'+esc(k.etiket||"")+'</span></div>' +
+      '<div class="kuyu">'+esc(k.kuyu||"—")+'</div>' +
+      '<div class="der num">'+(k.derinlik ? tl(k.derinlik)+'<small> m</small>' : "—")+'</div>' +
+    '</div></div>';
 }
 
 /* Kuyu kesiti. p = well_profile() çıktısı */
