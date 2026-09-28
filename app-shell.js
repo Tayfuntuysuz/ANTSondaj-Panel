@@ -56,6 +56,7 @@ var SAYFALAR = [
   {k:"puantaj",  d:"index.html#puantaj", ad:"Puantaj",        i:"kisi",   g:"Günlük iş"},
   {k:"kuyular",  d:"panel.html#kuyular", ad:"Kuyular",        i:"kuyu",   g:"Saha"},
   {k:"sefozet",  d:"panel.html",     ad:"Saha özetim",        i:"pano",   g:"Saham"},
+  {k:"santiyeler", d:"santiyeler.html", ad:"Şantiye karşılaştırma", i:"pano", g:"Analiz"},
   {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"para",   g:"Analiz"},
   {k:"ofis",     d:"ofis.html",      ad:"Merkez ofis",        i:"ofis",   g:"Analiz"},
   {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"kisi",   g:"Analiz"},

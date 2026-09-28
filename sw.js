@@ -1,9 +1,10 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "sondaj-panel-v21";
+var CACHE = "sondaj-panel-v22";
 var SHELL = [
-  "./", "./index.html", "./panel.html", "./rapor.html", "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
+  "./", "./index.html", "./panel.html", "./rapor.html", "./santiyeler.html",
+  "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
   "./app.css", "./app-shell.js",
   "./manifest.webmanifest", "./icon.svg", "./logo.png", "./logo-mark.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js",

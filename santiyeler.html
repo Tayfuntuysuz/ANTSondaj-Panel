@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sondaj Panel · Şantiye Karşılaştırma</title>
+<meta name="theme-color" content="#123146">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.grid{gap:14px;margin-bottom:15px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.sechead{display:flex;align-items:baseline;gap:10px;margin:22px 0 8px}
+.sechead h2{font-size:21px}
+.sechead span{font-size:12px;color:var(--ink-3)}
+.chart{width:100%;height:230px;display:block}
+.chart text{font-size:10px;fill:var(--ink-3);font-family:"IBM Plex Sans",sans-serif}
+.chart .grid-line{stroke:var(--line-soft);stroke-width:1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:8px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.bar .lab{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sahaetiket{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;
+  background:var(--chip,rgba(18,112,143,.12));color:var(--accent);margin:0 3px 3px 0;white-space:nowrap}
+.foot{margin-top:20px;font-size:12px;color:var(--ink-3);max-width:80ch}
+</style>
+</head>
+<body>
+
+<div id="sp-icerik">
+  <div class="filters">
+    <div class="field"><label for="f-from">Başlangıç</label><input type="date" id="f-from"></div>
+    <div class="field"><label for="f-to">Bitiş</label><input type="date" id="f-to"></div>
+    <button class="btn" id="btn-load" type="button">Getir</button>
+    <button class="btn ghost" id="btn-yil" type="button">Bu yıl</button>
+    <a class="btn ghost" href="panel.html">Şantiye ayrıntısı</a>
+    <span id="range-label" style="font-size:12px;color:var(--ink-3)"></span>
+  </div>
+  <div id="msg" style="margin-top:12px"></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="sechead"><h2>Şantiyeler</h2><span>Aynı dönemde yan yana</span></div>
+  <div class="card"><div class="scroll" id="saha-tablo"></div></div>
+
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>Toplam metraj</h3><div class="note">Dönem içinde delinen metre</div><div class="bars" id="metraj-bars"></div></div>
+    <div class="card"><h3>Günlük ortalama</h3><div class="note">Çalışılan gün başına metre</div><div class="bars" id="gunluk-bars"></div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3>Makine başına metraj</h3><div class="note">Kule verimliliği</div><div class="bars" id="makine-bars"></div></div>
+    <div class="card"><h3>Metre başı yakıt</h3><div class="note">Litre / metre — düşük olan iyi</div><div class="bars" id="yakit-bars"></div></div>
+  </div>
+
+  <div class="sechead"><h2>Aylık seyir</h2><span>Hangi ay hangi şantiye ne yaptı</span></div>
+  <div class="card">
+    <div id="trend-chart"></div>
+    <div class="scroll" id="trend-tablo" style="margin-top:14px"></div>
+  </div>
+
+  <div class="sechead"><h2>Sondör karnesi</h2><span>Şantiye fark etmeksizin kişi bazında</span></div>
+  <div class="card"><div class="scroll" id="sondor-tablo"></div></div>
+
+  <p class="foot">Metraj, iptal edilen kuyular hariç tutularak hesaplanır; iptal sütunu ayrıca gösterilir.
+  Günlük ortalama, o şantiyede vardiya kaydı bulunan gün sayısına bölünerek bulunur.
+  Yakıt ve yemek yalnız bu bilgilerin raporda bulunduğu şantiyelerde dolu gelir.
+  Aynı makine kodu farklı şantiyelerde ayrı kule olarak sayılır.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
+var money=function(n){ return "₺"+Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); };
+var AY3=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];}); }
+function msg(t,k){ $("#msg").innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
+
+var sb=null;
+
+SP.boot({sayfa:"santiyeler", baslik:"Şantiye karşılaştırma", hazir:function(){
+  sb = SP.sb;
+  yilAraligi();
+  load();
+}});
+
+function yilAraligi(){
+  var y = new Date().getFullYear();
+  $("#f-from").value = y+"-01-01";
+  $("#f-to").value   = y+"-12-31";
+}
+$("#btn-load").addEventListener("click", load);
+$("#btn-yil").addEventListener("click", function(){ yilAraligi(); load(); });
+
+function load(){
+  var f = $("#f-from").value, t = $("#f-to").value;
+  if(!f || !t){ msg("Tarih aralığı seçin.","err"); return; }
+  $("#range-label").textContent = f + " → " + t;
+  msg("Hesaplanıyor…");
+  Promise.all([
+    sb.rpc("saha_karsilastirma", {p_from:f, p_to:t}),
+    sb.rpc("aylik_trend",        {p_from:f, p_to:t}),
+    sb.rpc("sondor_karnesi",     {p_from:f, p_to:t, p_project:null})
+  ]).then(function(r){
+    for(var i=0;i<r.length;i++){ if(r[i].error){ msg(esc(r[i].error.message),"err"); return; } }
+    msg("");
+    ciz(r[0].data||[], r[1].data||[], r[2].data||[]);
+  }).catch(function(e){ msg(esc(e.message||e),"err"); });
+}
+
+function table(el, cols, rows, empty, foot){
+  if(!rows || !rows.length){ el.innerHTML = '<div class="note">'+empty+'</div>'; return; }
+  el.innerHTML = '<table><thead><tr>'+cols.map(function(c){return '<th>'+c[0]+'</th>';}).join("")+'</tr></thead><tbody>'+
+    rows.map(function(r){ return '<tr>'+cols.map(function(c){ return '<td>'+c[1](r)+'</td>'; }).join("")+'</tr>'; }).join("")+
+    '</tbody>'+(foot?'<tfoot><tr>'+foot+'</tr></tfoot>':'')+'</table>';
+}
+function bars(el, rows, key, fmt, renk){
+  rows = (rows||[]).filter(function(r){ return Number(r[key]); });
+  if(!rows.length){ el.innerHTML='<div class="note">Bu dönemde veri yok.</div>'; return; }
+  rows = rows.slice().sort(function(a,b){ return Number(b[key])-Number(a[key]); });
+  var max = Math.max.apply(null, rows.map(function(r){ return Math.abs(Number(r[key])||0); })) || 1;
+  el.innerHTML = rows.map(function(r){
+    var v = Number(r[key])||0;
+    return '<div class="bar"><span class="lab">'+esc(r.saha)+'</span>' +
+      '<span class="track"><i style="width:'+(Math.abs(v)/max*100)+'%;background:'+(renk?renk(v):'var(--accent)')+'"></i></span>' +
+      '<span class="val num">'+fmt(v)+'</span></div>';
+  }).join("");
+}
+
+/* çok serili dikey sütun grafik: ay × şantiye */
+function trendChart(el, trend){
+  if(!trend.length){ el.innerHTML='<div class="note">Bu dönemde veri yok.</div>'; return; }
+  var aylar = [], sahalar = [];
+  trend.forEach(function(r){
+    if(aylar.indexOf(r.ay) < 0) aylar.push(r.ay);
+    if(sahalar.indexOf(r.saha) < 0) sahalar.push(r.saha);
+  });
+  aylar.sort();
+  var renkler = ["var(--accent)","var(--accent-2)","var(--pq)","var(--nq)","var(--kaya)","var(--warn)"];
+  var toplam = {};
+  aylar.forEach(function(a){ toplam[a] = 0; });
+  trend.forEach(function(r){ toplam[r.ay] += Number(r.metraj)||0; });
+  var max = Math.max.apply(null, aylar.map(function(a){ return toplam[a]; })) || 1;
+
+  var W=760, H=230, padL=58, padR=10, padT=14, padB=28;
+  var step=(W-padL-padR)/aylar.length, bw=Math.max(8, Math.min(46, step-14));
+  var o=['<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Aylık metraj, şantiyelere göre">'];
+  [0,max/2,max].forEach(function(t){
+    var yy=padT+(H-padT-padB)*(1-t/max);
+    o.push('<line class="grid-line" x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+yy.toFixed(1)+'"/>');
+    o.push('<text x="'+(padL-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end">'+tl(t,0)+'</text>');
+  });
+  aylar.forEach(function(a,i){
+    var x = padL + i*step + (step-bw)/2, alt = H-padB;
+    sahalar.forEach(function(s,k){
+      var row = trend.filter(function(r){ return r.ay===a && r.saha===s; })[0];
+      var v = row ? Number(row.metraj)||0 : 0;
+      if(!v) return;
+      var h = (H-padT-padB)*(v/max);
+      alt -= h;
+      o.push('<rect x="'+x.toFixed(1)+'" y="'+alt.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+
+        '" fill="'+renkler[k%renkler.length]+'"><title>'+esc(s)+' · '+a+' · '+tl(v)+' m</title></rect>');
+    });
+    var d = new Date(a+"T00:00:00");
+    o.push('<text x="'+(padL+i*step+step/2).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle">'+AY3[d.getMonth()]+'</text>');
+  });
+  o.push('</svg>');
+  el.innerHTML = o.join("") + '<div class="legend">' + sahalar.map(function(s,k){
+    return '<span><i style="background:'+renkler[k%renkler.length]+'"></i>'+esc(s)+'</span>'; }).join("") + '</div>';
+}
+
+function ciz(saha, trend, sondor){
+  var T = saha.reduce(function(a,r){
+    a.metraj += Number(r.metraj)||0; a.iptal += Number(r.iptal)||0;
+    a.vardiya += Number(r.vardiya)||0; a.makine += Number(r.makine)||0;
+    a.kuyu += Number(r.kuyu)||0; a.litre += Number(r.yakit_litre)||0;
+    a.yakit_tl += Number(r.yakit_tl)||0; a.yemek_tl += Number(r.yemek_tl)||0;
+    return a;
+  }, {metraj:0,iptal:0,vardiya:0,makine:0,kuyu:0,litre:0,yakit_tl:0,yemek_tl:0});
+
+  /* metre başı yakıt yalnız yakıt kaydı olan şantiyeler üzerinden hesaplanmalı */
+  var YM = saha.filter(function(r){ return Number(r.yakit_litre) > 0; })
+    .reduce(function(a,r){ a.metraj += Number(r.metraj)||0; a.litre += Number(r.yakit_litre)||0;
+                           a.n++; return a; }, {metraj:0, litre:0, n:0});
+
+  $("#tiles").innerHTML = [
+    ['Toplam metraj', tl(T.metraj)+'<small>m</small>', saha.length+' şantiye · '+T.kuyu+' kuyu',''],
+    ['İptal kuyu', tl(T.iptal)+'<small>m</small>', 'Metraja ve hakedişe sayılmaz', (T.iptal>0?'kotu':'')],
+    ['Makine', tl(T.makine,0), 'Çalışan kule sayısı',''],
+    ['Vardiya', tl(T.vardiya,0), 'Kayıtlı vardiya günü',''],
+    ['Yakıt', tl(T.litre,0)+'<small>lt</small>', T.yakit_tl?money(T.yakit_tl):'Tutar girilmemiş',''],
+    ['Metre başı yakıt', YM.metraj?tl(YM.litre/YM.metraj):'—',
+     YM.metraj ? ('Litre / metre · '+YM.n+' şantiyede yakıt kaydı var') : 'Yakıt kaydı yok','']
+  ].map(function(x){
+    return '<div class="tile '+x[3]+'"><div class="k">'+x[0]+'</div><div class="v num">'+x[1]+'</div><div class="s">'+x[2]+'</div></div>';
+  }).join("");
+
+  table($("#saha-tablo"), [
+    ["Şantiye", function(r){ return '<b>'+esc(r.saha)+'</b>'; }],
+    ["İşveren", function(r){ return r.isveren ? esc(r.isveren) : '<span class="note">—</span>'; }],
+    ["Metraj",  function(r){ return '<span class="num">'+tl(r.metraj)+' m</span>'; }],
+    ["İptal",   function(r){ return '<span class="num">'+(Number(r.iptal)?tl(r.iptal)+' m':'—')+'</span>'; }],
+    ["Makine",  function(r){ return '<span class="num">'+tl(r.makine,0)+'</span>'; }],
+    ["Kuyu",    function(r){ return '<span class="num">'+tl(r.kuyu,0)+'</span>'; }],
+    ["Gün",     function(r){ return '<span class="num">'+tl(r.gun,0)+'</span>'; }],
+    ["Gün ort.",function(r){ return '<span class="num"><b>'+tl(r.gunluk_ort)+'</b> m</span>'; }],
+    ["Makine başı", function(r){ return '<span class="num">'+tl(r.makine_basi)+' m</span>'; }],
+    ["Yakıt",   function(r){ return '<span class="num">'+(Number(r.yakit_litre)?tl(r.yakit_litre,0)+' lt':'—')+'</span>'; }],
+    ["lt/m",    function(r){
+      if(r.litre_metre == null || !Number(r.litre_metre)) return '<span class="note">—</span>';
+      var v = Number(r.litre_metre);
+      var cls = v <= 6 ? 'good' : (v <= 9 ? 'warn' : 'bad');
+      return '<span class="pill '+cls+'">'+tl(v)+'</span>'; }],
+    ["₺/m",     function(r){ return '<span class="num">'+(Number(r.tl_metre)?money(r.tl_metre):'—')+'</span>'; }]
+  ], saha, "Bu tarih aralığında şantiye verisi yok.",
+     saha.length ? '<td>Toplam</td><td></td><td class="num">'+tl(T.metraj)+' m</td><td class="num">'+
+       (T.iptal?tl(T.iptal)+' m':'—')+'</td><td class="num">'+tl(T.makine,0)+'</td><td class="num">'+
+       tl(T.kuyu,0)+'</td><td></td><td></td><td></td><td class="num">'+tl(T.litre,0)+' lt</td><td></td><td></td>' : null);
+
+  bars($("#metraj-bars"), saha, "metraj",      function(v){ return tl(v)+" m"; });
+  bars($("#gunluk-bars"), saha, "gunluk_ort",  function(v){ return tl(v)+" m"; });
+  bars($("#makine-bars"), saha, "makine_basi", function(v){ return tl(v)+" m"; });
+  bars($("#yakit-bars"),  saha, "litre_metre", function(v){ return tl(v)+" lt"; },
+       function(v){ return v <= 6 ? "var(--good)" : (v <= 9 ? "var(--warn)" : "var(--bad)"); });
+
+  trendChart($("#trend-chart"), trend);
+
+  /* ay × şantiye tablosu */
+  var aylar = [], sahalar = {};
+  trend.forEach(function(r){
+    if(aylar.indexOf(r.ay) < 0) aylar.push(r.ay);
+    (sahalar[r.saha] = sahalar[r.saha] || {})[r.ay] = Number(r.metraj)||0;
+  });
+  aylar.sort();
+  var satirlar = Object.keys(sahalar).map(function(s){
+    var top = aylar.reduce(function(a,ay){ return a + (sahalar[s][ay]||0); }, 0);
+    return {saha:s, ay:sahalar[s], toplam:top};
+  }).sort(function(a,b){ return b.toplam-a.toplam; });
+  var cols = [["Şantiye", function(r){ return '<b>'+esc(r.saha)+'</b>'; }]];
+  aylar.forEach(function(a){
+    var d = new Date(a+"T00:00:00");
+    cols.push([AY3[d.getMonth()], function(r){
+      var v = r.ay[a]; return '<span class="num">'+(v?tl(v,0):'—')+'</span>'; }]);
+  });
+  cols.push(["Toplam", function(r){ return '<span class="num"><b>'+tl(r.toplam,0)+'</b></span>'; }]);
+  table($("#trend-tablo"), cols, satirlar, "Veri yok.");
+
+  table($("#sondor-tablo"), [
+    ["Sondör", function(r){ return '<b>'+esc(r.sondor)+'</b>'; }],
+    ["Metraj", function(r){ return '<span class="num">'+tl(r.metraj)+' m</span>'; }],
+    ["Gün",    function(r){ return '<span class="num">'+tl(r.gun,0)+'</span>'; }],
+    ["Gün ort.", function(r){ return '<span class="num"><b>'+tl(r.gun_ort)+'</b> m</span>'; }],
+    ["Şantiye", function(r){ return (r.santiye||[]).map(function(s){
+        return '<span class="sahaetiket">'+esc(s)+'</span>'; }).join(""); }],
+    ["Makine", function(r){
+        var m = r.makine || [];
+        var gor = m.slice(0,3).map(function(s){ return '<span class="sahaetiket">'+esc(s)+'</span>'; }).join("");
+        return gor + (m.length > 3 ? '<span class="sahaetiket" title="'+esc(m.join(", "))+
+               '">+'+(m.length-3)+'</span>' : ''); }]
+  ], sondor, "Bu tarih aralığında sondör verisi yok.");
+}
+})();
+</script>
+</body>
+</html>
