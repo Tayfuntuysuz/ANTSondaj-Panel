@@ -55,6 +55,8 @@ textarea{min-height:70px}
 .eyebrow{font-family:"Barlow Condensed",sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
 .pill.good{background:var(--good-soft);color:var(--good)}
+.stok-az{color:var(--warn)}
+.stok-bitti{color:var(--bad)}
 .pill.warn{background:var(--warn-soft);color:var(--warn)}
 .pill.bad{background:var(--bad-soft);color:var(--bad)}
 .readout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -80,7 +82,8 @@ td:first-child{text-align:left;color:var(--ink-2)}
 .msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
 .msg.ok{border-left-color:var(--good);background:var(--good-soft);color:var(--good)}
 .msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
-.li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.li{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.li .foto-ekle{flex:0 0 auto;padding:5px 10px;font-size:12px}
 .li:last-child{border-bottom:0}
 .hint{font-size:12px;color:var(--ink-3)}
 .bars{display:flex;flex-direction:column;gap:8px}
@@ -232,6 +235,8 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <button class="btn ghost sm" id="btn-recent" type="button">Yenile</button>
         </div>
         <div id="recent-list"><div class="hint">Yenile'ye basın.</div></div>
+        <input id="foto-sonradan" type="file" accept="image/*" multiple hidden>
+        <div id="recent-msg"></div>
       </div>
     </section>
 
@@ -306,8 +311,30 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <div class="field"><label for="b-status">Durum <span class="req">*</span></label>
             <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option></select></div>
         </div>
+        <div class="field"><label for="b-formasyon">Formasyon</label>
+          <select id="b-formasyon">
+            <option value="">— seçin —</option>
+            <option>Yeşil-siyah şist</option><option>Şist</option><option>Gnays</option>
+            <option>Kireçtaşı</option><option>Mermer</option><option>Kumtaşı</option>
+            <option>Granit</option><option>Andezit</option><option>Bazalt</option>
+            <option>Serpantinit</option><option>Skarn</option><option>Cevherli zon</option>
+            <option>Silisli zon</option><option>Alterasyon zonu</option><option>Kil</option>
+            <option>Breş</option><option value="__diger">Diğer…</option>
+          </select></div>
+        <div class="field" id="b-formasyon-diger-wrap" hidden>
+          <label for="b-formasyon-diger">Formasyon adı</label>
+          <input id="b-formasyon-diger" placeholder="örn. kloritli şist"></div>
+        <div class="hint">Formasyon, hangi taşta hangi matkabın kaç metre verdiğini görmek için.</div>
         <button class="btn" id="btn-bit-remove" type="button">Matkabı çıkar</button>
         <div id="bit-msg2"></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Sahadaki stok</span>
+          <button class="btn ghost sm" id="btn-stok-yenile" type="button">Yenile</button>
+        </div>
+        <div id="stok-liste"><div class="hint">Yenile'ye basın.</div></div>
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -658,7 +685,12 @@ $("#btn-add-run").addEventListener("click", function(){
   else { msg($("#run-msg"), ""); }
   runs.push({seq:runs.length+1, diameter:$("#f-dia").value, from_m:depth(), to_m:v, personnel_id:$("#f-runner").value});
   $("#f-to").value = "";
-  renderRuns(); updateRunButton();
+  renderRuns(); refreshState();
+  /* Kutu temizlendiği için "eksik bitiş metresi" uyarısı yeniden çıkmasın;
+     yerine ne olduğunu söyleyen onay göster. */
+  $("#btn-add-run").disabled = true;
+  msg($("#run-msg"), "Manevra eklendi. Kuyu derinliği " + tl(depth()) +
+      " m. Başka manevra varsa bitiş metresini yazın.", "ok");
 });
 $("#f-to").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); if(!$("#btn-add-run").disabled) $("#btn-add-run").click(); } });
 
@@ -884,7 +916,7 @@ function syncAll(){
     return items.reduce(function(ch, it){ return ch.then(function(){ return sendItem(it, tenant); }); }, Promise.resolve());
   }).then(function(){
     syncing = false; msg($("#sync-msg"), "Tüm kayıtlar gönderildi.", "ok");
-    return loadMaster(true).then(refreshQueue).then(function(){ if(!$("#tab-malzeme").hidden) loadBits(); });
+    return loadMaster(true).then(refreshQueue).then(function(){ if(!$("#tab-malzeme").hidden){ loadBits(); loadStok(); } });
   }).catch(function(e){
     syncing = false; msg($("#sync-msg"), "Gönderilemedi: " + (e && e.message ? e.message : e), "err"); return refreshQueue();
   });
@@ -957,7 +989,16 @@ function sendItem(it, tenant){
       bid = mm[bid];
       if(!bid) throw new Error("Matkap henüz merkeze gitmedi, sonraki denemede gönderilecek.");
     }
-    return sb.rpc("bit_remove", {p_bit:bid, p_to:it.payload.to_m, p_status:it.payload.status, p_date:it.payload.date})
+    /* 19. dosya kuruluysa formasyon da kaydedilir; değilse eski fonksiyona düşer. */
+    return sb.rpc("bit_remove2", {p_bit:bid, p_to_m:it.payload.to_m, p_date:it.payload.date,
+                                  p_status:it.payload.status, p_formation:it.payload.formasyon || null})
+      .then(function(r){
+        if(r.error && /bit_remove2|does not exist|bulunamadı/i.test(r.error.message || "")){
+          return sb.rpc("bit_remove", {p_bit:bid, p_to:it.payload.to_m,
+                                       p_status:it.payload.status, p_date:it.payload.date});
+        }
+        return r;
+      })
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
   }
   if(it.kind === "stock"){
@@ -972,6 +1013,10 @@ function sendItem(it, tenant){
   if(it.kind === "fuel"){
     return sb.from("fuel_logs").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  if(it.kind === "photo"){
+    return uploadPhotos(it.photos, tenant, it.payload.project_id, "shift", it.payload.shift_id)
+      .then(function(){ return obDel(it.id); });
   }
   if(it.kind === "expense"){
     return sb.from("expenses").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
@@ -989,7 +1034,7 @@ window.addEventListener("offline", refreshQueue);
 /* ---------------- son kayıtlar ---------------- */
 function loadRecent(){
   if(!navigator.onLine){ $("#recent-list").innerHTML = '<div class="hint">Bağlantı yokken son kayıtlar görüntülenemez.</div>'; return; }
-  sb.from("shifts").select("id,work_date,shift,fuel_liters,well_id,machine_id")
+  sb.from("shifts").select("id,work_date,shift,fuel_liters,well_id,machine_id,project_id")
     .order("work_date", {ascending:false}).order("created_at", {ascending:false}).limit(10)
     .then(function(r){
       if(r.error){ $("#recent-list").innerHTML = '<div class="hint">' + r.error.message + '</div>'; return; }
@@ -1004,12 +1049,41 @@ function loadRecent(){
         $("#recent-list").innerHTML = rows.map(function(s){
           return '<div class="li"><span><b>' + wellName(s.well_id) + '</b> <span class="hint">' + machName(s.machine_id) +
             ' · ' + s.work_date + ' · ' + (s.shift === "gece" ? "gece" : "gündüz") + '</span></span>' +
-            '<span class="num">' + tl(sums[s.id]||0) + ' m · ' + tl(s.fuel_liters||0) + ' lt</span></div>';
+            '<span class="num">' + tl(sums[s.id]||0) + ' m · ' + tl(s.fuel_liters||0) + ' lt</span>' +
+            '<button class="btn ghost sm foto-ekle" type="button" data-shift="' + s.id +
+            '" data-proje="' + (s.project_id || "") + '">Fotoğraf ekle</button></div>';
         }).join("");
+        $$(".foto-ekle").forEach(function(b){
+          b.addEventListener("click", function(){
+            SECILI_VARDIYA = {id:b.dataset.shift, proje:b.dataset.proje || $("#f-project").value};
+            $("#foto-sonradan").click();
+          });
+        });
       });
     });
 }
 $("#btn-recent").addEventListener("click", loadRecent);
+
+/* kaydedilmiş vardiyaya sonradan fotoğraf ekleme */
+var SECILI_VARDIYA = null;
+$("#foto-sonradan").addEventListener("change", function(){
+  var files = filesOf($("#foto-sonradan"));
+  $("#foto-sonradan").value = "";
+  if(!files.length || !SECILI_VARDIYA) return;
+  var v = SECILI_VARDIYA; SECILI_VARDIYA = null;
+  var tenant = MASTER.profile.tenant_id;
+  if(navigator.onLine){
+    msg($("#recent-msg"), "Fotoğraf yükleniyor…");
+    uploadPhotos(files, tenant, v.proje, "shift", v.id)
+      .then(function(){ msg($("#recent-msg"), files.length + " fotoğraf eklendi.", "ok"); })
+      .catch(function(e){ msg($("#recent-msg"), "Yüklenemedi: " + (e.message||e), "err"); });
+  } else {
+    enqueue({id:uuid(), kind:"photo", created:Date.now(), photos:files,
+             payload:{shift_id:v.id, project_id:v.proje}})
+      .then(function(){ msg($("#recent-msg"),
+        files.length + " fotoğraf kuyruğa alındı, bağlantı gelince gidecek.", "warn"); });
+  }
+});
 
 /* ---------------- özet ---------------- */
 $("#btn-summary").addEventListener("click", function(){
@@ -1046,22 +1120,37 @@ var OPENBITS = [];
 function cacheBits(list){ OPENBITS = list || []; try{ localStorage.setItem("sp_openbits", JSON.stringify(OPENBITS)); }catch(e){} renderBits(); }
 try { OPENBITS = JSON.parse(localStorage.getItem("sp_openbits") || "[]"); } catch(e){ OPENBITS = []; }
 
+/* Matkabın şu ana kadar yaptığı metre:
+   bu kuyudaki ilerleme + daha önce başka kuyularda yaptığı. */
+function bitOmru(b){
+  if(b.pending) return null;
+  var once = Number(b.total_before || 0);
+  var w = (MASTER && MASTER.wells || []).filter(function(x){ return x.code === b.well; })[0];
+  if(!w || b.from_m == null) return once || null;
+  var simdi = Number(w.current_depth || 0) - Number(b.from_m);
+  if(simdi < 0) simdi = 0;
+  return Math.round((once + simdi) * 100) / 100;
+}
 function renderBits(){
   var box = $("#bit-list");
   if(!OPENBITS.length){ box.innerHTML = '<div class="hint">Takılı matkap yok.</div>'; }
   else {
     box.innerHTML = OPENBITS.map(function(b){
+      var o = bitOmru(b);
       return '<div class="li"><span><b>' + b.brand + '</b> · ' + b.diameter +
         '<br><span class="hint">' + (b.machine||"") + (b.well ? " · " + b.well : "") +
         ' · ' + tl(b.from_m) + ' m\'den takılı' + (b.pending ? " · gönderilmeyi bekliyor" : "") + '</span></span>' +
-        '<span class="hint">' + (b.installed_at||"") + '</span></div>';
+        '<span class="num" style="text-align:right">' + (o === null ? '—' : tl(o) + ' m') +
+        '<br><span class="hint">' + (b.installed_at||"") + '</span></span></div>';
     }).join("");
   }
   var sel = $("#b-open"); var cur = sel.value; sel.innerHTML = "";
   var o0 = document.createElement("option"); o0.value=""; o0.textContent="— seçin —"; sel.appendChild(o0);
   OPENBITS.forEach(function(b){
     var o = document.createElement("option"); o.value = b.bit_id;
-    o.textContent = b.brand + " · " + b.diameter + " · " + (b.machine||"") + " (" + tl(b.from_m) + " m)";
+    var om = bitOmru(b);
+    o.textContent = b.brand + " · " + b.diameter + " · " + (b.machine||"") +
+      " (" + tl(b.from_m) + " m'den" + (om === null ? "" : ", şu ana kadar " + tl(om) + " m") + ")";
     sel.appendChild(o);
   });
   if(cur) sel.value = cur;
@@ -1076,6 +1165,39 @@ function loadBits(){
   });
 }
 $("#btn-bits-refresh").addEventListener("click", loadBits);
+$("#b-formasyon").addEventListener("change", function(){
+  $("#b-formasyon-diger-wrap").hidden = ($("#b-formasyon").value !== "__diger");
+});
+function formasyonDegeri(){
+  var v = $("#b-formasyon").value;
+  if(v === "__diger") return $("#b-formasyon-diger").value.trim() || null;
+  return v || null;
+}
+
+/* ---------------- sahadaki stok ---------------- */
+function loadStok(){
+  var proje = $("#f-project").value || ((MASTER.projects||[])[0]||{}).id;
+  if(!proje){ msg($("#stock-msg"), "Önce vardiya sekmesinden proje seçin.", "warn"); return; }
+  if(!navigator.onLine){ $("#stok-liste").innerHTML =
+    '<div class="hint">Bağlantı yokken stok görüntülenemez.</div>'; return; }
+  $("#stok-liste").innerHTML = '<div class="hint">Yükleniyor…</div>';
+  sb.rpc("stock_status", {p_project:proje}).then(function(r){
+    if(r.error){ $("#stok-liste").innerHTML = '<div class="hint">' + r.error.message + '</div>'; return; }
+    var rows = (r.data||[]).filter(function(x){ return Number(x.giris) || Number(x.cikis); });
+    if(!rows.length){ $("#stok-liste").innerHTML =
+      '<div class="hint">Henüz stok hareketi girilmemiş.</div>'; return; }
+    $("#stok-liste").innerHTML = rows.map(function(x){
+      var kalan = Number(x.kalan||0);
+      var renk = kalan <= 0 ? "stok-bitti" : (kalan < 5 ? "stok-az" : "");
+      var say = function(v){ v = Number(v||0);        /* adet tamsa ondalık gösterme */
+        return v % 1 === 0 ? v.toLocaleString("tr-TR") : tl(v); };
+      return '<div class="li"><span><b>' + x.material + '</b>' +
+        '<br><span class="hint">giren ' + say(x.giris) + ' · çıkan ' + say(x.cikis) + '</span></span>' +
+        '<span class="num"><b class="' + renk + '">' + say(kalan) + '</b> ' + (x.unit||"") + '</span></div>';
+    }).join("");
+  });
+}
+$("#btn-stok-yenile").addEventListener("click", loadStok);
 
 $("#btn-bit-install").addEventListener("click", function(){
   var mach = $("#b-machine").value, dia = $("#b-dia").value, brand = $("#b-brand").value;
@@ -1104,8 +1226,11 @@ $("#btn-bit-remove").addEventListener("click", function(){
   cacheBits(OPENBITS);
   enqueue({ id:uuid(), kind:"bit_remove", created:Date.now(),
     title:"Matkap çıkarıldı", sub: (rec ? rec.brand + " · " : "") + tl(to) + " m",
-    payload:{ bit_id:bit, to_m:to, status:$("#b-status").value, date:todayStr() } })
+    payload:{ bit_id:bit, to_m:to, status:$("#b-status").value, date:todayStr(),
+              formasyon:formasyonDegeri() } })
   .then(function(){ $("#b-to").value = "";
+    $("#b-formasyon").value = ""; $("#b-formasyon-diger").value = "";
+    $("#b-formasyon-diger-wrap").hidden = true;
     msg($("#bit-msg2"), "Kaydedildi." + (rec ? " Yaptığı metre: " + tl(to - Number(rec.from_m)) : ""), "ok"); });
 });
 
@@ -1269,7 +1394,7 @@ $$("#tabs button").forEach(function(b){
       $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
     if(b.dataset.tab === "kuyruk") refreshQueue();
     if(b.dataset.tab === "puantaj" && !$("#att-list").innerHTML) renderAttendance({});
-    if(b.dataset.tab === "malzeme") loadBits();
+    if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
     window.scrollTo(0,0);
   });
 });
