@@ -451,6 +451,18 @@ function obDel(id){ return tx("readwrite").then(function(s){ return new Promise(
   var q=s.delete(id); q.onsuccess=function(){res();}; q.onerror=function(){rej(q.error);}; }); }); }
 
 /* ---------------- config ---------------- */
+/* Adresten gelen bağlantı bilgisi: karekodla kurulum için.
+   ...index.html?u=https://xxx.supabase.co&k=eyJ...
+   Değerler bir kez kaydedilir ve adres temizlenir. */
+try{
+  var q0 = new URLSearchParams(location.search);
+  if(q0.get("u") && q0.get("k")){
+    localStorage.setItem("sp_url", q0.get("u").trim().replace(/\/+$/,""));
+    localStorage.setItem("sp_key", q0.get("k").trim());
+    history.replaceState(null, "", location.pathname);
+  }
+}catch(e){}
+
 var cfg = { url: localStorage.getItem("sp_url") || "", key: localStorage.getItem("sp_key") || "" };
 var sb = null, MASTER = null;
 
