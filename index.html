@@ -55,8 +55,15 @@ textarea{min-height:70px}
 .eyebrow{font-family:"Barlow Condensed",sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
 .pill.good{background:var(--good-soft);color:var(--good)}
+/* eksik varken kaydet düğmesi: basılabilir ama "hazır değil" görünür */
+.btn.eksikli{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
 .stok-az{color:var(--warn)}
 .stok-bitti{color:var(--bad)}
+/* sahada renk tek başına yetmez: yanına yazı da koyuyoruz */
+.stok-rozet{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;
+  font-size:11px;font-weight:800;letter-spacing:.4px;vertical-align:1px}
+.stok-rozet.az{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
+.stok-rozet.bitti{background:var(--bad-soft);color:var(--bad);border:1px solid var(--bad)}
 .pill.warn{background:var(--warn-soft);color:var(--warn)}
 .pill.bad{background:var(--bad-soft);color:var(--bad)}
 .readout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -741,22 +748,37 @@ function refreshState(){
   var todo = $("#sum-todo");
   if(fi === 0){ todo.textContent = "Tüm alanlar tamam. Kaydedebilirsiniz."; todo.className = "todo ok"; }
   else { todo.textContent = "Adım " + fi + " eksik: " + stepProblems(fi).join(", "); todo.className = "todo"; }
-  $("#btn-save-shift").disabled = (fi !== 0);
+  /* Kaydet düğmesi ARTIK PASİF YAPILMIYOR. Sahada tepkisiz düğme, şefe
+     "program bozuk" dedirtiyor. Düğme hep basılabilir; eksik varsa
+     basınca eksiğin bulunduğu adıma atlıyor ve neyin eksik olduğunu yazıyor. */
+  $("#btn-save-shift").classList.toggle("eksikli", fi !== 0);
   updateRunButton();
 }
 $$("#tab-vardiya input, #tab-vardiya select, #tab-vardiya textarea").forEach(function(el){
   el.addEventListener("change", refreshState); el.addEventListener("input", refreshState);
 });
+/* Bir adıma gitmek: hem adım düğmelerinin hem de kaydet uyarısının kullandığı yol. */
+function adimaGit(n){
+  var b = document.querySelector('.steps button[data-step="' + n + '"]');
+  if(!b) return;
+  $$(".steps button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
+  $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== String(n)); });
+  b.scrollIntoView({block:"nearest", inline:"center"});
+}
 $$(".steps button").forEach(function(b){
   b.addEventListener("click", function(){
     var n = Number(b.dataset.step), fi = firstIncomplete();
+    /* İleri adım eksik yüzünden kapalıysa kullanıcıyı yerinde bırakıp uyarı
+       yazmak sahada işe yaramıyor: şef uyarıyı görmeden "tıkladım, olmadı"
+       diyor. Onun yerine eksiğin bulunduğu adıma götürüyoruz. */
     if(fi !== 0 && n > fi){
-      msg($("#step-msg"), "Önce " + fi + ". adımı tamamlayın: " + stepProblems(fi).join(", ") + ".", "err");
+      adimaGit(fi);
+      msg($("#step-msg"), n + ". adım için önce " + fi + ". adım gerekiyor. Eksik: " +
+          stepProblems(fi).join(", ") + ".", "err");
       return;
     }
     msg($("#step-msg"), "");
-    $$(".steps button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
-    $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== b.dataset.step); });
+    adimaGit(n);
   });
 });
 
@@ -785,7 +807,17 @@ function filesOf(input){ var out=[]; for(var i=0;i<input.files.length;i++) out.p
 
 $("#btn-save-shift").addEventListener("click", function(){
   var fi = firstIncomplete();
-  if(fi !== 0){ msg($("#shift-msg"), "Adım " + fi + " eksik: " + stepProblems(fi).join(", ") + ".", "err"); return; }
+  if(fi !== 0){
+    msg($("#shift-msg"), "Kaydedilmedi — " + fi + ". adımda eksik var: " +
+        stepProblems(fi).join(", ") + ". Sizi oraya götürdüm.", "err");
+    adimaGit(fi);
+    msg($("#step-msg"), "Eksik: " + stepProblems(fi).join(", ") + ".", "err");
+    return;
+  }
+  /* Eksik kalmadı: önceki kırmızı uyarılar MUTLAKA silinmeli. Yoksa kayıt
+     başarılı olduğu hâlde ekranda "Kaydedilmedi" yazısı kalıyor ve şef
+     vardiyayı ikinci kez giriyor. */
+  msg($("#shift-msg"), ""); msg($("#step-msg"), "");
   var crew = [];
   [["#f-driller1","sondor"],["#f-driller2","sondor"],["#f-helper","alt_eleman"]].forEach(function(p){
     var v = $(p[0]).value;
@@ -980,6 +1012,9 @@ function sendItem(it, tenant){
         var m = {}; try { m = JSON.parse(localStorage.getItem("sp_bitmap") || "{}"); } catch(e){}
         m[it.payload.local_id] = r.data;
         try { localStorage.setItem("sp_bitmap", JSON.stringify(m)); } catch(e){}
+        /* gönderildi: geçici satırı listeden düşür, yoksa çift görünür */
+        OPENBITS = OPENBITS.filter(function(b){ return b.bit_id !== it.payload.local_id; });
+        cacheBits(OPENBITS);
         return obDel(it.id); });
   }
   if(it.kind === "bit_remove"){
@@ -1160,7 +1195,11 @@ function loadBits(){
   if(!navigator.onLine || !sb) return;
   sb.rpc("open_bits", {p_machine:null}).then(function(r){
     if(r.error){ msg($("#bit-msg"), r.error.message, "err"); return; }
-    var pending = OPENBITS.filter(function(b){ return b.pending; });
+    /* Merkeze gitmiş geçici satırlar burada ayıklanır. sp_bitmap'te karşılığı
+       varsa matkap sunucuya ulaşmış demektir; yerel kopyası atılır, yoksa
+       liste her yenilemede aynı matkabı iki kere gösterir. */
+    var m = {}; try { m = JSON.parse(localStorage.getItem("sp_bitmap") || "{}"); } catch(e){}
+    var pending = OPENBITS.filter(function(b){ return b.pending && !m[b.bit_id]; });
     cacheBits((r.data||[]).concat(pending));
   });
 }
@@ -1189,11 +1228,14 @@ function loadStok(){
     $("#stok-liste").innerHTML = rows.map(function(x){
       var kalan = Number(x.kalan||0);
       var renk = kalan <= 0 ? "stok-bitti" : (kalan < 5 ? "stok-az" : "");
+      var rozet = kalan <= 0 ? '<span class="stok-rozet bitti">BİTTİ</span>'
+                : (kalan < 5 ? '<span class="stok-rozet az">AZ KALDI</span>' : "");
       var say = function(v){ v = Number(v||0);        /* adet tamsa ondalık gösterme */
         return v % 1 === 0 ? v.toLocaleString("tr-TR") : tl(v); };
       return '<div class="li"><span><b>' + x.material + '</b>' +
         '<br><span class="hint">giren ' + say(x.giris) + ' · çıkan ' + say(x.cikis) + '</span></span>' +
-        '<span class="num"><b class="' + renk + '">' + say(kalan) + '</b> ' + (x.unit||"") + '</span></div>';
+        '<span class="num"><b class="' + renk + '">' + say(kalan) + '</b> ' + (x.unit||"") +
+        rozet + '</span></div>';
     }).join("");
   });
 }
