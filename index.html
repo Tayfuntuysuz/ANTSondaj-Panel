@@ -220,10 +220,12 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
       <div class="card" data-pane="5" hidden style="margin-top:12px">
         <div class="grid2">
-          <div class="field"><label for="f-fuel">Mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" inputmode="decimal" data-req="5"></div>
+          <div class="field"><label for="f-fuel">Bu vardiyada <b>harcanan</b> mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" inputmode="decimal" data-req="5"></div>
           <div class="field"><label for="f-survey">Kuyu ölçümü (adet)</label><input id="f-survey" type="number" inputmode="numeric" value="0"></div>
         </div>
-        <div class="hint">Mazot alınmadıysa 0 yazın. Kuyu ölçümü hakedişte adet olarak fiyatlanır.</div>
+        <div class="hint">Bu kulenin bu vardiyada <b>yaktığı</b> mazot. Sahaya gelen tankeri buraya değil,
+          Gider sekmesindeki "Sahaya gelen akaryakıt" kartına yazın. Hiç yakılmadıysa 0.
+          Kuyu ölçümü hakedişte adet olarak fiyatlanır.</div>
         <div class="grid2">
           <div class="field"><label for="f-lost-mat">Kuyuda kalan malzeme</label><select id="f-lost-mat"></select></div>
           <div class="field"><label for="f-lost-qty">Miktar</label><input id="f-lost-qty" type="number" inputmode="decimal" placeholder="0"></div>
@@ -249,18 +251,53 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
     <!-- YAKIT -->
     <section id="tab-yakit" hidden>
+
+      <!-- Saha yakıt bakiyesi: gelen − verilen -->
       <div class="card">
-        <span class="eyebrow">Akaryakıt girişi</span>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Sahadaki mazot</span>
+          <button class="btn ghost sm" id="btn-yakit-yenile" type="button">Yenile</button>
+        </div>
+        <div id="yakit-bakiye"><div class="hint">Yenile'ye basın.</div></div>
+      </div>
+
+      <!-- GİRİŞ: sahaya gelen tanker / alım -->
+      <div class="card" style="margin-top:14px">
+        <span class="eyebrow">Sahaya gelen akaryakıt</span>
+        <div class="hint">Tankerle gelen ya da satın alınan yakıt. Ekipmana verilen yakıt
+          aşağıdaki karta yazılır.</div>
         <div class="field"><label for="y-project">Proje <span class="req">*</span></label><select id="y-project"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="yg-date">Tarih <span class="req">*</span></label><input id="yg-date" type="date"></div>
+          <div class="field"><label for="yg-type">Cins <span class="req">*</span></label><select id="yg-type"><option>mazot</option><option>benzin</option><option>adblue</option><option>madeni_yag</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="yg-liters">Litre <span class="req">*</span></label><input id="yg-liters" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="yg-amount">Tutar (₺)</label><input id="yg-amount" type="number" inputmode="decimal"></div>
+        </div>
+        <div class="field"><label for="yg-supplier">Nereden geldi</label><input id="yg-supplier" placeholder="Petrol ofisi / tanker plakası / irsaliye no"></div>
+        <div class="field"><label for="yg-note">Açıklama</label>
+          <textarea id="yg-note" placeholder="Örn: 8 varil, irsaliye 4471"></textarea></div>
+        <button class="btn" id="btn-save-fuel-in" type="button">Gelen yakıtı kaydet</button>
+        <div id="fuelin-msg"></div>
+      </div>
+
+      <!-- ÇIKIŞ: ekipmana verilen -->
+      <div class="card" style="margin-top:14px">
+        <span class="eyebrow">Ekipmana verilen yakıt</span>
+        <div class="hint">Kuleye, traktöre, su pompasına ya da araca verilen yakıt.
+          Her verişi ayrı yazın — sahadaki bakiye bundan düşer.</div>
         <div class="grid2">
           <div class="field"><label for="y-date">Tarih <span class="req">*</span></label><input id="y-date" type="date"></div>
           <div class="field"><label for="y-type">Cins <span class="req">*</span></label><select id="y-type"><option>mazot</option><option>benzin</option><option>adblue</option><option>madeni_yag</option></select></div>
         </div>
-        <div class="field"><label for="y-machine">Makine <span class="req">*</span></label><select id="y-machine"></select></div>
+        <div class="field"><label for="y-hedef">Kime verildi <span class="req">*</span></label><select id="y-hedef"></select></div>
         <div class="grid2">
           <div class="field"><label for="y-liters">Litre <span class="req">*</span></label><input id="y-liters" type="number" inputmode="decimal"></div>
           <div class="field"><label for="y-amount">Tutar (₺)</label><input id="y-amount" type="number" inputmode="decimal"></div>
         </div>
+        <div class="field"><label for="y-note">Harcama içeriği</label>
+          <textarea id="y-note" placeholder="Örn: 1. vardiya dolumu, kule deposu tam"></textarea></div>
         <button class="btn" id="btn-save-fuel" type="button">Kaydet</button>
         <div id="fuel-msg"></div>
       </div>
@@ -550,7 +587,14 @@ function fillSelects(){
   ["#f-project","#y-project","#e-project","#p-project","#s-project"].forEach(function(s){
     opt(s, pr, function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); }); });
   opt("#f-machine", ma, function(m){ return m.code; });
-  opt("#y-machine", ma, function(m){ return m.code; });
+  /* Yakıt kimе verildi: kuleler + traktör, su pompası, araçlar tek listede.
+     Değerler "m:<id>" (makine) ya da "v:<id>" (araç/ekipman) biçiminde. */
+  var hedefler = ma.map(function(m){ return {id:"m:"+m.id, ad:m.code}; })
+    .concat((MASTER.vehicles||[]).map(function(v){
+      var etiket = v.plate + (v.fuel_class === "kule_destek" ? " · saha ekipmanı" : "");
+      return {id:"v:"+v.id, ad:etiket};
+    }));
+  opt("#y-hedef", hedefler, function(h){ return h.ad; });
   var drillers = pe.filter(function(p){ return p.kind === "sondor"; });
   opt("#f-driller1", drillers, function(p){ return p.full_name; });
   opt("#f-driller2", drillers, function(p){ return p.full_name; }, "— yok —");
@@ -900,19 +944,74 @@ function resetForm(){
 }
 
 $("#btn-save-fuel").addEventListener("click", function(){
-  var l = Number($("#y-liters").value);
-  if(!$("#y-project").value || !$("#y-machine").value || !$("#y-date").value || !l){
-    msg($("#fuel-msg"), "Proje, makine, tarih ve litre zorunlu.", "err"); return; }
+  var l = Number($("#y-liters").value), hedef = $("#y-hedef").value;
+  if(!$("#y-project").value || !$("#y-date").value || !l || !hedef){
+    msg($("#fuel-msg"), "Proje, tarih, litre ve kime verildiği zorunlu.", "err"); return; }
+  /* hedef "m:<id>" ise kule, "v:<id>" ise traktör/pompa/araç */
+  var kule = hedef.indexOf("m:") === 0 ? hedef.slice(2) : null;
+  var arac = hedef.indexOf("v:") === 0 ? hedef.slice(2) : null;
   enqueue({ id:uuid(), kind:"fuel", created:Date.now(),
-    title:"Yakıt · " + ($("#y-machine").selectedOptions[0]||{textContent:""}).textContent,
+    title:"Yakıt çıkışı · " + ($("#y-hedef").selectedOptions[0]||{textContent:""}).textContent,
     sub: tl(l) + " lt",
     payload:{ client_uuid:uuid(), project_id:$("#y-project").value, log_date:$("#y-date").value,
-      machine_id:$("#y-machine").value, fuel_type:$("#y-type").value, liters:l,
-      amount: $("#y-amount").value ? Number($("#y-amount").value) : null } }).then(function(){
-    $("#y-liters").value=""; $("#y-amount").value="";
+      machine_id:kule, vehicle_id:arac, fuel_type:$("#y-type").value, liters:l,
+      amount: $("#y-amount").value ? Number($("#y-amount").value) : null,
+      note: $("#y-note").value.trim() || null } }).then(function(){
+    $("#y-liters").value=""; $("#y-amount").value=""; $("#y-note").value="";
     msg($("#fuel-msg"), "Kaydedildi.", "ok");
+    if(navigator.onLine) setTimeout(loadYakit, 900);
   });
 });
+
+/* Sahaya gelen yakıt — ayrı tabloya (fuel_deliveries) gider */
+$("#btn-save-fuel-in").addEventListener("click", function(){
+  var l = Number($("#yg-liters").value);
+  if(!$("#y-project").value || !$("#yg-date").value || !l){
+    msg($("#fuelin-msg"), "Proje, tarih ve litre zorunlu.", "err"); return; }
+  enqueue({ id:uuid(), kind:"fuel_in", created:Date.now(),
+    title:"Sahaya gelen yakıt", sub: tl(l) + " lt",
+    payload:{ client_uuid:uuid(), project_id:$("#y-project").value,
+      delivery_date:$("#yg-date").value, fuel_type:$("#yg-type").value, liters:l,
+      amount: $("#yg-amount").value ? Number($("#yg-amount").value) : null,
+      supplier: $("#yg-supplier").value.trim() || null,
+      note: $("#yg-note").value.trim() || null } }).then(function(){
+    $("#yg-liters").value=""; $("#yg-amount").value="";
+    $("#yg-supplier").value=""; $("#yg-note").value="";
+    msg($("#fuelin-msg"), "Gelen yakıt kaydedildi.", "ok");
+    if(navigator.onLine) setTimeout(loadYakit, 900);
+  });
+});
+
+/* ---------------- sahadaki mazot ---------------- */
+function loadYakit(){
+  var proje = $("#y-project").value || $("#f-project").value
+            || ((MASTER && MASTER.projects || [])[0]||{}).id;
+  if(!proje){ $("#yakit-bakiye").innerHTML =
+    '<div class="hint">Önce proje seçin.</div>'; return; }
+  if(!navigator.onLine || !sb){ $("#yakit-bakiye").innerHTML =
+    '<div class="hint">Bağlantı yokken bakiye görüntülenemez.</div>'; return; }
+  $("#yakit-bakiye").innerHTML = '<div class="hint">Yükleniyor…</div>';
+  sb.rpc("yakit_bakiye", {p_project:proje}).then(function(r){
+    if(r.error){ $("#yakit-bakiye").innerHTML =
+      '<div class="hint">' + r.error.message + '</div>'; return; }
+    var d = r.data || {};
+    if(!d.kayit_var){ $("#yakit-bakiye").innerHTML =
+      '<div class="hint">Henüz "sahaya gelen yakıt" kaydı girilmemiş. ' +
+      'Bakiye ancak gelen yakıt yazıldıktan sonra hesaplanır.</div>'; return; }
+    var kalan = Number(d.kalan_litre||0), varil = Number(d.kalan_varil||0);
+    var renk = kalan <= 0 ? "stok-bitti" : (varil < 2 ? "stok-az" : "");
+    var rozet = kalan <= 0 ? '<span class="stok-rozet bitti">BİTTİ</span>'
+              : (varil < 2 ? '<span class="stok-rozet az">AZ KALDI</span>' : "");
+    $("#yakit-bakiye").innerHTML =
+      '<div class="li"><span><b>Sahadaki mazot</b><br><span class="hint">gelen ' +
+      tl(d.gelen_litre) + ' lt · verilen ' + tl(d.cikan_litre) + ' lt</span></span>' +
+      '<span class="num"><b class="' + renk + '">' + tl(kalan) + '</b> lt' + rozet +
+      '<br><span class="hint">' + tl(varil) + ' varil</span></span></div>' +
+      '<div class="hint">Vardiya formlarında yazılan mazot: ' + tl(d.vardiyada_yazilan) +
+      ' lt. Bu rakam bakiyeye girmez — ekipmana verilenle karşılaştırmak içindir.</div>';
+  });
+}
+$("#btn-yakit-yenile").addEventListener("click", loadYakit);
 
 $("#btn-save-exp").addEventListener("click", function(){
   var a = Number($("#e-amount").value);
@@ -1047,6 +1146,10 @@ function sendItem(it, tenant){
   }
   if(it.kind === "fuel"){
     return sb.from("fuel_logs").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  if(it.kind === "fuel_in"){
+    return sb.from("fuel_deliveries").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
   }
   if(it.kind === "photo"){
@@ -1437,6 +1540,7 @@ $$("#tabs button").forEach(function(b){
     if(b.dataset.tab === "kuyruk") refreshQueue();
     if(b.dataset.tab === "puantaj" && !$("#att-list").innerHTML) renderAttendance({});
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
+    if(b.dataset.tab === "gider") loadYakit();
     window.scrollTo(0,0);
   });
 });
@@ -1445,7 +1549,7 @@ $$("#tabs button").forEach(function(b){
 function todayStr(){ var d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function start(){
   show("scr-app");
-  ["#f-date","#y-date","#e-date","#p-date"].forEach(function(s){ if(!$(s).value) $(s).value = todayStr(); });
+  ["#f-date","#y-date","#yg-date","#e-date","#p-date"].forEach(function(s){ if(!$(s).value) $(s).value = todayStr(); });
   $("#s-month").value = todayStr().slice(0,7);
   loadMaster(false).then(refreshQueue).then(function(){ if(navigator.onLine){ syncAll(); loadRecent(); } });
 }
