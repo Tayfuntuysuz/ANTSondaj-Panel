@@ -292,6 +292,8 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <div class="field"><label for="y-type">Cins <span class="req">*</span></label><select id="y-type"><option>mazot</option><option>benzin</option><option>adblue</option><option>madeni_yag</option></select></div>
         </div>
         <div class="field"><label for="y-hedef">Kime verildi <span class="req">*</span></label><select id="y-hedef"></select></div>
+        <div class="field" id="y-shift-wrap" hidden><label for="y-shift">Hangi vardiya <span class="req">*</span></label>
+          <select id="y-shift"><option value="">— seçin —</option><option value="gunduz">Gündüz</option><option value="gece">Gece</option></select></div>
         <div class="grid2">
           <div class="field"><label for="y-liters">Litre <span class="req">*</span></label><input id="y-liters" type="number" inputmode="decimal"></div>
           <div class="field"><label for="y-amount">Tutar (₺)</label><input id="y-amount" type="number" inputmode="decimal"></div>
@@ -950,14 +952,20 @@ $("#btn-save-fuel").addEventListener("click", function(){
   /* hedef "m:<id>" ise kule, "v:<id>" ise traktör/pompa/araç */
   var kule = hedef.indexOf("m:") === 0 ? hedef.slice(2) : null;
   var arac = hedef.indexOf("v:") === 0 ? hedef.slice(2) : null;
+  /* Kuleye verilen yakıt hangi vardiyaya ait olduğu bilinmeden işe yaramaz:
+     vardiya bazlı litre/metre bu alandan hesaplanıyor. */
+  if(kule && !$("#y-shift").value){
+    msg($("#fuel-msg"), "Kuleye verilen yakıtta vardiya zorunlu — gündüz mü, gece mi?", "err"); return; }
   enqueue({ id:uuid(), kind:"fuel", created:Date.now(),
     title:"Yakıt çıkışı · " + ($("#y-hedef").selectedOptions[0]||{textContent:""}).textContent,
     sub: tl(l) + " lt",
     payload:{ client_uuid:uuid(), project_id:$("#y-project").value, log_date:$("#y-date").value,
-      machine_id:kule, vehicle_id:arac, fuel_type:$("#y-type").value, liters:l,
+      machine_id:kule, vehicle_id:arac, shift:($("#y-shift").value || null),
+      fuel_type:$("#y-type").value, liters:l,
       amount: $("#y-amount").value ? Number($("#y-amount").value) : null,
       note: $("#y-note").value.trim() || null } }).then(function(){
     $("#y-liters").value=""; $("#y-amount").value=""; $("#y-note").value="";
+    $("#y-shift").value="";
     msg($("#fuel-msg"), "Kaydedildi.", "ok");
     if(navigator.onLine) setTimeout(loadYakit, 900);
   });
@@ -1012,6 +1020,13 @@ function loadYakit(){
   });
 }
 $("#btn-yakit-yenile").addEventListener("click", loadYakit);
+
+/* Vardiya yalnız kule için sorulur. Traktör, pompa ve araçlarda vardiya yoktur. */
+$("#y-hedef").addEventListener("change", function(){
+  var kule = $("#y-hedef").value.indexOf("m:") === 0;
+  $("#y-shift-wrap").hidden = !kule;
+  if(!kule) $("#y-shift").value = "";
+});
 
 $("#btn-save-exp").addEventListener("click", function(){
   var a = Number($("#e-amount").value);
