@@ -1463,7 +1463,21 @@ var ATT_IST   = {};    /* personel_id -> {status, advance_amount, single_shift} 
 var ATT_YUKLU = null;  /* ekrandaki listenin ait olduğu proje|gün */
 
 function attAnahtar(){ return $("#p-project").value + "|" + $("#p-date").value; }
-function ekip(){ return (MASTER && MASTER.personnel) || []; }
+/* Ekip artık GİRİŞ YAPAN KULLANICIYA değil, SEÇİLEN PROJE VE TARİHE göre
+   sunucudan gelir. Yönetici Amasya'yı seçtiğinde de yalnız Amasya ekibi çıkar.
+   Çevrimdışıyken son bilinen listeye düşülür. */
+var EKIP = null;           /* crew_of(proje, tarih) sonucu */
+var EKIP_ANAHTAR = null;
+function ekip(){ return EKIP || (MASTER && MASTER.personnel) || []; }
+function ekipYukle(){
+  var pr = $("#p-project").value, tr = $("#p-date").value || todayStr();
+  if(!pr) { EKIP = null; EKIP_ANAHTAR = null; return Promise.resolve(); }
+  if(!navigator.onLine || !sb){ return Promise.resolve(); }
+  return sb.rpc("crew_of", {p_project:pr, p_date:tr}).then(function(r){
+    if(r.error){ msg($("#att-msg"), r.error.message, "err"); return; }
+    EKIP = r.data || []; EKIP_ANAHTAR = pr + "|" + tr;
+  });
+}
 function kisiAdi(id){
   var k = ekip().filter(function(p){ return p.id === id; })[0]
        || ((MASTER && MASTER.personnel_all) || []).filter(function(p){ return p.id === id; })[0];
@@ -1479,13 +1493,18 @@ function istisnaMi(x){
                  Number(x.advance_amount || 0) > 0 || !!x.single_shift);
 }
 
+function santiyeAdi(){
+  var o = $("#p-project").selectedOptions[0];
+  var t = o ? o.textContent : "";
+  return t.indexOf(" · ") > -1 ? t.split(" · ").pop() : t;
+}
 function attOzet(){
   var n = ekip().length, k = Object.keys(ATT_IST).length;
   $("#att-ozet").innerHTML = n
-    ? "<b>" + n + " kişi</b> · " + (k ? k + " istisna, kalan " + (n - k) + " kişi çalıştı"
-                                      : "hepsi çalıştı")
-    : "Bu sahada kayıtlı ekip yok. Aşağıdan <b>Saha ekibi</b> bölümünden kişi ekleyin.";
-  $("#ekip-ozet").textContent = n + " kişi";
+    ? '<span class="hint">' + santiyeAdi() + " · " + ($("#p-date").value||"") + "</span><br><b>" +
+      n + " kişi</b> · " + (k ? k + " istisna, kalan " + (n - k) + " kişi çalıştı" : "hepsi çalıştı")
+    : "Bu şantiyede bu tarihte görevli kimse yok. Aşağıdan <b>Saha ekibi</b> bölümünden kişi alın.";
+  $("#ekip-ozet").textContent = n + " kişi · " + ($("#p-date").value || "");
 }
 
 function attCiz(){
@@ -1582,7 +1601,8 @@ function attLoad(sessiz){
   }
   var anahtar = attAnahtar();
   msg($("#att-msg"), "Getiriliyor…");
-  return sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value})
+  return ekipYukle().then(function(){
+    return sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value}); })
     .then(function(r){
       if(r.error){ ATT_YUKLU = null; msg($("#att-msg"), r.error.message, "err"); return; }
       ATT_IST = {};
@@ -1654,11 +1674,13 @@ $("#btn-ekip-ac").addEventListener("click", function(){
 function ekipCiz(){
   var box = $("#ekip-liste"); box.innerHTML = "";
   var ks = ekip();
-  if(!ks.length){ box.innerHTML = '<div class="hint">Ekip boş.</div>'; attOzet(); return; }
+  if(!ks.length){ box.innerHTML = '<div class="hint">Bu tarihte bu şantiyede görevli kimse yok.</div>';
+    attOzet(); return; }
   ks.forEach(function(p){
     var d = document.createElement("div"); d.className = "ekip-satir";
     d.innerHTML = "<span><b>" + p.full_name + "</b><br><span class='hint'>" +
-                  String(p.kind||"").replace(/_/g," ") + "</span></span>";
+                  String(p.kind||"").replace(/_/g," ") +
+                  (p.from_date ? " · " + p.from_date + "'den beri" : "") + "</span></span>";
     var cik = document.createElement("button");
     cik.type = "button"; cik.className = "btn ghost sm"; cik.textContent = "Çıkar";
     cik.addEventListener("click", function(){ ekipCikar(p); });
@@ -1668,13 +1690,16 @@ function ekipCiz(){
 }
 function ekipCikar(p){
   if(!navigator.onLine || !sb){ msg($("#ekip-msg"), "Ekip değişikliği için bağlantı gerekiyor.", "err"); return; }
+  var tr = $("#p-date").value || todayStr();
   msg($("#ekip-msg"), p.full_name + " çıkarılıyor…");
-  sb.rpc("unassign_personnel", {p_project:$("#p-project").value, p_personnel:p.id}).then(function(r){
+  sb.rpc("unassign_personnel", {p_project:$("#p-project").value, p_personnel:p.id, p_date:tr})
+   .then(function(r){
     if(r.error){ msg($("#ekip-msg"), r.error.message, "err"); return; }
     delete ATT_IST[p.id];
-    loadMaster(true).then(function(){
+    ekipYukle().then(function(){
       ekipCiz(); attCiz();
-      msg($("#ekip-msg"), p.full_name + " sahadan çıkarıldı. Geçmiş kayıtları duruyor.", "ok");
+      msg($("#ekip-msg"), p.full_name + " · " + tr + " itibarıyla bu şantiyeden çıkarıldı. " +
+          "Geçmiş puantaj ve vardiya kayıtları duruyor.", "ok");
     });
   });
 }
@@ -1682,20 +1707,39 @@ $("#btn-ekip-ekle").addEventListener("click", function(){
   var ac = $("#ekip-sec").hidden;
   $("#ekip-sec").hidden = !ac;
   $("#btn-ekip-ekle").textContent = ac ? "Kapat" : "+ Kişi ekle";
-  if(ac){ $("#ekip-ara").value = ""; ekipAraCiz(); $("#ekip-ara").focus(); }
+  if(ac){ $("#ekip-ara").value = ""; $("#ekip-sonuc").innerHTML =
+    '<div class="hint" style="padding:11px 12px">Yükleniyor…</div>';
+    havuzYukle().then(function(){ ekipAraCiz(); $("#ekip-ara").focus(); }); }
 });
+var HAVUZ = [];
+function havuzYukle(){
+  var pr = $("#p-project").value, tr = $("#p-date").value || todayStr();
+  if(!pr || !navigator.onLine || !sb){ HAVUZ = []; return Promise.resolve(); }
+  return sb.rpc("crew_pool", {p_project:pr, p_date:tr}).then(function(r){
+    HAVUZ = r.error ? [] : (r.data || []); });
+}
 function ekipAraCiz(){
-  var icerde = {}; ekip().forEach(function(p){ icerde[p.id] = true; });
-  var disarda = ((MASTER && MASTER.personnel_all) || []).filter(function(p){ return !icerde[p.id]; });
-  araCiz($("#ekip-sonuc"), suz(disarda, $("#ekip-ara").value), function(p){
+  /* Havuzda kişinin o gün hangi sahada olduğu da yazar: şef birini alırken
+     transfer ettiğini görür. */
+  var liste = suz(HAVUZ, $("#ekip-ara").value).map(function(p){
+    return Object.assign({}, p, {
+      kind: String(p.kind||"").replace(/_/g," ") + (p.nerede ? " · şu an " + p.nerede : " · boşta") });
+  });
+  araCiz($("#ekip-sonuc"), liste, function(p){
     if(!navigator.onLine || !sb){ msg($("#ekip-msg"), "Ekip değişikliği için bağlantı gerekiyor.", "err"); return; }
-    msg($("#ekip-msg"), p.full_name + " ekleniyor…");
-    sb.rpc("assign_personnel", {p_project:$("#p-project").value, p_personnel:p.id}).then(function(r){
+    var tr = $("#p-date").value || todayStr();
+    msg($("#ekip-msg"), p.full_name + " alınıyor…");
+    sb.rpc("assign_personnel", {p_project:$("#p-project").value, p_personnel:p.id, p_date:tr})
+     .then(function(r){
       if(r.error){ msg($("#ekip-msg"), r.error.message, "err"); return; }
       $("#ekip-sec").hidden = true; $("#btn-ekip-ekle").textContent = "+ Kişi ekle";
-      loadMaster(true).then(function(){
+      var d = r.data || {};
+      return Promise.all([ekipYukle(), havuzYukle()]).then(function(){
         ekipCiz(); attCiz();
-        msg($("#ekip-msg"), p.full_name + " ekibe eklendi.", "ok");
+        msg($("#ekip-msg"), d.durum === "transfer"
+          ? p.full_name + " · " + tr + " itibarıyla " + (d.onceki_saha || "önceki şantiye") +
+            " görevinden alınıp bu şantiyeye yazıldı."
+          : p.full_name + " · " + tr + " itibarıyla ekibe alındı.", "ok");
       });
     });
   });
