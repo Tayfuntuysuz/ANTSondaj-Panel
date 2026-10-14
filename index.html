@@ -57,6 +57,19 @@ textarea{min-height:70px}
 .pill.good{background:var(--good-soft);color:var(--good)}
 /* eksik varken kaydet düğmesi: basılabilir ama "hazır değil" görünür */
 .btn.eksikli{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
+.ozet-kutu{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--card)}
+.ozet-kutu b{font-size:17px}
+.ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.ara-sonuc button{display:block;width:100%;text-align:left;border:0;background:none;padding:11px 12px;
+  border-bottom:1px solid var(--line-soft);font:inherit;color:inherit;cursor:pointer;min-height:44px}
+.ara-sonuc button:last-child{border-bottom:0}
+.ara-sonuc button:active{background:var(--card-2)}
+.ist-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
+.ist-ust{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ist-sil{border:0;background:none;font-size:20px;line-height:1;color:var(--bad);cursor:pointer;padding:0 4px;min-height:32px}
+.ekip-satir{display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.ekip-satir:last-child{border-bottom:0}
 .stok-az{color:var(--warn)}
 .stok-bitti{color:var(--bad)}
 /* sahada renk tek başına yetmez: yanına yazı da koyuyoruz */
@@ -401,19 +414,45 @@ td:first-child{text-align:left;color:var(--ink-2)}
     <section id="tab-puantaj" hidden>
       <div class="card">
         <span class="eyebrow">Puantaj</span>
-        <div class="field"><label for="p-project">Proje <span class="req">*</span></label><select id="p-project"></select></div>
-        <div class="field"><label for="p-date">Tarih <span class="req">*</span></label><input id="p-date" type="date"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn ghost sm" id="btn-att-load" type="button">Günü getir</button>
-          <button class="btn ghost sm" id="btn-att-all" type="button">Tümü çalıştı</button>
+        <div class="grid2">
+          <div class="field"><label for="p-project">Proje <span class="req">*</span></label><select id="p-project"></select></div>
+          <div class="field"><label for="p-date">Tarih <span class="req">*</span></label><input id="p-date" type="date"></div>
         </div>
+        <div id="att-ozet" class="ozet-kutu">Yükleniyor…</div>
         <div id="att-msg"></div>
-        <div class="hint">Varsayılan "çalıştı". Sadece istisnaları değiştirin. Avans girecekseniz tutarı yazın.</div>
+        <button class="btn ghost" id="btn-att-exc" type="button">+ İstisna ekle</button>
+        <div id="att-sec" hidden>
+          <input id="att-ara" placeholder="İsim yazın…" autocomplete="off">
+          <div id="att-sonuc" class="ara-sonuc"></div>
+        </div>
+        <div class="hint">Yazmadığınız herkes <b>çalıştı</b> sayılır. Yalnız izinli, raporlu,
+          avans alan ya da tek çalışan kişileri ekleyin.</div>
       </div>
+
       <div id="att-list" style="margin-top:12px"></div>
+
       <div class="card" style="margin-top:12px">
         <button class="btn" id="btn-att-save" type="button">Puantajı kaydet</button>
         <div id="att-msg2"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Saha ekibi</span>
+          <button class="btn ghost sm" id="btn-ekip-ac" type="button">Düzenle</button>
+        </div>
+        <div id="ekip-ozet" class="hint">—</div>
+        <div id="ekip-kutu" hidden>
+          <div id="ekip-liste"></div>
+          <button class="btn ghost sm" id="btn-ekip-ekle" type="button" style="margin-top:10px">+ Kişi ekle</button>
+          <div id="ekip-sec" hidden>
+            <input id="ekip-ara" placeholder="Şirket listesinde ara…" autocomplete="off">
+            <div id="ekip-sonuc" class="ara-sonuc"></div>
+          </div>
+          <div class="hint">Çıkarmak kaydı silmez — kişinin bu sahadaki görevini bugün kapatır.
+            Geçmiş puantaj, vardiya ve prim kayıtları yerinde kalır.</div>
+          <div id="ekip-msg"></div>
+        </div>
       </div>
     </section>
 
@@ -1413,58 +1452,132 @@ $("#btn-stock").addEventListener("click", function(){
 
 /* ---------------- puantaj ---------------- */
 var ATT_STATUS = [["calisti","Çalıştı"],["izin","İzin"],["rapor","Rapor"],["ucretsiz_izin","Ücretsiz izin"],["bayram","Bayram"],["ozel_durum","Özel durum"]];
-function renderAttendance(existing){
+
+/* ============================================================
+   PUANTAJ — istisna mantığı
+   Şefin günlük gerçeği "herkes çalıştı, biri izinli". 17 satırlık form
+   sahada kaydırılamıyordu; 30+ kişilik şantiyede hiç çalışmaz. Ekran artık
+   yalnız İSTİSNALARI tutuyor: yazılmayan herkes çalıştı sayılır.
+   ============================================================ */
+var ATT_IST   = {};    /* personel_id -> {status, advance_amount, single_shift} */
+var ATT_YUKLU = null;  /* ekrandaki listenin ait olduğu proje|gün */
+
+function attAnahtar(){ return $("#p-project").value + "|" + $("#p-date").value; }
+function ekip(){ return (MASTER && MASTER.personnel) || []; }
+function kisiAdi(id){
+  var k = ekip().filter(function(p){ return p.id === id; })[0]
+       || ((MASTER && MASTER.personnel_all) || []).filter(function(p){ return p.id === id; })[0];
+  return k ? k.full_name : "—";
+}
+function durumAdi(v){
+  var d = ATT_STATUS.filter(function(s){ return s[0] === v; })[0];
+  return d ? d[1] : v;
+}
+/* Bir kayıt istisna mı? Çalıştı + avans yok + tek çalışma yok ise değildir. */
+function istisnaMi(x){
+  return !!x && ((x.status && x.status !== "calisti") ||
+                 Number(x.advance_amount || 0) > 0 || !!x.single_shift);
+}
+
+function attOzet(){
+  var n = ekip().length, k = Object.keys(ATT_IST).length;
+  $("#att-ozet").innerHTML = n
+    ? "<b>" + n + " kişi</b> · " + (k ? k + " istisna, kalan " + (n - k) + " kişi çalıştı"
+                                      : "hepsi çalıştı")
+    : "Bu sahada kayıtlı ekip yok. Aşağıdan <b>Saha ekibi</b> bölümünden kişi ekleyin.";
+  $("#ekip-ozet").textContent = n + " kişi";
+}
+
+function attCiz(){
   var box = $("#att-list"); box.innerHTML = "";
-  var people = (MASTER && MASTER.personnel || []);
-  if(!people.length){ box.innerHTML = '<div class="card hint">Personel listesi boş.</div>'; return; }
+  var ids = Object.keys(ATT_IST);
+  if(!ids.length){ attOzet(); return; }
   var card = document.createElement("div"); card.className = "card";
-  people.forEach(function(p){
-    var cur = existing[p.id] || {};
-    var row = document.createElement("div");
-    row.style.cssText = "display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--line-soft)";
-    row.innerHTML = "<div style='display:flex;justify-content:space-between;gap:8px'><b>" + p.full_name +
-      "</b><span class='hint'>" + p.kind.replace(/_/g," ") + "</span></div>";
-    var line = document.createElement("div");
-    line.style.cssText = "display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center";
-    var sel = document.createElement("select");
-    sel.dataset.att = p.id;
-    ATT_STATUS.forEach(function(s){ var o=document.createElement("option"); o.value=s[0]; o.textContent=s[1]; sel.appendChild(o); });
-    sel.value = cur.status || "calisti";
+  ids.sort(function(a,b){ return kisiAdi(a).localeCompare(kisiAdi(b), "tr"); });
+  ids.forEach(function(id){
+    var v = ATT_IST[id];
+    var d = document.createElement("div"); d.className = "ist-satir";
+
+    var ust = document.createElement("div"); ust.className = "ist-ust";
+    var ad = document.createElement("b"); ad.textContent = kisiAdi(id);
+    var sil = document.createElement("button");
+    sil.type = "button"; sil.className = "ist-sil"; sil.textContent = "×";
+    sil.setAttribute("aria-label", kisiAdi(id) + " istisnasını kaldır");
+    sil.addEventListener("click", function(){ delete ATT_IST[id]; attCiz(); });
+    ust.appendChild(ad); ust.appendChild(sil);
+
+    var alt = document.createElement("div");
+    alt.style.cssText = "display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px";
+    var sel = document.createElement("select"); sel.dataset.att = id;
+    ATT_STATUS.forEach(function(st){
+      var o = document.createElement("option"); o.value = st[0]; o.textContent = st[1]; sel.appendChild(o); });
+    sel.value = v.status || "calisti";
+    sel.addEventListener("change", function(){ ATT_IST[id].status = sel.value; });
     var adv = document.createElement("input");
-    adv.type = "number"; adv.inputMode = "decimal"; adv.placeholder = "avans ₺";
-    adv.dataset.adv = p.id;
-    if(cur.advance_amount) adv.value = cur.advance_amount;
-    line.appendChild(sel); line.appendChild(adv);
+    adv.type = "number"; adv.inputMode = "decimal"; adv.placeholder = "avans ₺"; adv.dataset.adv = id;
+    if(v.advance_amount) adv.value = v.advance_amount;
+    adv.addEventListener("input", function(){
+      ATT_IST[id].advance_amount = adv.value ? Number(adv.value) : null; });
+    alt.appendChild(sel); alt.appendChild(adv);
+
     var tek = document.createElement("label");
-    tek.style.cssText = "display:flex;align-items:center;gap:8px;font-size:13px";
+    tek.style.cssText = "display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px";
     var cb = document.createElement("input");
-    cb.type = "checkbox"; cb.dataset.tek = p.id; cb.style.cssText = "width:20px;min-height:20px";
-    cb.checked = !!cur.single_shift;
+    cb.type = "checkbox"; cb.dataset.tek = id; cb.style.cssText = "width:20px;min-height:20px";
+    cb.checked = !!v.single_shift;
+    cb.addEventListener("change", function(){ ATT_IST[id].single_shift = cb.checked; });
     tek.appendChild(cb); tek.appendChild(document.createTextNode("Tek çalışma"));
-    row.appendChild(line); row.appendChild(tek);
-    card.appendChild(row);
+
+    d.appendChild(ust); d.appendChild(alt); d.appendChild(tek);
+    card.appendChild(d);
   });
   box.appendChild(card);
+  attOzet();
 }
-$("#btn-att-all").addEventListener("click", function(){
-  $$("[data-att]").forEach(function(s){ s.value = "calisti"; });
-  msg($("#att-msg"), "Herkes çalıştı olarak işaretlendi.", "ok");
-});
-/* Ekrandaki listenin hangi proje/güne ait olduğu. Kaydetme bunu doğrular:
-   puantaj kaydı o günün TAMAMINI ezdiği için, getirilmemiş bir güne basılan
-   Kaydet daha önce girilmiş izin, rapor ve avansları siler. */
-var ATT_YUKLU = null;
-function attAnahtar(){ return $("#p-project").value + "|" + $("#p-date").value; }
 
+/* ---- isim arama (istisna ekleme) ---- */
+function araCiz(kutu, liste, secildi){
+  kutu.innerHTML = "";
+  if(!liste.length){ kutu.innerHTML = '<div class="hint" style="padding:11px 12px">Eşleşen isim yok.</div>'; return; }
+  liste.slice(0, 40).forEach(function(p){
+    var b = document.createElement("button"); b.type = "button";
+    b.innerHTML = p.full_name + ' <span class="hint">· ' + String(p.kind||"").replace(/_/g," ") + "</span>";
+    b.addEventListener("click", function(){ secildi(p); });
+    kutu.appendChild(b);
+  });
+}
+function suz(liste, q){
+  q = (q||"").toLocaleLowerCase("tr").trim();
+  if(!q) return liste;
+  return liste.filter(function(p){ return p.full_name.toLocaleLowerCase("tr").indexOf(q) > -1; });
+}
+$("#btn-att-exc").addEventListener("click", function(){
+  var ac = $("#att-sec").hidden;
+  $("#att-sec").hidden = !ac;
+  $("#btn-att-exc").textContent = ac ? "Kapat" : "+ İstisna ekle";
+  if(ac){ $("#att-ara").value = ""; attAraCiz(); $("#att-ara").focus(); }
+});
+function attAraCiz(){
+  var kalan = ekip().filter(function(p){ return !ATT_IST[p.id]; });
+  araCiz($("#att-sonuc"), suz(kalan, $("#att-ara").value), function(p){
+    ATT_IST[p.id] = {status:"izin", advance_amount:null, single_shift:false};
+    $("#att-sec").hidden = true; $("#btn-att-exc").textContent = "+ İstisna ekle";
+    attCiz();
+    msg($("#att-msg"), p.full_name + " eklendi — durumunu aşağıdan seçin.", "ok");
+  });
+}
+$("#att-ara").addEventListener("input", attAraCiz);
+
+/* ---- günü getirme ---- */
 function attLoad(sessiz){
   if(!$("#p-project").value || !$("#p-date").value){
     if(!sessiz) msg($("#att-msg"), "Proje ve tarih seçin.", "err");
     return Promise.resolve();
   }
   if(!navigator.onLine || !sb){
-    renderAttendance({}); ATT_YUKLU = null;
-    msg($("#att-msg"), "Bağlantı yok. Bu gün için daha önce kayıt girildiyse göremiyorum — " +
-        "kaydederseniz o kayıtların üzerine yazılır.", "warn");
+    ATT_IST = {}; ATT_YUKLU = null; attCiz();
+    msg($("#att-msg"), "Bağlantı yok. Bu güne daha önce kayıt girildiyse göremiyorum — " +
+        "kaydederseniz üzerine yazılır.", "warn");
     return Promise.resolve();
   }
   var anahtar = attAnahtar();
@@ -1472,58 +1585,122 @@ function attLoad(sessiz){
   return sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value})
     .then(function(r){
       if(r.error){ ATT_YUKLU = null; msg($("#att-msg"), r.error.message, "err"); return; }
-      var map = {};
-      (r.data||[]).forEach(function(x){ map[x.personnel_id] = x; });
-      renderAttendance(map);
+      ATT_IST = {};
+      (r.data||[]).forEach(function(x){
+        if(istisnaMi(x)) ATT_IST[x.personnel_id] = {
+          status: x.status || "calisti",
+          advance_amount: x.advance_amount || null,
+          single_shift: !!x.single_shift };
+      });
       ATT_YUKLU = anahtar;
+      attCiz();
+      var k = Object.keys(ATT_IST).length;
       msg($("#att-msg"), (r.data||[]).length
-        ? (r.data||[]).length + " kişilik kayıt yüklendi, üzerine yazabilirsiniz."
-        : "Bu gün için kayıt yok — herkes çalıştı olarak geldi.", "ok");
+        ? (k ? k + " istisna yüklendi." : "Kayıt var, istisna yok — herkes çalışmış.")
+        : "Bu gün için kayıt yok.", "ok");
     });
 }
-$("#btn-att-load").addEventListener("click", function(){ attLoad(false); });
-/* Proje ya da tarih değişince liste o güne göre yenilenir; böylece ekranda
-   her zaman o günün gerçek kaydı durur. */
+$("#btn-att-load") && $("#btn-att-load").addEventListener("click", function(){ attLoad(false); });
 ["#p-project","#p-date"].forEach(function(sel){
   $(sel).addEventListener("change", function(){ ATT_YUKLU = null; attLoad(true); });
 });
+
+/* ---- kaydetme ---- */
 $("#btn-att-save").addEventListener("click", function(){
-  /* Her düğmenin cevabı kendi yanında çıkar: yükleme uyarıları yukarıda
-     (#att-msg), kaydetme sonucu kaydet düğmesinin altında (#att-msg2).
-     Eksik alan uyarısı alan yukarıda olduğu için iki yere birden yazılır. */
   if(!$("#p-project").value || !$("#p-date").value){
     msg($("#att-msg2"), "Proje ve tarih seçin — yukarıdaki kart.", "err");
     msg($("#att-msg"),  "Proje ve tarih seçin.", "err");
     $("#p-project").scrollIntoView({block:"center"});
-    return; }
-  var rows = $$("[data-att]").map(function(s){
-    var id = s.dataset.att;
-    var adv = document.querySelector("[data-adv='" + id + "']");
-    var tek = document.querySelector("[data-tek='" + id + "']");
-    return { personnel_id:id, status:s.value, single_shift: tek ? tek.checked : false,
-             advance_amount: (adv && adv.value) ? Number(adv.value) : null };
-  });
-  if(!rows.length){ msg($("#att-msg2"), "Personel listesi boş.", "err"); return; }
-  /* Liste bu güne ait değilse körlemesine kaydetme.
-     ÇEVRİMDIŞIYKEN ENGELLEMEZ: sahada internet yokken puantaj girilebilmeli.
-     O durumda yukarıdaki kartta zaten "üzerine yazılır" uyarısı duruyor. */
-  if(navigator.onLine && ATT_YUKLU !== attAnahtar()){
-    msg($("#att-msg2"), "Önce \u201cGünü getir\u201de basın. Ekrandaki liste " +
-        $("#p-date").value + " gününe ait değil; şimdi kaydederseniz o güne girilmiş " +
-        "izin, rapor ve avanslar silinir.", "err");
-    msg($("#att-msg"), "Bu güne basın: Günü getir.", "err");
-    $("#btn-att-load").scrollIntoView({block:"center"});
     return;
   }
+  var kisiler = ekip();
+  if(!kisiler.length){
+    msg($("#att-msg2"), "Bu sahada ekip yok. Önce Saha ekibi bölümünden kişi ekleyin.", "err"); return; }
+  /* Çevrimdışıyken engellemez: sahada internet yokken puantaj girilebilmeli. */
+  if(navigator.onLine && ATT_YUKLU !== attAnahtar()){
+    msg($("#att-msg2"), "Gün henüz getirilmedi. Tarihi bir değiştirip geri alın — " +
+        "yoksa o güne girilmiş kayıtların üzerine yazılır.", "err");
+    return;
+  }
+  var rows = kisiler.map(function(p){
+    var v = ATT_IST[p.id];
+    return { personnel_id: p.id,
+             status: (v && v.status) || "calisti",
+             single_shift: !!(v && v.single_shift),
+             advance_amount: (v && v.advance_amount) ? Number(v.advance_amount) : null };
+  });
+  var k = Object.keys(ATT_IST).length;
   enqueue({ id:uuid(), kind:"attendance", created:Date.now(),
     title:"Puantaj · " + $("#p-date").value, sub: rows.length + " personel",
     payload:{ project_id:$("#p-project").value, work_date:$("#p-date").value, rows:rows } }).then(function(){
     ATT_YUKLU = attAnahtar();
-    msg($("#att-msg2"), rows.length + " kişilik puantaj kaydedildi · " + $("#p-date").value +
+    msg($("#att-msg2"), rows.length + " kişi kaydedildi · " + $("#p-date").value + " · " +
+        (k ? k + " istisna" : "istisna yok") +
         (navigator.onLine ? "" : " · bağlantı gelince gönderilecek"), "ok");
     msg($("#att-msg"), "");
   });
 });
+
+/* ============================================================
+   SAHA EKİBİ — şef kendi ekibini düzenler
+   Çıkarma kaydı silmez, atamayı bugün kapatır.
+   ============================================================ */
+$("#btn-ekip-ac").addEventListener("click", function(){
+  var ac = $("#ekip-kutu").hidden;
+  $("#ekip-kutu").hidden = !ac;
+  $("#btn-ekip-ac").textContent = ac ? "Kapat" : "Düzenle";
+  if(ac) ekipCiz();
+});
+function ekipCiz(){
+  var box = $("#ekip-liste"); box.innerHTML = "";
+  var ks = ekip();
+  if(!ks.length){ box.innerHTML = '<div class="hint">Ekip boş.</div>'; attOzet(); return; }
+  ks.forEach(function(p){
+    var d = document.createElement("div"); d.className = "ekip-satir";
+    d.innerHTML = "<span><b>" + p.full_name + "</b><br><span class='hint'>" +
+                  String(p.kind||"").replace(/_/g," ") + "</span></span>";
+    var cik = document.createElement("button");
+    cik.type = "button"; cik.className = "btn ghost sm"; cik.textContent = "Çıkar";
+    cik.addEventListener("click", function(){ ekipCikar(p); });
+    d.appendChild(cik); box.appendChild(d);
+  });
+  attOzet();
+}
+function ekipCikar(p){
+  if(!navigator.onLine || !sb){ msg($("#ekip-msg"), "Ekip değişikliği için bağlantı gerekiyor.", "err"); return; }
+  msg($("#ekip-msg"), p.full_name + " çıkarılıyor…");
+  sb.rpc("unassign_personnel", {p_project:$("#p-project").value, p_personnel:p.id}).then(function(r){
+    if(r.error){ msg($("#ekip-msg"), r.error.message, "err"); return; }
+    delete ATT_IST[p.id];
+    loadMaster(true).then(function(){
+      ekipCiz(); attCiz();
+      msg($("#ekip-msg"), p.full_name + " sahadan çıkarıldı. Geçmiş kayıtları duruyor.", "ok");
+    });
+  });
+}
+$("#btn-ekip-ekle").addEventListener("click", function(){
+  var ac = $("#ekip-sec").hidden;
+  $("#ekip-sec").hidden = !ac;
+  $("#btn-ekip-ekle").textContent = ac ? "Kapat" : "+ Kişi ekle";
+  if(ac){ $("#ekip-ara").value = ""; ekipAraCiz(); $("#ekip-ara").focus(); }
+});
+function ekipAraCiz(){
+  var icerde = {}; ekip().forEach(function(p){ icerde[p.id] = true; });
+  var disarda = ((MASTER && MASTER.personnel_all) || []).filter(function(p){ return !icerde[p.id]; });
+  araCiz($("#ekip-sonuc"), suz(disarda, $("#ekip-ara").value), function(p){
+    if(!navigator.onLine || !sb){ msg($("#ekip-msg"), "Ekip değişikliği için bağlantı gerekiyor.", "err"); return; }
+    msg($("#ekip-msg"), p.full_name + " ekleniyor…");
+    sb.rpc("assign_personnel", {p_project:$("#p-project").value, p_personnel:p.id}).then(function(r){
+      if(r.error){ msg($("#ekip-msg"), r.error.message, "err"); return; }
+      $("#ekip-sec").hidden = true; $("#btn-ekip-ekle").textContent = "+ Kişi ekle";
+      loadMaster(true).then(function(){
+        ekipCiz(); attCiz();
+        msg($("#ekip-msg"), p.full_name + " ekibe eklendi.", "ok");
+      });
+    });
+  });
+}
+$("#ekip-ara").addEventListener("input", ekipAraCiz);
 
 /* ---------------- prim ---------------- */
 function multRow(v){
@@ -1604,7 +1781,7 @@ $$("#tabs button").forEach(function(b){
     ["vardiya","malzeme","yakit","nakit","puantaj","ozet","kuyruk"].forEach(function(t){
       $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
     if(b.dataset.tab === "kuyruk") refreshQueue();
-    if(b.dataset.tab === "puantaj") attLoad(true);
+    if(b.dataset.tab === "puantaj"){ attCiz(); attLoad(true); }
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
     if(b.dataset.tab === "gider") loadYakit();
     window.scrollTo(0,0);
