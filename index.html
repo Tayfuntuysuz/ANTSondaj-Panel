@@ -407,12 +407,13 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <button class="btn ghost sm" id="btn-att-load" type="button">Günü getir</button>
           <button class="btn ghost sm" id="btn-att-all" type="button">Tümü çalıştı</button>
         </div>
+        <div id="att-msg"></div>
         <div class="hint">Varsayılan "çalıştı". Sadece istisnaları değiştirin. Avans girecekseniz tutarı yazın.</div>
       </div>
       <div id="att-list" style="margin-top:12px"></div>
       <div class="card" style="margin-top:12px">
         <button class="btn" id="btn-att-save" type="button">Puantajı kaydet</button>
-        <div id="att-msg"></div>
+        <div id="att-msg2"></div>
       </div>
     </section>
 
@@ -587,7 +588,11 @@ function fillSelects(){
   if(!MASTER) return;
   var pr = MASTER.projects||[], ma = MASTER.machines||[], pe = MASTER.personnel||[];
   ["#f-project","#y-project","#e-project","#p-project","#s-project"].forEach(function(s){
-    opt(s, pr, function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); }); });
+    opt(s, pr, function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); });
+    /* Şefin tek şantiyesi var; her sekmede yeniden seçtirmenin anlamı yok.
+       Seçilmemiş bırakmak, düğmelerin sessizce "proje seçin" demesine yol açıyordu. */
+    if(pr.length === 1 && !$(s).value) $(s).value = pr[0].id;
+  });
   opt("#f-machine", ma, function(m){ return m.code; });
   /* Yakıt kimе verildi: kuleler + traktör, su pompası, araçlar tek listede.
      Değerler "m:<id>" (makine) ya da "v:<id>" (araç/ekipman) biçiminde. */
@@ -1445,20 +1450,52 @@ $("#btn-att-all").addEventListener("click", function(){
   $$("[data-att]").forEach(function(s){ s.value = "calisti"; });
   msg($("#att-msg"), "Herkes çalıştı olarak işaretlendi.", "ok");
 });
-$("#btn-att-load").addEventListener("click", function(){
-  if(!$("#p-project").value || !$("#p-date").value){ msg($("#att-msg"), "Proje ve tarih seçin.", "err"); return; }
-  if(!navigator.onLine){ renderAttendance({}); msg($("#att-msg"), "Bağlantı yok; boş liste açıldı.", "warn"); return; }
+/* Ekrandaki listenin hangi proje/güne ait olduğu. Kaydetme bunu doğrular:
+   puantaj kaydı o günün TAMAMINI ezdiği için, getirilmemiş bir güne basılan
+   Kaydet daha önce girilmiş izin, rapor ve avansları siler. */
+var ATT_YUKLU = null;
+function attAnahtar(){ return $("#p-project").value + "|" + $("#p-date").value; }
+
+function attLoad(sessiz){
+  if(!$("#p-project").value || !$("#p-date").value){
+    if(!sessiz) msg($("#att-msg"), "Proje ve tarih seçin.", "err");
+    return Promise.resolve();
+  }
+  if(!navigator.onLine || !sb){
+    renderAttendance({}); ATT_YUKLU = null;
+    msg($("#att-msg"), "Bağlantı yok. Bu gün için daha önce kayıt girildiyse göremiyorum — " +
+        "kaydederseniz o kayıtların üzerine yazılır.", "warn");
+    return Promise.resolve();
+  }
+  var anahtar = attAnahtar();
   msg($("#att-msg"), "Getiriliyor…");
-  sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value}).then(function(r){
-    if(r.error){ msg($("#att-msg"), r.error.message, "err"); return; }
-    var map = {};
-    (r.data||[]).forEach(function(x){ map[x.personnel_id] = x; });
-    renderAttendance(map);
-    msg($("#att-msg"), (r.data||[]).length ? "Bu güne ait kayıt yüklendi, üzerine yazabilirsiniz." : "Bu gün için kayıt yok.", "ok");
-  });
+  return sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value})
+    .then(function(r){
+      if(r.error){ ATT_YUKLU = null; msg($("#att-msg"), r.error.message, "err"); return; }
+      var map = {};
+      (r.data||[]).forEach(function(x){ map[x.personnel_id] = x; });
+      renderAttendance(map);
+      ATT_YUKLU = anahtar;
+      msg($("#att-msg"), (r.data||[]).length
+        ? (r.data||[]).length + " kişilik kayıt yüklendi, üzerine yazabilirsiniz."
+        : "Bu gün için kayıt yok — herkes çalıştı olarak geldi.", "ok");
+    });
+}
+$("#btn-att-load").addEventListener("click", function(){ attLoad(false); });
+/* Proje ya da tarih değişince liste o güne göre yenilenir; böylece ekranda
+   her zaman o günün gerçek kaydı durur. */
+["#p-project","#p-date"].forEach(function(sel){
+  $(sel).addEventListener("change", function(){ ATT_YUKLU = null; attLoad(true); });
 });
 $("#btn-att-save").addEventListener("click", function(){
-  if(!$("#p-project").value || !$("#p-date").value){ msg($("#att-msg"), "Proje ve tarih seçin.", "err"); return; }
+  /* Her düğmenin cevabı kendi yanında çıkar: yükleme uyarıları yukarıda
+     (#att-msg), kaydetme sonucu kaydet düğmesinin altında (#att-msg2).
+     Eksik alan uyarısı alan yukarıda olduğu için iki yere birden yazılır. */
+  if(!$("#p-project").value || !$("#p-date").value){
+    msg($("#att-msg2"), "Proje ve tarih seçin — yukarıdaki kart.", "err");
+    msg($("#att-msg"),  "Proje ve tarih seçin.", "err");
+    $("#p-project").scrollIntoView({block:"center"});
+    return; }
   var rows = $$("[data-att]").map(function(s){
     var id = s.dataset.att;
     var adv = document.querySelector("[data-adv='" + id + "']");
@@ -1466,11 +1503,25 @@ $("#btn-att-save").addEventListener("click", function(){
     return { personnel_id:id, status:s.value, single_shift: tek ? tek.checked : false,
              advance_amount: (adv && adv.value) ? Number(adv.value) : null };
   });
-  if(!rows.length){ msg($("#att-msg"), "Personel listesi boş.", "err"); return; }
+  if(!rows.length){ msg($("#att-msg2"), "Personel listesi boş.", "err"); return; }
+  /* Liste bu güne ait değilse körlemesine kaydetme.
+     ÇEVRİMDIŞIYKEN ENGELLEMEZ: sahada internet yokken puantaj girilebilmeli.
+     O durumda yukarıdaki kartta zaten "üzerine yazılır" uyarısı duruyor. */
+  if(navigator.onLine && ATT_YUKLU !== attAnahtar()){
+    msg($("#att-msg2"), "Önce \u201cGünü getir\u201de basın. Ekrandaki liste " +
+        $("#p-date").value + " gününe ait değil; şimdi kaydederseniz o güne girilmiş " +
+        "izin, rapor ve avanslar silinir.", "err");
+    msg($("#att-msg"), "Bu güne basın: Günü getir.", "err");
+    $("#btn-att-load").scrollIntoView({block:"center"});
+    return;
+  }
   enqueue({ id:uuid(), kind:"attendance", created:Date.now(),
     title:"Puantaj · " + $("#p-date").value, sub: rows.length + " personel",
     payload:{ project_id:$("#p-project").value, work_date:$("#p-date").value, rows:rows } }).then(function(){
-    msg($("#att-msg"), "Puantaj kaydedildi." + (navigator.onLine ? "" : " Bağlantı gelince gönderilecek."), "ok");
+    ATT_YUKLU = attAnahtar();
+    msg($("#att-msg2"), rows.length + " kişilik puantaj kaydedildi · " + $("#p-date").value +
+        (navigator.onLine ? "" : " · bağlantı gelince gönderilecek"), "ok");
+    msg($("#att-msg"), "");
   });
 });
 
@@ -1553,7 +1604,7 @@ $$("#tabs button").forEach(function(b){
     ["vardiya","malzeme","yakit","nakit","puantaj","ozet","kuyruk"].forEach(function(t){
       $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
     if(b.dataset.tab === "kuyruk") refreshQueue();
-    if(b.dataset.tab === "puantaj" && !$("#att-list").innerHTML) renderAttendance({});
+    if(b.dataset.tab === "puantaj") attLoad(true);
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
     if(b.dataset.tab === "gider") loadYakit();
     window.scrollTo(0,0);
