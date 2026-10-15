@@ -551,6 +551,27 @@ function obAll(){ return tx("readonly").then(function(s){ return new Promise(fun
   var q=s.getAll(); q.onsuccess=function(){res(q.result||[]);}; q.onerror=function(){rej(q.error);}; }); }); }
 function obDel(id){ return tx("readwrite").then(function(s){ return new Promise(function(res,rej){
   var q=s.delete(id); q.onsuccess=function(){res();}; q.onerror=function(){rej(q.error);}; }); }); }
+/* Veritabanı hataları ham hâlde şefe gösterilemez. "duplicate key value
+   violates unique constraint shifts_tenant_id_machine_id_work_date_shift_idx"
+   diye bir satır sahada hiçbir şey anlatmaz. */
+function hataTr(m){
+  m = String(m || "");
+  if(/shifts_tenant_id_machine_id_work_date_shift/i.test(m))
+    return "Bu makine için bu gün ve vardiya zaten girilmiş. Aynı vardiyayı ikinci kez kaydedemezsiniz.";
+  if(/row-level security|violates row-level/i.test(m))
+    return "Bu kayıt sizin şantiyenize ait değil; yazma yetkiniz yok.";
+  if(/JWT expired|token is expired|invalid claim/i.test(m))
+    return "Oturum süresi doldu. Çıkış yapıp tekrar giriş yapın, kayıt sonra gönderilecek.";
+  if(/Failed to fetch|NetworkError|network/i.test(m))
+    return "Merkeze ulaşılamadı. Bağlantı gelince yeniden denenecek.";
+  if(/foreign key|violates foreign key/i.test(m))
+    return "Bağlı kayıt merkezde bulunamadı. Önceki kayıt gitmemiş olabilir.";
+  if(/duplicate key/i.test(m))
+    return "Bu kayıt merkezde zaten var.";
+  if(/not-null|null value in column/i.test(m))
+    return "Zorunlu bir alan boş kalmış.";
+  return m;
+}
 /* Takılan kaydın sebebini kaydın üstüne yazar: şef neden gitmediğini görsün. */
 function obHata(id, mesaj){ return tx("readwrite").then(function(s){ return new Promise(function(res){
   var g=s.get(id);
@@ -1150,7 +1171,7 @@ function syncAll(){
         catch(e){ pr = Promise.reject(e); }
         return pr.catch(function(e){
           takilan++;
-          return obHata(it.id, (e && e.message) ? e.message : String(e));
+          return obHata(it.id, hataTr((e && e.message) ? e.message : String(e)));
         });
       });
     }, Promise.resolve());
@@ -1161,7 +1182,7 @@ function syncAll(){
       : "Tüm kayıtlar gönderildi.", takilan ? "warn" : "ok");
     return loadMaster(true).then(refreshQueue).then(function(){ if(!$("#tab-malzeme").hidden){ loadBits(); loadStok(); } });
   }).catch(function(e){
-    syncing = false; msg($("#sync-msg"), "Gönderilemedi: " + (e && e.message ? e.message : e), "err"); return refreshQueue();
+    syncing = false; msg($("#sync-msg"), "Gönderilemedi: " + hataTr(e && e.message ? e.message : e), "err"); return refreshQueue();
   });
 }
 /* yerel kuyu kimliklerini gerçek kimliklerle eşleştirme */
@@ -1196,6 +1217,7 @@ function sendItem(it, tenant){
     return sb.from("shifts").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .select("id").single().then(function(r){
         if(r.error) throw r.error;
+        if(!r.data || !r.data.id) throw new Error("Vardiya kaydedildi ama merkez kimlik döndürmedi.");
         var sid = r.data.id;
         return sb.from("shift_runs").delete().eq("shift_id", sid).then(function(){
           return sb.from("shift_runs").insert(it.runs.map(function(x,i){
@@ -1271,6 +1293,7 @@ function sendItem(it, tenant){
   if(it.kind === "expense"){
     return sb.from("expenses").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .select("id").single().then(function(r){ if(r.error) throw r.error;
+        if(!r.data || !r.data.id) throw new Error("Harcama kaydedildi ama merkez kimlik döndürmedi.");
         return uploadPhotos(it.photos, tenant, it.payload.project_id, "expense", r.data.id).then(function(){ return obDel(it.id); }); });
   }
   return obDel(it.id);
@@ -1354,8 +1377,14 @@ $("#btn-summary").addEventListener("click", function(){
   var m = $("#s-month").value ? $("#s-month").value + "-01" : new Date().toISOString().slice(0,8) + "01";
   sb.rpc("monthly_summary", {p_project:$("#s-project").value, p_month:m}).then(function(r){
     if(r.error){ msg($("#sum-msg"), r.error.message, "err"); return; }
-    msg($("#sum-msg"), "");
     var d = r.data;
+    /* Kayıt olmayan ayda monthly_summary boş dönebiliyor; eskiden burada
+       sayfa çöküyordu (Cannot read properties of null) ve çöken sayfa
+       sonraki düğmeleri de bozuyordu. */
+    if(!d){ msg($("#sum-msg"), "");
+      $("#sum-out").innerHTML = '<div class="card hint">Bu ay için kayıt yok.</div>';
+      return; }
+    msg($("#sum-msg"), "");
     function bars(title, rows, key){
       if(!rows || !rows.length) return "";
       var max = Math.max.apply(null, rows.map(function(x){ return Number(x.meters); }));
