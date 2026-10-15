@@ -252,6 +252,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
 
       <div id="done-wrap" hidden style="margin-top:12px"></div>
+      <div id="duzelt-serit" class="msg warn" hidden style="margin-top:12px"></div>
 
       <div class="card" style="margin-top:14px">
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -901,6 +902,85 @@ $$(".steps button").forEach(function(b){
   });
 });
 
+/* ============================================================
+   VARDİYA DÜZELTME
+   Kayıt client_uuid üzerinden upsert edildiği için, aynı kimlikle
+   tekrar gönderilen vardiya YENİ SATIR AÇMAZ, mevcudu günceller ve
+   manevraları yenisiyle değiştirir. Düzeltmenin tamamı bu kimliğin
+   korunmasına dayanıyor.
+   Yetki ve ay kilidi kontrolü veritabanında; burada yalnız sorulup
+   cevabı şefe gösteriliyor.
+   ============================================================ */
+var DUZELT = null;   /* {shift_id, client_uuid, etiket} */
+
+function duzeltSeridi(){
+  var el = $("#duzelt-serit");
+  if(!DUZELT){ el.hidden = true; el.innerHTML = ""; return; }
+  el.hidden = false;
+  el.innerHTML = "<b>Düzeltme:</b> " + DUZELT.etiket +
+    " · kaydedince mevcut kayıt güncellenecek, yenisi açılmayacak. ";
+  var v = document.createElement("button");
+  v.type = "button"; v.className = "btn ghost sm"; v.textContent = "Vazgeç";
+  v.addEventListener("click", function(){ DUZELT = null; duzeltSeridi(); resetForm();
+    msg($("#shift-msg"), "Düzeltmeden vazgeçildi.", "ok"); });
+  el.appendChild(v);
+}
+
+function vardiyaDuzelt(sat){
+  if(!navigator.onLine || !sb){
+    msg($("#recent-msg"), "Düzeltme için bağlantı gerekiyor.", "err"); return; }
+  msg($("#recent-msg"), "Kayıt açılıyor…");
+  sb.rpc("kayit_duzeltilebilir_mi", {p_shift: sat.id}).then(function(r){
+    if(r.error){ msg($("#recent-msg"), r.error.message, "err"); return; }
+    var izin = r.data || {};
+    if(!izin.olur){ msg($("#recent-msg"), izin.sebep || "Bu kayıt düzeltilemez.", "err"); return; }
+
+    return Promise.all([
+      sb.from("shift_runs").select("seq,diameter,from_m,to_m,personnel_id,meters")
+        .eq("shift_id", sat.id).order("seq"),
+      sb.from("shift_crew").select("personnel_id,crew_role").eq("shift_id", sat.id)
+    ]).then(function(res){
+      if(res[0].error) throw res[0].error;
+      /* formu kayıtla doldur */
+      $("#f-project").value = sat.project_id || "";
+      $("#f-date").value    = sat.work_date || "";
+      $("#f-shift").value   = sat.shift || "gunduz";
+      $("#f-machine").value = sat.machine_id || "";
+      fillWells();
+      $("#f-well").value    = sat.well_id || "";
+      $("#f-paper").value   = sat.paper_no || "";
+      $("#f-fuel").value    = (sat.fuel_liters == null ? "" : sat.fuel_liters);
+      $("#f-end").value     = sat.end_state || "";
+
+      var ekip = (res[1].data || []);
+      var sondorler = ekip.filter(function(c){ return c.crew_role === "sondor"; });
+      var yardimci  = ekip.filter(function(c){ return c.crew_role !== "sondor"; });
+      $("#f-driller1").value = (sondorler[0]||{}).personnel_id || "";
+      $("#f-driller2").value = (sondorler[1]||{}).personnel_id || "";
+      $("#f-helper").value   = (yardimci[0]||{}).personnel_id  || "";
+
+      runs = (res[0].data || []).map(function(x, i){
+        return {seq:i+1, diameter:x.diameter, from_m:Number(x.from_m),
+                to_m:Number(x.to_m), personnel_id:x.personnel_id}; });
+      renderRuns();
+
+      /* kontrol listesi: kaydedilmiş hâlini bilmiyoruz, hepsi uygun sayılır */
+      $$("#checks .chip").forEach(function(c){ c.setAttribute("aria-pressed","true"); });
+      countChecks();
+
+      DUZELT = { shift_id: sat.id, client_uuid: sat.client_uuid,
+                 etiket: sat.work_date + " · " + (sat.shift === "gece" ? "gece" : "gündüz") };
+      duzeltSeridi();
+      $("#done-wrap").hidden = true;
+      $(".tabs button[data-tab=\"vardiya\"]").click();
+      adimaGit(1);
+      refreshState(); syncDepth();
+      msg($("#recent-msg"), "");
+      msg($("#shift-msg"), "Kayıt açıldı. Düzeltip tekrar kaydedin.", "ok");
+    });
+  }).catch(function(e){ msg($("#recent-msg"), (e && e.message) || String(e), "err"); });
+}
+
 /* ---------------- kuyruk ---------------- */
 var queue = [];
 function refreshQueue(){
@@ -976,10 +1056,12 @@ $("#btn-save-shift").addEventListener("click", function(){
   var metraj = totalM(), fuel = Number($("#f-fuel").value);
   var item = {
     id: uuid(), kind: "shift", created: Date.now(),
-    title: "Vardiya · " + wellCode,
+    title: (DUZELT ? "Vardiya düzeltme · " : "Vardiya · ") + wellCode,
     sub: tl(metraj) + " m · " + $("#f-date").value,
     payload: {
-      client_uuid: uuid(),
+      /* Düzeltmede ESKİ kimlik korunur; yoksa kayıt güncellenmez,
+         tekillik kuralına takılan yeni satır denenir. */
+      client_uuid: (DUZELT && DUZELT.client_uuid) || uuid(),
       project_id: $("#f-project").value,
       well_id: $("#f-well").value,
       machine_id: $("#f-machine").value,
@@ -1001,10 +1083,14 @@ $("#btn-save-shift").addEventListener("click", function(){
     photos: filesOf($("#f-photo"))
   };
   var savedDepth = depth();
+  var duzeltmeMi = !!DUZELT;
+  DUZELT = null; duzeltSeridi();
   enqueue(item).then(function(){
     var w = currentWell();
     if(w){ w.current_depth = savedDepth; try{ localStorage.setItem("sp_master", JSON.stringify(MASTER)); }catch(e){} }
     showDone(wellCode, metraj, fuel, item.payload.work_date, item.payload.shift);
+    if(duzeltmeMi) msg($("#shift-msg"), "Düzeltme kaydedildi. Eski kayıt güncellendi.", "ok");
+    if(navigator.onLine) setTimeout(loadRecent, 1200);
   });
 });
 
@@ -1315,7 +1401,7 @@ function loadRecent(){
     return; }
   if(!navigator.onLine){ $("#recent-list").innerHTML = '<div class="hint">Bağlantı yokken son kayıtlar görüntülenemez.</div>'; return; }
   $("#recent-list").innerHTML = '<div class="hint">Yükleniyor…</div>';
-  sb.from("shifts").select("id,work_date,shift,fuel_liters,well_id,machine_id,project_id")
+  sb.from("shifts").select("id,client_uuid,work_date,shift,fuel_liters,well_id,machine_id,project_id,paper_no,end_state,status")
     .eq("project_id", proje)
     .order("work_date", {ascending:false}).order("created_at", {ascending:false}).limit(10)
     .then(function(r){
@@ -1334,8 +1420,16 @@ function loadRecent(){
             ' · ' + s.work_date + ' · ' + (s.shift === "gece" ? "gece" : "gündüz") + '</span></span>' +
             '<span class="num">' + tl(sums[s.id]||0) + ' m · ' + tl(s.fuel_liters||0) + ' lt</span>' +
             '<button class="btn ghost sm foto-ekle" type="button" data-shift="' + s.id +
-            '" data-proje="' + (s.project_id || "") + '">Fotoğraf ekle</button></div>';
+            '" data-proje="' + (s.project_id || "") + '">Fotoğraf ekle</button>' +
+            '<button class="btn ghost sm duzelt" type="button" data-shift="' + s.id + '">Düzelt</button>' +
+            (s.status === "corrected" ? ' <span class="pill warn">düzeltildi</span>' : '') + '</div>';
         }).join("");
+        $$(".duzelt").forEach(function(b){
+          b.addEventListener("click", function(){
+            var sat = rows.filter(function(x){ return x.id === b.dataset.shift; })[0];
+            if(sat) vardiyaDuzelt(sat);
+          });
+        });
         $$(".foto-ekle").forEach(function(b){
           b.addEventListener("click", function(){
             SECILI_VARDIYA = {id:b.dataset.shift, proje:b.dataset.proje || $("#f-project").value};
