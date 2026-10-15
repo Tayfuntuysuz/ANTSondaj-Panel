@@ -32,12 +32,12 @@ h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
 .app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--card)}
 header.bar{background:var(--navy);color:#eaf4f8;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30}
 header.bar b{font-family:"Barlow Condensed",sans-serif;font-size:19px;letter-spacing:.04em;text-transform:uppercase;flex:1}
-.netchip{display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:4px 10px;font-size:12px;background:none;color:#cfe3ec;cursor:pointer}
+.netchip{display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 12px;min-height:38px;font-size:12px;background:none;color:#cfe3ec;cursor:pointer}
 .netchip .dot{width:8px;height:8px;border-radius:50%;background:#4cbb8c}
 .netchip[data-off="true"] .dot{background:#d8a44b}
 main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
 nav.tabs{display:flex;border-top:1px solid var(--line);background:var(--card-2);position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
-nav.tabs button{flex:1;border:0;background:none;color:var(--ink-3);font:inherit;font-size:12px;padding:10px 2px 12px;cursor:pointer;border-top:2px solid transparent;margin-top:-1px}
+nav.tabs button{flex:1;border:0;background:none;color:var(--ink-3);font:inherit;font-size:12px;padding:13px 2px 15px;min-height:48px;cursor:pointer;border-top:2px solid transparent;margin-top:-1px}
 nav.tabs button[aria-pressed="true"]{color:var(--accent-ink);border-top-color:var(--accent);font-weight:600}
 .field{display:flex;flex-direction:column;gap:5px}
 label{font-size:12.5px;color:var(--ink-2);font-weight:500}
@@ -49,7 +49,7 @@ textarea{min-height:70px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:10px;padding:13px 14px;font-weight:600;cursor:pointer;width:100%}
 .btn.ghost{background:none;color:var(--accent-ink);border-color:var(--line)}
-.btn.sm{padding:8px 12px;font-size:13px;width:auto}
+.btn.sm{padding:11px 14px;min-height:44px;font-size:13px;width:auto}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card-2);display:flex;flex-direction:column;gap:12px}
 .eyebrow{font-family:"Barlow Condensed",sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
@@ -66,10 +66,12 @@ textarea{min-height:70px}
 .ara-sonuc button:active{background:var(--card-2)}
 .ist-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
 .ist-ust{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.ist-sil{border:0;background:none;font-size:20px;line-height:1;color:var(--bad);cursor:pointer;padding:0 4px;min-height:32px}
+.ist-sil{border:0;background:none;font-size:22px;line-height:1;color:var(--bad);cursor:pointer;padding:0 10px;min-width:44px;min-height:44px}
 .ekip-satir{display:flex;justify-content:space-between;align-items:center;gap:8px;
   padding:9px 0;border-bottom:1px solid var(--line-soft)}
 .ekip-satir:last-child{border-bottom:0}
+.q-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
+.q-satir.takildi{border-color:var(--bad);background:var(--bad-soft)}
 .stok-az{color:var(--warn)}
 .stok-bitti{color:var(--bad)}
 /* sahada renk tek başına yetmez: yanına yazı da koyuyoruz */
@@ -93,7 +95,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
 .chip[aria-pressed="true"]{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:600}
 .chip[aria-pressed="true"]::before{content:"✓ "}
 .steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
-.steps button{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:5px}
+.steps button{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 14px;min-height:44px;font-size:13px;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:5px}
 .steps button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 .steps button[data-state="ok"]:not([aria-pressed="true"]){border-color:var(--good);color:var(--good)}
 .steps button[data-state="locked"]{opacity:.5}
@@ -225,7 +227,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>HQ</option><option>PQ</option><option>NQ</option><option>PW</option></select></div>
           <div class="field"><label for="f-to">Bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" step="0.01" inputmode="decimal"></div>
         </div>
-        <button class="btn" id="btn-add-run" type="button" disabled>Manevra ekle</button>
+        <button class="btn eksikli" id="btn-add-run" type="button">Manevra ekle</button>
         <div id="run-msg"></div>
         <table><thead><tr><th>Çap</th><th>Sondör</th><th>Bitiş</th><th>Manevra</th><th></th></tr></thead><tbody id="runs"></tbody></table>
         <div class="field"><label for="f-end">Kuyu durumu</label><select id="f-end"><option value="">Devam ediyor</option><option value="kuyu_sonu">Kuyu sonu</option><option value="kuyu_iptali">Kuyu iptali</option></select></div>
@@ -549,6 +551,13 @@ function obAll(){ return tx("readonly").then(function(s){ return new Promise(fun
   var q=s.getAll(); q.onsuccess=function(){res(q.result||[]);}; q.onerror=function(){rej(q.error);}; }); }); }
 function obDel(id){ return tx("readwrite").then(function(s){ return new Promise(function(res,rej){
   var q=s.delete(id); q.onsuccess=function(){res();}; q.onerror=function(){rej(q.error);}; }); }); }
+/* Takılan kaydın sebebini kaydın üstüne yazar: şef neden gitmediğini görsün. */
+function obHata(id, mesaj){ return tx("readwrite").then(function(s){ return new Promise(function(res){
+  var g=s.get(id);
+  g.onsuccess=function(){ var it=g.result; if(!it){ res(); return; }
+    it.hata = mesaj; it.deneme = (it.deneme||0) + 1; it.son_deneme = Date.now();
+    var q=s.put(it); q.onsuccess=function(){res();}; q.onerror=function(){res();}; };
+  g.onerror=function(){ res(); }; }); }); }
 
 /* ---------------- config ---------------- */
 /* Adresten gelen bağlantı bilgisi: karekodla kurulum için.
@@ -750,7 +759,10 @@ function runFormReady(){
   return !!($("#f-runner").value && $("#f-dia").value && !isNaN(v));
 }
 function updateRunButton(){
-  $("#btn-add-run").disabled = !runFormReady();
+  /* Pasif düğme sahada "program bozuk" dedirtiyor — kaydet düğmesinde
+     kaldırdık, burada da kalkıyor. Düğme hep basılabilir; eksik varsa
+     basınca ne eksik olduğunu söyler. */
+  $("#btn-add-run").classList.toggle("eksikli", !runFormReady());
   var why = [];
   if(!$("#f-runner").value) why.push("sondör");
   if(!$("#f-dia").value) why.push("çap");
@@ -763,7 +775,16 @@ function updateRunButton(){
 });
 $("#btn-add-run").addEventListener("click", function(){
   var v = parseFloat(String($("#f-to").value).replace(",","."));
-  if(!runFormReady()) { updateRunButton(); return; }
+  if(!runFormReady()) {
+    updateRunButton();
+    var eks = [];
+    if(!$("#f-runner").value) eks.push("sondör");
+    if(!$("#f-dia").value) eks.push("çap");
+    if(!$("#f-to").value) eks.push("bitiş metresi");
+    msg($("#run-msg"), "Manevra eklenmedi — eksik: " + eks.join(", ") + ".", "err");
+    (!$("#f-runner").value ? $("#f-runner") : (!$("#f-dia").value ? $("#f-dia") : $("#f-to")))
+      .scrollIntoView({block:"center"});
+    return; }
   if(v <= depth()){ msg($("#run-msg"), "Bitiş metresi mevcut derinlikten (" + tl(depth()) + " m) büyük olmalı.", "err"); return; }
   if(v - depth() > 12){ msg($("#run-msg"), "Dikkat: tek manevrada " + tl(v-depth()) + " m girdiniz.", "warn"); }
   else { msg($("#run-msg"), ""); }
@@ -772,11 +793,11 @@ $("#btn-add-run").addEventListener("click", function(){
   renderRuns(); refreshState();
   /* Kutu temizlendiği için "eksik bitiş metresi" uyarısı yeniden çıkmasın;
      yerine ne olduğunu söyleyen onay göster. */
-  $("#btn-add-run").disabled = true;
+  $("#btn-add-run").classList.add("eksikli");
   msg($("#run-msg"), "Manevra eklendi. Kuyu derinliği " + tl(depth()) +
       " m. Başka manevra varsa bitiş metresini yazın.", "ok");
 });
-$("#f-to").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); if(!$("#btn-add-run").disabled) $("#btn-add-run").click(); } });
+$("#f-to").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); $("#btn-add-run").click(); } });
 
 /* ---------------- adım kontrolü ---------------- */
 function stepProblems(n){
@@ -870,9 +891,33 @@ function refreshQueue(){
     var box = $("#q-list"); box.innerHTML = "";
     if(!items.length){ box.innerHTML = '<div class="hint">Bekleyen kayıt yok.</div>'; return; }
     items.sort(function(a,b){ return a.created - b.created; }).forEach(function(it){
-      var d = document.createElement("div"); d.className = "li";
-      d.innerHTML = "<span><b>"+it.title+"</b><br><span class='hint'>"+it.sub+"</span></span>" +
-        "<span class='pill "+(navigator.onLine?"":"warn")+"'>"+(navigator.onLine?"gönderilecek":"bekliyor")+"</span>";
+      var d = document.createElement("div");
+      d.className = it.hata ? "q-satir takildi" : "q-satir";
+      var ust = document.createElement("div"); ust.className = "ist-ust";
+      ust.innerHTML = "<span><b>"+it.title+"</b><br><span class='hint'>"+it.sub+"</span></span>" +
+        "<span class='pill "+(it.hata ? "bad" : (navigator.onLine?"":"warn"))+"'>" +
+        (it.hata ? "takıldı" : (navigator.onLine?"gönderilecek":"bekliyor")) + "</span>";
+      d.appendChild(ust);
+      if(it.hata){
+        var h = document.createElement("div"); h.className = "hint";
+        h.style.cssText = "margin-top:6px;color:var(--bad)";
+        h.textContent = "Sebep: " + it.hata + (it.deneme > 1 ? "  (" + it.deneme + " deneme)" : "");
+        d.appendChild(h);
+        /* İki aşamalı silme: tarayıcı onay kutusu uygulamayı kilitliyor. */
+        var sil = document.createElement("button");
+        sil.type = "button"; sil.className = "btn ghost sm"; sil.style.marginTop = "8px";
+        sil.textContent = "Bu kaydı sil";
+        sil.addEventListener("click", function(){
+          if(sil.dataset.emin !== "1"){
+            sil.dataset.emin = "1"; sil.textContent = "Silinsin mi? Tekrar basın";
+            setTimeout(function(){ sil.dataset.emin = ""; sil.textContent = "Bu kaydı sil"; }, 4000);
+            return;
+          }
+          obDel(it.id).then(refreshQueue)
+            .then(function(){ msg($("#sync-msg"), "Kayıt silindi: " + it.title, "ok"); });
+        });
+        d.appendChild(sil);
+      }
       box.appendChild(d);
     });
   });
@@ -1088,11 +1133,32 @@ function syncAll(){
   if(syncing || !navigator.onLine || !sb || !MASTER) return Promise.resolve();
   syncing = true;
   var tenant = MASTER.profile.tenant_id;
+  /* ÖNEMLİ: her kayıt kendi başına denenir. Eskiden tek zincirdi ve bir
+     kayıt hata verince ARKASINDAKİ BÜTÜN KAYITLAR da gitmiyordu — şef on
+     vardiya girip üçüncüsü takılsa kalan yedisi sonsuza kadar bekliyordu.
+     Artık takılan kenara ayrılır, sebebi üstüne yazılır, gerisi gider. */
+  var takilan = 0;
   return obAll().then(function(items){
     items.sort(function(a,b){ return a.created - b.created; });
-    return items.reduce(function(ch, it){ return ch.then(function(){ return sendItem(it, tenant); }); }, Promise.resolve());
+    return items.reduce(function(ch, it){
+      return ch.then(function(){
+        /* sendItem bazı dallarda SENKRON throw ediyor (örn. "matkap henüz
+           merkeze gitmedi"). Promise.resolve onu yakalamaz, zincir yine
+           kopardı — try/catch şart. */
+        var pr;
+        try { pr = Promise.resolve(sendItem(it, tenant)); }
+        catch(e){ pr = Promise.reject(e); }
+        return pr.catch(function(e){
+          takilan++;
+          return obHata(it.id, (e && e.message) ? e.message : String(e));
+        });
+      });
+    }, Promise.resolve());
   }).then(function(){
-    syncing = false; msg($("#sync-msg"), "Tüm kayıtlar gönderildi.", "ok");
+    syncing = false;
+    msg($("#sync-msg"), takilan
+      ? takilan + " kayıt gönderilemedi, sebebi aşağıda yazıyor. Diğerleri gitti."
+      : "Tüm kayıtlar gönderildi.", takilan ? "warn" : "ok");
     return loadMaster(true).then(refreshQueue).then(function(){ if(!$("#tab-malzeme").hidden){ loadBits(); loadStok(); } });
   }).catch(function(e){
     syncing = false; msg($("#sync-msg"), "Gönderilemedi: " + (e && e.message ? e.message : e), "err"); return refreshQueue();
