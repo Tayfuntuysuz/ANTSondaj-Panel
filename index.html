@@ -314,7 +314,8 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <div class="field"><label for="y-date">Tarih <span class="req">*</span></label><input id="y-date" type="date"></div>
           <div class="field"><label for="y-type">Cins <span class="req">*</span></label><select id="y-type"><option>mazot</option><option>benzin</option><option>adblue</option><option>madeni_yag</option></select></div>
         </div>
-        <div class="field"><label for="y-hedef">Kime verildi <span class="req">*</span></label><select id="y-hedef"></select></div>
+        <div class="field"><label for="y-hedef">Kime verildi <span class="req">*</span></label><select id="y-hedef"></select>
+          <div class="hint" id="y-hedef-hint"></div></div>
         <div class="field" id="y-shift-wrap" hidden><label for="y-shift">Hangi vardiya <span class="req">*</span></label>
           <select id="y-shift"><option value="">— seçin —</option><option value="gunduz">Gündüz</option><option value="gece">Gece</option></select></div>
         <div class="grid2">
@@ -342,6 +343,17 @@ td:first-child{text-align:left;color:var(--ink-2)}
         <div class="field"><label for="e-photo">Fiş fotoğrafı</label><input id="e-photo" type="file" accept="image/*"></div>
         <button class="btn" id="btn-save-exp" type="button">Kaydet</button>
         <div id="exp-msg"></div>
+        <div id="h-duzelt-serit" class="msg warn" hidden style="margin-top:12px"></div>
+      </div>
+
+      <!-- Yanlış girilen harcamayı şef kendisi düzeltir (ay kapanana kadar) -->
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Son harcamalar</span>
+          <button class="btn ghost sm" id="btn-harcama-yenile" type="button">Yenile</button>
+        </div>
+        <div id="harcama-liste"><div class="hint">Yenile'ye basın.</div></div>
+        <div id="harcama-msg"></div>
       </div>
     </section>
 
@@ -355,19 +367,21 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
       <div class="card" style="margin-top:12px">
         <span class="eyebrow">Yeni matkap tak</span>
+        <!-- Kuyu önce sorulur: makine listesi ve takıldığı metre ona göre kurulur. -->
+        <div class="field"><label for="b-well">Kuyu <span class="req">*</span></label><select id="b-well"></select></div>
         <div class="grid2">
           <div class="field"><label for="b-machine">Makine <span class="req">*</span></label><select id="b-machine"></select></div>
           <div class="field"><label for="b-dia">Çap <span class="req">*</span></label>
             <select id="b-dia"><option value="">— seçin —</option><option>HQ</option><option>PQ</option><option>NQ</option><option>PW</option></select></div>
         </div>
-        <div class="field"><label for="b-well">Kuyu</label><select id="b-well"></select></div>
         <div class="grid2">
           <div class="field"><label for="b-brand">Marka <span class="req">*</span></label>
             <select id="b-brand"><option value="">— seçin —</option><option>Terekalmaz 5/7</option><option>Terekalmaz 5/7 (çıkma)</option>
             <option>Geo MRA 2 Yeşil</option><option>Geo MRA 3 Mavi</option><option>Wattel Bordo</option><option>Wattel Bordo Turbo</option><option>Neolit 5/7</option><option>Diğer</option></select></div>
           <div class="field"><label for="b-serial">Seri no</label><input id="b-serial" placeholder="varsa"></div>
         </div>
-        <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label><input id="b-from" type="number" inputmode="decimal"></div>
+        <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label><input id="b-from" type="number" inputmode="decimal">
+          <div class="hint" id="b-from-hint">Kuyu seçilince kuyunun bulunduğu metre kendiliğinden yazılır. Farklıysa değiştirin.</div></div>
         <button class="btn" id="btn-bit-install" type="button">Matkabı tak</button>
         <div id="bit-msg"></div>
       </div>
@@ -502,6 +516,17 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <button class="btn ghost sm" id="btn-att-summary" type="button">Getir</button>
         </div>
         <div id="att-summary"></div>
+      </div>
+
+      <!-- Yakıt dökümü: beyan (vardiya formu) ile defter (kuleye verilen) yan yana -->
+      <div class="card" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="eyebrow">Yakıt dökümü</span>
+          <button class="btn ghost sm" id="btn-yakit-rapor" type="button">Getir</button>
+        </div>
+        <div class="hint">Vardiya formunda yazılan mazot (beyan) ile o vardiyada kuleye
+          verilen yakıt (defter) karşılaştırılır. Araç yakıtı sondaj performansına girmez.</div>
+        <div id="yakit-rapor"></div>
       </div>
     </section>
   </main>
@@ -657,21 +682,13 @@ function fillSelects(){
        Seçilmemiş bırakmak, düğmelerin sessizce "proje seçin" demesine yol açıyordu. */
     if(pr.length === 1 && !$(s).value) $(s).value = pr[0].id;
   });
-  opt("#f-machine", ma, function(m){ return m.code; });
-  /* Yakıt kimе verildi: kuleler + traktör, su pompası, araçlar tek listede.
-     Değerler "m:<id>" (makine) ya da "v:<id>" (araç/ekipman) biçiminde. */
-  var hedefler = ma.map(function(m){ return {id:"m:"+m.id, ad:m.code}; })
-    .concat((MASTER.vehicles||[]).map(function(v){
-      var etiket = v.plate + (v.fuel_class === "kule_destek" ? " · saha ekipmanı" : "");
-      return {id:"v:"+v.id, ad:etiket};
-    }));
-  opt("#y-hedef", hedefler, function(h){ return h.ad; });
+  fillMachines();
+  fillYakitHedef();
   var drillers = pe.filter(function(p){ return p.kind === "sondor"; });
   opt("#f-driller1", drillers, function(p){ return p.full_name; });
   opt("#f-driller2", drillers, function(p){ return p.full_name; }, "— yok —");
   opt("#f-runner",  drillers, function(p){ return p.full_name; });
   opt("#f-helper", pe.filter(function(p){ return p.kind !== "sondor"; }), function(p){ return p.full_name; }, "— yok —");
-  opt("#b-machine", ma, function(m){ return m.code; });
   var mats = MASTER.materials || [];
   opt("#f-lost-mat", mats, function(m){ return m.name + " (" + m.unit + ")"; }, "— yok —");
   opt("#st-material", mats, function(m){ return m.name + " (" + m.unit + ")"; });
@@ -682,16 +699,110 @@ function fillSelects(){
   $("#who").textContent = MASTER.profile ? MASTER.profile.full_name.split(" ")[0] : "";
   refreshState();
 }
+/* ============================================================
+   LİSTELER SEÇİLEN PROJEYE GÖRE KURULUR
+   Tekrarlayan hata buydu: makine, araç ve kuyu listeleri GİRİŞ YAPAN
+   KULLANICIYA göre doluyordu. Şefte fark edilmiyor (tek şantiyeye bağlı),
+   yöneticide bütün şirket geliyordu. Tayfun'un kuralı: "O şantiyede hangi
+   makine varsa o görünmeli, kimin kullanıcı adıyla girdiği önemli değil."
+   ============================================================ */
+function projeAdi(id){
+  var p = (MASTER && MASTER.projects || []).filter(function(x){ return x.id === id; })[0];
+  return p ? (p.site_name || p.name) : "";
+}
+function projeMakineleri(pid){
+  var ma = (MASTER && MASTER.machines) || [];
+  if(!pid) return ma;
+  return ma.filter(function(m){ return m.project_id === pid; });
+}
+/* Proje seçilmemişken aynı kod birkaç şantiyede geçiyor (ANT-2500 üçe kadar).
+   Etikete şantiye adı eklenmezse ayırt edilemiyor. */
+function makineEtiketi(m, pid){
+  if(pid) return m.code;
+  var s = projeAdi(m.project_id);
+  return m.code + (s ? " · " + s : "");
+}
+function fillMachines(){
+  var pid = $("#f-project").value;
+  var liste = projeMakineleri(pid);
+  opt("#f-machine", liste, function(m){ return makineEtiketi(m, pid); });
+  if(liste.length === 1) $("#f-machine").value = liste[0].id;
+  bitMakineleri();
+}
+/* Yakıt "kime verildi": o şantiyenin kuleleri + traktör/pompa/araçlar.
+   Şantiyeye bağlanmamış araç (project_id boş) her sahada görünür — plaka
+   listesi sahadan dönene kadar kimse araçsız kalmasın. */
+function fillYakitHedef(){
+  var pid = $("#y-project").value || $("#f-project").value;
+  var hedefler = projeMakineleri(pid).map(function(m){
+      return {id:"m:"+m.id, ad:makineEtiketi(m, pid)}; })
+    .concat(((MASTER && MASTER.vehicles) || []).filter(function(v){
+      return !pid || !v.project_id || v.project_id === pid;
+    }).map(function(v){
+      var etiket = v.plate + (v.fuel_class === "kule_destek" ? " · saha ekipmanı" : "");
+      return {id:"v:"+v.id, ad:etiket, bagsiz:!v.project_id};
+    }));
+  opt("#y-hedef", hedefler, function(h){ return h.ad; });
+  /* Henüz şantiyeye bağlanmamış araç varsa listede neden durduğu yazılır —
+     yoksa şef kendi sahasında olmayan bir plakayı görüp tereddüt ediyor. */
+  var bagsiz = hedefler.filter(function(h){ return h.bagsiz; }).length;
+  var ip = $("#y-hedef-hint");
+  if(ip) ip.textContent = bagsiz
+    ? bagsiz + " araç henüz bir şantiyeye bağlanmamış; bu yüzden her sahada görünüyor."
+    : "";
+}
+/* Matkap takma: makine listesi KUYUYA göre. O kuyuda vardiyası olan
+   makine(ler) varsa yalnız onlar, yoksa o şantiyenin makineleri. */
+var BITMAK = {};        /* kuyu_id -> [makine_id] */
+function bitMakineleri(){
+  var wid = $("#b-well").value;
+  var w = (MASTER && MASTER.wells || []).filter(function(x){ return x.id === wid; })[0];
+  var pid = w ? w.project_id : $("#f-project").value;
+  var liste = projeMakineleri(pid);
+  if(wid && BITMAK[wid] && BITMAK[wid].length){
+    var dar = liste.filter(function(m){ return BITMAK[wid].indexOf(m.id) >= 0; });
+    if(dar.length) liste = dar;
+  }
+  opt("#b-machine", liste, function(m){ return makineEtiketi(m, pid); });
+  if(liste.length === 1) $("#b-machine").value = liste[0].id;
+}
+function bitKuyuMakineYukle(){
+  var wid = $("#b-well").value;
+  if(!wid || !navigator.onLine || !sb || BITMAK[wid]) { bitMakineleri(); return; }
+  sb.from("shifts").select("machine_id").eq("well_id", wid).limit(200).then(function(r){
+    var ids = {}; (r.data||[]).forEach(function(x){ if(x.machine_id) ids[x.machine_id] = 1; });
+    BITMAK[wid] = Object.keys(ids);
+    bitMakineleri();
+  });
+}
 function fillWells(){
   var pid = $("#f-project").value;
   var wells = (MASTER.wells||[]).filter(function(w){ return w.project_id === pid; });
   opt("#f-well", wells, function(w){ return w.code + " · " + tl(w.current_depth) + " m"; });
-  opt("#b-well", wells, function(w){ return w.code + " · " + tl(w.current_depth) + " m"; }, "— yok —");
+  opt("#b-well", wells, function(w){ return w.code + " · " + tl(w.current_depth) + " m"; });
   if(wells.length === 1) $("#f-well").value = wells[0].id;
+  bitMakineleri();
   syncDepth(); refreshState();
 }
 function currentWell(){ return (MASTER && MASTER.wells || []).filter(function(w){ return w.id === $("#f-well").value; })[0] || null; }
-$("#f-project").addEventListener("change", function(){ runs = []; renderRuns(); fillWells(); });
+$("#f-project").addEventListener("change", function(){
+  runs = []; renderRuns();
+  /* Proje değişti: makine, kuyu, araç listeleri BİRLİKTE yenilenir. Tek tek
+     yama yapmak bu hatanın her sekmede tekrar çıkmasına yol açıyordu. */
+  fillMachines(); fillWells(); fillYakitHedef();
+});
+$("#y-project").addEventListener("change", function(){ fillYakitHedef(); });
+/* Kuyu seçilince: makine listesi daralır ve takıldığı metre kuyunun
+   bulunduğu derinlikle dolar. Şef sıfırdan yazarsa 960 yerine 96 yazıyor. */
+$("#b-well").addEventListener("change", function(){
+  var w = (MASTER && MASTER.wells || []).filter(function(x){ return x.id === $("#b-well").value; })[0];
+  if(w && w.current_depth != null) $("#b-from").value = Number(w.current_depth);
+  $("#b-from-hint").textContent = w
+    ? "Kuyu şu an " + tl(w.current_depth) + " m'de. Matkap başka metreden takıldıysa değiştirin."
+    : "Kuyu seçilince kuyunun bulunduğu metre kendiliğinden yazılır.";
+  BITONAY = null;
+  bitKuyuMakineYukle();
+});
 $("#f-well").addEventListener("change", function(){ runs = []; renderRuns(); refreshState(); });
 
 $("#btn-new-well").addEventListener("click", function(){
@@ -1218,19 +1329,109 @@ $("#y-hedef").addEventListener("change", function(){
   if(!kule) $("#y-shift").value = "";
 });
 
+/* ============================================================
+   NAKİT HARCAMA — DÜZELTME
+   Vardiyadaki kalıbın aynısı: client_uuid korunarak tekrar gönderilen
+   harcama YENİ SATIR AÇMAZ, mevcudu günceller. Yetki, ay kilidi ve iz
+   veritabanında (30. dosya, trg_expenses_duzeltme); burada yalnız sorulup
+   cevabı şefe gösteriliyor.
+   ============================================================ */
+var HDUZELT = null;   /* {id, client_uuid, etiket} */
+
+function harcamaSeridi(){
+  var el = $("#h-duzelt-serit");
+  if(!HDUZELT){ el.hidden = true; el.innerHTML = ""; return; }
+  el.hidden = false;
+  el.innerHTML = "<b>Düzeltme:</b> " + HDUZELT.etiket +
+    " · kaydedince mevcut harcama güncellenecek, yenisi açılmayacak. ";
+  var v = document.createElement("button");
+  v.type = "button"; v.className = "btn ghost sm"; v.textContent = "Vazgeç";
+  v.addEventListener("click", function(){
+    HDUZELT = null; harcamaSeridi();
+    $("#e-amount").value=""; $("#e-desc").value="";
+    msg($("#exp-msg"), "Düzeltmeden vazgeçildi.", "ok");
+  });
+  el.appendChild(v);
+}
+
 $("#btn-save-exp").addEventListener("click", function(){
   var a = Number($("#e-amount").value);
   if(!$("#e-project").value || !$("#e-date").value || !a || !$("#e-desc").value.trim()){
     msg($("#exp-msg"), "Proje, tarih, tutar ve açıklama zorunlu.", "err"); return; }
+  var duzeltmeMi = !!HDUZELT;
   enqueue({ id:uuid(), kind:"expense", created:Date.now(),
-    title:"Nakit · " + $("#e-cat").value, sub: money(a),
-    payload:{ client_uuid:uuid(), project_id:$("#e-project").value, expense_date:$("#e-date").value,
+    title:(duzeltmeMi ? "Nakit düzeltme · " : "Nakit · ") + $("#e-cat").value, sub: money(a),
+    payload:{ client_uuid:(HDUZELT && HDUZELT.client_uuid) || uuid(),
+      project_id:$("#e-project").value, expense_date:$("#e-date").value,
       category:$("#e-cat").value, amount:a, method:"nakit", description:$("#e-desc").value.trim() },
     photos: filesOf($("#e-photo")) }).then(function(){
+    HDUZELT = null; harcamaSeridi();
     $("#e-amount").value=""; $("#e-desc").value=""; $("#e-photo").value="";
-    msg($("#exp-msg"), "Kaydedildi.", "ok");
+    msg($("#exp-msg"), duzeltmeMi ? "Harcama düzeltildi." : "Kaydedildi.", "ok");
+    if(navigator.onLine) setTimeout(loadHarcama, 1200);
   });
 });
+
+function loadHarcama(){
+  var proje = $("#e-project").value;
+  if(!proje){ $("#harcama-liste").innerHTML =
+    '<div class="hint">Önce proje seçin — son harcamalar o şantiyeye göre gelir.</div>'; return; }
+  if(!navigator.onLine || !sb){ $("#harcama-liste").innerHTML =
+    '<div class="hint">Bağlantı yokken son harcamalar görüntülenemez.</div>'; return; }
+  $("#harcama-liste").innerHTML = '<div class="hint">Yükleniyor…</div>';
+  sb.from("expenses").select("id,client_uuid,expense_date,category,amount,description,project_id")
+    .eq("project_id", proje).eq("method", "nakit")
+    .order("expense_date", {ascending:false}).order("created_at", {ascending:false}).limit(10)
+    .then(function(r){
+      if(r.error){ $("#harcama-liste").innerHTML = '<div class="hint">' + hataTr(r.error.message) + '</div>'; return; }
+      var rows = r.data || [];
+      if(!rows.length){ $("#harcama-liste").innerHTML =
+        '<div class="hint">Bu şantiyede henüz nakit harcama kaydı yok.</div>'; return; }
+      $("#harcama-liste").innerHTML = rows.map(function(x){
+        return '<div class="kayit">' +
+          '<div class="kayit-ust"><b>' + (x.category||"") + '</b>' +
+            '<span class="hint">' + x.expense_date + ' · ' + (x.description||"") + '</span></div>' +
+          '<div class="kayit-alt"><span class="num">' + money(x.amount) + '</span>' +
+            '<span class="kayit-dugme">' +
+              '<button class="btn ghost mini h-duzelt" type="button" data-id="' + x.id + '">Düzelt</button>' +
+            '</span></div></div>';
+      }).join("");
+      $$(".h-duzelt").forEach(function(b){
+        b.addEventListener("click", function(){
+          var sat = rows.filter(function(x){ return x.id === b.dataset.id; })[0];
+          if(sat) harcamaDuzelt(sat);
+        });
+      });
+    });
+}
+$("#btn-harcama-yenile").addEventListener("click", loadHarcama);
+$("#e-project").addEventListener("change", function(){ if(navigator.onLine) loadHarcama(); });
+
+function harcamaDuzelt(sat){
+  if(!navigator.onLine || !sb){
+    msg($("#harcama-msg"), "Düzeltme için bağlantı gerekiyor.", "err"); return; }
+  if(!sat.client_uuid){
+    msg($("#harcama-msg"), "Bu kayıt panelden girilmemiş (aktarılmış kayıt). " +
+      "Düzeltmesi yönetimde yapılır.", "err"); return; }
+  msg($("#harcama-msg"), "Kayıt açılıyor…");
+  sb.rpc("harcama_duzeltilebilir_mi", {p_expense: sat.id}).then(function(r){
+    if(r.error){ msg($("#harcama-msg"), hataTr(r.error.message), "err"); return; }
+    var izin = r.data || {};
+    if(!izin.olur){ msg($("#harcama-msg"), izin.sebep || "Bu kayıt düzeltilemez.", "err"); return; }
+    $("#e-project").value = sat.project_id || "";
+    $("#e-date").value    = sat.expense_date || "";
+    $("#e-cat").value     = sat.category || "Diğer";
+    $("#e-amount").value  = (sat.amount == null ? "" : sat.amount);
+    $("#e-desc").value    = sat.description || "";
+    $("#e-photo").value   = "";
+    HDUZELT = { id: sat.id, client_uuid: sat.client_uuid,
+                etiket: sat.expense_date + " · " + (sat.category||"") + " · " + money(sat.amount) };
+    harcamaSeridi();
+    msg($("#harcama-msg"), "");
+    msg($("#exp-msg"), "Kayıt yukarıya açıldı. Düzeltip Kaydet'e basın.", "ok");
+    window.scrollTo(0, 0);
+  }).catch(function(e){ msg($("#harcama-msg"), hataTr((e && e.message) || String(e)), "err"); });
+}
 
 /* ---------------- senkron ---------------- */
 function uploadPhotos(files, tenant, projectId, entity, entityId){
@@ -1538,12 +1739,25 @@ function renderBits(){
   else {
     box.innerHTML = OPENBITS.map(function(b){
       var o = bitOmru(b);
-      return '<div class="li"><span><b>' + b.brand + '</b> · ' + b.diameter +
-        '<br><span class="hint">' + (b.machine||"") + (b.well ? " · " + b.well : "") +
-        ' · ' + tl(b.from_m) + ' m\'den takılı' + (b.pending ? " · gönderilmeyi bekliyor" : "") + '</span></span>' +
-        '<span class="num" style="text-align:right">' + (o === null ? '—' : tl(o) + ' m') +
-        '<br><span class="hint">' + (b.installed_at||"") + '</span></span></div>';
+      /* İptal yalnız hiç metraj işlememiş matkapta. Sunucu da aynı kuralı
+         uyguluyor; burada düğmeyi hiç göstermemek şefi boşa uğraştırmamak için. */
+      var iptal = (b.pending || b.iptal_olur)
+        ? '<button class="btn ghost mini bit-iptal" type="button" data-bit="' + b.bit_id + '">İptal</button>'
+        : '';
+      return '<div class="kayit">' +
+        '<div class="kayit-ust"><b>' + b.brand + '</b> · ' + b.diameter +
+          '<span class="hint">' + (b.machine||"") + (b.well ? " · " + b.well : "") +
+          ' · ' + tl(b.from_m) + ' m\'den takılı' + (b.pending ? " · gönderilmeyi bekliyor" : "") +
+          '</span></div>' +
+        '<div class="kayit-alt">' +
+          '<span class="num">' + (o === null ? '—' : tl(o) + ' m') +
+          ' <span class="hint">' + (b.installed_at||"") + '</span></span>' +
+          '<span class="kayit-dugme">' + iptal + '</span>' +
+        '</div></div>';
     }).join("");
+    $$(".bit-iptal").forEach(function(d){
+      d.addEventListener("click", function(){ matkapIptal(d.dataset.bit, d); });
+    });
   }
   var sel = $("#b-open"); var cur = sel.value; sel.innerHTML = "";
   var o0 = document.createElement("option"); o0.value=""; o0.textContent="— seçin —"; sel.appendChild(o0);
@@ -1570,6 +1784,57 @@ function loadBits(){
   });
 }
 $("#btn-bits-refresh").addEventListener("click", loadBits);
+
+/* ============================================================
+   MATKAP İPTALİ — "yanlış taktım"
+   Henüz METRAJ İŞLEMEMİŞ bir matkap kaydı geri alınabilir. Bu geçmişi
+   değiştirmek değil, hiçbir şeye dokunmamış bir kaydı silmek. Metraj
+   işledikten sonra kapanıyor: ömür ve bits.total_meters bozulur, orası
+   yönetime kalıyor. Karar ve gerekçe: 14-duzeltme-ve-ay-kilidi.md
+   ============================================================ */
+function matkapIptal(bitId, dugme){
+  var rec = OPENBITS.filter(function(b){ return b.bit_id === bitId; })[0];
+  if(!rec){ loadBits(); return; }
+
+  /* İki aşamalı onay: silme işi sessiz tek dokunuşla olmaz. */
+  if(dugme && dugme.dataset.onay !== "1"){
+    dugme.dataset.onay = "1";
+    dugme.textContent = "Emin misiniz?";
+    msg($("#bit-msg"), "İptal edilecek: <b>" + rec.brand + "</b> · " + (rec.machine||"") +
+        " · " + tl(rec.from_m) + " m. Onaylamak için düğmeye bir daha basın.", "warn");
+    return;
+  }
+
+  /* Henüz gönderilmemiş kayıt: kuyruktan düşer, merkeze hiç gitmez. */
+  if(rec.pending){
+    return obAll().then(function(items){
+      var it = items.filter(function(x){
+        return x.kind === "bit_install" && x.payload && x.payload.local_id === bitId; })[0];
+      return it ? obDel(it.id) : null;
+    }).then(function(){
+      OPENBITS = OPENBITS.filter(function(b){ return b.bit_id !== bitId; });
+      cacheBits(OPENBITS);
+      return refreshQueue();
+    }).then(function(){
+      msg($("#bit-msg"), "Matkap kaydı iptal edildi — merkeze gönderilmedi.", "ok");
+    });
+  }
+
+  if(!navigator.onLine || !sb){
+    msg($("#bit-msg"), "İptal için bağlantı gerekiyor. Kayıt merkeze gitmiş durumda.", "err");
+    loadBits(); return;
+  }
+  msg($("#bit-msg"), "İptal ediliyor…");
+  sb.rpc("matkap_iptal", {p_bit: bitId}).then(function(r){
+    if(r.error){ msg($("#bit-msg"), hataTr(r.error.message), "err"); return; }
+    var d = r.data || {};
+    if(!d.olur){ msg($("#bit-msg"), d.sebep || "Bu matkap iptal edilemez.", "err"); loadBits(); return; }
+    OPENBITS = OPENBITS.filter(function(b){ return b.bit_id !== bitId; });
+    cacheBits(OPENBITS);
+    msg($("#bit-msg"), "Matkap kaydı iptal edildi.", "ok");
+    loadBits();
+  }).catch(function(e){ msg($("#bit-msg"), hataTr((e && e.message) || String(e)), "err"); });
+}
 $("#b-formasyon").addEventListener("change", function(){
   $("#b-formasyon-diger-wrap").hidden = ($("#b-formasyon").value !== "__diger");
 });
@@ -1589,8 +1854,18 @@ function loadStok(){
   sb.rpc("stock_status", {p_project:proje}).then(function(r){
     if(r.error){ $("#stok-liste").innerHTML = '<div class="hint">' + r.error.message + '</div>'; return; }
     var rows = (r.data||[]).filter(function(x){ return Number(x.giris) || Number(x.cikis); });
+    /* "Sahada hiç kalmadı" ile "bu sahaya hiç girilmemiş" ayrı şeyler; stok
+       listesi yalnız hareket görmüş malzemeyi gösterdiği için ikisi aynı
+       görünüyordu. Hareket görmemişler altta ayrı satırda yazılır. */
+    var gorulen = {}; rows.forEach(function(x){ gorulen[x.material] = 1; });
+    var hic = ((MASTER && MASTER.materials) || []).filter(function(m){ return !gorulen[m.name]; })
+      .map(function(m){ return m.name; });
+    var hicSatir = hic.length
+      ? '<div class="hint" style="margin-top:8px"><b>Hareket görmemiş malzemeler:</b> ' +
+        hic.join(", ") + '. Bu sahada hiç giriş/çıkış yazılmamış — stokta olmadığı anlamına gelmez.</div>'
+      : "";
     if(!rows.length){ $("#stok-liste").innerHTML =
-      '<div class="hint">Henüz stok hareketi girilmemiş.</div>'; return; }
+      '<div class="hint">Bu şantiyede henüz stok hareketi girilmemiş.</div>' + hicSatir; return; }
     $("#stok-liste").innerHTML = rows.map(function(x){
       var kalan = Number(x.kalan||0);
       var renk = kalan <= 0 ? "stok-bitti" : (kalan < 5 ? "stok-az" : "");
@@ -1602,15 +1877,39 @@ function loadStok(){
         '<br><span class="hint">giren ' + say(x.giris) + ' · çıkan ' + say(x.cikis) + '</span></span>' +
         '<span class="num"><b class="' + renk + '">' + say(kalan) + '</b> ' + (x.unit||"") +
         rozet + '</span></div>';
-    }).join("");
+    }).join("") + hicSatir;
   });
 }
 $("#btn-stok-yenile").addEventListener("click", loadStok);
 
+/* ============================================================
+   MATKAP TAKMA — GİRİŞ METRESİ DOĞRULAMASI
+   Giriş metresi matkap ömrünün temeli: hem ekranda görünen ömür, hem
+   sökerken bits.total_meters'a eklenen toplam metre buradan çıkıyor.
+   960 yerine 96 yazılırsa matkap 864 metre fazla çalışmış görünür ve ŞEF
+   BUNU DÜZELTEMEZ (bit_usages yalnız yöneticiye açık). Düzeltme hakkını
+   kısıtlıyorsak yanlışı giriş anında yakalamak zorundayız: engellemiyoruz,
+   ama sessiz de geçmiyoruz — ikinci basışta kaydediyor.
+   ============================================================ */
+var BITONAY = null;     /* onaylanmış sapmalı değer */
 $("#btn-bit-install").addEventListener("click", function(){
   var mach = $("#b-machine").value, dia = $("#b-dia").value, brand = $("#b-brand").value;
   var from = $("#b-from").value === "" ? null : Number($("#b-from").value);
   if(!mach || !dia || !brand || from === null){ msg($("#bit-msg"), "Makine, çap, marka ve takıldığı metre zorunlu.", "err"); return; }
+  var kuyu = (MASTER && MASTER.wells || []).filter(function(x){ return x.id === $("#b-well").value; })[0];
+  if(!kuyu){ msg($("#bit-msg"), "Kuyu seçin — makine listesi ve takıldığı metre kuyuya göre kuruluyor.", "err"); return; }
+  var derin = Number(kuyu.current_depth || 0);
+  var sapma = Math.abs(derin - from);
+  /* Kuyudan derine takmak ya da belirgin sapma: bir kere sor. */
+  if(BITONAY !== from && (from > derin + 0.5 || (derin > 0 && sapma > Math.max(10, derin * 0.1)))){
+    BITONAY = from;
+    msg($("#bit-msg"), "<b>Emin misiniz?</b> " + kuyu.code + " kuyusu " + tl(derin) +
+      " m'de, siz " + tl(from) + " m yazdınız" +
+      (from > derin ? " — kuyunun derinliğinden fazla" : "") +
+      ". Doğruysa <b>Matkabı tak</b>'a bir daha basın; yanlışsa metreyi düzeltin.", "err");
+    return;
+  }
+  BITONAY = null;
   var localId = "localbit:" + uuid();
   var machName = ($("#b-machine").selectedOptions[0]||{textContent:""}).textContent;
   var wellName = $("#b-well").value ? ($("#b-well").selectedOptions[0].textContent.split(" ·")[0]) : null;
@@ -1621,8 +1920,10 @@ $("#btn-bit-install").addEventListener("click", function(){
     title:"Matkap takıldı · " + brand, sub: machName + " · " + tl(from) + " m",
     payload:{ local_id:localId, machine_id:mach, well_id:$("#b-well").value || null, brand:brand,
               hardness:null, diameter:dia, serial:$("#b-serial").value || "", from_m:from, date:todayStr() } })
-  .then(function(){ $("#b-serial").value=""; $("#b-from").value="";
-    msg($("#bit-msg"), "Matkap kaydedildi.", "ok"); });
+  .then(function(){ $("#b-serial").value="";
+    $("#b-from").value = (kuyu && kuyu.current_depth != null) ? Number(kuyu.current_depth) : "";
+    msg($("#bit-msg"), "Matkap kaydedildi. Yanlışsa yukarıdaki listeden " +
+        "<b>İptal</b> ile geri alabilirsiniz — metraj işlemeye başlamadan.", "ok"); });
 });
 
 $("#btn-bit-remove").addEventListener("click", function(){
@@ -1970,6 +2271,84 @@ $("#btn-att-summary").addEventListener("click", function(){
   });
 });
 
+/* ============================================================
+   YAKIT DÖKÜMÜ
+   Üç fonksiyon vardı ama hiçbir ekranda gösterilmiyordu:
+     yakit_dagilim        → sondaj yakıtı / araç yakıtı ayrımı, lt/metre
+     yakit_makine_ozeti   → makine bazlı metraj, beyan, defter
+     yakit_vardiya_dokumu → vardiya vardiya beyan/defter farkı
+   Tayfun'un istediği sıra buydu: litre bazında, her makine için, vardiya
+   bazlı; araç yakıtı masraf olarak görünsün ama performansa girmesin.
+   ============================================================ */
+function ayAraligi(){
+  var ay = $("#s-month").value || todayStr().slice(0,7);
+  var y = Number(ay.slice(0,4)), m = Number(ay.slice(5,7));
+  var son = new Date(y, m, 0).getDate();
+  return [ay + "-01", ay + "-" + (son < 10 ? "0" : "") + son];
+}
+$("#btn-yakit-rapor").addEventListener("click", function(){
+  if(!navigator.onLine || !sb){ $("#yakit-rapor").innerHTML =
+    '<div class="hint">Bağlantı gerekiyor.</div>'; return; }
+  var proje = $("#s-project").value;
+  if(!proje){ $("#yakit-rapor").innerHTML = '<div class="hint">Yukarıdan proje seçin.</div>'; return; }
+  var ar = ayAraligi();
+  $("#yakit-rapor").innerHTML = '<div class="hint">Yükleniyor…</div>';
+  Promise.all([
+    sb.rpc("yakit_dagilim",        {p_project:proje, p_from:ar[0], p_to:ar[1]}),
+    sb.rpc("yakit_makine_ozeti",   {p_project:proje, p_from:ar[0], p_to:ar[1]}),
+    sb.rpc("yakit_vardiya_dokumu", {p_project:proje, p_from:ar[0], p_to:ar[1]})
+  ]).then(function(res){
+    var hata = res.filter(function(r){ return r.error; })[0];
+    if(hata){ $("#yakit-rapor").innerHTML = '<div class="hint">' + hataTr(hata.error.message) + '</div>'; return; }
+    var d = res[0].data || {}, mak = res[1].data || [], vard = res[2].data || [];
+    if(!mak.length && !vard.length){
+      $("#yakit-rapor").innerHTML = '<div class="hint">Bu ay için kayıt yok.</div>'; return; }
+
+    var ust = '<div class="readout">' +
+      '<div><div class="k">Sondaj yakıtı</div><div class="v num">' + tl(d.sondaj_litre) + ' lt</div></div>' +
+      '<div><div class="k">Araç yakıtı</div><div class="v num">' + tl(d.arac_litre) + ' lt</div></div>' +
+      '<div><div class="k">Metraj</div><div class="v num">' + tl(d.metraj) + ' m</div></div>' +
+      '<div><div class="k">Litre / metre</div><div class="v num">' +
+        (d.lt_metre == null ? '—' : tl(d.lt_metre)) + '</div></div>' +
+      '</div>' +
+      '<div class="hint">Sondaj yakıtı = kuleye verilen (' + tl(d.kule_litre) +
+      ' lt) + traktör ve su pompası (' + tl(d.destek_litre) + ' lt). ' +
+      'Litre/metre yalnız bu rakamdan hesaplanır; araç yakıtı masraf olarak ayrı durur.' +
+      (Number(d.siniflanmamis) > 0
+        ? ' <b>' + d.siniflanmamis + ' aracın türü girilmemiş</b> — sınıflanana kadar araç yakıtında sayılıyor.'
+        : '') + '</div>';
+
+    var mTablo = !mak.length ? "" :
+      '<div style="overflow-x:auto;margin-top:12px"><table><thead><tr><th>Makine</th>' +
+      '<th>Vardiya</th><th>Metraj</th><th>Beyan</th><th>Defter</th><th>lt/m</th></tr></thead><tbody>' +
+      mak.map(function(x){
+        return "<tr><td>" + x.makine + "</td><td class='num'>" + x.vardiya +
+          "</td><td class='num'>" + tl(x.metraj) + "</td><td class='num'>" + tl(x.beyan) +
+          "</td><td class='num'>" + tl(x.defter) + "</td><td class='num'>" +
+          (x.lt_metre == null ? "—" : tl(x.lt_metre)) + "</td></tr>";
+      }).join("") + '</tbody></table></div>';
+
+    /* Vardiya dökümü uzun olabilir; son 15 vardiya gösterilir. */
+    var son = vard.slice(-15).reverse();
+    var vTablo = !son.length ? "" :
+      '<div class="eyebrow" style="margin-top:14px">Vardiya dökümü (son ' + son.length + ')</div>' +
+      '<div style="overflow-x:auto"><table><thead><tr><th>Tarih</th><th>Makine</th><th>Vardiya</th>' +
+      '<th>Metraj</th><th>Beyan</th><th>Defter</th><th>Fark</th></tr></thead><tbody>' +
+      son.map(function(x){
+        var f = Number(x.fark||0);
+        var renk = Math.abs(f) >= 20 ? ' class="num stok-az"' : ' class="num"';
+        return "<tr><td>" + x.tarih + "</td><td>" + x.makine + "</td><td>" + x.vardiya +
+          "</td><td class='num'>" + tl(x.metraj) + "</td><td class='num'>" + tl(x.beyan) +
+          "</td><td class='num'>" + tl(x.defter) + "</td><td" + renk + ">" +
+          (f > 0 ? "+" : "") + tl(f) + "</td></tr>";
+      }).join("") + '</tbody></table></div>' +
+      '<div class="hint">Fark = defter − beyan. Büyük fark, yakıt verişinin ya da ' +
+      'vardiya formundaki mazotun yazılmadığını gösterir.</div>';
+
+    $("#yakit-rapor").innerHTML = ust + mTablo + vTablo;
+  });
+});
+
 /* ---------------- sekmeler ---------------- */
 $$("#tabs button").forEach(function(b){
   b.addEventListener("click", function(){
@@ -1982,7 +2361,7 @@ $$("#tabs button").forEach(function(b){
     if(b.dataset.tab === "kuyruk") refreshQueue();
     if(b.dataset.tab === "puantaj"){ attCiz(); attLoad(true); }
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
-    if(b.dataset.tab === "gider") loadYakit();
+    if(b.dataset.tab === "gider"){ loadYakit(); loadHarcama(); }
     window.scrollTo(0,0);
   });
 });
