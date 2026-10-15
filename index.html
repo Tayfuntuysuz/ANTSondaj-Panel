@@ -1230,13 +1230,23 @@ window.addEventListener("offline", refreshQueue);
 
 /* ---------------- son kayıtlar ---------------- */
 function loadRecent(){
+  /* Son kayıtlar SEÇİLİ PROJEYE aittir. Eskiden süzgeç yoktu: şefte satır
+     güvenliği kurtarıyordu ama yönetici, daha hiçbir şey seçmeden bütün
+     şantiyelerin vardiyalarını görüyordu. */
+  var proje = $("#f-project").value;
+  if(!proje){ $("#recent-list").innerHTML =
+    '<div class="hint">Önce yukarıdan proje seçin — son kayıtlar o şantiyeye göre gelir.</div>';
+    return; }
   if(!navigator.onLine){ $("#recent-list").innerHTML = '<div class="hint">Bağlantı yokken son kayıtlar görüntülenemez.</div>'; return; }
+  $("#recent-list").innerHTML = '<div class="hint">Yükleniyor…</div>';
   sb.from("shifts").select("id,work_date,shift,fuel_liters,well_id,machine_id,project_id")
+    .eq("project_id", proje)
     .order("work_date", {ascending:false}).order("created_at", {ascending:false}).limit(10)
     .then(function(r){
       if(r.error){ $("#recent-list").innerHTML = '<div class="hint">' + r.error.message + '</div>'; return; }
       var rows = r.data || [];
-      if(!rows.length){ $("#recent-list").innerHTML = '<div class="hint">Henüz kayıt yok.</div>'; return; }
+      if(!rows.length){ $("#recent-list").innerHTML =
+        '<div class="hint">Bu şantiyede henüz vardiya kaydı yok.</div>'; return; }
       var ids = rows.map(function(x){ return x.id; });
       sb.from("shift_runs").select("shift_id,meters").in("shift_id", ids).then(function(rr){
         var sums = {};
@@ -1260,6 +1270,7 @@ function loadRecent(){
     });
 }
 $("#btn-recent").addEventListener("click", loadRecent);
+$("#f-project").addEventListener("change", function(){ if(navigator.onLine) loadRecent(); });
 
 /* kaydedilmiş vardiyaya sonradan fotoğraf ekleme */
 var SECILI_VARDIYA = null;
