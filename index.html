@@ -72,6 +72,13 @@ textarea{min-height:70px}
 .ekip-satir:last-child{border-bottom:0}
 .q-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
 .q-satir.takildi{border-color:var(--bad);background:var(--bad-soft)}
+.kayit{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
+.kayit-ust{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kayit-ust .hint{font-size:12.5px}
+.kayit-alt{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.kayit-dugme{display:flex;gap:6px;flex-shrink:0}
+/* Listelerdeki ikincil düğmeler: dokunulabilir ama satırı şişirmeyen boy */
+.btn.mini{padding:0 12px;min-height:40px;font-size:13px;width:auto;white-space:nowrap}
 .stok-az{color:var(--warn)}
 .stok-bitti{color:var(--bad)}
 /* sahada renk tek başına yetmez: yanına yazı da koyuyoruz */
@@ -1415,14 +1422,24 @@ function loadRecent(){
         (rr.data||[]).forEach(function(x){ sums[x.shift_id] = (sums[x.shift_id]||0) + Number(x.meters); });
         var wellName = function(id){ var w=(MASTER.wells||[]).filter(function(x){return x.id===id;})[0]; return w?w.code:"kuyu"; };
         var machName = function(id){ var m=(MASTER.machines||[]).filter(function(x){return x.id===id;})[0]; return m?m.code:""; };
+        /* Satır iki katlı: üstte kaydın kendisi, altta rakam ve iki küçük
+           düğme yan yana. Tek satıra sıkıştırınca düğmeler alt alta düşüp
+           kocaman görünüyordu. */
         $("#recent-list").innerHTML = rows.map(function(s){
-          return '<div class="li"><span><b>' + wellName(s.well_id) + '</b> <span class="hint">' + machName(s.machine_id) +
-            ' · ' + s.work_date + ' · ' + (s.shift === "gece" ? "gece" : "gündüz") + '</span></span>' +
-            '<span class="num">' + tl(sums[s.id]||0) + ' m · ' + tl(s.fuel_liters||0) + ' lt</span>' +
-            '<button class="btn ghost sm foto-ekle" type="button" data-shift="' + s.id +
-            '" data-proje="' + (s.project_id || "") + '">Fotoğraf ekle</button>' +
-            '<button class="btn ghost sm duzelt" type="button" data-shift="' + s.id + '">Düzelt</button>' +
-            (s.status === "corrected" ? ' <span class="pill warn">düzeltildi</span>' : '') + '</div>';
+          return '<div class="kayit">' +
+            '<div class="kayit-ust"><b>' + wellName(s.well_id) + '</b>' +
+              '<span class="hint">' + machName(s.machine_id) + ' · ' + s.work_date +
+              ' · ' + (s.shift === "gece" ? "gece" : "gündüz") + '</span>' +
+              (s.status === "corrected" ? '<span class="pill warn">düzeltildi</span>' : '') +
+            '</div>' +
+            '<div class="kayit-alt">' +
+              '<span class="num">' + tl(sums[s.id]||0) + ' m · ' + tl(s.fuel_liters||0) + ' lt</span>' +
+              '<span class="kayit-dugme">' +
+                '<button class="btn ghost mini duzelt" type="button" data-shift="' + s.id + '">Düzelt</button>' +
+                '<button class="btn ghost mini foto-ekle" type="button" data-shift="' + s.id +
+                '" data-proje="' + (s.project_id || "") + '">Fotoğraf</button>' +
+              '</span>' +
+            '</div></div>';
         }).join("");
         $$(".duzelt").forEach(function(b){
           b.addEventListener("click", function(){
