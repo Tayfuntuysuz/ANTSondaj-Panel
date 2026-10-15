@@ -485,19 +485,6 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
       <div id="sum-out" style="margin-top:14px;display:flex;flex-direction:column;gap:14px"></div>
 
-      <div class="card" style="margin-top:14px">
-        <span class="eyebrow">Prim kuralı</span>
-        <div class="field"><label for="b-threshold">Prim barajı (çarpanlı metraj)</label><input id="b-threshold" type="number" inputmode="decimal" placeholder="örn. 900"></div>
-        <div class="hint">Derinlik çarpanları: her satır "başlangıç metresi, bitiş metresi, çarpan". Boş bırakırsanız çarpan 1 kabul edilir.</div>
-        <div id="mult-rows"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn ghost sm" id="btn-mult-add" type="button">Çarpan satırı ekle</button>
-          <button class="btn ghost sm" id="btn-bonus-save" type="button">Kuralı kaydet</button>
-          <button class="btn ghost sm" id="btn-bonus-report" type="button">Prim raporu</button>
-        </div>
-        <div id="bonus-msg"></div>
-      </div>
-      <div id="bonus-out" style="margin-top:12px;display:flex;flex-direction:column;gap:12px"></div>
 
       <div class="card" style="margin-top:14px">
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -1757,59 +1744,10 @@ function ekipAraCiz(){
 }
 $("#ekip-ara").addEventListener("input", ekipAraCiz);
 
-/* ---------------- prim ---------------- */
-function multRow(v){
-  var d = document.createElement("div");
-  d.style.cssText = "display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-top:6px";
-  d.innerHTML = "<input type='number' inputmode='decimal' placeholder='başl. m' data-mf value='" + ((v&&v.from)||"") +
-    "'><input type='number' inputmode='decimal' placeholder='bitiş m' data-mt value='" + ((v&&v.to)||"") +
-    "'><input type='number' inputmode='decimal' step='0.01' placeholder='çarpan' data-mx value='" + ((v&&v.x)||"") + "'>";
-  var x = document.createElement("button"); x.className="chip"; x.type="button"; x.textContent="×";
-  x.addEventListener("click", function(){ d.remove(); });
-  d.appendChild(x);
-  $("#mult-rows").appendChild(d);
-}
-$("#btn-mult-add").addEventListener("click", function(){ multRow(null); });
-function multPayload(){
-  return $$("#mult-rows > div").map(function(d){
-    return { from: Number(d.querySelector("[data-mf]").value || 0),
-             to:   Number(d.querySelector("[data-mt]").value || 1000000),
-             x:    Number(d.querySelector("[data-mx]").value || 1) };
-  }).filter(function(m){ return m.x > 0; });
-}
-$("#btn-bonus-save").addEventListener("click", function(){
-  if(!navigator.onLine){ msg($("#bonus-msg"), "Bu işlem için bağlantı gerekiyor.", "err"); return; }
-  if(!$("#s-project").value){ msg($("#bonus-msg"), "Yukarıdan proje seçin.", "err"); return; }
-  var thr = $("#b-threshold").value ? Number($("#b-threshold").value) : null;
-  sb.rpc("set_bonus_rule", {p_project:$("#s-project").value, p_threshold:thr, p_mult:multPayload()}).then(function(r){
-    msg($("#bonus-msg"), r.error ? r.error.message : "Prim kuralı kaydedildi.", r.error ? "err" : "ok");
-  });
-});
-$("#btn-bonus-report").addEventListener("click", function(){
-  if(!navigator.onLine){ msg($("#bonus-msg"), "Bu işlem için bağlantı gerekiyor.", "err"); return; }
-  if(!$("#s-project").value){ msg($("#bonus-msg"), "Yukarıdan proje seçin.", "err"); return; }
-  var m = $("#s-month").value ? $("#s-month").value + "-01" : todayStr().slice(0,8) + "01";
-  msg($("#bonus-msg"), "Hesaplanıyor…");
-  sb.rpc("bonus_report", {p_project:$("#s-project").value, p_month:m}).then(function(r){
-    if(r.error){ msg($("#bonus-msg"), r.error.message, "err"); return; }
-    msg($("#bonus-msg"), "");
-    var d = r.data;
-    $("#b-threshold").value = d.threshold || $("#b-threshold").value;
-    if(!$$("#mult-rows > div").length && (d.multipliers||[]).length) (d.multipliers||[]).forEach(multRow);
-    function tbl(title, rows){
-      if(!rows || !rows.length) return '<div class="card hint">' + title + ': veri yok.</div>';
-      return '<div class="card"><span class="eyebrow">' + title + '</span><table><thead><tr><th>Ad</th><th>Metraj</th><th>Çarpanlı</th><th></th></tr></thead><tbody>' +
-        rows.map(function(x){
-          return "<tr><td>" + x.name + "</td><td class='num'>" + tl(x.meters) + "</td><td class='num'><b>" + tl(x.weighted) +
-            "</b></td><td>" + (x.over ? "<span class='pill warn'>baraj aşıldı</span>" : "") + "</td></tr>";
-        }).join("") + '</tbody></table></div>';
-    }
-    $("#bonus-out").innerHTML =
-      (d.threshold ? '<div class="msg">Baraj: ' + tl(d.threshold) + ' m (çarpanlı)</div>'
-                   : '<div class="msg warn">Baraj tanımlı değil. Üstteki alana yazıp kuralı kaydedin.</div>') +
-      tbl("Sondör primi", d.drillers) + tbl("Makine bazında", d.machines);
-  });
-});
+/* Prim bölümü bu uygulamadan KALDIRILDI.
+   Prim, şefin kendi kazancını ilgilendiren bir yönetim konusu: baraj ve
+   skala yönetici tarafından belirlenir, şef veri girişi ekranında ne
+   görmeli ne de değiştirebilmeli. Yönetici tarafına taşındı. */
 $("#btn-att-summary").addEventListener("click", function(){
   if(!navigator.onLine){ $("#att-summary").innerHTML = '<div class="hint">Bağlantı gerekiyor.</div>'; return; }
   if(!$("#s-project").value){ $("#att-summary").innerHTML = '<div class="hint">Yukarıdan proje seçin.</div>'; return; }
