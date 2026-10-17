@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sondaj Panel · Ana veri ve projeler</title>
+<meta name="theme-color" content="#123146">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.sekmeler button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  border-radius:999px;padding:8px 15px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.sekmeler button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.sechead{display:flex;align-items:baseline;gap:10px;margin:18px 0 8px}
+.sechead h2{font-size:20px}
+.sechead span{font-size:12px;color:var(--ink-3)}
+.adimlar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.adimlar div{font-size:12px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);
+  color:var(--ink-3);background:var(--card)}
+.adimlar div.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.adimlar div.ok{border-color:var(--ok,#1d7a4c);color:var(--ok,#1d7a4c)}
+.satir{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px}
+.satir .field{flex:1;min-width:120px;margin:0}
+.secimler{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+/* app.css'teki genel label kuralı (büyük harf, 10,5 px) seçim kutularında
+   okunmuyor; burada sıfırlanıyor. */
+.secimler label{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);
+  border-radius:999px;padding:7px 13px;background:var(--card);cursor:pointer;
+  font-size:13.5px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink-2)}
+.secimler label.sec{border-color:var(--accent);background:var(--chip,rgba(18,112,143,.1));color:var(--accent)}
+.secimler input[type=checkbox]{width:17px;height:17px;min-height:0;flex:none;margin:0;
+  accent-color:var(--accent);padding:0}
+.satir label{display:flex;align-items:center}
+.satir label input[type=checkbox]{width:17px;height:17px;min-height:0;flex:none;margin:0;padding:0;
+  accent-color:var(--accent)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.kv:last-child{border-bottom:0}
+.kv span:first-child{color:var(--ink-3);font-size:13px}
+.not{font-size:12px;color:var(--ink-3);max-width:78ch;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div id="sp-icerik">
+  <div class="sekmeler" id="sekmeler">
+    <button type="button" data-s="projeler" aria-pressed="true">Projeler</button>
+    <button type="button" data-s="yeni" aria-pressed="false">Yeni proje</button>
+    <button type="button" data-s="makineler" aria-pressed="false">Makineler</button>
+    <button type="button" data-s="araclar" aria-pressed="false">Araç ve ekipman</button>
+    <button type="button" data-s="personel" aria-pressed="false">Personel</button>
+    <button type="button" data-s="malzeme" aria-pressed="false">Malzeme</button>
+    <button type="button" data-s="musteri" aria-pressed="false">Müşteriler</button>
+  </div>
+  <div id="msg"></div>
+
+  <!-- PROJELER -->
+  <section data-bol="projeler">
+    <div class="card"><div id="proje-tablo"></div></div>
+    <div class="not">Bir projeyi açmak için Yeni proje sekmesini kullanın; mevcut projenin
+      kuyusunu, makinesini ve ekibini de oradan ekleyebilirsiniz.</div>
+  </section>
+
+  <!-- YENİ PROJE SİHİRBAZI -->
+  <section data-bol="yeni" hidden>
+    <div class="adimlar" id="adimlar"></div>
+
+    <div class="card" data-adim="1">
+      <h3>1 · Müşteri ve proje</h3>
+      <div class="not">Bir müşterinin birden fazla şantiyesi olabilir; her şantiye ayrı proje
+        olarak açılır. Metraj, hakediş ve prim proje bazlı hesaplanır.</div>
+      <div class="field"><label for="p-musteri">Müşteri</label>
+        <select id="p-musteri"></select></div>
+      <div class="satir">
+        <div class="field"><label for="p-yenimusteri">Yeni müşteri adı</label>
+          <input id="p-yenimusteri" placeholder="listede yoksa buraya yazın"></div>
+        <div class="field"><label for="p-vergi">Vergi no</label><input id="p-vergi"></div>
+      </div>
+      <div class="satir">
+        <div class="field"><label for="p-ad">Proje adı *</label>
+          <input id="p-ad" placeholder="Ardeşen Sahası Karotlu Sondaj"></div>
+        <div class="field"><label for="p-saha">Şantiye adı</label>
+          <input id="p-saha" placeholder="Hanönü Şantiyesi"></div>
+      </div>
+      <div class="satir">
+        <div class="field"><label for="p-il">İl</label><input id="p-il"></div>
+        <div class="field"><label for="p-ilce">İlçe</label><input id="p-ilce"></div>
+      </div>
+    </div>
+
+    <div class="card" data-adim="2" hidden>
+      <h3>2 · Vardiya düzeni</h3>
+      <div class="not">Vardiya sayısı ve saatleri projeye göre değişir. Gece yarısını geçen
+        vardiya ertesi günün raporuna yazılır — program bunu saatlerden kendisi anlar,
+        gerekirse işareti değiştirin.</div>
+      <div class="field" style="max-width:220px"><label for="p-vsayi">Vardiya sayısı</label>
+        <select id="p-vsayi"><option value="2">2 vardiya</option><option value="3">3 vardiya</option></select></div>
+      <div id="vardiya-satirlar"></div>
+    </div>
+
+    <div class="card" data-adim="3" hidden>
+      <h3>3 · Kuyular</h3>
+      <div class="not">Eğim ve azimut yalnız burada girilir; vardiya formunda bir daha sorulmaz
+        ve kuyu açıldıktan sonra değişmez. Planlanan derinliği işveren verir.</div>
+      <div id="kuyu-satirlar"></div>
+      <button class="btn gh" id="btn-kuyu-ekle" type="button">Kuyu ekle</button>
+    </div>
+
+    <div class="card" data-adim="4" hidden>
+      <h3>4 · Makineler</h3>
+      <div class="not">Bu projede çalışacak kuleler. Makine başka şantiyedeyse buraya alındığında
+        oradaki görevi kapanır — motor saati ve bakım takibi tek makinede birikir.</div>
+      <div class="secimler" id="makine-sec"></div>
+    </div>
+
+    <div class="card" data-adim="5" hidden>
+      <h3>5 · Ekip</h3>
+      <div class="not">Sondörler, yardımcılar, işçiler ve şoförler. Seçilen kişiler bugünden
+        itibaren bu şantiyeye atanır; başka şantiyedeyse oradaki görevi kapanır.</div>
+      <div class="secimler" id="personel-sec"></div>
+    </div>
+
+    <div class="card" data-adim="6" hidden>
+      <h3>6 · Araç ve ekipman</h3>
+      <div class="not">Binek araçlar, pompa ve saha ekipmanı. Şantiyeye bağlanmayan araç
+        her sahada görünür ve yakıtı araç gideri sayılır.</div>
+      <div class="secimler" id="arac-sec"></div>
+      <div id="ozet-kutu" style="margin-top:14px"></div>
+      <button class="btn" id="btn-proje-kur" type="button" style="margin-top:12px">Projeyi oluştur</button>
+      <div id="kur-msg"></div>
+    </div>
+
+    <div class="satir" style="margin-top:12px">
+      <button class="btn gh" id="btn-geri" type="button">← Geri</button>
+      <button class="btn" id="btn-ileri" type="button">İleri →</button>
+    </div>
+  </section>
+
+  <!-- MAKİNELER -->
+  <section data-bol="makineler" hidden>
+    <div class="card">
+      <h3>Makine tanımı</h3>
+      <div class="not">Her fiziksel kule <b>bir kere</b> tanımlanır. Aynı kule için şantiye başına
+        ayrı kayıt açılmaz — bakım saati ve arıza geçmişi tek kayıtta birikmek zorunda.</div>
+      <div class="satir">
+        <div class="field"><label for="m-kod">Kod *</label><input id="m-kod" placeholder="ANT-2500/1"></div>
+        <div class="field"><label for="m-model">Model</label><input id="m-model"></div>
+        <div class="field"><label for="m-seri">Seri no</label><input id="m-seri"></div>
+      </div>
+      <div class="satir">
+        <div class="field"><label for="m-plaka">Plaka</label><input id="m-plaka"></div>
+        <div class="field"><label for="m-gun">Bakım aralığı (gün)</label><input id="m-gun" type="number" value="10"></div>
+        <div class="field"><label for="m-saat">Bakım aralığı (motor saati)</label><input id="m-saat" type="number" value="250"></div>
+        <button class="btn" id="btn-makine-kaydet" type="button">Kaydet</button>
+      </div>
+      <div id="makine-msg"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div id="makine-tablo"></div></div>
+  </section>
+
+  <!-- ARAÇLAR -->
+  <section data-bol="araclar" hidden>
+    <div class="card">
+      <h3>Araç ve ekipman tanımı</h3>
+      <div class="not">Tür, yakıt raporunu belirler: <b>saha ekipmanı</b> (traktör, su pompası)
+        sondaj yakıtına girer; pikap, kamyon ve servis araç gideri sayılır.</div>
+      <div class="satir">
+        <div class="field"><label for="a-plaka">Plaka / ad *</label><input id="a-plaka" placeholder="34 ABC 123 ya da TRAKTÖR"></div>
+        <div class="field"><label for="a-tur">Tür</label>
+          <select id="a-tur">
+            <option value="kule_destek">Saha ekipmanı (traktör, pompa)</option>
+            <option value="pickup">Pikap</option>
+            <option value="kamyon">Kamyon</option>
+            <option value="servis">Servis</option>
+            <option value="bilinmiyor">Bilinmiyor</option>
+          </select></div>
+        <div class="field"><label for="a-proje">Şantiye</label><select id="a-proje"></select></div>
+        <button class="btn" id="btn-arac-kaydet" type="button">Kaydet</button>
+      </div>
+      <div id="arac-msg"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div id="arac-tablo"></div></div>
+  </section>
+
+  <!-- PERSONEL -->
+  <section data-bol="personel" hidden>
+    <div class="card">
+      <h3>Personel tanımı</h3>
+      <div class="satir">
+        <div class="field"><label for="pe-ad">Ad soyad *</label><input id="pe-ad"></div>
+        <div class="field"><label for="pe-gorev">Görev</label>
+          <select id="pe-gorev">
+            <option value="sondor">Sondör</option>
+            <option value="sondor_yardimcisi">Sondör yardımcısı</option>
+            <option value="alt_eleman">İşçi</option>
+            <option value="sofor">Şoför</option>
+            <option value="santiye_sefi">Şantiye şefi</option>
+            <option value="destek">Destek</option>
+            <option value="diger">Diğer</option>
+          </select></div>
+        <button class="btn" id="btn-personel-kaydet" type="button">Kaydet</button>
+      </div>
+      <div class="not">Kişiyi şantiyeye almak için Yeni proje sihirbazının 5. adımını ya da
+        şefin panelindeki saha ekibi kartını kullanın.</div>
+      <div id="personel-msg"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div id="personel-tablo"></div></div>
+  </section>
+
+  <!-- MALZEME -->
+  <section data-bol="malzeme" hidden>
+    <div class="card">
+      <h3>Malzeme tanımı</h3>
+      <div class="satir">
+        <div class="field"><label for="ml-ad">Malzeme adı *</label><input id="ml-ad"></div>
+        <div class="field"><label for="ml-birim">Birim</label>
+          <select id="ml-birim"><option>adet</option><option>metre</option><option>litre</option>
+            <option>kg</option><option>torba</option><option>takım</option></select></div>
+        <div class="field"><label for="ml-kat">Kategori</label><input id="ml-kat" placeholder="sarf / ekipman"></div>
+        <button class="btn" id="btn-malzeme-kaydet" type="button">Kaydet</button>
+      </div>
+      <div id="malzeme-msg"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div id="malzeme-tablo"></div></div>
+
+    <div class="card" style="margin-top:14px">
+      <h3>Kuyu programları</h3>
+      <div class="not">Kuyu açılırken seçilen program listesi. Maden arama ve maden planlama
+        dışında yeni program eklenebilir.</div>
+      <div class="satir">
+        <div class="field"><label for="pr-ad">Program adı</label><input id="pr-ad" placeholder="Su sondajı"></div>
+        <button class="btn gh" id="btn-program-kaydet" type="button">Ekle</button>
+      </div>
+      <div id="program-liste"></div>
+      <div id="program-msg"></div>
+    </div>
+  </section>
+
+  <!-- MÜŞTERİLER -->
+  <section data-bol="musteri" hidden>
+    <div class="card">
+      <h3>Müşteri (işveren) tanımı</h3>
+      <div class="satir">
+        <div class="field"><label for="mu-ad">Müşteri adı *</label><input id="mu-ad"></div>
+        <div class="field"><label for="mu-vergi">Vergi no</label><input id="mu-vergi"></div>
+        <button class="btn" id="btn-musteri-kaydet" type="button">Kaydet</button>
+      </div>
+      <div id="musteri-msg"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div id="musteri-tablo"></div></div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js"></script>
+<script>
+(function(){
+"use strict";
+var $ = SP.$, $$ = SP.$$, esc = SP.esc, tl = SP.tl, msg = SP.msg, tablo = SP.tablo;
+var sb = null, D = null;                  /* D: anaveri() sonucu */
+var KUYULAR = [], ADIM = 1, YENI_PROJE = null;
+
+SP.boot({ sayfa:"anaveri", baslik:"Ana veri ve projeler", hazir:function(){
+  sb = SP.sb;
+  if(!SP.girebilir()){
+    /* Patron salt okunur görür: kaydetme düğmeleri hiç basılmasın. */
+    $$("#sp-icerik button.btn").forEach(function(b){ b.disabled = true; });
+    msg($("#msg"), "Bu sayfayı yalnız görüntüleyebilirsiniz; tanım değiştirme yetkiniz yok.", "warn");
+  }
+  vardiyaSatirlari(); kuyuEkle();
+  yukle();
+}});
+
+function yukle(){
+  msg($("#msg"), "Yükleniyor…");
+  return sb.rpc("anaveri").then(function(r){
+    if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
+    D = r.data || {};
+    msg($("#msg"), "");
+    ciz();
+  });
+}
+
+/* ---------------- sekmeler ---------------- */
+$$("#sekmeler button").forEach(function(b){
+  b.addEventListener("click", function(){
+    $$("#sekmeler button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
+    $$("[data-bol]").forEach(function(s){ s.hidden = (s.dataset.bol !== b.dataset.s); });
+    window.scrollTo(0,0);
+  });
+});
+
+/* ---------------- listeler ---------------- */
+function ciz(){
+  $("#proje-tablo").innerHTML = tablo([
+    ["Müşteri",  function(r){ return esc(r.musteri || "—"); }],
+    ["Proje",    function(r){ return "<b>"+esc(r.name)+"</b>"; }],
+    ["Şantiye",  function(r){ return esc(r.site_name || "—"); }],
+    ["Yer",      function(r){ return esc([r.city, r.district].filter(Boolean).join(" / ") || "—"); }],
+    ["Vardiya",  function(r){ return (r.vardiyalar||[]).map(function(v){
+        return '<div class="hint">'+v.slot+". "+esc(v.label)+" · "+String(v.starts).slice(0,5)+
+               "–"+String(v.ends).slice(0,5)+(v.next_day?" · ertesi gün":"")+"</div>"; }).join("")
+        || '<span class="hint">tanımsız</span>'; }],
+    ["Kuyu",     function(r){ return '<span class="num">'+(r.kuyu||0)+'</span>'; }],
+    ["Makine",   function(r){ return '<span class="num">'+(r.makine||0)+'</span>'; }],
+    ["Durum",    function(r){ return esc(r.status); }]
+  ], D.projects, "Henüz proje açılmamış.");
+
+  $("#makine-tablo").innerHTML = tablo([
+    ["Kod",     function(r){ return "<b>"+esc(r.code)+"</b>"; }],
+    ["Model",   function(r){ return esc(r.model || "—"); }],
+    ["Seri no", function(r){ return esc(r.serial_no || "—"); }],
+    ["Şantiye", function(r){ return esc(r.santiye || "—"); }],
+    ["Bakım",   function(r){ return '<span class="num">'+(r.maint_days||10)+'</span> gün / ' +
+                  '<span class="num">'+tl(r.maint_hours||250,0)+'</span> saat'; }]
+  ], D.machines, "Makine tanımlanmamış.");
+
+  $("#arac-tablo").innerHTML = tablo([
+    ["Plaka / ad", function(r){ return "<b>"+esc(r.plate)+"</b>"; }],
+    ["Tür",        function(r){ return esc(TUR_AD[r.fuel_class] || r.fuel_class || "—"); }],
+    ["Şantiye",    function(r){ return r.santiye ? esc(r.santiye) :
+                      '<span class="hint">bağlı değil — her sahada görünür</span>'; }]
+  ], D.vehicles, "Araç tanımlanmamış.");
+
+  $("#personel-tablo").innerHTML = tablo([
+    ["Ad soyad", function(r){ return "<b>"+esc(r.full_name)+"</b>"; }],
+    ["Görev",    function(r){ return esc(GOREV_AD[r.kind] || r.kind || "—"); }],
+    ["Şantiye",  function(r){ return r.santiye ? esc(r.santiye) :
+                    '<span class="hint">atanmamış</span>'; }]
+  ], D.personnel, "Personel tanımlanmamış.");
+
+  $("#malzeme-tablo").innerHTML = tablo([
+    ["Malzeme",  function(r){ return "<b>"+esc(r.name)+"</b>"; }],
+    ["Birim",    function(r){ return esc(r.unit); }],
+    ["Kategori", function(r){ return esc(r.category || "—"); }]
+  ], D.materials, "Malzeme tanımlanmamış.");
+
+  $("#musteri-tablo").innerHTML = tablo([
+    ["Müşteri", function(r){ return "<b>"+esc(r.name)+"</b>"; }],
+    ["Vergi no", function(r){ return esc(r.tax_no || "—"); }],
+    ["Projesi", function(r){
+       var n = (D.projects||[]).filter(function(p){ return p.employer_id === r.id; }).length;
+       return '<span class="num">'+n+'</span>'; }]
+  ], D.employers, "Müşteri tanımlanmamış.");
+
+  $("#program-liste").innerHTML = (D.programs||[]).map(function(p){
+    return '<span class="sahaetiket" style="display:inline-block;margin:2px 4px 2px 0;' +
+      'border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px">' +
+      esc(p.name) + '</span>'; }).join("") || '<div class="hint">Program tanımlanmamış.</div>';
+
+  /* seçiciler */
+  secDoldur("#p-musteri", D.employers, "name", "— yeni müşteri gireceğim —");
+  secDoldur("#a-proje", D.projects, "ad2", "— şantiyeye bağlı değil —");
+  kutuCiz("#makine-sec", D.machines, function(m){
+    return m.code + (m.santiye ? " · " + m.santiye : ""); }, "makine");
+  kutuCiz("#personel-sec", D.personnel, function(p){
+    return p.full_name + " · " + (GOREV_AD[p.kind] || p.kind) +
+           (p.santiye ? " · " + p.santiye : ""); }, "personel");
+  kutuCiz("#arac-sec", D.vehicles, function(v){
+    return v.plate + " · " + (TUR_AD[v.fuel_class] || ""); }, "arac");
+}
+var TUR_AD = {kule_destek:"Saha ekipmanı", pickup:"Pikap", kamyon:"Kamyon",
+              servis:"Servis", bilinmiyor:"Bilinmiyor", gider_notu:"Gider notu"};
+var GOREV_AD = {sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı", alt_eleman:"İşçi",
+                sofor:"Şoför", santiye_sefi:"Şantiye şefi", destek:"Destek", diger:"Diğer"};
+
+function secDoldur(sel, liste, alan, bos){
+  var el = $(sel); if(!el) return;
+  var cur = el.value;
+  el.innerHTML = '<option value="">'+esc(bos)+'</option>' + (liste||[]).map(function(x){
+    var ad = (alan === "ad2") ? ((x.site_name || x.name)) : x[alan];
+    return '<option value="'+x.id+'">'+esc(ad)+'</option>'; }).join("");
+  if(cur) el.value = cur;
+}
+function kutuCiz(sel, liste, etiket, ad){
+  var el = $(sel); if(!el) return;
+  if(!liste || !liste.length){ el.innerHTML = '<div class="hint">Önce '+ad+' tanımlayın.</div>'; return; }
+  el.innerHTML = liste.map(function(x){
+    return '<label><input type="checkbox" value="'+x.id+'"> '+esc(etiket(x))+'</label>'; }).join("");
+  el.querySelectorAll("input").forEach(function(i){
+    i.addEventListener("change", function(){
+      i.closest("label").classList.toggle("sec", i.checked); ozetCiz(); });
+  });
+}
+function secilen(sel){
+  return $$(sel + " input:checked").map(function(i){ return i.value; });
+}
+
+/* ---------------- vardiya düzeni ---------------- */
+var VARSAYILAN = {
+  2: [["Gündüz","08:00","20:00"],["Gece","20:00","08:00"]],
+  3: [["1. vardiya","08:00","16:00"],["2. vardiya","16:00","00:00"],["3. vardiya","00:00","08:00"]]
+};
+function geceYarisiniGecer(bas, bit){ return bit < bas && bit !== "00:00"; }
+function vardiyaSatirlari(){
+  var n = Number($("#p-vsayi").value || 2);
+  $("#vardiya-satirlar").innerHTML = VARSAYILAN[n].map(function(v, i){
+    var ertesi = geceYarisiniGecer(v[1], v[2]);
+    return '<div class="satir" data-slot="'+(i+1)+'">' +
+      '<div class="field"><label>'+(i+1)+'. vardiya adı</label>' +
+        '<input class="v-ad" value="'+esc(v[0])+'"></div>' +
+      '<div class="field"><label>Başlangıç</label><input class="v-bas" type="time" value="'+v[1]+'"></div>' +
+      '<div class="field"><label>Bitiş</label><input class="v-bit" type="time" value="'+v[2]+'"></div>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding-bottom:10px">' +
+        '<input type="checkbox" class="v-ertesi"'+(ertesi?" checked":"")+'> ertesi günün raporuna</label>' +
+      '</div>';
+  }).join("");
+  $$("#vardiya-satirlar .v-bas, #vardiya-satirlar .v-bit").forEach(function(el){
+    el.addEventListener("change", function(){
+      var s = el.closest(".satir");
+      s.querySelector(".v-ertesi").checked =
+        geceYarisiniGecer(s.querySelector(".v-bas").value, s.querySelector(".v-bit").value);
+      ozetCiz();
+    });
+  });
+}
+$("#p-vsayi").addEventListener("change", function(){ vardiyaSatirlari(); ozetCiz(); });
+function vardiyaVerisi(){
+  return $$("#vardiya-satirlar .satir").map(function(s){
+    return { slot: Number(s.dataset.slot),
+             label: s.querySelector(".v-ad").value.trim() || (s.dataset.slot + ". vardiya"),
+             starts: s.querySelector(".v-bas").value,
+             ends: s.querySelector(".v-bit").value,
+             next_day: s.querySelector(".v-ertesi").checked };
+  });
+}
+
+/* ---------------- kuyular ---------------- */
+function kuyuEkle(){
+  KUYULAR.push({kod:"", program:"", egim:"90", azimut:"", planlanan:""});
+  kuyuCiz();
+}
+function kuyuCiz(){
+  var programlar = (D && D.programs || []).map(function(p){ return p.name; });
+  if(!programlar.length) programlar = ["Maden arama","Maden planlama"];
+  $("#kuyu-satirlar").innerHTML = KUYULAR.map(function(k, i){
+    return '<div class="satir" data-i="'+i+'">' +
+      '<div class="field"><label>Kuyu adı</label><input class="k-kod" value="'+esc(k.kod)+'" placeholder="EBA-01"></div>' +
+      '<div class="field"><label>Program</label><select class="k-prog">' +
+        '<option value="">— seçin —</option>' +
+        programlar.map(function(p){ return '<option'+(k.program===p?" selected":"")+'>'+esc(p)+'</option>'; }).join("") +
+        '</select></div>' +
+      '<div class="field"><label>Eğim</label><input class="k-egim" type="number" value="'+esc(k.egim)+'"></div>' +
+      '<div class="field"><label>Azimut</label><input class="k-az" type="number" value="'+esc(k.azimut)+'"></div>' +
+      '<div class="field"><label>Planlanan (m)</label><input class="k-plan" type="number" value="'+esc(k.planlanan)+'"></div>' +
+      '<button class="btn gh k-sil" type="button">×</button></div>';
+  }).join("");
+  $$("#kuyu-satirlar .satir").forEach(function(s){
+    var i = Number(s.dataset.i);
+    s.querySelector(".k-kod").addEventListener("input", function(e){ KUYULAR[i].kod = e.target.value; ozetCiz(); });
+    s.querySelector(".k-prog").addEventListener("change", function(e){ KUYULAR[i].program = e.target.value; });
+    s.querySelector(".k-egim").addEventListener("input", function(e){ KUYULAR[i].egim = e.target.value; });
+    s.querySelector(".k-az").addEventListener("input", function(e){ KUYULAR[i].azimut = e.target.value; });
+    s.querySelector(".k-plan").addEventListener("input", function(e){ KUYULAR[i].planlanan = e.target.value; });
+    s.querySelector(".k-sil").addEventListener("click", function(){ KUYULAR.splice(i,1); kuyuCiz(); ozetCiz(); });
+  });
+}
+$("#btn-kuyu-ekle").addEventListener("click", kuyuEkle);
+
+/* ---------------- sihirbaz ---------------- */
+function adimCiz(){
+  var adlar = ["Müşteri ve proje","Vardiya düzeni","Kuyular","Makineler","Ekip","Araçlar"];
+  $("#adimlar").innerHTML = adlar.map(function(a,i){
+    var n = i+1;
+    return '<div class="'+(n===ADIM?"on":(n<ADIM?"ok":""))+'">'+n+' · '+esc(a)+'</div>'; }).join("");
+  $$("[data-adim]").forEach(function(c){ c.hidden = (Number(c.dataset.adim) !== ADIM); });
+  $("#btn-geri").disabled = (ADIM === 1);
+  $("#btn-ileri").hidden = (ADIM === 6);
+  if(ADIM === 6) ozetCiz();
+}
+function adimSorun(n){
+  if(n === 1 && !$("#p-ad").value.trim() &&
+     !($("#p-musteri").value || $("#p-yenimusteri").value.trim())) return "Proje adı ve müşteri";
+  if(n === 1 && !$("#p-ad").value.trim()) return "Proje adı";
+  if(n === 1 && !$("#p-musteri").value && !$("#p-yenimusteri").value.trim()) return "Müşteri";
+  if(n === 2){
+    var v = vardiyaVerisi();
+    if(v.some(function(x){ return !x.starts || !x.ends; })) return "Vardiya saatleri";
+  }
+  if(n === 3 && !KUYULAR.some(function(k){ return k.kod.trim(); })) return "En az bir kuyu adı";
+  return null;
+}
+$("#btn-ileri").addEventListener("click", function(){
+  var s = adimSorun(ADIM);
+  if(s){ msg($("#msg"), "Eksik: " + esc(s) + ".", "err"); window.scrollTo(0,0); return; }
+  msg($("#msg"), "");
+  ADIM = Math.min(6, ADIM + 1); adimCiz(); window.scrollTo(0,0);
+});
+$("#btn-geri").addEventListener("click", function(){
+  ADIM = Math.max(1, ADIM - 1); adimCiz(); window.scrollTo(0,0);
+});
+function ozetCiz(){
+  var musteri = $("#p-yenimusteri").value.trim() ||
+    (($("#p-musteri").selectedOptions[0]||{}).textContent || "—");
+  var v = vardiyaVerisi();
+  $("#ozet-kutu").innerHTML =
+    '<div class="kv"><span>Müşteri</span><span>'+esc(musteri)+'</span></div>' +
+    '<div class="kv"><span>Proje</span><span>'+esc($("#p-ad").value || "—")+'</span></div>' +
+    '<div class="kv"><span>Şantiye</span><span>'+esc($("#p-saha").value || "—")+'</span></div>' +
+    '<div class="kv"><span>Vardiya</span><span>'+ v.map(function(x){
+        return esc(x.label)+" "+x.starts+"–"+x.ends; }).join(" · ") +'</span></div>' +
+    '<div class="kv"><span>Kuyu</span><span>'+ (KUYULAR.filter(function(k){ return k.kod.trim(); })
+        .map(function(k){ return esc(k.kod); }).join(", ") || "—") +'</span></div>' +
+    '<div class="kv"><span>Makine</span><span>'+ secilen("#makine-sec").length +' seçildi</span></div>' +
+    '<div class="kv"><span>Ekip</span><span>'+ secilen("#personel-sec").length +' kişi</span></div>' +
+    '<div class="kv"><span>Araç</span><span>'+ secilen("#arac-sec").length +' araç</span></div>';
+}
+["#p-ad","#p-saha","#p-yenimusteri","#p-musteri"].forEach(function(s){
+  $(s).addEventListener("input", ozetCiz); $(s).addEventListener("change", ozetCiz);
+});
+
+/* Projeyi kur: müşteri → proje+vardiya → kuyular → makineler → ekip → araçlar */
+$("#btn-proje-kur").addEventListener("click", function(){
+  for(var n=1;n<=3;n++){
+    var s = adimSorun(n);
+    if(s){ ADIM = n; adimCiz(); msg($("#msg"), "Eksik: " + esc(s) + ".", "err"); window.scrollTo(0,0); return; }
+  }
+  var btn = $("#btn-proje-kur"); btn.disabled = true;
+  msg($("#kur-msg"), "Proje kuruluyor…");
+  var bugun = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+
+  musteriBul().then(function(mid){
+    return sb.rpc("save_project2", {p_employer:mid, p_name:$("#p-ad").value.trim(),
+      p_site:$("#p-saha").value.trim(), p_city:$("#p-il").value.trim(),
+      p_district:$("#p-ilce").value.trim(), p_shifts:vardiyaVerisi()});
+  }).then(function(r){
+    if(r.error) throw r.error;
+    var pid = (r.data || {}).proje;
+    if(!pid) throw new Error("Proje kimliği dönmedi.");
+    YENI_PROJE = pid;
+    var isler = [];
+    KUYULAR.filter(function(k){ return k.kod.trim(); }).forEach(function(k){
+      isler.push(sb.rpc("create_well3", {p_project:pid, p_code:k.kod.trim(),
+        p_dip:Number(k.egim)||90, p_azimuth:k.azimut === "" ? null : Number(k.azimut),
+        p_program:k.program || null, p_planned:k.planlanan === "" ? null : Number(k.planlanan)}));
+    });
+    secilen("#makine-sec").forEach(function(mid){
+      isler.push(sb.rpc("assign_machine", {p_project:pid, p_machine:mid, p_date:bugun, p_note:"proje kurulumu"}));
+    });
+    secilen("#personel-sec").forEach(function(pid2){
+      isler.push(sb.rpc("assign_personnel", {p_project:pid, p_personnel:pid2, p_date:bugun, p_machine:null}));
+    });
+    secilen("#arac-sec").forEach(function(vid){
+      var v = (D.vehicles||[]).filter(function(x){ return x.id === vid; })[0] || {};
+      isler.push(sb.rpc("save_vehicle", {p_plate:v.plate, p_kind:v.kind || "arac",
+        p_fuel_class:v.fuel_class || "bilinmiyor", p_project:pid, p_id:vid}));
+    });
+    return Promise.all(isler);
+  }).then(function(sonuc){
+    var hata = (sonuc||[]).filter(function(x){ return x && x.error; });
+    return yukle().then(function(){
+      btn.disabled = false;
+      if(hata.length){
+        msg($("#kur-msg"), "Proje açıldı ama " + hata.length + " alt kayıt gitmedi: " +
+            esc(hata[0].error.message), "warn");
+      } else {
+        msg($("#kur-msg"), "<b>Proje oluşturuldu.</b> Şantiye şefi bu projeyi panelinde görebilir.", "ok");
+      }
+    });
+  }).catch(function(e){
+    btn.disabled = false;
+    msg($("#kur-msg"), esc((e && e.message) || String(e)), "err");
+  });
+});
+function musteriBul(){
+  var yeni = $("#p-yenimusteri").value.trim();
+  if(yeni) return sb.rpc("save_employer", {p_name:yeni, p_tax_no:$("#p-vergi").value.trim() || null})
+    .then(function(r){ if(r.error) throw r.error; return r.data; });
+  return Promise.resolve($("#p-musteri").value);
+}
+
+/* ---------------- ana veri kayıtları ---------------- */
+function kaydet(rpc, veri, msgSel, temizle){
+  msg($(msgSel), "Kaydediliyor…");
+  return sb.rpc(rpc, veri).then(function(r){
+    if(r.error){ msg($(msgSel), esc(r.error.message), "err"); return; }
+    msg($(msgSel), "Kaydedildi.", "ok");
+    (temizle||[]).forEach(function(s){ $(s).value = ""; });
+    return yukle();
+  });
+}
+$("#btn-makine-kaydet").addEventListener("click", function(){
+  if(!$("#m-kod").value.trim()){ msg($("#makine-msg"), "Makine kodu zorunlu.", "err"); return; }
+  kaydet("save_machine", {p_code:$("#m-kod").value.trim(), p_model:$("#m-model").value.trim(),
+    p_serial:$("#m-seri").value.trim(), p_plate:$("#m-plaka").value.trim(),
+    p_maint_days:Number($("#m-gun").value)||10, p_maint_hours:Number($("#m-saat").value)||250},
+    "#makine-msg", ["#m-kod","#m-model","#m-seri","#m-plaka"]);
+});
+$("#btn-arac-kaydet").addEventListener("click", function(){
+  if(!$("#a-plaka").value.trim()){ msg($("#arac-msg"), "Plaka ya da ad zorunlu.", "err"); return; }
+  kaydet("save_vehicle", {p_plate:$("#a-plaka").value.trim(), p_kind:"arac",
+    p_fuel_class:$("#a-tur").value, p_project:$("#a-proje").value || null},
+    "#arac-msg", ["#a-plaka"]);
+});
+$("#btn-personel-kaydet").addEventListener("click", function(){
+  if(!$("#pe-ad").value.trim()){ msg($("#personel-msg"), "Ad soyad zorunlu.", "err"); return; }
+  kaydet("add_personnel", {p_name:$("#pe-ad").value.trim(), p_kind:$("#pe-gorev").value},
+    "#personel-msg", ["#pe-ad"]);
+});
+$("#btn-malzeme-kaydet").addEventListener("click", function(){
+  if(!$("#ml-ad").value.trim()){ msg($("#malzeme-msg"), "Malzeme adı zorunlu.", "err"); return; }
+  kaydet("save_material", {p_name:$("#ml-ad").value.trim(), p_unit:$("#ml-birim").value,
+    p_category:$("#ml-kat").value.trim() || null}, "#malzeme-msg", ["#ml-ad","#ml-kat"]);
+});
+$("#btn-musteri-kaydet").addEventListener("click", function(){
+  if(!$("#mu-ad").value.trim()){ msg($("#musteri-msg"), "Müşteri adı zorunlu.", "err"); return; }
+  kaydet("save_employer", {p_name:$("#mu-ad").value.trim(),
+    p_tax_no:$("#mu-vergi").value.trim() || null}, "#musteri-msg", ["#mu-ad","#mu-vergi"]);
+});
+$("#btn-program-kaydet").addEventListener("click", function(){
+  var ad = $("#pr-ad").value.trim();
+  if(!ad){ msg($("#program-msg"), "Program adı zorunlu.", "err"); return; }
+  msg($("#program-msg"), "Kaydediliyor…");
+  sb.rpc("save_well_program", {p_name:ad}).then(function(r){
+    if(r.error){ msg($("#program-msg"), esc(r.error.message), "err"); return; }
+    $("#pr-ad").value = "";
+    msg($("#program-msg"), "Program eklendi.", "ok");
+    yukle().then(kuyuCiz);
+  });
+});
+
+adimCiz();
+})();
+</script>
+</body>
+</html>

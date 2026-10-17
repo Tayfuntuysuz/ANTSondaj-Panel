@@ -62,6 +62,7 @@ var SAYFALAR = [
   {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"kisi",   g:"Analiz"},
   {k:"muhasebe", d:"muhasebe.html",  ad:"Muhasebe",           i:"para",   g:"Finans"},
   {k:"hakedis",  d:"muhasebe.html#fatura", ad:"Hakediş",      i:"rapor",  g:"Finans"},
+  {k:"anaveri",  d:"yonetim.html",   ad:"Ana veri ve projeler", i:"ayar", g:"Yönetim"},
   {k:"kullanicilar", d:"ofis.html#kullanicilar", ad:"Kullanıcılar", i:"ayar", g:"Yönetim"},
   {k:"isveren",  d:"isveren.html",   ad:"Raporlarım",         i:"kalkan", g:"Raporlar"}
 ];
