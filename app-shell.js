@@ -16,9 +16,22 @@ var $  = function(s, k){ return (k||document).querySelector(s); };
 var $$ = function(s, k){ return Array.prototype.slice.call((k||document).querySelectorAll(s)); };
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
   return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]; }); }
+/* ---------- biçim: sayı, para, tarih ----------
+   Dil ve para birimi tek yerden gelir. Dil kullanıcının seçimi (cihazda),
+   para birimi firmanın ayarı. Koda "tr-TR" ya da "₺" yazılmaz. */
+var BICIM = { dil:"tr-TR", para:"TRY" };
+function bicimKur(){
+  var d = oku("sp_dil"); if(d) BICIM.dil = d;
+  if(erisim && erisim.para_birimi) BICIM.para = erisim.para_birimi;
+}
 function tl(n,d){ d=(d===undefined?2:d);
-  return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); }
-function money(n){ return "₺"+Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); }
+  return Number(n||0).toLocaleString(BICIM.dil,{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function money(n){
+  try{
+    return Number(n||0).toLocaleString(BICIM.dil,
+      {style:"currency", currency:BICIM.para, maximumFractionDigits:0});
+  }catch(e){ return tl(n,0) + " " + BICIM.para; }
+}
 function iso(d){ d=d||new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function trd(s){ if(!s) return "—"; var p=String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
 function msg(el,t,k){ if(!el) return; el.innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
@@ -70,9 +83,28 @@ var GRUP_SIRA = ["Genel","Günlük iş","Saha","Saham","Analiz","Finans","Raporl
 
 /* ---------- durum ---------- */
 var sb = null, erisim = null, cfg = {url:"", key:""}, AYAR = {};
+/* Oturumdaki kullanıcı. my_access e-posta döndürmüyor; şifre sıfırlama
+   bağlantısı için adres buradan okunuyor. */
+var OTURUM = {};
 
 function oku(k){ try{ return localStorage.getItem(k) || ""; }catch(e){ return ""; } }
 function yaz(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function sil(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+/* ---------- tema ve yazı boyutu ----------
+   Üç durum: "" (cihazı takip et) · "acik" · "koyu".
+   Sayfa boyanmadan önce <head> içindeki küçük betik uygular; buradaki
+   işlevler yalnız kullanıcı değiştirince çalışır. */
+function temaOku(){ return oku("sp_tema"); }
+function temaYaz(v){
+  if(v){ yaz("sp_tema", v); document.documentElement.setAttribute("data-tema", v); }
+  else { sil("sp_tema"); document.documentElement.removeAttribute("data-tema"); }
+}
+function yaziOku(){ return oku("sp_yazi"); }
+function yaziYaz(v){
+  if(v){ yaz("sp_yazi", v); document.documentElement.setAttribute("data-yazi", v); }
+  else { sil("sp_yazi"); document.documentElement.removeAttribute("data-yazi"); }
+}
 
 /* ---------- ekranlar ---------- */
 function kabukKur(){
@@ -91,10 +123,10 @@ function kabukKur(){
       '<div class="sp-top">' +
         '<div><div class="yol" id="sp-yol"></div><h1 id="sp-baslik"></h1></div>' +
         '<div class="sp"><span id="sp-arac"></span>' +
-          '<div class="sp-kisi"><span class="av" id="sp-av"></span>' +
+          '<button class="sp-kisi" id="sp-kisi" type="button" ' +
+            'aria-label="Ayarlar"><span class="av" id="sp-av"></span>' +
           '<span><span class="ad" id="sp-ad"></span><br>' +
-          '<span class="rol" id="sp-rol2"></span></span></div>' +
-          '<button class="btn gh sm" id="sp-cikis" type="button">Çıkış</button>' +
+          '<span class="rol" id="sp-rol2"></span></span></button>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -104,11 +136,107 @@ function kabukKur(){
   else { var d=document.createElement("div"); d.id="sp-icerik"; d.className="sp-icerik";
          $(".sp-main", s).appendChild(d); }
   $("#sp-icerik").classList.add("sp-icerik");
-  $("#sp-cikis").addEventListener("click", function(){
+  $("#sp-kisi").addEventListener("click", ayarlarAc);
+  return s;
+}
+
+/* ---------- ayarlar ----------
+   Her panelde aynı ekran. Alt menüye yeni bir sayfa eklenmiyor;
+   üstteki kullanıcı adına basınca açılıyor.
+   Burası KİŞİSEL ayar: tema, yazı boyutu, dil, şifre.
+   Para birimi, hafta sonu, bakım aralığı gibi FİRMA ayarları
+   yönetici ekranında kalır. */
+function ayarSegment(ad, secenekler, simdi, uygula){
+  return '<div class="ayar-not">'+esc(ad)+'</div><div class="segment" data-seg="'+esc(uygula)+'">' +
+    secenekler.map(function(o){
+      return '<button type="button" data-v="'+esc(o[0])+'" aria-pressed="' +
+        (o[0] === simdi ? "true" : "false") + '">'+esc(o[1])+'</button>';
+    }).join("") + '</div>';
+}
+
+function ayarlarAc(){
+  if($("#sp-ayar")) return;
+  var e = erisim || {};
+  var posta = e.eposta || OTURUM.email || "";
+  var d = document.createElement("div");
+  d.className = "ayar-ort"; d.id = "sp-ayar";
+  d.innerHTML =
+    '<div class="ayar-kut" role="dialog" aria-modal="true" aria-label="Ayarlar">' +
+      '<div class="ayar-bas"><h2>AYARLAR</h2>' +
+        '<button class="kapa" type="button" id="ay-kapa" aria-label="Kapat">×</button></div>' +
+      '<div class="ayar-govde">' +
+
+        '<section class="ayar-blok"><h3>Görünüm</h3>' +
+          ayarSegment("Tema", [["","Sistem"],["acik","Açık"],["koyu","Koyu"]], temaOku(), "tema") +
+          '<div style="height:14px"></div>' +
+          ayarSegment("Yazı boyutu", [["","Normal"],["buyuk","Büyük"]], yaziOku(), "yazi") +
+        '</section>' +
+
+        '<section class="ayar-blok"><h3>Hesap</h3>' +
+          '<div class="ayar-sat"><span class="k">Kullanıcı</span>' +
+            '<span class="v">'+esc(e.kullanici||"—")+'</span></div>' +
+          (posta ? '<div class="ayar-sat"><span class="k">E-posta</span>' +
+            '<span class="v">'+esc(posta)+'</span></div>' : "") +
+          '<div class="ayar-sat"><span class="k">Rol</span>' +
+            '<span class="v"><span class="pill">'+esc(e.rol_adi||"—")+'</span></span></div>' +
+          (e.firma ? '<div class="ayar-sat"><span class="k">Firma</span>' +
+            '<span class="v">'+esc(e.firma)+'</span></div>' : "") +
+          '<div style="margin-top:11px"><button class="btn gh sm" type="button" id="ay-sifre">' +
+            'Şifre değiştir</button></div>' +
+          '<div id="ay-sifre-msg"></div>' +
+        '</section>' +
+
+        '<section class="ayar-blok"><h3>Dil ve bölge</h3>' +
+          '<label class="ayar-not" for="ay-dil">Dil</label>' +
+          '<select id="ay-dil"><option value="tr-TR">Türkçe</option></select>' +
+        '</section>' +
+
+        '<section class="ayar-blok">' +
+          '<div style="display:flex;align-items:center;gap:10px">' +
+            '<div><div style="font-size:13.5px">Sürüm 2.0</div>' +
+            '<div class="hint">Sondaj Panel</div></div>' +
+            '<button class="btn gh sm teh" type="button" id="ay-cikis" ' +
+              'style="margin-inline-start:auto">Çıkış</button></div>' +
+        '</section>' +
+
+      '</div></div>';
+  document.body.appendChild(d);
+
+  var kapat = function(){ d.remove(); };
+  $("#ay-kapa", d).addEventListener("click", kapat);
+  d.addEventListener("click", function(ev){ if(ev.target === d) kapat(); });
+  document.addEventListener("keydown", function esc1(ev){
+    if(ev.key === "Escape"){ kapat(); document.removeEventListener("keydown", esc1); }
+  });
+
+  $$(".segment", d).forEach(function(seg){
+    seg.addEventListener("click", function(ev){
+      var b = ev.target.closest("button[data-v]"); if(!b) return;
+      var v = b.getAttribute("data-v");
+      if(seg.getAttribute("data-seg") === "tema") temaYaz(v); else yaziYaz(v);
+      $$("button", seg).forEach(function(x){
+        x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    });
+  });
+
+  var dsel = $("#ay-dil", d);
+  if(dsel){ dsel.value = BICIM.dil;
+    dsel.addEventListener("change", function(){ yaz("sp_dil", dsel.value); location.reload(); }); }
+
+  $("#ay-sifre", d).addEventListener("click", function(){
+    var m = $("#ay-sifre-msg", d);
+    if(!sb || !posta){ msg(m, "Şifre değişikliği için e-posta adresi bulunamadı.", "err"); return; }
+    msg(m, "Gönderiliyor…");
+    sb.auth.resetPasswordForEmail(posta).then(function(r){
+      if(r.error) msg(m, esc(r.error.message), "err");
+      else msg(m, "Şifre bağlantısı e-postanıza gönderildi.", "ok");
+    }).catch(function(x){ msg(m, esc(String(x && x.message || x)), "err"); });
+  });
+
+  $("#ay-cikis", d).addEventListener("click", function(){
     if(!sb){ location.reload(); return; }
     sb.auth.signOut().then(function(){ location.reload(); });
   });
-  return s;
 }
 
 function tamEkran(html){
@@ -164,6 +292,7 @@ function girisEkrani(hata){
     msg($("#gr-msg"), "Kontrol ediliyor…");
     sb.auth.signInWithPassword({email:e, password:p}).then(function(r){
       if(r.error){ msg($("#gr-msg"), esc(r.error.message), "err"); return; }
+      OTURUM = (r.data && r.data.user) || {email:e};
       yetkiAl();
     }).catch(function(x){ msg($("#gr-msg"), esc(String(x && x.message || x)), "err"); });
   };
@@ -232,6 +361,7 @@ function yetkiAl(){
       return;
     }
     AYAR.yetki = izin;
+    bicimKur();
     $("#sp-shell").hidden = false;
     menuKur(); ustKur();
     if(typeof AYAR.hazir === "function") AYAR.hazir(erisim, izin);
@@ -258,6 +388,7 @@ function baglan(){
   }
   sb.auth.getSession().then(function(r){
     if(r.error) throw r.error;
+    OTURUM = (r.data && r.data.session && r.data.session.user) || {};
     if(r.data && r.data.session) yetkiAl(); else girisEkrani();
   }).catch(function(e){
     kurulumEkrani("Sunucuya ulaşılamadı: " + (e && e.message ? e.message : e));
@@ -430,6 +561,8 @@ var API = {
   sayfaVar: function(k){ return !!(erisim && erisim.sayfalar && erisim.sayfalar[k]); },
   modulVar: function(m){ return !!(erisim && (erisim.moduller||[]).indexOf(m) > -1); },
   arac: function(html){ var e = $("#sp-arac"); if(e) e.innerHTML = html; },
+  ayarlar: ayarlarAc, tema: temaOku, temaSec: temaYaz, yaziSec: yaziYaz,
+  get bicim(){ return BICIM; },
   baslik: function(t){ AYAR.baslik = t; var e = $("#sp-baslik"); if(e) e.textContent = t; },
   $:$, $$:$$, esc:esc, tl:tl, money:money, iso:iso, trd:trd, msg:msg, bashrf:bashrf,
   AYLAR:AYLAR, ikon:ikon, kutular:kutular, tablo:tablo, cubuklar:cubuklar,

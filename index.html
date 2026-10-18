@@ -2,6 +2,10 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
+<script>/* tema: sayfa boyanmadan once uygulanir, yoksa koyu temada beyaz parlama olur */
+try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
+if(_t)document.documentElement.setAttribute("data-tema",_t);
+if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sondaj Panel</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -11,43 +15,76 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
+  /* Lacivert ust cubuk her temada lacivert kalir; uzerindeki yazi rengi de
+     temayla degismez. Yine de token: bayi kendi rengini verebilsin. */
+  --navy-ink:#eaf4f8;--navy-ink-2:#cfe3ec;--navy-cizgi:rgba(255,255,255,.22);
+  --dolu-yazi:#fff;--bar-iyi:#4cbb8c;--bar-uyari:#d8a44b;--perde:rgba(5,18,26,.55);
   --bg:#f4f7f9;--card:#fff;--card-2:#fafcfd;--line:#e2eaef;--line-soft:#eef3f6;
   --ink:#0d1f2b;--ink-2:#4a6575;--ink-3:#7e9aa8;
   --accent:#12708f;--accent-2:#4bb3d6;--accent-soft:#e6f2f7;--accent-ink:#0b4d64;--navy:#0f2537;
   --pq:#0f2537;--hq:#12708f;--nq:#4bb3d6;--pw:#7cc9e3;--kaya:#a8815a;--kaya-2:#c6a988;
   --good:#1f7a55;--good-soft:#e3f3ec;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae6e3;
+  --yazi:15px;--yazi-alan:16px;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root{
+/* Koyu tema — üç durum:
+   data-tema yok → cihazı takip eder · "acik" → hep açık · "koyu" → hep koyu.
+   Seçim <head> içindeki küçük betikle, sayfa boyanmadan önce uygulanır. */
+@media (prefers-color-scheme:dark){:root:not([data-tema="acik"]){
   --bg:#0b161d;--card:#112430;--card-2:#16303d;--line:#25404e;--line-soft:#1c3340;
   --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
   --accent:#4bb3d6;--accent-2:#7cc9e3;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#081720;
   --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
   color-scheme:dark;}}
+:root[data-tema="koyu"]{
+  --bg:#0b161d;--card:#112430;--card-2:#16303d;--line:#25404e;--line-soft:#1c3340;
+  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
+  --accent:#4bb3d6;--accent-2:#7cc9e3;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#081720;
+  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
+  color-scheme:dark;}
+:root[data-yazi="buyuk"]{--yazi:17px;--yazi-alan:18px}
 *{box-sizing:border-box}
-html,body{height:100%;overflow-x:hidden}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+/* overflow-x:hidden html/body'yi kaydırma kabı yapıyor ve position:sticky'yi
+   bozuyordu. clip aynı işi yapıyor ama kaydırma kabı oluşturmuyor. */
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:var(--yazi);line-height:1.45;-webkit-text-size-adjust:100%}
 h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
 .num{font-variant-numeric:tabular-nums}
-.app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--card)}
-header.bar{background:var(--navy);color:#eaf4f8;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30}
-header.bar b{font-family:"Barlow Condensed",sans-serif;font-size:19px;letter-spacing:.04em;text-transform:uppercase;flex:1}
-.netchip{display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 12px;min-height:38px;font-size:12px;background:none;color:#cfe3ec;cursor:pointer}
-.netchip .dot{width:8px;height:8px;border-radius:50%;background:#4cbb8c}
-.netchip[data-off="true"] .dot{background:#d8a44b}
+.app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--card)}
+header.bar{background:var(--navy);color:var(--navy-ink);padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30}
+header.bar b{font-family:"Barlow Condensed",sans-serif;font-size:19px;letter-spacing:.04em;
+  text-transform:uppercase;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+header.bar .netchip,header.bar .whobtn{flex:none}
+@media (max-width:430px){
+  header.bar b{font-size:17.5px}
+  /* cevrimiciyken yalniz nokta + bekleyen sayisi */
+  .netchip.dar #nettext{font-size:0}
+  .netchip.dar #nettext::after{content:attr(data-sayi);font-size:13.5px}
+}
+.netchip{display:flex;align-items:center;gap:6px;border:1px solid var(--navy-cizgi);border-radius:999px;padding:8px 12px;min-height:38px;font-size:12px;background:none;color:var(--navy-ink-2);cursor:pointer}
+.whobtn{border:1px solid var(--navy-cizgi);background:none;color:var(--navy-ink-2);border-radius:999px;
+  padding:8px 12px;min-height:38px;font-size:12px;cursor:pointer;width:auto;white-space:nowrap;
+  max-width:140px;overflow:hidden;text-overflow:ellipsis}
+.netchip .dot{width:8px;height:8px;border-radius:50%;background:var(--bar-iyi)}
+.netchip[data-off="true"] .dot{background:var(--bar-uyari)}
 main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
 nav.tabs{display:flex;border-top:1px solid var(--line);background:var(--card-2);position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
-nav.tabs button{flex:1;border:0;background:none;color:var(--ink-3);font:inherit;font-size:12px;padding:13px 2px 15px;min-height:48px;cursor:pointer;border-top:2px solid transparent;margin-top:-1px}
+nav.tabs button{position:relative;flex:1;border:0;background:none;color:var(--ink-3);font:inherit;font-size:12px;padding:15px 2px 15px;min-height:48px;cursor:pointer;border-top:2px solid transparent;margin-top:-1px;white-space:nowrap}
 nav.tabs button[aria-pressed="true"]{color:var(--accent-ink);border-top-color:var(--accent);font-weight:600}
+/* Rozet sekmenin ustune biner: akista yer kaplarsa yedi sekme tek satira sigmiyor. */
+nav.tabs button .uyari{position:absolute;top:1px;inset-inline-end:2px;
+  background:var(--bad);color:var(--dolu-yazi);border-radius:999px;min-width:14px;height:14px;
+  line-height:14px;font-size:9.5px;padding:0 3px;font-weight:700;text-align:center}
 .field{display:flex;flex-direction:column;gap:5px}
 label{font-size:12.5px;color:var(--ink-2);font-weight:500}
 label .req{color:var(--bad);font-weight:700}
 input,select,textarea,button{font:inherit;color:inherit}
-input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;min-height:48px;font-size:16px}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;min-height:48px;font-size:var(--yazi-alan)}
 input.missing,select.missing{border-color:var(--bad);background:var(--bad-soft)}
 textarea{min-height:70px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:10px;padding:13px 14px;font-weight:600;cursor:pointer;width:100%}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--dolu-yazi);border-radius:10px;padding:13px 14px;font-weight:600;cursor:pointer;width:100%}
 .btn.ghost{background:none;color:var(--accent-ink);border-color:var(--line)}
 .btn.sm{padding:11px 14px;min-height:44px;font-size:13px;width:auto}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -60,13 +97,12 @@ textarea{min-height:70px}
 .ozet-kutu{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--card)}
 .ozet-kutu b{font-size:17px}
 .ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
-.ara-sonuc button{display:block;width:100%;text-align:left;border:0;background:none;padding:11px 12px;
+.ara-sonuc button{display:block;width:100%;text-align:start;border:0;background:none;padding:11px 12px;
   border-bottom:1px solid var(--line-soft);font:inherit;color:inherit;cursor:pointer;min-height:44px}
 .ara-sonuc button:last-child{border-bottom:0}
 .ara-sonuc button:active{background:var(--card-2)}
 .ist-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
 .ist-ust{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.ist-sil{border:0;background:none;font-size:22px;line-height:1;color:var(--bad);cursor:pointer;padding:0 10px;min-width:44px;min-height:44px}
 .ekip-satir{display:flex;justify-content:space-between;align-items:center;gap:8px;
   padding:9px 0;border-bottom:1px solid var(--line-soft)}
 .ekip-satir:last-child{border-bottom:0}
@@ -82,7 +118,7 @@ textarea{min-height:70px}
 .stok-az{color:var(--warn)}
 .stok-bitti{color:var(--bad)}
 /* sahada renk tek başına yetmez: yanına yazı da koyuyoruz */
-.stok-rozet{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;
+.stok-rozet{display:inline-block;margin-inline-start:6px;padding:1px 8px;border-radius:999px;
   font-size:11px;font-weight:800;letter-spacing:.4px;vertical-align:1px}
 .stok-rozet.az{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
 .stok-rozet.bitti{background:var(--bad-soft);color:var(--bad);border:1px solid var(--bad)}
@@ -93,24 +129,24 @@ textarea{min-height:70px}
 .readout .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
 .readout .v{font-family:"Barlow Condensed",sans-serif;font-size:27px}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);text-align:right;padding:6px 8px}
-th:first-child{text-align:left}
-td{padding:7px 8px;border-top:1px solid var(--line-soft);text-align:right}
-td:first-child{text-align:left;color:var(--ink-2)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);text-align:end;padding:6px 8px}
+th:first-child{text-align:start}
+td{padding:7px 8px;border-top:1px solid var(--line-soft);text-align:end}
+td:first-child{text-align:start;color:var(--ink-2)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 9px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
 .chip[aria-pressed="true"]{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:600}
 .chip[aria-pressed="true"]::before{content:"✓ "}
 .steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .steps button{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 14px;min-height:44px;font-size:13px;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:5px}
-.steps button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.steps button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
 .steps button[data-state="ok"]:not([aria-pressed="true"]){border-color:var(--good);color:var(--good)}
 .steps button[data-state="locked"]{opacity:.5}
 .steps .mark{font-size:11px}
-.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
-.msg.err{border-left-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
-.msg.ok{border-left-color:var(--good);background:var(--good-soft);color:var(--good)}
-.msg.warn{border-left-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;border-inline-start:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.msg.err{border-inline-start-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.msg.ok{border-inline-start-color:var(--good);background:var(--good-soft);color:var(--good)}
+.msg.warn{border-inline-start-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
 .li{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
 .li .foto-ekle{flex:0 0 auto;padding:5px 10px;font-size:12px}
 .li:last-child{border-bottom:0}
@@ -129,6 +165,128 @@ td:first-child{text-align:left;color:var(--ink-2)}
 .summary .todo.ok{color:var(--good)}
 .done-card{border:1px solid var(--good);background:var(--good-soft);color:var(--good);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .done-card b{font-size:17px}
+
+/* ============================================================
+   33. paket — ortak satır / blok / akış / ayar bileşenleri
+   Veri girilen satırlar artık iki katlı kutu değil, tek sıra.
+   (19. dosya 1, 2, 5, 9, 11, 12, 13 ve 22-24. maddeler)
+   ============================================================ */
+
+/* --- tek sıra veri satırı + başlık + toplam --- */
+.satir,.satir-bas,.satir-top{display:flex;gap:8px;align-items:center}
+.satir{padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.satir:last-of-type{border-bottom:0}
+.satir-bas{padding-bottom:5px;border-bottom:1px solid var(--line-soft)}
+.satir-bas>*{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.satir-bas .dar{text-align:end}
+.satir-top{padding-top:8px;font-weight:600}
+.satir-top .esnek{font-size:12.5px;color:var(--ink-2)}
+.satir .esnek,.satir-bas .esnek,.satir-top .esnek{flex:1 1 auto;min-width:0}
+.satir .orta,.satir-bas .orta,.satir-top .orta{flex:1 1 0;min-width:0}
+.satir .dar,.satir-bas .dar,.satir-top .dar{flex:none;width:88px}
+.satir .dar,.satir-top .dar{text-align:end;font-variant-numeric:tabular-nums}
+.satir .bos,.satir-bas .bos,.satir-top .bos{flex:none;width:44px}
+.satir input,.satir select{padding:9px 10px;min-height:44px}
+/* satır sonundaki silme düğmesi: çerçeveli, 44 px, çıplak × değil */
+.sil{flex:none;width:44px;min-width:44px;min-height:44px;padding:0;border:1px solid var(--line);
+  background:none;color:var(--bad);border-radius:10px;font-size:17px;line-height:1;cursor:pointer}
+.sil:active{background:var(--bad-soft)}
+/* Satır SARMIYOR. Sarsa miktar alt satıra düşer, × tek başına kalır —
+   şikâyetin sebebi tam olarak buydu. Esnek alan min-width:0 ile daralır. */
+.satir .esnek{min-width:0}
+
+/* --- bant başlıklı blok --- */
+.blok{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px;background:var(--card)}
+.bant{display:flex;align-items:center;gap:8px;background:var(--line-soft);
+  border-inline-start:3px solid var(--accent);padding:8px 11px;font-size:14.5px;font-weight:600}
+.bant.uy{border-inline-start-color:var(--warn)}
+.bant.kt{border-inline-start-color:var(--bad)}
+.bant.ok{border-inline-start-color:var(--good)}
+.bant .sp{margin-inline-start:auto;display:flex;align-items:center;gap:7px;font-weight:400}
+.blok .ic{padding:11px 12px}
+
+/* --- ölçü kutucuğu: etiket üstte, büyük rakam altta, sınır yanında --- */
+.ikili{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.olcu{border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.olcu .et{font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600}
+.olcu .dg{font-family:"Barlow Condensed",sans-serif;font-size:26px;line-height:1.08;margin-top:2px}
+.olcu .dg .lim{font-size:13px;color:var(--ink-3);margin-inline-start:3px;
+  font-family:"IBM Plex Sans",sans-serif}
+.olcu.uy .dg{color:var(--warn)}
+.olcu.kt .dg{color:var(--bad)}
+
+/* --- küçük yerleşim yardımcıları: aynı inline stil 10 yerde tekrarlanıyordu --- */
+.arasi{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.saga{display:flex;justify-content:flex-end}
+.ayrac-ust{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.dizi{display:flex;align-items:center;gap:8px;margin-top:10px}
+
+/* --- katlanır başlık --- */
+.katla{width:100%;display:flex;align-items:center;gap:8px;background:var(--line-soft);
+  border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;color:inherit;
+  font-size:13.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  text-align:start;min-height:48px}
+.katla .im{margin-inline-start:auto;color:var(--accent-ink);font-size:20px;line-height:1;flex:none}
+.katla .ek{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3);font-size:12.5px}
+
+/* --- durum şeridi --- */
+.akis{display:flex;flex-direction:column;gap:12px}
+.akis .adim{display:flex;align-items:flex-start;gap:10px}
+.akis .nk{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);
+  box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1}
+.akis .ad{flex:1 1 auto;font-size:13.5px}
+.akis .tar{flex:none;font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.akis .adim.ok .nk{background:var(--good);border-color:var(--good);color:var(--dolu-yazi)}
+.akis .adim.simdi .nk{border-color:var(--warn)}
+.akis .adim.simdi .ad{color:var(--warn);font-weight:600}
+.akis .adim.bekl .ad{color:var(--ink-3)}
+
+/* --- seçim düğmeleri --- */
+.segment{display:flex;gap:6px}
+.segment button{flex:1 1 0;border:1px solid var(--line);background:none;color:var(--ink-2);
+  border-radius:10px;min-height:46px;font-size:13.5px;cursor:pointer;font-weight:500;width:auto}
+.segment button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
+
+/* --- vardiya şeritleri: üstte bağlam, altta çalışan toplam --- */
+.serit-ust{position:sticky;top:var(--bar-h,56px);z-index:18;background:var(--card);
+  border-bottom:1px solid var(--line);padding:8px 16px;display:flex;align-items:center;gap:8px;
+  margin:0 -16px}
+.serit-ust .ad{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.serit-ust .sayi{margin-inline-start:auto;font-size:14px;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;flex:none}
+.serit-eksik{position:sticky;top:calc(var(--bar-h,56px) + 37px);z-index:18;background:var(--warn-soft);
+  color:var(--warn);font-size:12.5px;padding:5px 16px;margin:0 -16px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.serit-alt{position:sticky;bottom:var(--tab-h,48px);z-index:19;background:var(--card);border-top:1px solid var(--line);
+  padding:7px 16px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-2);
+  margin:0 -16px}
+.serit-alt .gc{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.serit-alt .sn{margin-inline-start:auto;color:var(--ink-3)}
+
+/* --- ayarlar örtüsü --- */
+.ayar-ort{position:fixed;inset:0;z-index:60;background:var(--perde);
+  display:flex;justify-content:center;overflow-y:auto;overscroll-behavior:contain}
+.ayar-kut{background:var(--bg);width:100%;max-width:520px;min-height:100%;display:flex;flex-direction:column}
+.ayar-bas{position:sticky;top:0;z-index:1;background:var(--navy);color:var(--navy-ink);
+  padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px}
+.ayar-bas b{font-family:"Barlow Condensed",sans-serif;font-size:19px;letter-spacing:.04em;text-transform:uppercase;flex:1}
+.ayar-bas .kapa{border:0;background:none;color:var(--navy-ink-2);font-size:24px;line-height:1;cursor:pointer;
+  min-width:44px;min-height:44px;width:auto}
+.ayar-govde{padding:16px;display:flex;flex-direction:column;gap:14px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+.ayar-not{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;margin-bottom:6px}
+.ayar-sat{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.ayar-sat:last-child{border-bottom:0}
+.ayar-sat .k{color:var(--ink-2);font-size:13.5px}
+.ayar-sat .v{margin-inline-start:auto;font-size:14px;text-align:end}
+.btn.teh{border-color:var(--bad);color:var(--bad);background:none}
+
+/* yalnız ekran okuyucu */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);
+  clip-path:inset(50%);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -136,7 +294,9 @@ td:first-child{text-align:left;color:var(--ink-2)}
 <div class="app">
   <header class="bar">
     <b>Sondaj Panel</b>
-    <span id="who" class="hint" style="color:#9fc4d3"></span>
+    <!-- Ayarlar girişi: kullanıcı adı. Alt sekmelere sekizinci sekme
+         eklenmiyor — telefonda zaten yedi tane var. -->
+    <button id="who" class="whobtn" type="button" aria-label="Ayarlar"></button>
     <button class="netchip" id="netchip" type="button"><span class="dot"></span><span id="nettext">—</span></button>
   </header>
 
@@ -169,13 +329,13 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
     <!-- VARDİYA -->
     <section id="tab-vardiya">
-      <div class="summary" id="summary">
-        <div class="row1">
-          <span class="big num" id="sum-well">—</span>
-          <span class="num" id="sum-meters">0,00 m</span>
-        </div>
-        <div class="todo" id="sum-todo">Adım 1 ile başlayın.</div>
+      <!-- Üstte bağlam (değişmez), altta çalışan toplam (değişir).
+           Şerit kaydırınca kaybolmuyor; başlığın hemen altına yapışıyor. -->
+      <div class="serit-ust" id="serit-ust">
+        <span class="ad" id="sum-well">—</span>
+        <span class="sayi" id="sum-meters">0,00 m</span>
       </div>
+      <div class="serit-eksik" id="sum-todo">Adım 1 ile başlayın.</div>
 
       <div class="steps" role="group" aria-label="Adım" style="margin-top:12px">
         <button type="button" data-step="1" aria-pressed="true">1 · Vardiya <span class="mark"></span></button>
@@ -193,6 +353,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <div class="field"><label for="f-shift">Vardiya <span class="req">*</span></label><select id="f-shift" data-req="1"></select></div>
         </div>
         <div class="hint" id="f-shift-hint"></div>
+        <div class="hint" id="f-date-not" style="color:var(--warn)"></div>
         <div id="sondaj-alanlar">
           <div class="field"><label for="f-machine">Makine <span class="req">*</span></label><select id="f-machine" data-req="1"></select></div>
           <div class="field"><label for="f-well">Kuyu <span class="req">*</span></label><select id="f-well" data-req="1"></select></div>
@@ -227,7 +388,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
 
       <div class="card" data-pane="3" hidden style="margin-top:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Çalışma öncesi kontroller</span>
           <button class="btn ghost sm" id="btn-check-all" type="button">Tümü uygun</button>
         </div>
@@ -241,6 +402,10 @@ td:first-child{text-align:left;color:var(--ink-2)}
         <!-- ARIZA: makineye bağlı, vardiyayla sınırlı değil -->
         <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">
           <span class="eyebrow">Arıza</span>
+          <!-- Kart neye yazdığını başlığında gösterir: hangi makine, hangi
+               kuyu, hangi gün, hangi vardiya. Şef 1. adımda ne seçtiğini
+               hatırlamak zorunda kalmasın. (19. dosya, 2b) -->
+          <div class="bant" id="ar-baslik" style="border-radius:10px;margin:2px 0 4px">—</div>
           <div class="hint">Vardiyada arıza olduysa yazın. Makine fabrikaya gittiyse bitiş saatini
             boş bırakın — arıza açık kalır, Makine sekmesinden takip edilir.</div>
           <div id="acik-ariza"></div>
@@ -255,6 +420,9 @@ td:first-child{text-align:left;color:var(--ink-2)}
             <div class="field"><label for="ar-bit">Bitiş saati</label><input id="ar-bit" type="time"></div>
             <div class="field"><label for="ar-bitgun">Bitiş günü</label><input id="ar-bitgun" type="date"></div>
           </div>
+          <!-- Program tarihi kendisi hesaplıyor ama SESSİZ KALMIYOR:
+               hangi güne yazdığını buraya yazıyor. (19. dosya, 2a) -->
+          <div class="hint" id="ar-tarih-not" style="color:var(--warn)"></div>
           <div class="field"><label for="ar-note">Açıklama</label><input id="ar-note" placeholder="Ne oldu, ne yapıldı"></div>
           <button class="btn ghost sm" id="btn-ariza-kaydet" type="button">Arızayı kaydet</button>
           <div id="ar-msg"></div>
@@ -277,8 +445,8 @@ td:first-child{text-align:left;color:var(--ink-2)}
         <table><thead><tr><th>Çap</th><th>Başlangıç</th><th>Bitiş</th><th>Manevra</th><th></th></tr></thead><tbody id="runs"></tbody></table>
 
         <!-- ÇAP DÜŞTÜ: bir kuyuda bir kere, bir alt çapa -->
-        <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div class="ayrac-ust">
+          <div class="arasi">
             <span class="eyebrow">Çap düştü</span>
             <button class="btn ghost sm" id="btn-cap-dus" type="button">Çap düştü</button>
           </div>
@@ -292,16 +460,18 @@ td:first-child{text-align:left;color:var(--ink-2)}
         </div>
 
         <!-- KUYU SONU: kalan malzeme + ölçüm -->
-        <div id="kuyusonu-wrap" hidden style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+        <div id="kuyusonu-wrap" hidden class="ayrac-ust">
           <span class="eyebrow">Kuyuda kalan malzeme</span>
           <div class="hint">Muhafaza borusu ve tij metre olarak girilir. Birden fazla satır eklenebilir.</div>
           <div id="kalan-liste"></div>
-          <button class="btn ghost sm" id="btn-kalan-add" type="button">Satır ekle</button>
+          <button class="btn ghost sm" id="btn-kalan-add" type="button"
+            style="align-self:flex-start">Satır ekle</button>
 
           <div class="eyebrow" style="margin-top:14px">Kuyu ölçümü</div>
           <div class="hint">Derinlik, azimut ve eğim. Birden fazla ölçüm eklenebilir.</div>
           <div id="olcum-liste"></div>
-          <button class="btn ghost sm" id="btn-olcum-add" type="button">Ölçüm ekle</button>
+          <button class="btn ghost sm" id="btn-olcum-add" type="button"
+            style="align-self:flex-start">Ölçüm ekle</button>
         </div>
         <button class="btn ghost ilerle" type="button" data-next="5" style="margin-top:12px">İlerle →</button>
       </div>
@@ -312,7 +482,8 @@ td:first-child{text-align:left;color:var(--ink-2)}
           Gider sekmesindeki "Sahaya gelen akaryakıt" kartına yazın. Hiç yakılmadıysa 0.</div>
         <div class="eyebrow" style="margin-top:14px">Kuyuda kullanılan malzeme</div>
         <div id="kullanilan-liste"></div>
-        <button class="btn ghost sm" id="btn-kullanilan-add" type="button">Malzeme ekle</button>
+        <button class="btn ghost sm" id="btn-kullanilan-add" type="button"
+          style="align-self:flex-start">Malzeme ekle</button>
         <div class="field" style="margin-top:12px"><label for="f-note">Kullanılan malzemeler açıklaması</label>
           <textarea id="f-note" placeholder="Örn: 2 adet matkap ucu, bentonit takviyesi"></textarea></div>
         <button class="btn" id="btn-save-shift" type="button">Vardiyayı kaydet</button>
@@ -322,13 +493,18 @@ td:first-child{text-align:left;color:var(--ink-2)}
       <div id="done-wrap" hidden style="margin-top:12px"></div>
       <div id="duzelt-serit" class="msg warn" hidden style="margin-top:12px"></div>
 
+      <!-- Uzayan liste katlanır, sayısı başlıkta yazar: telefonda hep açık
+           duran liste formu ekranın dışına itiyordu. (19. dosya, 4. madde) -->
       <div class="card" style="margin-top:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span class="eyebrow">Kuyular</span>
-          <button class="btn ghost sm" id="btn-recent" type="button">Yenile</button>
+        <button class="katla" type="button" data-katla="recent-govde" aria-expanded="false">
+          Kuyular <span class="ek" id="recent-sayi"></span><span class="im">+</span></button>
+        <div id="recent-govde" hidden>
+          <div class="saga" style="margin-bottom:8px">
+            <button class="btn ghost sm" id="btn-recent" type="button">Yenile</button>
+          </div>
+          <div id="recent-list"><div class="hint">Yenile'ye basın.</div></div>
+          <div id="recent-msg"></div>
         </div>
-        <div id="recent-list"><div class="hint">Yenile'ye basın.</div></div>
-        <div id="recent-msg"></div>
       </div>
     </section>
 
@@ -337,7 +513,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
       <!-- Saha yakıt bakiyesi: gelen − verilen -->
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Sahadaki mazot</span>
           <button class="btn ghost sm" id="btn-yakit-yenile" type="button">Yenile</button>
         </div>
@@ -356,7 +532,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
         </div>
         <div class="grid2">
           <div class="field"><label for="yg-liters">Litre <span class="req">*</span></label><input id="yg-liters" type="number" inputmode="decimal"></div>
-          <div class="field"><label for="yg-amount">Tutar (₺)</label><input id="yg-amount" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="yg-amount">Tutar (<span class="para-sim">₺</span>)</label><input id="yg-amount" type="number" inputmode="decimal"></div>
         </div>
         <div class="field"><label for="yg-supplier">Nereden geldi</label><input id="yg-supplier" placeholder="Petrol ofisi / tanker plakası / irsaliye no"></div>
         <div class="field"><label for="yg-note">Açıklama</label>
@@ -380,7 +556,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
           <select id="y-shift"><option value="">— seçin —</option><option value="gunduz">Gündüz</option><option value="gece">Gece</option></select></div>
         <div class="grid2">
           <div class="field"><label for="y-liters">Litre <span class="req">*</span></label><input id="y-liters" type="number" inputmode="decimal"></div>
-          <div class="field"><label for="y-amount">Tutar (₺)</label><input id="y-amount" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="y-amount">Tutar (<span class="para-sim">₺</span>)</label><input id="y-amount" type="number" inputmode="decimal"></div>
         </div>
         <div class="field"><label for="y-note">Harcama içeriği</label>
           <textarea id="y-note" placeholder="Örn: 1. vardiya dolumu, kule deposu tam"></textarea></div>
@@ -396,7 +572,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
         <div class="field"><label for="e-project">Proje <span class="req">*</span></label><select id="e-project"></select></div>
         <div class="grid2">
           <div class="field"><label for="e-date">Tarih <span class="req">*</span></label><input id="e-date" type="date"></div>
-          <div class="field"><label for="e-amount">Tutar (₺) <span class="req">*</span></label><input id="e-amount" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="e-amount">Tutar (<span class="para-sim">₺</span>) <span class="req">*</span></label><input id="e-amount" type="number" inputmode="decimal"></div>
         </div>
         <div class="field"><label for="e-cat">Kategori <span class="req">*</span></label><select id="e-cat"><option>Yakıt</option><option>Yedek parça</option><option>Gıda</option><option>Nakliye</option><option>Tamir bakım</option><option>Diğer</option></select></div>
         <div class="field"><label for="e-desc">Açıklama <span class="req">*</span></label><input id="e-desc" placeholder="Ne için harcandı?"></div>
@@ -408,7 +584,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
       <!-- Yanlış girilen harcamayı şef kendisi düzeltir (ay kapanana kadar) -->
       <div class="card" style="margin-top:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Son harcamalar</span>
           <button class="btn ghost sm" id="btn-harcama-yenile" type="button">Yenile</button>
         </div>
@@ -420,9 +596,13 @@ td:first-child{text-align:left;color:var(--ink-2)}
     <!-- MALZEME & MATKAP -->
     <section id="tab-malzeme" hidden>
       <div class="card">
-        <span class="eyebrow">Takılı matkaplar</span>
-        <div id="bit-list"><div class="hint">Yükleniyor…</div></div>
-        <button class="btn ghost sm" id="btn-bits-refresh" type="button">Listeyi yenile</button>
+        <button class="katla" type="button" data-katla="bit-govde" aria-expanded="false">
+          Takılı matkaplar <span class="ek" id="bit-sayi"></span><span class="im">+</span></button>
+        <div id="bit-govde" hidden>
+          <div id="bit-list"><div class="hint">Yükleniyor…</div></div>
+          <button class="btn ghost sm" id="btn-bits-refresh" type="button"
+            style="margin-top:8px">Listeyi yenile</button>
+        </div>
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -473,11 +653,14 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
 
       <div class="card" style="margin-top:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span class="eyebrow">Sahadaki stok</span>
-          <button class="btn ghost sm" id="btn-stok-yenile" type="button">Yenile</button>
+        <button class="katla" type="button" data-katla="stok-govde" aria-expanded="false">
+          Sahadaki stok <span class="ek" id="stok-sayi"></span><span class="im">+</span></button>
+        <div id="stok-govde" hidden>
+          <div class="saga" style="margin-bottom:8px">
+            <button class="btn ghost sm" id="btn-stok-yenile" type="button">Yenile</button>
+          </div>
+          <div id="stok-liste"><div class="hint">Yenile'ye basın.</div></div>
         </div>
-        <div id="stok-liste"><div class="hint">Yenile'ye basın.</div></div>
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -497,7 +680,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
     <!-- MAKİNE: bakım ve arıza takibi -->
     <section id="tab-makine" hidden>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Bakım durumu</span>
           <button class="btn ghost sm" id="btn-bakim-yenile" type="button">Yenile</button>
         </div>
@@ -508,7 +691,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
 
       <div class="card" style="margin-top:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Açık arızalar</span>
           <button class="btn ghost sm" id="btn-ariza-yenile" type="button">Yenile</button>
         </div>
@@ -545,7 +728,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
       </div>
 
       <div class="card" style="margin-top:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Saha ekibi</span>
           <button class="btn ghost sm" id="btn-ekip-ac" type="button">Düzenle</button>
         </div>
@@ -567,7 +750,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
     <!-- BEKLEYEN -->
     <section id="tab-kuyruk" hidden>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Bekleyen kayıtlar</span><span class="pill" id="q-count">0</span>
         </div>
         <div id="q-list"></div>
@@ -595,7 +778,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
 
       <div class="card" style="margin-top:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Aylık puantaj özeti</span>
           <button class="btn ghost sm" id="btn-att-summary" type="button">Getir</button>
         </div>
@@ -604,7 +787,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
       <!-- Yakıt dökümü: beyan (vardiya formu) ile defter (kuleye verilen) yan yana -->
       <div class="card" style="margin-top:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Yakıt dökümü</span>
           <button class="btn ghost sm" id="btn-yakit-rapor" type="button">Getir</button>
         </div>
@@ -615,7 +798,7 @@ td:first-child{text-align:left;color:var(--ink-2)}
 
       <!-- Yöneticinin tanımladıkları. Şef GÖRÜR, değiştiremez. -->
       <div class="card" style="margin-top:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="arasi">
           <span class="eyebrow">Tanımlamalar</span>
           <button class="btn ghost sm" id="btn-tanim" type="button">Getir</button>
         </div>
@@ -655,8 +838,24 @@ if(location.protocol === "file:"){
 
 var $ = function(s){ return document.querySelector(s); };
 var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
-var tl = function(n){ return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}); };
-var money = function(n){ return "₺" + Number(n||0).toLocaleString("tr-TR",{maximumFractionDigits:0}); };
+/* Biçim tek yerden: dil kullanıcının seçimi, para birimi firmanın ayarı.
+   Koda "tr-TR" ya da "₺" yazılmıyor — ihracat hazırlığı (25. dosya). */
+var BICIM = { dil:"tr-TR", para:"TRY", sim:"₺" };
+try{ var _d = localStorage.getItem("sp_dil"); if(_d) BICIM.dil = _d; }catch(e){}
+var tl = function(n, d){ d = (d === undefined ? 2 : d);
+  return Number(n||0).toLocaleString(BICIM.dil,
+    {minimumFractionDigits:d, maximumFractionDigits:d}); };
+var money = function(n){
+  try{ return Number(n||0).toLocaleString(BICIM.dil,
+         {style:"currency", currency:BICIM.para, maximumFractionDigits:0}); }
+  catch(e){ return tl(n,0) + " " + BICIM.para; }
+};
+/* Para birimi sembolü: ekran etiketlerinde kullanılıyor (Tutar (₺) gibi). */
+function paraSim(){
+  try{ return (0).toLocaleString(BICIM.dil, {style:"currency", currency:BICIM.para})
+              .replace(/[\d.,\s]/g, "") || BICIM.sim; }
+  catch(e){ return BICIM.sim; }
+}
 var uuid = function(){ return (crypto.randomUUID ? crypto.randomUUID()
   : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){
       var r=Math.random()*16|0, v=c==="x"?r:(r&0x3|0x8); return v.toString(16);})); };
@@ -931,7 +1130,7 @@ function vardiyaModu(){
   $("#nak-wrap").hidden = !nak;
   $("#sondaj-alanlar").hidden = nak;
   $(".steps").hidden = nak;
-  $("#summary").hidden = nak;
+  seritGoster(!nak);
   if(nak){
     $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== "1"); });
     $("#nak-hint").textContent = ($("#f-shift").value === "nak-gun")
@@ -946,6 +1145,7 @@ function vardiyaModu(){
       : "";
     /* Motor saatleri vardiyanın saatiyle açılır; şef gerekirse değiştirir. */
     if(d && !MOTOR_ELLE){ $("#f-eng1").value = saatKisa(d.starts); $("#f-eng2").value = saatKisa(d.ends); }
+    tarihOner(d);
   }
   refreshState();
 }
@@ -965,15 +1165,18 @@ function isciCiz(){
   if(!ISCI.length){ box.innerHTML = '<div class="hint">İşçi eklenmedi.</div>'; return; }
   ISCI.forEach(function(pid, i){
     var row = document.createElement("div");
-    row.className = "ist-satir";
+    row.className = "satir";
     var sel = document.createElement("select");
+    sel.className = "esnek";
+    sel.setAttribute("aria-label", (i+1) + ". işçi");
     sel.innerHTML = '<option value="">— seçin —</option>' + yardimcilar().map(function(p){
       return '<option value="' + p.id + '">' + p.full_name + '</option>'; }).join("");
     sel.value = pid || "";
     sel.addEventListener("change", function(){ ISCI[i] = sel.value; refreshState(); });
     var sil = document.createElement("button");
-    sil.type = "button"; sil.className = "ist-sil"; sil.textContent = "×";
-    sil.setAttribute("aria-label", "İşçiyi çıkar");
+    sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
+    var ad = (yardimcilar().filter(function(p){ return p.id === pid; })[0] || {}).full_name;
+    sil.setAttribute("aria-label", (ad ? ad : (i+1) + ". işçi") + " satırını sil");
     sil.addEventListener("click", function(){ ISCI.splice(i,1); isciCiz(); refreshState(); });
     row.appendChild(sel); row.appendChild(sil);
     box.appendChild(row);
@@ -1124,17 +1327,55 @@ $("#f-check-note").addEventListener("input", refreshState);
    arıza günlerce sürebiliyor. Bitiş saati boş bırakılırsa arıza AÇIK kalır
    ve Makine sekmesinden takip edilir.
    ============================================================ */
+/* Gece vardiyasında saat hangi güne yazılıyor?
+   Vardiya gece yarısını geçiyorsa (next_day) ve girilen saat vardiyanın
+   başlangıcından KÜÇÜKSE, o saat ertesi güne aittir:
+     Gece 20:00–08:00, vardiya tarihi 17 Ekim, saat 02:00 → 18 Ekim.
+   Program bunu hesaplar ama ekranda da yazar. (19. dosya, 2a) */
+function arizaGunu(saat){
+  var temel = $("#f-date").value || todayStr();
+  if(!saat) return temel;
+  var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
+  if(!vd || !vd.next_day) return temel;
+  function dk(s){ var p = String(s).split(":"); return Number(p[0])*60 + Number(p[1]||0); }
+  return (dk(saat) < dk(vd.starts)) ? gunEkle(temel, 1) : temel;
+}
 function arizaSaati(gun, saat){
   if(!saat) return null;
   return (gun || $("#f-date").value || todayStr()) + "T" + saat + ":00";
 }
+/* Arıza kartının başlığı ve tarih açıklaması — seçimden otomatik dolar. */
+function arizaBaslikCiz(){
+  var b = $("#ar-baslik"); if(!b) return;
+  var mk = ($("#f-machine").selectedOptions[0] || {}).textContent || "";
+  var w  = currentWell();
+  var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
+  var t  = $("#f-date").value;
+  if(!mk){
+    b.className = "bant uy"; b.style.borderRadius = "10px";
+    b.textContent = "Önce 1. adımda makineyi seçin";
+  } else {
+    b.className = "bant"; b.style.borderRadius = "10px";
+    b.textContent = [mk, (w ? w.code : null), (t ? trd2(t) : null),
+                     (vd ? vd.label + " vardiyası" : null)]
+                    .filter(Boolean).join(" · ");
+  }
+  var not = $("#ar-tarih-not"), bas = $("#ar-bas") ? $("#ar-bas").value : "";
+  if(not){
+    var g = bas ? arizaGunu(bas) : null;
+    not.textContent = (g && g !== ($("#f-date").value || todayStr()))
+      ? "Arıza " + trd2(g) + " " + bas + "'de başladı — gece vardiyası gece yarısını geçti."
+      : "";
+  }
+}
+function trd2(s){ var p = String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
 $("#btn-ariza-kaydet").addEventListener("click", function(){
   var tip = $("#ar-kind").value, bas = $("#ar-bas").value;
   if(!tip){ msg($("#ar-msg"), "Arıza tipi seçilmedi. Arıza yoksa bu kartı boş bırakın.", "err"); return; }
   if(!bas){ msg($("#ar-msg"), "Arızanın başlangıç saati zorunlu.", "err"); return; }
   if(!$("#f-machine").value){ msg($("#ar-msg"), "Önce 1. adımda makineyi seçin — arıza makineye yazılıyor.", "err"); return; }
-  var basTs = arizaSaati($("#f-date").value, bas);
-  var bitTs = arizaSaati($("#ar-bitgun").value || $("#f-date").value, $("#ar-bit").value);
+  var basTs = arizaSaati(arizaGunu(bas), bas);
+  var bitTs = arizaSaati($("#ar-bitgun").value || arizaGunu($("#ar-bit").value), $("#ar-bit").value);
   if(bitTs && bitTs < basTs){ msg($("#ar-msg"), "Bitiş, başlangıçtan önce olamaz. Ertesi güne sarktıysa bitiş gününü değiştirin.", "err"); return; }
   enqueue({ id:uuid(), kind:"fault", created:Date.now(),
     title:"Arıza · " + ($("#ar-kind").selectedOptions[0]||{textContent:""}).textContent,
@@ -1266,15 +1507,17 @@ function kalanCiz(){
   var box = $("#kalan-liste"); if(!box) return;
   box.innerHTML = "";
   if(!KALAN.length){ box.innerHTML = '<div class="hint">Kuyuda kalan malzeme yazılmadı.</div>'; return; }
+  box.appendChild(satirBas(["Tür", "Miktar", "Birim"], [1, 0, 0]));
   KALAN.forEach(function(r,i){
     var row = document.createElement("div");
-    row.className = "kayit";
-    row.innerHTML = '<div class="kayit-ust" style="gap:6px">' +
-      '<select class="kln-tur" style="flex:1">' + kalanSecenek() + '</select></div>' +
-      '<div class="kayit-alt"><span style="display:flex;gap:6px;align-items:center;flex:1">' +
-      '<input class="kln-qty" type="number" step="0.01" inputmode="decimal" placeholder="miktar" style="max-width:110px">' +
-      '<select class="kln-unit" style="max-width:100px"><option value="metre">metre</option><option value="adet">adet</option></select>' +
-      '</span><span class="kayit-dugme"><button class="btn ghost mini kln-sil" type="button">×</button></span></div>';
+    row.className = "satir";
+    row.innerHTML =
+      '<select class="kln-tur esnek" aria-label="Malzeme türü">' + kalanSecenek() + '</select>' +
+      '<input class="kln-qty dar" type="number" step="0.01" inputmode="decimal" ' +
+        'placeholder="0" aria-label="Miktar">' +
+      '<select class="kln-unit" style="flex:none;width:92px" aria-label="Birim">' +
+        '<option value="metre">metre</option><option value="adet">adet</option></select>' +
+      '<button class="sil kln-sil" type="button" aria-label="Bu satırı sil">×</button>';
     var tur = row.querySelector(".kln-tur"), qty = row.querySelector(".kln-qty"), un = row.querySelector(".kln-unit");
     tur.value = r.tur || ""; qty.value = r.qty || ""; un.value = r.unit || "metre";
     /* Muhafaza borusu her zaman metre; birim seçimi kapalı kalıyor. */
@@ -1289,6 +1532,25 @@ function kalanCiz(){
     row.querySelector(".kln-sil").addEventListener("click", function(){ KALAN.splice(i,1); kalanCiz(); });
     box.appendChild(row);
   });
+  box.appendChild(satirTop("Toplam", KALAN.length + " kalem"));
+}
+
+/* Tekrarlanan satırların başlık ve toplam satırları.
+   Alan adını her satırda tekrar etmek yerine bir kez üstte yazıyoruz. */
+function satirBas(adlar, esnekler){
+  var d = document.createElement("div");
+  d.className = "satir-bas";
+  d.innerHTML = adlar.map(function(a, i){
+    return '<span class="' + (esnekler[i] ? "esnek" : "dar") + '">' + a + '</span>';
+  }).join("") + '<span class="bos"></span>';
+  return d;
+}
+function satirTop(etiket, deger){
+  var d = document.createElement("div");
+  d.className = "satir-top";
+  d.innerHTML = '<span class="esnek">' + etiket + '</span>' +
+                '<span class="dar num">' + deger + '</span><span class="bos"></span>';
+  return d;
 }
 $("#btn-kalan-add").addEventListener("click", function(){ KALAN.push({tur:"", qty:"", unit:"metre"}); kalanCiz(); });
 
@@ -1296,15 +1558,22 @@ function olcumCiz(){
   var box = $("#olcum-liste"); if(!box) return;
   box.innerHTML = "";
   if(!OLCUM.length){ box.innerHTML = '<div class="hint">Ölçüm yazılmadı.</div>'; return; }
+  var bas = document.createElement("div");
+  bas.className = "satir-bas";
+  bas.innerHTML = '<span class="orta">Derinlik</span><span class="orta">Azimut</span>' +
+                  '<span class="orta">Eğim</span><span class="bos"></span>';
+  box.appendChild(bas);
   OLCUM.forEach(function(o,i){
     var row = document.createElement("div");
-    row.className = "kayit";
-    row.innerHTML = '<div class="kayit-alt" style="gap:6px">' +
-      '<span style="display:flex;gap:6px;flex:1">' +
-      '<input class="olc-d" type="number" step="0.01" inputmode="decimal" placeholder="derinlik">' +
-      '<input class="olc-a" type="number" step="0.1" inputmode="decimal" placeholder="azimut">' +
-      '<input class="olc-e" type="number" step="0.1" inputmode="decimal" placeholder="eğim">' +
-      '</span><span class="kayit-dugme"><button class="btn ghost mini olc-sil" type="button">×</button></span></div>';
+    row.className = "satir";
+    row.innerHTML =
+      '<input class="olc-d orta" type="number" step="0.01" inputmode="decimal" ' +
+        'placeholder="0" aria-label="Derinlik" style="text-align:end">' +
+      '<input class="olc-a orta" type="number" step="0.1" inputmode="decimal" ' +
+        'placeholder="0" aria-label="Azimut" style="text-align:end">' +
+      '<input class="olc-e orta" type="number" step="0.1" inputmode="decimal" ' +
+        'placeholder="0" aria-label="Eğim" style="text-align:end">' +
+      '<button class="sil olc-sil" type="button" aria-label="Bu ölçüm satırını sil">×</button>';
     var d = row.querySelector(".olc-d"), a = row.querySelector(".olc-a"), e = row.querySelector(".olc-e");
     d.value = o.derinlik || ""; a.value = o.azimut || ""; e.value = o.egim || "";
     d.addEventListener("input", function(){ o.derinlik = d.value; });
@@ -1335,22 +1604,31 @@ function kullanilanCiz(){
   var box = $("#kullanilan-liste"); if(!box) return;
   box.innerHTML = "";
   if(!KULLANILAN.length){ box.innerHTML = '<div class="hint">Malzeme eklenmedi.</div>'; return; }
+  box.appendChild(satirBas(["Malzeme", "Miktar"], [1, 0]));
   KULLANILAN.forEach(function(r,i){
     var row = document.createElement("div");
-    row.className = "kayit";
-    row.innerHTML = '<div class="kayit-ust" style="gap:6px"><select class="kul-mat" style="flex:1">' +
+    row.className = "satir";
+    row.innerHTML =
+      '<select class="kul-mat esnek" aria-label="Malzeme">' +
       '<option value="">— seçin —</option>' + kullanilanMalzemeler().map(function(m){
         return '<option value="' + m.id + '">' + m.name + ' (' + m.unit + ')</option>'; }).join("") +
-      '</select></div>' +
-      '<div class="kayit-alt"><input class="kul-qty" type="number" step="0.01" inputmode="decimal" placeholder="miktar" style="max-width:120px">' +
-      '<span class="kayit-dugme"><button class="btn ghost mini kul-sil" type="button">×</button></span></div>';
+      '</select>' +
+      '<input class="kul-qty dar" type="number" step="0.01" inputmode="decimal" ' +
+        'placeholder="0" aria-label="Miktar">' +
+      '<button class="sil kul-sil" type="button" aria-label="Bu malzeme satırını sil">×</button>';
     var mt = row.querySelector(".kul-mat"), q = row.querySelector(".kul-qty");
     mt.value = r.material_id || ""; q.value = r.qty || "";
     mt.addEventListener("change", function(){ r.material_id = mt.value; });
-    q.addEventListener("input", function(){ r.qty = q.value; });
+    q.addEventListener("input", function(){ r.qty = q.value; kullanilanToplam(); });
     row.querySelector(".kul-sil").addEventListener("click", function(){ KULLANILAN.splice(i,1); kullanilanCiz(); });
     box.appendChild(row);
   });
+  box.appendChild(satirTop("Toplam", KULLANILAN.length + " kalem"));
+}
+/* Miktar değişince toplam satırı yeniden çizilmeden güncellensin. */
+function kullanilanToplam(){
+  var t = $("#kullanilan-liste .satir-top .dar");
+  if(t) t.textContent = KULLANILAN.length + " kalem";
 }
 $("#btn-kullanilan-add").addEventListener("click", function(){
   KULLANILAN.push({material_id:"", qty:""}); kullanilanCiz();
@@ -1505,10 +1783,13 @@ function refreshState(){
   var tarih = $("#f-date").value ? $("#f-date").value.split("-").reverse().slice(0,2).join(".") : "";
   $("#sum-well").textContent = (w ? w.code : "kuyu seçilmedi") +
     (tarih ? " · " + tarih : "") + (vd ? " · " + vd.label : (nakliyeMi() ? " · Nakliye" : ""));
-  $("#sum-meters").textContent = tl(totalM()) + " m" + ($("#f-fuel").value !== "" ? " · " + $("#f-fuel").value + " lt" : "");
+  $("#sum-meters").textContent = tl(totalM()) + " m";
+  arizaBaslikCiz();
+  /* Eksik şeridi yalnız eksik varken görünür; yer telefonda değerli. */
   var todo = $("#sum-todo");
-  if(fi === 0){ todo.textContent = "Tüm alanlar tamam. Kaydedebilirsiniz."; todo.className = "todo ok"; }
-  else { todo.textContent = "Adım " + fi + " eksik: " + stepProblems(fi).join(", "); todo.className = "todo"; }
+  todo.hidden = (fi === 0);
+  if(fi !== 0) todo.textContent = "Adım " + fi + " eksik: " + stepProblems(fi).join(", ");
+  seritAltCiz();
   /* Kaydet düğmesi ARTIK PASİF YAPILMIYOR. Sahada tepkisiz düğme, şefe
      "program bozuk" dedirtiyor. Düğme hep basılabilir; eksik varsa
      basınca eksiğin bulunduğu adıma atlıyor ve neyin eksik olduğunu yazıyor. */
@@ -1518,6 +1799,142 @@ function refreshState(){
 $$("#tab-vardiya input, #tab-vardiya select, #tab-vardiya textarea").forEach(function(el){
   el.addEventListener("change", refreshState); el.addEventListener("input", refreshState);
 });
+/* ============================================================
+   ALT ŞERİT — çalışan toplam ve son eşitleme
+   Üstteki şerit DEĞİŞMEZ bağlamı (kuyu/tarih/vardiya) tutar;
+   alttaki şerit girdikçe BÜYÜYEN sayıyı. İkisi farklı iştir.
+   Son eşitleme saati: sahada en çok sorulan soru "gitti mi".
+   ============================================================ */
+/* ============================================================
+   TARİH ÖNERİSİ — gece vardiyası sabah girilirse DÜN
+   Gece vardiyası sabah bitiyor; şef raporu vardiyadan sonra dolduruyor.
+   O yüzden "bugün" çoğu zaman yanlış gün. Kural:
+     vardiya gece yarısını geçiyorsa (next_day) VE şu anki saat vardiyanın
+     başlangıcından küçükse → vardiya dün başlamıştır, tarih dün olur.
+   Program sessizce seçmiyor: seçtiğini ekranda yazıyor ve şef
+   tarihe elle dokunduysa bir daha karışmıyor.
+   ============================================================ */
+var TARIH_ELLE = false;
+$("#f-date").addEventListener("input", function(){ TARIH_ELLE = true; });
+function gunEkle(gun, n){
+  var d = new Date(gun + "T12:00:00");
+  d.setDate(d.getDate() + n);
+  return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+}
+function tarihOner(vd){
+  if(TARIH_ELLE || DUZELT || !vd) return;
+  var simdi = new Date(), dkSimdi = simdi.getHours()*60 + simdi.getMinutes();
+  var p = String(vd.starts || "00:00").split(":");
+  var dkBas = Number(p[0])*60 + Number(p[1] || 0);
+  var olmasi = (vd.next_day && dkSimdi < dkBas) ? gunEkle(todayStr(), -1) : todayStr();
+  var not = $("#f-date-not");
+  if($("#f-date").value !== olmasi){
+    $("#f-date").value = olmasi;
+    if(not) not.textContent = (olmasi !== todayStr())
+      ? "Tarih dün olarak ayarlandı — gece vardiyası dün başladı. Yanlışsa değiştirin."
+      : "";
+  } else if(not && olmasi !== todayStr()){
+    not.textContent = "Gece vardiyası dün başladı; tarih dün yazılı.";
+  } else if(not){ not.textContent = ""; }
+  refreshState();
+}
+
+/* Üç şerit birlikte açılır kapanır: bağlam, eksik uyarısı, çalışan toplam. */
+function seritGoster(ac){
+  ["serit-ust","sum-todo","serit-alt"].forEach(function(id){
+    var e = document.getElementById(id); if(e) e.hidden = !ac;
+  });
+  if(ac) refreshState();
+}
+function esitlendi(){ try{ localStorage.setItem("sp_sync", String(Date.now())); }catch(e){} }
+function sonEsitleme(){
+  var t = 0; try{ t = Number(localStorage.getItem("sp_sync") || 0); }catch(e){}
+  if(!t) return "henüz gönderilmedi";
+  var d = new Date(t), bugun = new Date();
+  var saat = ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2);
+  var ayniGun = d.toDateString() === bugun.toDateString();
+  return "son eşitleme " + (ayniGun ? saat
+    : ("0"+d.getDate()).slice(-2) + "." + ("0"+(d.getMonth()+1)).slice(-2) + " " + saat);
+}
+/* Vardiya süresi: gece yarısını geçen vardiyada saat farkı negatif çıkar,
+   24 saat eklenir. (SQL tarafındaki saat_arasi ile aynı kural.) */
+function slotSaat(vd){
+  if(!vd || !vd.starts || !vd.ends) return null;
+  function dk(s){ var p = String(s).split(":"); return Number(p[0])*60 + Number(p[1]||0); }
+  var f = dk(vd.ends) - dk(vd.starts);
+  if(f <= 0) f += 24*60;
+  return f/60;
+}
+function seritAltCiz(){
+  var el = $("#serit-alt"); if(!el) return;
+  var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
+  var sa = slotSaat(vd);
+  var yakit = $("#f-fuel") ? $("#f-fuel").value : "";
+  var parca = [];
+  parca.push('<span class="gc">' + tl(totalM()) + ' m</span>');
+  if(sa) parca.push('<span class="num">' + tl(sa, (sa % 1 ? 1 : 0)) + ' saat</span>');
+  if(yakit !== "") parca.push('<span class="num">' + yakit + ' lt</span>');
+  el.innerHTML = parca.join('<span style="color:var(--ink-3)">·</span>') +
+    '<span class="sn">' + sonEsitleme() + '</span>';
+}
+
+/* ============================================================
+   KATLANIR KARTLAR
+   Başlığın tamamı dokunulabilir; küçük bir işarete nişan almak gerekmiyor.
+   Sayı başlıkta yazar ki içeride bir şey olduğu belli olsun.
+   ============================================================ */
+function katlaAc(id, ac){
+  var b = document.querySelector('[data-katla="' + id + '"]');
+  var g = document.getElementById(id);
+  if(!b || !g) return;
+  if(ac === undefined) ac = (b.getAttribute("aria-expanded") !== "true");
+  b.setAttribute("aria-expanded", String(ac));
+  g.hidden = !ac;
+  var im = b.querySelector(".im"); if(im) im.textContent = ac ? "−" : "+";
+}
+function katlaSayi(id, n){
+  var e = document.getElementById(id);
+  if(e) e.textContent = (n || n === 0) ? "(" + n + ")" : "";
+}
+$$("[data-katla]").forEach(function(b){
+  b.addEventListener("click", function(){
+    var id = b.getAttribute("data-katla");
+    katlaAc(id);
+    /* Açılınca kendiliğinden yüklensin: iki dokunuş istemek gereksiz. */
+    if(b.getAttribute("aria-expanded") === "true"){
+      if(id === "recent-govde" && !$("#recent-list").querySelector(".kuyu-kart")) loadRecent();
+      if(id === "stok-govde"   && !$("#stok-liste").querySelector(".li, .kayit, table")) loadStok();
+      if(id === "bit-govde") renderBits();
+    }
+  });
+});
+
+/* Sabit şeritlerin tam yeri: başlık ve sekme yüksekliği ölçülerek verilir,
+   göz kararıyla değil. (19. dosya, 3. madde) */
+function seritHizala(){
+  var bar = document.querySelector("header.bar"), tab = document.querySelector("nav.tabs");
+  var r = document.documentElement;
+  if(bar) r.style.setProperty("--bar-h", bar.offsetHeight + "px");
+  if(tab) r.style.setProperty("--tab-h", tab.offsetHeight + "px");
+}
+window.addEventListener("resize", seritHizala);
+window.addEventListener("orientationchange", seritHizala);
+/* Başlık, kullanıcı adı yazılınca ve yazı boyutu değişince büyüyor.
+   Bir kez ölçmek yetmiyor; yüksekliği izliyoruz. */
+if(window.ResizeObserver){
+  var seritGozcu = new ResizeObserver(seritHizala);
+  ["header.bar","nav.tabs"].forEach(function(s){
+    var e = document.querySelector(s); if(e) seritGozcu.observe(e);
+  });
+}
+
+(function seritAltKur(){
+  var sec = document.getElementById("tab-vardiya"); if(!sec) return;
+  var d = document.createElement("div");
+  d.className = "serit-alt"; d.id = "serit-alt";
+  sec.appendChild(d);
+})();
+
 /* Bir adıma gitmek: hem adım düğmelerinin hem de kaydet uyarısının kullandığı yol. */
 function adimaGit(n){
   var b = document.querySelector('.steps button[data-step="' + n + '"]');
@@ -1628,10 +2045,16 @@ function vardiyaDuzelt(sat){
 
 /* ---------------- kuyruk ---------------- */
 var queue = [];
+var SON_KUYU = null;  /* kaydedilen kuyu: liste yenilenince genişlesin */
 function refreshQueue(){
   return obAll().then(function(items){
     queue = items;
     $("#q-count").textContent = items.length;
+    /* Dar ekranda "Çevrimiçi" kelimesi yer kaplıyor ve başlığı kırpıyor; nokta
+       zaten yeşil. "Çevrimdışı" ise her zaman yazılır — şefin görmesi gerek. */
+    var net = $("#netchip");
+    net.classList.toggle("dar", navigator.onLine);
+    $("#nettext").setAttribute("data-sayi", String(items.length));
     $("#nettext").textContent = (navigator.onLine ? "Çevrimiçi" : "Çevrimdışı") + " · " + items.length;
     $("#netchip").setAttribute("data-off", String(!navigator.onLine));
     var box = $("#q-list"); box.innerHTML = "";
@@ -1748,8 +2171,9 @@ $("#btn-save-shift").addEventListener("click", function(){
 function showDone(wellCode, metraj, fuel, date, slot){
   var vd = slotBilgi($("#f-project").value, slot);
   var shift = vd ? vd.label : "";
+  SON_KUYU = $("#f-well").value || null;
   $$("[data-pane]").forEach(function(p){ p.hidden = true; });
-  $("#summary").hidden = true;
+  seritGoster(false);
   $(".steps").hidden = true;
   var wrap = $("#done-wrap"); wrap.hidden = false;
   wrap.innerHTML = "";
@@ -1780,7 +2204,7 @@ function resetForm(){
   msg($("#cap-msg"), ""); $("#cap-dus-wrap").hidden = true;
   $$("#checks .chip").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
   countChecks();
-  $("#done-wrap").hidden = true; $("#summary").hidden = false; $(".steps").hidden = false;
+  $("#done-wrap").hidden = true; seritGoster(true); $(".steps").hidden = false;
   $$(".steps button").forEach(function(o){ o.setAttribute("aria-pressed", String(o.dataset.step === "1")); });
   $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== "1"); });
   msg($("#shift-msg"), ""); msg($("#step-msg"), "");
@@ -2012,6 +2436,7 @@ function syncAll(){
     }, Promise.resolve());
   }).then(function(){
     syncing = false;
+    esitlendi();
     msg($("#sync-msg"), takilan
       ? takilan + " kayıt gönderilemedi, sebebi aşağıda yazıyor. Diğerleri gitti."
       : "Tüm kayıtlar gönderildi.", takilan ? "warn" : "ok");
@@ -2213,33 +2638,47 @@ function loadRecent(){
     });
     var durumAd = {planned:"planlandı", drilling:"devam ediyor",
                    completed:"sonlandı", cancelled:"iptal"};
+    katlaSayi("recent-sayi", kuyular.length);
     $("#recent-list").innerHTML = kuyular.map(function(w){
       var bitti = (w.status === "completed" || w.status === "cancelled");
-      return '<div class="kayit kuyu-kart" data-well="' + w.id + '" data-kod="' + w.code + '">' +
-        '<div class="kayit-ust"><b>' + w.code + '</b>' +
+      /* Bir satırda tek dokunma hedefi: satırın kendisi açıyor, ayrı
+         "Vardiyalar" düğmesi yok. (19. dosya, 4. madde) */
+      return '<div class="blok kuyu-kart" data-well="' + w.id + '" data-kod="' + w.code + '">' +
+        '<button class="kuyu-ac" type="button" data-well="' + w.id + '" aria-expanded="false" ' +
+          'style="width:100%;border:0;background:none;padding:10px 12px;text-align:start;' +
+          'cursor:pointer;color:inherit;min-height:48px">' +
+        '<span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+          '<b>' + w.code + '</b>' +
           '<span class="pill ' + (bitti ? "" : "warn") + '">' + (durumAd[w.status] || w.status) + '</span>' +
-          '<span class="hint">' + (son[w.id] ? "son kayıt " + son[w.id] : "kayıt yok") +
+          '<span class="num" style="margin-inline-start:auto"><b>' + tl(w.current_depth) + '</b> m' +
+          (w.planned_depth ? ' <span class="hint">/ ' + tl(w.planned_depth) + '</span>' : '') +
+          '</span></span>' +
+        '<span class="hint" style="display:block;margin-top:2px">' +
+          (son[w.id] ? "son kayıt " + son[w.id] : "kayıt yok") +
           (adet[w.id] ? " · " + adet[w.id] + " vardiya" : "") +
           (w.drop_depth != null ? " · " + tl(w.drop_depth) + " m'de " + (w.drop_diameter||"") : "") +
-          '</span></div>' +
-        '<div class="kayit-alt"><span class="num"><b>' + tl(w.current_depth) + '</b> m' +
-          (w.planned_depth ? ' <span class="hint">/ ' + tl(w.planned_depth) + ' m planlanan</span>' : '') +
-          '</span>' +
-          '<span class="kayit-dugme"><button class="btn ghost mini kuyu-ac" type="button" ' +
-          'data-well="' + w.id + '">Vardiyalar</button></span>' +
-        '</div><div class="kuyu-vardiyalar" hidden></div></div>';
+        '</span></button>' +
+        '<div class="kuyu-vardiyalar" hidden style="padding:0 12px 10px"></div></div>';
     }).join("");
     $$(".kuyu-ac").forEach(function(b){
       b.addEventListener("click", function(){ kuyuVardiyalari(b); });
     });
+    /* Vardiya kaydedildikten sonra liste kendiliğinden açılır ve yeni
+       yazılan kuyu genişlemiş gelir: şef yazdığının düştüğünü görsün. */
+    if(SON_KUYU){
+      katlaAc("recent-govde", true);
+      var hd = document.querySelector('.kuyu-ac[data-well="' + SON_KUYU + '"]');
+      if(hd) kuyuVardiyalari(hd);
+      SON_KUYU = null;
+    }
     msg($("#recent-msg"), "");
   });
 }
 /* Kuyu kartına dokununca o kuyunun son vardiyaları açılır. */
 function kuyuVardiyalari(dugme){
   var kart = dugme.closest(".kuyu-kart"), box = kart.querySelector(".kuyu-vardiyalar");
-  if(!box.hidden){ box.hidden = true; dugme.textContent = "Vardiyalar"; return; }
-  box.hidden = false; dugme.textContent = "Kapat";
+  if(!box.hidden){ box.hidden = true; dugme.setAttribute("aria-expanded","false"); return; }
+  box.hidden = false; dugme.setAttribute("aria-expanded","true");
   box.innerHTML = '<div class="hint">Yükleniyor…</div>';
   sb.from("shifts").select("id,client_uuid,work_date,shift,shift_slot,fuel_liters,well_id," +
                            "machine_id,project_id,paper_no,end_state,status")
@@ -2335,6 +2774,7 @@ function bitOmru(b){
 }
 function renderBits(){
   var box = $("#bit-list");
+  katlaSayi("bit-sayi", OPENBITS.length);
   if(!OPENBITS.length){ box.innerHTML = '<div class="hint">Takılı matkap yok.</div>'; }
   else {
     box.innerHTML = OPENBITS.map(function(b){
@@ -2466,13 +2906,14 @@ function loadStok(){
       : "";
     if(!rows.length){ $("#stok-liste").innerHTML =
       '<div class="hint">Bu şantiyede henüz stok hareketi girilmemiş.</div>' + hicSatir; return; }
+    katlaSayi("stok-sayi", rows.length);
     $("#stok-liste").innerHTML = rows.map(function(x){
       var kalan = Number(x.kalan||0);
       var renk = kalan <= 0 ? "stok-bitti" : (kalan < 5 ? "stok-az" : "");
       var rozet = kalan <= 0 ? '<span class="stok-rozet bitti">BİTTİ</span>'
                 : (kalan < 5 ? '<span class="stok-rozet az">AZ KALDI</span>' : "");
       var say = function(v){ v = Number(v||0);        /* adet tamsa ondalık gösterme */
-        return v % 1 === 0 ? v.toLocaleString("tr-TR") : tl(v); };
+        return v % 1 === 0 ? tl(v,0) : tl(v); };
       return '<div class="li"><span><b>' + x.material + '</b>' +
         '<br><span class="hint">giren ' + say(x.giris) + ' · çıkan ' + say(x.cikis) + '</span></span>' +
         '<span class="num"><b class="' + renk + '">' + say(kalan) + '</b> ' + (x.unit||"") +
@@ -2625,7 +3066,7 @@ function attCiz(){
     var ust = document.createElement("div"); ust.className = "ist-ust";
     var ad = document.createElement("b"); ad.textContent = kisiAdi(id);
     var sil = document.createElement("button");
-    sil.type = "button"; sil.className = "ist-sil"; sil.textContent = "×";
+    sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
     sil.setAttribute("aria-label", kisiAdi(id) + " istisnasını kaldır");
     sil.addEventListener("click", function(){ delete ATT_IST[id]; attCiz(); });
     ust.appendChild(ad); ust.appendChild(sil);
@@ -2638,7 +3079,7 @@ function attCiz(){
     sel.value = v.status || "calisti";
     sel.addEventListener("change", function(){ ATT_IST[id].status = sel.value; });
     var adv = document.createElement("input");
-    adv.type = "number"; adv.inputMode = "decimal"; adv.placeholder = "avans ₺"; adv.dataset.adv = id;
+    adv.type = "number"; adv.inputMode = "decimal"; adv.placeholder = "avans " + paraSim(); adv.dataset.adv = id;
     if(v.advance_amount) adv.value = v.advance_amount;
     adv.addEventListener("input", function(){
       ATT_IST[id].advance_amount = adv.value ? Number(adv.value) : null; });
@@ -2968,27 +3409,93 @@ function bakimYukle(){
     var rows = r.data || [];
     if(!rows.length){ $("#bakim-liste").innerHTML =
       '<div class="hint">Bu şantiyeye atanmış makine yok.</div>'; return; }
-    var rozet = {gecti:['bitti','BAKIM GEÇTİ'], yaklasti:['az','YAKLAŞTI'],
-                 kayit_yok:['az','BAKIM KAYDI YOK'], tamam:['','']};
-    $("#bakim-liste").innerHTML = rows.map(function(x){
-      var rz = rozet[x.durum] || ['',''];
-      return '<div class="kayit">' +
-        '<div class="kayit-ust"><b>' + x.makine + '</b>' +
-          (rz[1] ? '<span class="stok-rozet ' + rz[0] + '">' + rz[1] + '</span>' : '') +
-          '<span class="hint">' +
-          (x.son_bakim ? "son bakım " + x.son_bakim + " · " + x.gun + " gün önce"
-                       : "hiç bakım kaydı girilmemiş") +
-          '</span></div>' +
-        '<div class="kayit-alt"><span class="num">' + tl(x.saat) + ' / ' + tl(x.saat_limit) +
-          ' <span class="hint">motor saati</span></span>' +
-          '<span class="kayit-dugme"><button class="btn ghost mini bak-yap" type="button" ' +
-          'data-mak="' + x.makine_id + '" data-ad="' + x.makine + '">Bakım yapıldı</button></span>' +
-        '</div></div>';
-    }).join("");
+    $("#bakim-liste").innerHTML = rows.map(bakimBlok).join("");
     $$(".bak-yap").forEach(function(b){
       b.addEventListener("click", function(){ bakimIsaretle(b); });
     });
+    bakimUyariSayisi(rows);
   });
+}
+
+/* Bakım kartı: kuralın İKİ ayağı da ekranda — gün ve motor saati.
+   Rozet KALANI yazar, geçeni değil: "Bakıma 3 gün" bir iş emridir,
+   "7 gün oldu" kullanıcıya çıkarma yaptırır. (19. dosya, 6. madde) */
+function bakimBlok(x){
+  var gun = (x.gun == null) ? null : Number(x.gun);
+  var gunLim = Number(x.gun_limit || 0);
+  var saat = Number(x.saat || 0), saatLim = Number(x.saat_limit || 0);
+  var kalanGun  = (gun == null || !gunLim)  ? null : (gunLim - gun);
+  var kalanSaat = !saatLim ? null : (saatLim - saat);
+
+  var sinif = "", metin = "";
+  if(x.durum === "gecti"){
+    sinif = "kt";
+    var asim = (kalanGun != null && kalanGun < 0) ? (-kalanGun) + " GÜN"
+             : (kalanSaat != null && kalanSaat < 0) ? tl(-kalanSaat,0) + " SAAT" : "";
+    metin = "BAKIM GEÇTİ" + (asim ? " · " + asim : "");
+  } else if(x.durum === "yaklasti"){
+    sinif = "uy";
+    /* hangisi önce doluyorsa o yazılır */
+    metin = (kalanGun != null && kalanSaat != null)
+      ? ((kalanGun / (gunLim||1)) <= (kalanSaat / (saatLim||1))
+          ? "BAKIMA " + kalanGun + " GÜN" : "BAKIMA " + tl(kalanSaat,0) + " SAAT")
+      : (kalanGun != null ? "BAKIMA " + kalanGun + " GÜN"
+                          : "BAKIMA " + tl(kalanSaat,0) + " SAAT");
+  } else if(x.durum === "kayit_yok" && gun == null){
+    sinif = ""; metin = "HENÜZ ÇALIŞMADI";
+  } else {
+    sinif = "ok";
+    metin = (kalanGun != null) ? "BAKIMA " + kalanGun + " GÜN"
+                               : "BAKIMA " + tl(kalanSaat,0) + " SAAT";
+  }
+  var pilS = sinif === "kt" ? "bad" : (sinif === "uy" ? "warn" : (sinif === "ok" ? "good" : ""));
+
+  /* hangisi daha doluysa o koyu yazılır — gözü oraya çekmek için */
+  var gOran = (gun == null || !gunLim) ? -1 : gun/gunLim;
+  var sOran = !saatLim ? -1 : saat/saatLim;
+  var gKoyu = gOran >= sOran, sKoyu = sOran > gOran;
+  function kutu(etiket, deger, limit, koyu, renk){
+    return '<div class="olcu' + (koyu && renk ? ' ' + renk : '') + '">' +
+      '<div class="et">' + etiket + '</div>' +
+      '<div class="dg num">' + deger +
+      '<span class="lim">/ ' + limit + '</span></div></div>';
+  }
+  /* kt = geçti (kırmızı), uy = yaklaştı (sarı); hangisi dolduysa o kutu renklenir */
+  var renk = (sinif === "kt" || sinif === "uy") ? sinif : "";
+
+  return '<div class="blok">' +
+    '<div class="bant ' + sinif + '">' + x.makine +
+      (metin ? '<span class="sp"><span class="pill ' + pilS + '">' + metin + '</span></span>' : '') +
+    '</div>' +
+    '<div class="ic">' +
+      '<div class="ikili">' +
+        kutu("Gün", (gun == null ? "—" : gun), (gunLim || "—"), gKoyu, renk) +
+        kutu("Motor saati", tl(saat,0), tl(saatLim,0), sKoyu, renk) +
+      '</div>' +
+      '<div class="dizi">' +
+        '<span class="hint">' +
+          (x.son_bakim ? "son bakım " + trk(x.son_bakim)
+                       : (x.ilk_vardiya ? "ilk vardiya " + trk(x.ilk_vardiya) + " · bakım kaydı yok"
+                                        : "bakım kaydı yok")) +
+        '</span>' +
+        '<button class="btn ghost mini bak-yap" type="button" style="margin-inline-start:auto" ' +
+          'data-mak="' + x.makine_id + '" data-ad="' + x.makine + '">Bakım yapıldı</button>' +
+      '</div>' +
+    '</div></div>';
+}
+function trk(s){ if(!s) return "—"; var p = String(s).slice(0,10).split("-"); return p[2]+"."+p[1]; }
+
+/* Uyarı yalnız Makine sekmesinde saklanmaz: sekmenin yanında sayı çıkar. */
+function bakimUyariSayisi(rows){
+  var n = (rows || []).filter(function(x){
+    return x.durum === "gecti" || x.durum === "yaklasti"; }).length;
+  var b = document.querySelector('nav.tabs button[data-tab="makine"]');
+  if(!b) return;
+  var e = b.querySelector(".uyari");
+  if(!n){ if(e) e.remove(); return; }
+  if(!e){ e = document.createElement("span"); e.className = "uyari"; b.appendChild(e); }
+  e.textContent = n;
+  e.setAttribute("aria-label", n + " makinenin bakımı geçti ya da yaklaştı");
 }
 function bakimIsaretle(dugme){
   /* İki aşamalı onay: bakım kaydı sayacı sıfırlıyor, yanlışlıkla basılmasın. */
@@ -3069,10 +3576,145 @@ $$("#tabs button").forEach(function(b){
   });
 });
 
+/* ============================================================
+   AYARLAR — her panelde aynı ekran
+   Burası KİŞİSEL ayar: tema, yazı boyutu, dil, şifre, eşitleme.
+   Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
+   yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
+   ============================================================ */
+var SURUM = "28";
+var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
+  owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
+function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
+function temaOku(){ try{ return localStorage.getItem("sp_tema") || ""; }catch(e){ return ""; } }
+function yaziOku(){ try{ return localStorage.getItem("sp_yazi") || ""; }catch(e){ return ""; } }
+function ayarYaz(ad, v){
+  try{ if(v) localStorage.setItem("sp_" + ad, v); else localStorage.removeItem("sp_" + ad); }catch(e){}
+  if(v) document.documentElement.setAttribute("data-" + ad, v);
+  else document.documentElement.removeAttribute("data-" + ad);
+  seritHizala();
+}
+function segmentHtml(ad, secenekler, simdi, anahtar){
+  return '<div class="ayar-not">' + ad + '</div><div class="segment" data-seg="' + anahtar + '">' +
+    secenekler.map(function(o){
+      return '<button type="button" data-v="' + o[0] + '" aria-pressed="' +
+        (o[0] === simdi ? "true" : "false") + '">' + o[1] + '</button>';
+    }).join("") + '</div>';
+}
+function ayarlarAc(){
+  if(document.getElementById("ayar-ort")) return;
+  var p = (MASTER && MASTER.profile) || {};
+  var d = document.createElement("div");
+  d.className = "ayar-ort"; d.id = "ayar-ort";
+  d.innerHTML =
+    '<div class="ayar-kut" role="dialog" aria-modal="true" aria-label="Ayarlar">' +
+      '<div class="ayar-bas"><b>Ayarlar</b>' +
+        '<button class="kapa" type="button" id="ay-kapa" aria-label="Kapat">×</button></div>' +
+      '<div class="ayar-govde">' +
+
+        '<div class="card">' +
+          '<span class="eyebrow">Görünüm</span>' +
+          segmentHtml("Tema", [["","Sistem"],["acik","Açık"],["koyu","Koyu"]], temaOku(), "tema") +
+          segmentHtml("Yazı boyutu", [["","Normal"],["buyuk","Büyük"]], yaziOku(), "yazi") +
+          '<div class="hint">Sahada güneşte ve eldivenle okumak zorsa yazıyı büyütün.</div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<span class="eyebrow">Hesap</span>' +
+          '<div class="ayar-sat"><span class="k">Kullanıcı</span>' +
+            '<span class="v">' + (p.full_name || p.email || "—") + '</span></div>' +
+          '<div class="ayar-sat"><span class="k">Rol</span>' +
+            '<span class="v"><span class="pill">' + rolAdi(p) + '</span></span></div>' +
+          '<div class="ayar-sat"><span class="k">Şantiye</span>' +
+            '<span class="v" id="ay-santiye">—</span></div>' +
+          '<button class="btn ghost sm" type="button" id="ay-sifre" ' +
+            'style="margin-top:10px">Şifre değiştir</button>' +
+          '<div id="ay-sifre-msg"></div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<span class="eyebrow">Çevrimdışı</span>' +
+          '<div class="ayar-sat"><span class="k">Bekleyen kayıt</span>' +
+            '<span class="v"><span class="pill" id="ay-bekleyen">0</span></span></div>' +
+          '<div class="ayar-sat"><span class="k">Son eşitleme</span>' +
+            '<span class="v" id="ay-sync">—</span></div>' +
+          '<button class="btn ghost sm" type="button" id="ay-sync-btn" ' +
+            'style="margin-top:10px">Şimdi eşitle</button>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<span class="eyebrow">Dil ve bölge</span>' +
+          '<div class="field"><label for="ay-dil">Dil</label>' +
+            '<select id="ay-dil"><option value="tr-TR">Türkçe</option></select></div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<div class="li" style="border:0;padding:0">' +
+            '<span><b>Sürüm ' + SURUM + '</b>' +
+              '<br><span class="hint">Sondaj Panel</span></span>' +
+            '<button class="btn ghost sm teh" type="button" id="ay-cikis">Çıkış</button></div>' +
+        '</div>' +
+
+      '</div></div>';
+  document.body.appendChild(d);
+
+  var kapat = function(){ d.remove(); };
+  document.getElementById("ay-kapa").addEventListener("click", kapat);
+  d.addEventListener("click", function(ev){ if(ev.target === d) kapat(); });
+
+  var pr = $("#f-project");
+  var pad = pr && pr.selectedOptions[0] ? pr.selectedOptions[0].textContent : "";
+  document.getElementById("ay-santiye").textContent = pad || "—";
+  document.getElementById("ay-bekleyen").textContent = (queue || []).length;
+  document.getElementById("ay-sync").textContent = sonEsitleme().replace("son eşitleme ", "");
+
+  $$(".segment", d).forEach(function(seg){
+    seg.addEventListener("click", function(ev){
+      var b = ev.target.closest("button[data-v]"); if(!b) return;
+      ayarYaz(seg.getAttribute("data-seg"), b.getAttribute("data-v"));
+      $$("button", seg).forEach(function(x){
+        x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    });
+  });
+
+  document.getElementById("ay-sync-btn").addEventListener("click", function(){
+    if(!navigator.onLine){ msg($("#ay-sifre-msg"), "Bağlantı yok. Kayıtlar bağlantı gelince gidecek.", "warn"); return; }
+    refreshQueue().then(syncAll).then(function(){
+      document.getElementById("ay-bekleyen").textContent = (queue || []).length;
+      document.getElementById("ay-sync").textContent = sonEsitleme().replace("son eşitleme ", "");
+    });
+  });
+
+  document.getElementById("ay-sifre").addEventListener("click", function(){
+    var m = $("#ay-sifre-msg");
+    if(!sb || !navigator.onLine){
+      msg(m, "Şifre değiştirmek için bağlantı gerekiyor.", "err"); return; }
+    msg(m, "Gönderiliyor…");
+    sb.auth.getSession().then(function(r){
+      var mail = r && r.data && r.data.session && r.data.session.user && r.data.session.user.email;
+      if(!mail){ msg(m, "Oturumda e-posta adresi bulunamadı.", "err"); return; }
+      return sb.auth.resetPasswordForEmail(mail).then(function(x){
+        if(x.error) msg(m, hataTr(x.error.message), "err");
+        else msg(m, "Şifre bağlantısı " + mail + " adresine gönderildi.", "ok");
+      });
+    }).catch(function(e){ msg(m, hataTr(e && e.message ? e.message : e), "err"); });
+  });
+
+  document.getElementById("ay-cikis").addEventListener("click", function(){
+    if(!sb){ location.reload(); return; }
+    sb.auth.signOut().then(function(){ location.reload(); });
+  });
+}
+$("#who").addEventListener("click", ayarlarAc);
+
 /* ---------------- açılış ---------------- */
 function todayStr(){ var d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function start(){
   show("scr-app");
+  seritHizala();
+  /* Firma para birimi geldiyse ekran etiketleri ona göre yazılır. */
+  if(MASTER && MASTER.profile && MASTER.profile.para_birimi) BICIM.para = MASTER.profile.para_birimi;
+  $$(".para-sim").forEach(function(e){ e.textContent = paraSim(); });
   ["#f-date","#y-date","#yg-date","#e-date","#p-date"].forEach(function(s){ if(!$(s).value) $(s).value = todayStr(); });
   $("#s-month").value = todayStr().slice(0,7);
   loadMaster(false).then(refreshQueue).then(function(){ if(navigator.onLine){ syncAll(); loadRecent(); } });
