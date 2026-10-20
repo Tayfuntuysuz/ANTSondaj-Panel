@@ -98,8 +98,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     <div class="card" data-adim="2" hidden>
       <h3>2 · Vardiya düzeni</h3>
       <div class="not">Vardiya sayısı ve saatleri projeye göre değişir. Gece yarısını geçen
-        vardiya ertesi günün raporuna yazılır — program bunu saatlerden kendisi anlar,
-        gerekirse işareti değiştirin.</div>
+        vardiyayı program saatlerden kendisi anlar, gerekirse işareti değiştirin.
+        <b>Rapor her zaman vardiyanın başladığı güne yazılır</b> — gece vardiyası da
+        o günün raporuna girer.</div>
       <div class="field" style="max-width:220px"><label for="p-vsayi">Vardiya sayısı</label>
         <select id="p-vsayi"><option value="2">2 vardiya</option><option value="3">3 vardiya</option></select></div>
       <div id="vardiya-satirlar"></div>
@@ -306,7 +307,7 @@ function ciz(){
     ["Yer",      function(r){ return esc([r.city, r.district].filter(Boolean).join(" / ") || "—"); }],
     ["Vardiya",  function(r){ return (r.vardiyalar||[]).map(function(v){
         return '<div class="hint">'+v.slot+". "+esc(v.label)+" · "+String(v.starts).slice(0,5)+
-               "–"+String(v.ends).slice(0,5)+(v.next_day?" · ertesi gün":"")+"</div>"; }).join("")
+               "–"+String(v.ends).slice(0,5)+(v.next_day?" · gece yarısını geçer":"")+"</div>"; }).join("")
         || '<span class="hint">tanımsız</span>'; }],
     ["Kuyu",     function(r){ return '<span class="num">'+(r.kuyu||0)+'</span>'; }],
     ["Makine",   function(r){ return '<span class="num">'+(r.makine||0)+'</span>'; }],
@@ -409,7 +410,7 @@ function vardiyaSatirlari(){
       '<div class="field"><label>Başlangıç</label><input class="v-bas" type="time" value="'+v[1]+'"></div>' +
       '<div class="field"><label>Bitiş</label><input class="v-bit" type="time" value="'+v[2]+'"></div>' +
       '<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding-bottom:10px">' +
-        '<input type="checkbox" class="v-ertesi"'+(ertesi?" checked":"")+'> ertesi günün raporuna</label>' +
+        '<input type="checkbox" class="v-ertesi"'+(ertesi?" checked":"")+'> gece yarısını geçer</label>' +
       '</div>';
   }).join("");
   $$("#vardiya-satirlar .v-bas, #vardiya-satirlar .v-bit").forEach(function(el){

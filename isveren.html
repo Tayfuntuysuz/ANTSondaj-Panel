@@ -161,7 +161,7 @@ function gun(){
     if(r.error){ $("#gun-out").innerHTML='<div class="card"><div class="msg err">'+esc(r.error.message)+'</div></div>'; return; }
     var d=r.data, v=d.vardiyalar||[];
     var h='<div class="card"><h3>'+esc(d.proje||"")+' · '+trd(d.tarih)+'</h3>'+
-      '<div class="note">Gece vardiyası, rapor kuralı gereği ertesi güne yazılır.</div>'+
+      '<div class="note">Gece vardiyası gece yarısını geçse de başladığı günün raporuna yazılır.</div>'+
       tiles([["Günün metrajı", tl(d.toplam_metraj)+' <small>m</small>'],
              ["Vardiya", String(v.length)],
              ["Mazot", tl(d.toplam_mazot,0)+' <small>lt</small>']])+'</div>';

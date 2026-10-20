@@ -84,6 +84,12 @@ input,select,textarea{width:100%;background:var(--card);border:1px solid var(--l
 input.missing,select.missing{border-color:var(--bad);background:var(--bad-soft)}
 textarea{min-height:70px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* IZGARA TASMASI: 1fr aslinda minmax(auto,1fr) demek; auto, icerigin asgari
+   genisliginden dar olamaz. iOS Safari'de input[type=date] genis ciziliyor,
+   sutun kuculmeyi reddedip yandakinin ustune biniyor. min-width:0 bunu acar.
+   Her iki sutunlu izgara icin gecerli (.grid2 ve .ikili). */
+.grid2 > *,.ikili > *{min-width:0}
+input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max-width:100%}
 .btn{border:1px solid var(--accent);background:var(--accent);color:var(--dolu-yazi);border-radius:10px;padding:13px 14px;font-weight:600;cursor:pointer;width:100%}
 .btn.ghost{background:none;color:var(--accent-ink);border-color:var(--line)}
 .btn.sm{padding:11px 14px;min-height:44px;font-size:13px;width:auto}
@@ -96,6 +102,12 @@ textarea{min-height:70px}
 .btn.eksikli{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
 .ozet-kutu{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--card)}
 .ozet-kutu b{font-size:17px}
+/* Arama kutusu: buyutec ikonu kutunun ICINDE. Serbest giris degil, suzgec
+   oldugu ilk bakista anlasilsin (38. dosya, 3. bulgu). */
+.ara-kutu{position:relative}
+.ara-kutu svg{position:absolute;inset-inline-start:11px;top:50%;margin-top:-9px;
+  width:18px;height:18px;color:var(--ink-3);pointer-events:none}
+.ara-kutu input{padding-inline-start:37px}
 .ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
 .ara-sonuc button{display:block;width:100%;text-align:start;border:0;background:none;padding:11px 12px;
   border-bottom:1px solid var(--line-soft);font:inherit;color:inherit;cursor:pointer;min-height:44px}
@@ -218,6 +230,12 @@ td:first-child{text-align:start;color:var(--ink-2)}
 
 /* --- küçük yerleşim yardımcıları: aynı inline stil 10 yerde tekrarlanıyordu --- */
 .arasi{display:flex;justify-content:space-between;align-items:center;gap:8px}
+/* Etiket satirinin sag ucuna oturan metin dugmesi. Dikey padding ile dokunma
+   alani 44px'e cikiyor, negatif margin ile satir yuksekligi degismiyor. */
+.metin-dugme{background:none;border:0;padding:11px 2px;margin:-11px 0;
+  color:var(--accent-ink);font-size:12.5px;font-weight:600;cursor:pointer;
+  white-space:nowrap;flex:none}
+.metin-dugme:active{opacity:.6}
 .saga{display:flex;justify-content:flex-end}
 .ayrac-ust{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
 .dizi{display:flex;align-items:center;gap:8px;margin-top:10px}
@@ -324,6 +342,18 @@ td:first-child{text-align:start;color:var(--ink-2)}
     </div>
   </main>
 
+  <!-- ROL KAPISI: bu ekran SAHA icindir, yalniz santiye sefi acabilir.
+       39. dosya karari: bir rol, bir ekran. Yonetici kendi panelinden calisir. -->
+  <main id="scr-kapi" hidden>
+    <div class="center">
+      <h2 style="font-size:24px">Bu ekran saha içindir</h2>
+      <p class="hint" id="kapi-metin"></p>
+      <a class="btn" id="kapi-git" href="panel.html"
+         style="text-decoration:none;display:block;text-align:center">Yönetici paneline git</a>
+      <button class="btn ghost" id="kapi-cikis" type="button">Çıkış yap</button>
+    </div>
+  </main>
+
   <!-- UYGULAMA -->
   <main id="scr-app" hidden>
 
@@ -356,8 +386,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="hint" id="f-date-not" style="color:var(--warn)"></div>
         <div id="sondaj-alanlar">
           <div class="field"><label for="f-machine">Makine <span class="req">*</span></label><select id="f-machine" data-req="1"></select></div>
-          <div class="field"><label for="f-well">Kuyu <span class="req">*</span></label><select id="f-well" data-req="1"></select></div>
-          <button class="btn ghost sm" id="btn-new-well" type="button">Yeni kuyu ekle</button>
+          <div class="field" id="alan-kuyu" style="margin-top:10px">
+            <div class="arasi"><label for="f-well">Kuyu <span class="req">*</span></label>
+              <button class="metin-dugme" id="btn-new-well" type="button">+ Yeni kuyu ekle</button></div>
+            <select id="f-well" data-req="1"></select>
+          </div>
           <div class="field" style="margin-top:10px"><label for="f-paper">Kâğıt form no</label><input id="f-paper" inputmode="numeric" placeholder="001369"></div>
         </div>
         <button class="btn ghost ilerle" type="button" data-next="2">İlerle →</button>
@@ -713,7 +746,12 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div id="att-msg"></div>
         <button class="btn ghost" id="btn-att-exc" type="button">+ İstisna ekle</button>
         <div id="att-sec" hidden>
-          <input id="att-ara" placeholder="İsim yazın…" autocomplete="off">
+          <label for="att-ara" id="att-ara-et" style="margin-top:10px;display:block">Ekipte ara</label>
+          <div class="ara-kutu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input id="att-ara" placeholder="Ekipteki kişiyi arayın…" autocomplete="off">
+          </div>
           <div id="att-sonuc" class="ara-sonuc"></div>
         </div>
         <div class="hint">Yazmadığınız herkes <b>çalıştı</b> sayılır. Yalnız izinli, raporlu,
@@ -737,7 +775,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <div id="ekip-liste"></div>
           <button class="btn ghost sm" id="btn-ekip-ekle" type="button" style="margin-top:10px">+ Kişi ekle</button>
           <div id="ekip-sec" hidden>
-            <input id="ekip-ara" placeholder="Şirket listesinde ara…" autocomplete="off">
+            <div class="ara-kutu" style="margin-top:10px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              <input id="ekip-ara" placeholder="Şirket listesinde arayın…" autocomplete="off">
+            </div>
             <div id="ekip-sonuc" class="ara-sonuc"></div>
           </div>
           <div class="hint">Çıkarmak kaydı silmez — kişinin bu sahadaki görevini bugün kapatır.
@@ -760,7 +802,8 @@ td:first-child{text-align:start;color:var(--ink-2)}
       <div class="card" style="margin-top:14px">
         <span class="eyebrow">Hesap</span>
         <div class="hint" id="acct-info"></div>
-        <a class="btn ghost" href="rapor.html" style="display:block;text-align:center;text-decoration:none">Aylık raporu aç</a>
+        <!-- "Aylik raporu ac" baglantisi KALDIRILDI (38. dosya, 7. bulgu):
+             aylik rapor sefin yetkisinde degil ve prim tutarlarini iceriyor. -->
         <button class="btn ghost" id="btn-refresh" type="button">Ana verileri yenile</button>
         <button class="btn ghost" id="btn-logout" type="button">Çıkış yap</button>
       </div>
@@ -930,8 +973,30 @@ var cfg = { url: localStorage.getItem("sp_url") || "", key: localStorage.getItem
 var sb = null, MASTER = null;
 
 function show(id){
-  ["scr-setup","scr-login","scr-app"].forEach(function(s){ $("#"+s).hidden = (s !== id); });
+  ["scr-setup","scr-login","scr-kapi","scr-app"].forEach(function(s){ $("#"+s).hidden = (s !== id); });
   $("#tabs").hidden = (id !== "scr-app");
+}
+
+/* ---------------- rol kapisi ----------------
+   Bu dosya SAHA panelidir; yalniz santiye sefi icindir (39. dosya).
+   Rol bootstrap_data'daki profile.role'den okunuyor. Cevrimdisi sef de
+   girebilsin diye: rol BILINMIYORSA engellenmez — kimlik dogrulamasi
+   zaten yapildi, RLS her halukarda yaziyi sinirliyor. Rol BILINIYOR ve
+   site_chief DEGILSE kapi kapanir. */
+var SAHA_ROLLERI = {site_chief:1};
+function rolu(){
+  var p = (MASTER && MASTER.profile) || {};
+  return p.role || "";
+}
+function kapiKontrol(){
+  var r = rolu();
+  if(!r || SAHA_ROLLERI[r]) return true;
+  $("#kapi-metin").textContent =
+    rolAdi((MASTER && MASTER.profile) || {}) + " hesabı saha giriş ekranını kullanmaz. " +
+    "Vardiya, puantaj ve gider kayıtlarını şantiye şefi girer; siz kendi panelinizden " +
+    "görür ve düzeltirsiniz.";
+  show("scr-kapi");
+  return false;
 }
 function makeClient(){ sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}}); }
 
@@ -952,6 +1017,12 @@ $("#btn-login").addEventListener("click", function(){
   });
 });
 $("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+$("#kapi-cikis").addEventListener("click", function(){
+  /* Yanlis hesapla girildiyse onbellekteki ana veri de temizlenmeli,
+     yoksa sonraki girisde eski rolle karar verilir. */
+  try{ localStorage.removeItem("sp_master"); }catch(e){}
+  sb.auth.signOut().then(function(){ location.reload(); });
+});
 
 /* ---------------- ana veri ---------------- */
 function loadMaster(force){
@@ -1140,8 +1211,11 @@ function vardiyaModu(){
   } else {
     var d = slot ? slotBilgi(pid, slot) : null;
     $("#f-shift-hint").textContent = d
-      ? (saatKisa(d.starts) + "–" + saatKisa(d.ends) + " · " +
-         (d.next_day ? "ertesi günün raporuna yazılır" : "aynı günün raporuna yazılır"))
+      /* 33a karari (19 Ekim): rapor tarihi her zaman vardiyanin BASLADIGI gun.
+         next_day artik yalniz "vardiya gece yarisini geciyor" demek. */
+      ? (saatKisa(d.starts) + "–" + saatKisa(d.ends) +
+         (d.next_day ? " · gece yarısını geçer" : "") +
+         " · seçtiğiniz günün raporuna yazılır")
       : "";
     /* Motor saatleri vardiyanın saatiyle açılır; şef gerekirse değiştirir. */
     if(d && !MOTOR_ELLE){ $("#f-eng1").value = saatKisa(d.starts); $("#f-eng2").value = saatKisa(d.ends); }
@@ -1261,7 +1335,8 @@ $("#btn-new-well").addEventListener("click", function(){
   var ok = document.createElement("button"); ok.className="btn"; ok.type="button"; ok.textContent="Kuyuyu oluştur";
   var no = document.createElement("button"); no.className="btn ghost"; no.type="button"; no.textContent="Vazgeç";
   wrap.appendChild(ok); wrap.appendChild(no);
-  $("#btn-new-well").after(wrap);
+  /* Dugme artik etiket satirinin icinde; kutu alanin TAMAMINDAN sonra acilmali. */
+  $("#alan-kuyu").after(wrap);
   no.addEventListener("click", function(){ wrap.remove(); });
   ok.addEventListener("click", function(){
     var c = wrap.querySelector("#nw-code").value.trim();
@@ -3101,12 +3176,14 @@ function attCiz(){
 }
 
 /* ---- isim arama (istisna ekleme) ---- */
-function araCiz(kutu, liste, secildi){
+function araCiz(kutu, liste, secildi, bosMetin){
   kutu.innerHTML = "";
-  if(!liste.length){ kutu.innerHTML = '<div class="hint" style="padding:11px 12px">Eşleşen isim yok.</div>'; return; }
+  if(!liste.length){
+    kutu.innerHTML = '<div class="hint" style="padding:11px 12px">' +
+      (bosMetin || "Eşleşen isim yok.") + '</div>'; return; }
   liste.slice(0, 40).forEach(function(p){
     var b = document.createElement("button"); b.type = "button";
-    b.innerHTML = p.full_name + ' <span class="hint">· ' + String(p.kind||"").replace(/_/g," ") + "</span>";
+    b.innerHTML = p.full_name + ' <span class="hint">· ' + gorevAdi(p.kind) + "</span>";
     b.addEventListener("click", function(){ secildi(p); });
     kutu.appendChild(b);
   });
@@ -3124,12 +3201,16 @@ $("#btn-att-exc").addEventListener("click", function(){
 });
 function attAraCiz(){
   var kalan = ekip().filter(function(p){ return !ATT_IST[p.id]; });
+  /* Bu kutu YENI KISI ACMIYOR, yalnizca sahadaki ekibi suzuyor.
+     Etiket ve bos sonuc metni bunu acikca soyluyor (38. dosya, 3. bulgu). */
+  var et = $("#att-ara-et");
+  if(et) et.textContent = "Ekipte ara (" + kalan.length + " kişi)";
   araCiz($("#att-sonuc"), suz(kalan, $("#att-ara").value), function(p){
     ATT_IST[p.id] = {status:"izin", advance_amount:null, single_shift:false};
     $("#att-sec").hidden = true; $("#btn-att-exc").textContent = "+ İstisna ekle";
     attCiz();
     msg($("#att-msg"), p.full_name + " eklendi — durumunu aşağıdan seçin.", "ok");
-  });
+  }, "Bu isimde kimse yok. Yeni kişi yöneticiden eklenir.");
 }
 $("#att-ara").addEventListener("input", attAraCiz);
 
@@ -3225,7 +3306,7 @@ function ekipCiz(){
   ks.forEach(function(p){
     var d = document.createElement("div"); d.className = "ekip-satir";
     d.innerHTML = "<span><b>" + p.full_name + "</b><br><span class='hint'>" +
-                  String(p.kind||"").replace(/_/g," ") +
+                  gorevAdi(p.kind) +
                   (p.from_date ? " · " + p.from_date + "'den beri" : "") + "</span></span>";
     var cik = document.createElement("button");
     cik.type = "button"; cik.className = "btn ghost sm"; cik.textContent = "Çıkar";
@@ -3269,7 +3350,7 @@ function ekipAraCiz(){
      transfer ettiğini görür. */
   var liste = suz(HAVUZ, $("#ekip-ara").value).map(function(p){
     return Object.assign({}, p, {
-      kind: String(p.kind||"").replace(/_/g," ") + (p.nerede ? " · şu an " + p.nerede : " · boşta") });
+      kind: gorevAdi(p.kind) + (p.nerede ? " · şu an " + p.nerede : " · boşta") });
   });
   araCiz($("#ekip-sonuc"), liste, function(p){
     if(!navigator.onLine || !sb){ msg($("#ekip-msg"), "Ekip değişikliği için bağlantı gerekiyor.", "err"); return; }
@@ -3288,7 +3369,7 @@ function ekipAraCiz(){
           : p.full_name + " · " + tr + " itibarıyla ekibe alındı.", "ok");
       });
     });
-  });
+  }, "Şirket listesinde bu isimde kimse yok. Yeni personel yöneticiden eklenir.");
 }
 $("#ekip-ara").addEventListener("input", ekipAraCiz);
 
@@ -3543,7 +3624,7 @@ $("#btn-tanim").addEventListener("click", function(){
         (p.il ? ' · ' + p.il : '') + '</span></div>' +
       liste("Vardiya düzeni", (d.vardiyalar||[]).map(function(v){
         return v.slot + ". " + v.ad + " · " + saatKisa(v.bas) + "–" + saatKisa(v.bit) +
-               " · " + tl(v.saat) + " saat" + (v.ertesi_gun ? " · ertesi günün raporuna" : ""); })) +
+               " · " + tl(v.saat) + " saat" + (v.ertesi_gun ? " · gece yarısını geçer" : ""); })) +
       liste("Makineler", (d.makineler||[]).map(function(m){ return m.code; })) +
       liste("Kuyular", (d.kuyular||[]).map(function(k){
         return k.kod + " · " + (k.program || "program yok") +
@@ -3552,7 +3633,7 @@ $("#btn-tanim").addEventListener("click", function(){
                " · " + tl(k.derinlik) + " m" +
                (k.planlanan ? " / " + tl(k.planlanan) + " m planlanan" : "") +
                (k.cap_dusus != null ? " · " + tl(k.cap_dusus) + " m'de " + (k.dusen_cap||"") : ""); })) +
-      liste("Ekip", (d.ekip||[]).map(function(e){ return e.full_name + " · " + (e.kind||""); })) +
+      liste("Ekip", (d.ekip||[]).map(function(e){ return e.full_name + " · " + gorevAdi(e.kind); })) +
       liste("Araç ve ekipman", (d.araclar||[]).map(function(a){ return a.plaka + " · " + (a.tur||""); }));
     $("#tanim-out").innerHTML = html;
   });
@@ -3586,6 +3667,20 @@ var SURUM = "28";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
+/* personnel_kind enum'unun Turkce karsiliklari. Ham kod (alt_eleman,
+   sondor_yardimcisi) hicbir ekranda gorunmemeli. Yeni gorev eklenirse
+   buraya da eklenecek; eslesmeyen kod alt tireleri bosluga cevrilip
+   bas harfi buyutulerek gosteriliyor. */
+var GOREV_AD = {santiye_sefi:"Şantiye şefi", sondor:"Sondör",
+  sondor_yardimcisi:"Sondör yardımcısı", alt_eleman:"Alt eleman",
+  sofor:"Şoför", destek:"Destek", diger:"Diğer"};
+function gorevAdi(k){
+  k = String(k || "").trim();
+  if(!k) return "—";
+  if(GOREV_AD[k]) return GOREV_AD[k];
+  var s = k.replace(/_/g, " ");
+  return s.charAt(0).toLocaleUpperCase("tr") + s.slice(1);
+}
 function temaOku(){ try{ return localStorage.getItem("sp_tema") || ""; }catch(e){ return ""; } }
 function yaziOku(){ try{ return localStorage.getItem("sp_yazi") || ""; }catch(e){ return ""; } }
 function ayarYaz(ad, v){
@@ -3710,6 +3805,9 @@ $("#who").addEventListener("click", ayarlarAc);
 /* ---------------- açılış ---------------- */
 function todayStr(){ var d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function start(){
+  /* Onbellekte rol varsa ekrani hic acmadan karar ver; yoksa bootstrap
+     dondukten sonra tekrar bakilir (asagida). */
+  if(!kapiKontrol()) return;
   show("scr-app");
   seritHizala();
   /* Firma para birimi geldiyse ekran etiketleri ona göre yazılır. */
@@ -3717,7 +3815,12 @@ function start(){
   $$(".para-sim").forEach(function(e){ e.textContent = paraSim(); });
   ["#f-date","#y-date","#yg-date","#e-date","#p-date"].forEach(function(s){ if(!$(s).value) $(s).value = todayStr(); });
   $("#s-month").value = todayStr().slice(0,7);
-  loadMaster(false).then(refreshQueue).then(function(){ if(navigator.onLine){ syncAll(); loadRecent(); } });
+  /* Ilk giriste onbellek bos olur, rol ancak bootstrap ile gelir:
+     veri dondukten sonra kapi bir kez daha kontrol ediliyor. */
+  loadMaster(false)
+    .then(function(){ return kapiKontrol() ? refreshQueue() : Promise.reject("kapi"); })
+    .then(function(){ if(navigator.onLine){ syncAll(); loadRecent(); } })
+    .catch(function(e){ if(e !== "kapi") console.warn(e); });
 }
 if(!cfg.url || !cfg.key){ show("scr-setup"); }
 else {

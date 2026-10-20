@@ -57,7 +57,24 @@ td{padding:4px 6px;border:1px solid var(--line-soft);text-align:right;white-spac
 td:first-child{text-align:left;color:var(--ink-2)}
 tfoot td{font-weight:600;background:var(--accent-soft)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:760px){ .grid2{grid-template-columns:1fr} }
+/* TELEFON: sayfa A4 icin tasarlandi, telefonda OKUNMASI hedef degil —
+   bozuk gorunmemesi hedef (38. dosya, 6. bulgu; Tayfun'un (a) secimi).
+   Tablolar kendi icinde kayar, sayfanin kendisi yatay kaymaz. */
+.tablo-kaydir{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.grid2>*{min-width:0}
+@media (max-width:760px){
+  .grid2{grid-template-columns:1fr}
+  .sheet{padding:0 10px 60px}
+  .page{padding:16px 12px}
+  /* position:sticky yalniz DIKEY calisir; sayfa yana kayinca cubuk
+     yerinde kalip icerikten kopuyordu. */
+  .toolbar{position:static;padding:10px 12px}
+  .toolbar b{font-size:16px;width:100%;margin:0 0 4px}
+  .toolbar .field{flex:1 1 118px;min-width:0}
+  .toolbar select{width:100%}
+  .toolbar .btn{flex:1 1 auto}
+  body{overflow-x:hidden}
+}
 .bars{display:flex;flex-direction:column;gap:7px;margin-top:8px}
 .bar{display:grid;grid-template-columns:120px 1fr 78px;gap:8px;align-items:center;font-size:11.5px}
 .track{background:var(--line-soft);height:11px;border-radius:2px;overflow:hidden;position:relative}
@@ -89,8 +106,10 @@ tfoot td{font-weight:600;background:var(--accent-soft)}
 .hint{font-size:11px;color:var(--ink-3)}
 [hidden]{display:none!important}
 @media print{
-  body{background:#fff}
+  body{background:#fff;overflow-x:visible}
   .toolbar{display:none}
+  /* Kaydirma kabi kagitta yok sayilir: A4 ciktisi birebir eskisi gibi. */
+  .tablo-kaydir{overflow:visible;max-width:none}
   .sheet{max-width:none;margin:0;padding:0}
   .page{border:0;border-radius:0;margin:0;padding:14mm 12mm;break-after:page}
   .page:last-child{break-after:auto}
@@ -149,18 +168,68 @@ var AY3=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ar
 function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;"})[c];}); }
 
 var cfg={url:localStorage.getItem("sp_url")||"", key:localStorage.getItem("sp_key")||""};
-var sb=null, MASTER=null;
+var sb=null, MASTER=null, ERISIM={};
+
+/* ---------- YETKI KAPISI (38. dosya, 7. bulgu) ----------
+   Bu sayfa app-shell.js kullanmiyor (kendi baski mimarisi var), bu yuzden
+   ortak kapidan gecmiyordu: adresi bilen herkese aciliyordu. Asagidaki
+   kucuk kapi o bosluğu kapatiyor. Veri zaten RLS ile korunuyor, ama
+   "aylik rapor" sefin yetkisinde degil ve prim tutarlarini iceriyor. */
+function sayfaVar(k){ return !!(ERISIM.sayfalar && ERISIM.sayfalar[k]); }
+/* Reddedilen kullaniciyi kendi acabildigi bir sayfaya yolla; index.html
+   artik yalniz saha sefinin ekrani (39. dosya). */
+function donusHedef(){
+  var sira = [["sefozet","index.html","Saha uygulamasına dön"],
+              ["saha","index.html","Saha uygulamasına dön"],
+              ["isveren","isveren.html","Raporlarıma dön"],
+              ["panel","panel.html","Panele dön"],
+              ["muhasebe","muhasebe.html","Muhasebeye dön"]];
+  for(var i=0;i<sira.length;i++) if(sayfaVar(sira[i][0]))
+    return {h:sira[i][1], a:sira[i][2]};
+  return null;
+}
+function kapat(baslik, metin){
+  var d = donusHedef();
+  $("#out").innerHTML = '<div class="page"><h2>'+esc(baslik)+'</h2>' +
+    '<p class="hint" style="font-size:13px;margin:8px 0 14px">'+esc(metin)+'</p>' +
+    (d ? '<a href="'+d.h+'" style="color:var(--accent-ink);font-weight:600">'+esc(d.a)+'</a>' : '') +
+    '</div>';
+  var bar = $("#bar"); if(bar) bar.hidden = true;
+}
+function yetkiAl(){
+  return sb.rpc("my_access").then(function(r){
+    if(r.error){ kapat("Yetki okunamadı", r.error.message); return false; }
+    ERISIM = r.data || {};
+    if(!sayfaVar("rapor")){
+      kapat("Bu sayfaya erişiminiz yok",
+        (ERISIM.rol_adi || "Bu") + " rolü aylık raporu görüntüleyemiyor. " +
+        "Yetki gerekiyorsa yöneticinizle görüşün.");
+      return false;
+    }
+    /* Arac cubugundaki baglantilar da yetkiye gore: olmayan sayfaya
+       tiklanacak baglanti gosterilmez. */
+    ["panel","sirket"].forEach(function(k){
+      var a = $('#bar a[href="'+k+'.html"]');
+      if(a && !sayfaVar(k)) a.remove();
+    });
+    return true;
+  });
+}
 if(!cfg.url || !cfg.key){
   document.getElementById("out").innerHTML =
     '<div class="page"><div class="msg err">Bağlantı ayarları bulunamadı. Önce saha uygulamasına girip Supabase adresini ve anahtarını kaydedin.</div></div>';
 } else {
   sb = window.supabase.createClient(cfg.url, cfg.key, {auth:{persistSession:true, autoRefreshToken:true}});
-  sb.auth.getSession().then(function(r){ if(r.data && r.data.session){ boot(); } else { $("#scr-login").hidden = false; } });
+  sb.auth.getSession().then(function(r){
+    if(r.data && r.data.session){ yetkiAl().then(function(ok){ if(ok) boot(); }); }
+    else { $("#scr-login").hidden = false; }
+  });
 }
 $("#btn-login").addEventListener("click", function(){
   sb.auth.signInWithPassword({email:$("#in-mail").value.trim(), password:$("#in-pass").value}).then(function(r){
     if(r.error){ $("#login-msg").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
-    $("#scr-login").hidden = true; boot();
+    $("#scr-login").hidden = true;
+    yetkiAl().then(function(ok){ if(ok) boot(); });
   });
 });
 $("#btn-print").addEventListener("click", function(){ window.print(); });
@@ -207,10 +276,14 @@ function load(){
   var proj=$("#f-project").value, y=Number($("#f-year").value), m=Number($("#f-month").value);
   if(!proj) return;
   $("#out").innerHTML = '<div class="page"><div class="msg">Rapor hazırlanıyor…</div></div>';
+  /* Prim cetveli kisi kisi TUTAR gosteriyor; yalniz maas/bordro yetkisi
+     olan roller gorur. Yetki yoksa cagri hic yapilmiyor. */
+  var primVar = sayfaVar("maaslar");
   Promise.all([
     sb.rpc("report_month", {p_project:proj, p_year:y, p_month:m}),
     sb.rpc("report_charts", {p_project:proj, p_year:y, p_month:m}),
-    sb.rpc("bonus_report", {p_project:proj, p_month:y+"-"+String(m).padStart(2,"0")+"-01"})
+    primVar ? sb.rpc("bonus_report", {p_project:proj, p_month:y+"-"+String(m).padStart(2,"0")+"-01"})
+            : Promise.resolve({data:null, error:null})
   ]).then(function(res){
     var a=res[0], b=res[1], c=res[2];
     if(a.error||b.error){ $("#out").innerHTML='<div class="page"><div class="msg err">'+esc((a.error||b.error).message)+'</div></div>'; return; }
@@ -258,9 +331,12 @@ function vbars(rows, opts){
     '</span><span><i style="background:#7fb9cd"></i>'+esc(opts.bLabel)+'</span></div>' : '');
 }
 function tbl(cols, rows, foot){
-  return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c[0]+'</th>';}).join("")+'</tr></thead><tbody>'+
+  /* Tablolar nowrap; dar ekranda SAYFA degil tablonun KENDISI kaysin diye
+     kaydirma kabina aliniyor. @media print'te kap seffaf (overflow:visible),
+     A4 ciktisi degismiyor. */
+  return '<div class="tablo-kaydir"><table><thead><tr>'+cols.map(function(c){return '<th>'+c[0]+'</th>';}).join("")+'</tr></thead><tbody>'+
     rows.map(function(r){ return '<tr>'+cols.map(function(c){ return '<td>'+c[1](r)+'</td>'; }).join("")+'</tr>'; }).join("")+
-    '</tbody>'+(foot?'<tfoot><tr>'+foot+'</tr></tfoot>':'')+'</table>';
+    '</tbody>'+(foot?'<tfoot><tr>'+foot+'</tr></tfoot>':'')+'</table></div>';
 }
 var DURUM={bitti:"Bitti",matris_doktu:"Matris döktü",kullanilir:"Kullanılır",stokta:"Stokta"};
 var WSTAT={drilling:"Devam",completed:"Bitti",cancelled:"İptal",planned:"Planlı"};
@@ -382,7 +458,7 @@ function render(d, c, prim, y, m){
     return '<tr>'+tds+'</tr>';
   }).join("");
   P.push('<div class="page">'+antet(ayad)+'<h2>Puantaj tablosu</h2><div class="sub">'+ayad+'</div>' +
-    '<table class="pgrid"><thead>'+head+'</thead><tbody>'+(body||'<tr><td colspan="8">Kayıt yok.</td></tr>')+'</tbody></table>' +
+    '<div class="tablo-kaydir"><table class="pgrid"><thead>'+head+'</thead><tbody>'+(body||'<tr><td colspan="8">Kayıt yok.</td></tr>')+'</tbody></table></div>' +
     '<div class="legend"><span><i class="c-calisti" style="background:var(--ok)"></i>Çalıştı</span>' +
     '<span><i style="background:var(--izin)"></i>İzin</span><span><i style="background:var(--rapor)"></i>Rapor (R)</span>' +
     '<span><i style="background:var(--ucretsiz)"></i>Ücretsiz izin</span><span><i style="background:var(--bayram)"></i>Bayram</span>' +

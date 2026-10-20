@@ -66,7 +66,12 @@ var SAYFALAR = [
   {k:"panel",    d:"panel.html",     ad:"Genel bakış",        i:"pano",   g:"Genel"},
   {k:"rapor",    d:"rapor.html",     ad:"Aylık rapor",        i:"rapor",  g:"Genel"},
   {k:"saha",     d:"index.html",     ad:"Vardiya girişi",     i:"kule",   g:"Günlük iş"},
-  {k:"puantaj",  d:"index.html#puantaj", ad:"Puantaj",        i:"kisi",   g:"Günlük iş"},
+  /* Puantaj tek sayfa anahtari ama iki ayri hedef (39. dosya karari):
+     saha sefi kendi PWA'sinda girer, digerleri panel.html'deki salt okunur
+     ozete gider. Yoneticinin kendi puantaj sayfasi (puantaj.html, 32. dosya)
+     yapilinca "dv" oraya cevrilecek. */
+  {k:"puantaj",  d:"index.html#puantaj", dv:"panel.html#puantaj",
+                 roller:{site_chief:1}, ad:"Puantaj",          i:"kisi",   g:"Günlük iş"},
   {k:"kuyular",  d:"panel.html#kuyular", ad:"Kuyular",        i:"kuyu",   g:"Saha"},
   {k:"sefozet",  d:"panel.html",     ad:"Saha özetim",        i:"pano",   g:"Saham"},
   {k:"santiyeler", d:"santiyeler.html", ad:"Şantiye karşılaştırma", i:"pano", g:"Analiz"},
@@ -300,14 +305,30 @@ function girisEkrani(hata){
   $("#gr-pass").addEventListener("keydown", function(e){ if(e.key === "Enter") dene(); });
 }
 
+/* Kullanicinin GERCEKTEN acabilecegi ilk sayfa. Reddetme ekranindaki
+   dugme buraya gider: index.html artik yalniz saha sefinin ekrani
+   (39. dosya), herkesi oraya yollamak ikinci bir duvara carptiriyordu. */
+function ilkSayfa(){
+  var izin = (erisim && erisim.sayfalar) || {};
+  var s = SAYFALAR.filter(function(x){ return izin[x.k]; })[0];
+  return s ? sayfaHedef(s) : "index.html";
+}
 function uyariEkrani(baslik, metin){
   temizle();
+  var hedef = ilkSayfa();
   tamEkran('<div class="sp-orta"><h2>'+esc(baslik)+'</h2>' +
     '<div class="msg err">'+metin+'</div>' +
-    '<button class="btn gh" onclick="location.href=\'index.html\'">Başlangıç sayfası</button></div>');
+    '<button class="btn gh" onclick="location.href=\''+hedef+'\'">Başlangıç sayfası</button></div>');
 }
 
 /* ---------- menü ---------- */
+/* Menu satirinin hedefi. Satirda "roller" varsa ve oturumun rolu o listede
+   DEGILSE, "dv" (varsayilan hedef) kullanilir. Yoksa her zaman "d". */
+function sayfaHedef(s){
+  if(s.dv && s.roller && !s.roller[erisim.rol]) return s.dv;
+  return s.d;
+}
+
 function menuKur(){
   var izin = erisim.sayfalar || {};
   var gruplar = {};
@@ -319,7 +340,7 @@ function menuKur(){
     return '<div class="sp-grp"><div class="lbl">'+esc(g)+'</div><nav class="sp-nav">' +
       gruplar[g].map(function(x){
         var aktif = (x.s.k === AYAR.sayfa);
-        return '<a href="'+x.s.d+'" class="'+(aktif?"on":"")+'">'+ikon(x.s.i) +
+        return '<a href="'+sayfaHedef(x.s)+'" class="'+(aktif?"on":"")+'">'+ikon(x.s.i) +
                '<span>'+esc(x.s.ad)+'</span>' +
                (x.y === "gir" ? '<span class="tag">giriş</span>' : '') + '</a>';
       }).join("") + '</nav></div>';
