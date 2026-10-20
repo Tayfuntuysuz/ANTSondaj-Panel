@@ -121,6 +121,7 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .q-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
 .q-satir.takildi{border-color:var(--bad);background:var(--bad-soft)}
 .kayit{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
+.duzelt-cevap{margin-top:8px}
 .kayit-ust{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .kayit-ust .hint{font-size:12.5px}
 .kayit-alt{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
@@ -2163,14 +2164,23 @@ function duzeltSeridi(){
   el.appendChild(v);
 }
 
-function vardiyaDuzelt(sat){
+function vardiyaDuzelt(sat, satirEl){
+  /* Cevap hem satırın altına hem de eski yere yazılıyor. */
+  function dur(metin, tur){
+    msg($("#recent-msg"), metin, tur);
+    if(!satirEl) return;
+    var e = satirEl.querySelector(".duzelt-cevap");
+    if(!e){ e = document.createElement("div"); e.className = "duzelt-cevap";
+            satirEl.appendChild(e); }
+    e.innerHTML = metin ? '<div class="msg ' + (tur||"") + '">' + metin + '</div>' : "";
+  }
   if(!navigator.onLine || !sb){
-    msg($("#recent-msg"), "Düzeltme için bağlantı gerekiyor.", "err"); return; }
-  msg($("#recent-msg"), "Kayıt açılıyor…");
-  sb.rpc("kayit_duzeltilebilir_mi", {p_shift: sat.id}).then(function(r){
-    if(r.error){ msg($("#recent-msg"), r.error.message, "err"); return; }
+    dur("Düzeltme için bağlantı gerekiyor.", "err"); return; }
+  dur("Kayıt açılıyor…");
+  Promise.resolve(sb.rpc("kayit_duzeltilebilir_mi", {p_shift: sat.id})).then(function(r){
+    if(r.error){ dur(r.error.message, "err"); return; }
     var izin = r.data || {};
-    if(!izin.olur){ msg($("#recent-msg"), izin.sebep || "Bu kayıt düzeltilemez.", "err"); return; }
+    if(!izin.olur){ dur(izin.sebep || "Bu kayıt düzeltilemez.", "err"); return; }
 
     return Promise.all([
       sb.from("shift_runs").select("seq,diameter,from_m,to_m,personnel_id,meters")
@@ -2216,10 +2226,10 @@ function vardiyaDuzelt(sat){
       $(".tabs button[data-tab=\"vardiya\"]").click();
       adimaGit(1);
       refreshState(); syncDepth();
-      msg($("#recent-msg"), "");
+      dur("");
       msg($("#shift-msg"), "Kayıt açıldı. Düzeltip tekrar kaydedin.", "ok");
     });
-  }).catch(function(e){ msg($("#recent-msg"), (e && e.message) || String(e), "err"); });
+  }).catch(function(e){ dur((e && e.message) || String(e), "err"); });
 }
 
 /* ---------------- kuyruk ---------------- */
@@ -3288,7 +3298,11 @@ function kuyuVardiyalari(dugme){
         box.querySelectorAll(".duzelt").forEach(function(b){
           b.addEventListener("click", function(){
             var sat = rows.filter(function(x){ return x.id === b.dataset.shift; })[0];
-            if(sat) vardiyaDuzelt(sat);
+            /* Cevabı BASILAN SATIRIN altına yazıyoruz. Önceden tek bir
+               #recent-msg vardı ve listenin EN ALTINDAydı: şef üstteki
+               satırda Düzelt'e basıyor, "bu kaydı siz girmediniz" yazısı
+               ekranın dışında kalıyor, düğme çalışmıyor sanıyordu. */
+            if(sat) vardiyaDuzelt(sat, b.closest(".kayit") || b.parentNode);
           });
         });
       });
@@ -3781,11 +3795,15 @@ function attLoad(sessiz){
   msg($("#att-msg"), "Getiriliyor…");
   return ekipYukle().then(function(){
     /* İki çağrı birlikte: istisnalar ve vardiya dağılımı.
-       puantaj_gun henüz kurulmamışsa (eski sunucu) hata yutuluyor ve
-       ekran eski haliyle çalışmaya devam ediyor. */
+       DİKKAT: sb.rpc() gerçek Promise DEĞİL, yalnız `then` taşıyan bir
+       nesne — üzerinde .catch() yok. Doğrudan .catch çağırmak sessizce
+       hata atıyor ve ekranda "Getiriliyor…" asılı kalıyordu.
+       Promise.resolve() ile gerçek Promise'e çevriliyor. */
     return Promise.all([
-      sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value}),
-      sb.rpc("puantaj_gun", {p_project:$("#p-project").value, p_date:$("#p-date").value})
+      Promise.resolve(sb.rpc("attendance_of_day",
+        {p_project:$("#p-project").value, p_date:$("#p-date").value})),
+      Promise.resolve(sb.rpc("puantaj_gun",
+        {p_project:$("#p-project").value, p_date:$("#p-date").value}))
         .catch(function(){ return {data:null, error:true}; })
     ]); })
     .then(function(res){
@@ -4243,7 +4261,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "32";
+var SURUM = "33";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
