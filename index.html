@@ -198,6 +198,9 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .satir .dar,.satir-bas .dar,.satir-top .dar{flex:none;width:88px}
 .satir .dar,.satir-top .dar{text-align:end;font-variant-numeric:tabular-nums}
 .satir .bos,.satir-bas .bos,.satir-top .bos{flex:none;width:44px}
+/* Miktarın yanındaki birim etiketi — malzeme seçilince doluyor (41. dosya, 1b) */
+.satir .birim-et{flex:none;width:62px;font-size:12px;color:var(--ink-3)}
+.satir-bas .dar:last-of-type{width:62px}
 .satir input,.satir select{padding:9px 10px;min-height:44px}
 /* satır sonundaki silme düğmesi: çerçeveli, 44 px, çıplak × değil */
 .sil{flex:none;width:44px;min-width:44px;min-height:44px;padding:0;border:1px solid var(--line);
@@ -471,7 +474,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="field"><label for="f-end">Kuyu durumu</label><select id="f-end"><option value="">Devam ediyor</option><option value="kuyu_sonu">Kuyu sonu</option><option value="kuyu_iptali">Kuyu iptali</option></select></div>
         <div class="grid2">
           <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>PW</option><option>PQ</option><option>HQ</option><option>NQ</option></select></div>
-          <div class="field"><label for="f-to">Vardiya bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" step="0.01" inputmode="decimal"></div>
+          <div class="field"><label for="f-to">Vardiya bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
         </div>
         <button class="btn eksikli" id="btn-add-run" type="button">Manevra ekle</button>
         <div id="run-msg"></div>
@@ -485,7 +488,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </div>
           <div class="field" id="cap-dus-wrap" hidden style="margin-top:8px">
             <label for="cap-metre">Çapın düştüğü metre</label>
-            <input id="cap-metre" type="number" step="0.01" inputmode="decimal">
+            <input id="cap-metre" type="number" min="0" step="0.01" inputmode="decimal">
             <div class="hint" id="cap-dus-hint"></div>
             <button class="btn ghost sm" id="btn-cap-onay" type="button" style="margin-top:8px">Kaydet</button>
           </div>
@@ -510,7 +513,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
       </div>
 
       <div class="card" data-pane="5" hidden style="margin-top:12px">
-        <div class="field"><label for="f-fuel">Bu vardiyada <b>harcanan</b> mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" inputmode="decimal" data-req="5"></div>
+        <div class="field"><label for="f-fuel">Bu vardiyada <b>harcanan</b> mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" min="0" inputmode="decimal" data-req="5"></div>
         <div class="hint">Bu kulenin bu vardiyada <b>yaktığı</b> mazot. Sahaya gelen tankeri buraya değil,
           Gider sekmesindeki "Sahaya gelen akaryakıt" kartına yazın. Hiç yakılmadıysa 0.</div>
         <div class="eyebrow" style="margin-top:14px">Kuyuda kullanılan malzeme</div>
@@ -541,6 +544,19 @@ td:first-child{text-align:start;color:var(--ink-2)}
       </div>
     </section>
 
+    <!-- GİDER BÖLÜM ŞERİDİ (41. dosya, 3)
+         Gider sekmesi dört kart taşıyacak; hepsi alt alta durunca şef
+         kaydırmadan bulamıyordu. Şerit tek seferde tek bölüm gösteriyor.
+         KİRALAMA DÜĞMESİ BİLEREK YOK: bölüm henüz kodlanmadı, olmayan
+         yere götüren düğme konmuyor (32. dosya, yapım notu 3). -->
+    <section id="tab-gserit" hidden>
+      <div class="segment" data-seg="gider" style="margin-bottom:12px">
+        <button type="button" data-v="yakit" aria-pressed="true">Yakıt</button>
+        <button type="button" data-v="nakit" aria-pressed="false">Harcama</button>
+        <button type="button" data-v="avans" aria-pressed="false">Avans</button>
+      </div>
+    </section>
+
     <!-- YAKIT -->
     <section id="tab-yakit" hidden>
 
@@ -561,11 +577,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="field"><label for="y-project">Proje <span class="req">*</span></label><select id="y-project"></select></div>
         <div class="grid2">
           <div class="field"><label for="yg-date">Tarih <span class="req">*</span></label><input id="yg-date" type="date"></div>
-          <div class="field"><label for="yg-type">Cins <span class="req">*</span></label><select id="yg-type"><option>mazot</option><option>benzin</option><option>adblue</option><option>madeni_yag</option></select></div>
+          <div class="field"><label for="yg-type">Cins <span class="req">*</span></label><select id="yg-type" data-yakit-cins></select></div>
         </div>
         <div class="grid2">
-          <div class="field"><label for="yg-liters">Litre <span class="req">*</span></label><input id="yg-liters" type="number" inputmode="decimal"></div>
-          <div class="field"><label for="yg-amount">Tutar (<span class="para-sim">₺</span>)</label><input id="yg-amount" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="yg-liters">Litre <span class="req">*</span></label><input id="yg-liters" type="number" min="0" inputmode="decimal"></div>
+          <div class="field"><label for="yg-amount">Tutar (<span class="para-sim">₺</span>)</label><input id="yg-amount" type="number" min="0" inputmode="decimal"></div>
         </div>
         <div class="field"><label for="yg-supplier">Nereden geldi</label><input id="yg-supplier" placeholder="Petrol ofisi / tanker plakası / irsaliye no"></div>
         <div class="field"><label for="yg-note">Açıklama</label>
@@ -581,15 +597,15 @@ td:first-child{text-align:start;color:var(--ink-2)}
           Her verişi ayrı yazın — sahadaki bakiye bundan düşer.</div>
         <div class="grid2">
           <div class="field"><label for="y-date">Tarih <span class="req">*</span></label><input id="y-date" type="date"></div>
-          <div class="field"><label for="y-type">Cins <span class="req">*</span></label><select id="y-type"><option>mazot</option><option>benzin</option><option>adblue</option><option>madeni_yag</option></select></div>
+          <div class="field"><label for="y-type">Cins <span class="req">*</span></label><select id="y-type" data-yakit-cins></select></div>
         </div>
         <div class="field"><label for="y-hedef">Kime verildi <span class="req">*</span></label><select id="y-hedef"></select>
           <div class="hint" id="y-hedef-hint"></div></div>
         <div class="field" id="y-shift-wrap" hidden><label for="y-shift">Hangi vardiya <span class="req">*</span></label>
           <select id="y-shift"><option value="">— seçin —</option><option value="gunduz">Gündüz</option><option value="gece">Gece</option></select></div>
         <div class="grid2">
-          <div class="field"><label for="y-liters">Litre <span class="req">*</span></label><input id="y-liters" type="number" inputmode="decimal"></div>
-          <div class="field"><label for="y-amount">Tutar (<span class="para-sim">₺</span>)</label><input id="y-amount" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="y-liters">Litre <span class="req">*</span></label><input id="y-liters" type="number" min="0" inputmode="decimal"></div>
+          <div class="field"><label for="y-amount">Tutar (<span class="para-sim">₺</span>)</label><input id="y-amount" type="number" min="0" inputmode="decimal"></div>
         </div>
         <div class="field"><label for="y-note">Harcama içeriği</label>
           <textarea id="y-note" placeholder="Örn: 1. vardiya dolumu, kule deposu tam"></textarea></div>
@@ -605,7 +621,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="field"><label for="e-project">Proje <span class="req">*</span></label><select id="e-project"></select></div>
         <div class="grid2">
           <div class="field"><label for="e-date">Tarih <span class="req">*</span></label><input id="e-date" type="date"></div>
-          <div class="field"><label for="e-amount">Tutar (<span class="para-sim">₺</span>) <span class="req">*</span></label><input id="e-amount" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="e-amount">Tutar (<span class="para-sim">₺</span>) <span class="req">*</span></label><input id="e-amount" type="number" min="0" inputmode="decimal"></div>
         </div>
         <div class="field"><label for="e-cat">Kategori <span class="req">*</span></label><select id="e-cat"><option>Yakıt</option><option>Yedek parça</option><option>Gıda</option><option>Nakliye</option><option>Tamir bakım</option><option>Diğer</option></select></div>
         <div class="field"><label for="e-desc">Açıklama <span class="req">*</span></label><input id="e-desc" placeholder="Ne için harcandı?"></div>
@@ -623,6 +639,27 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <div id="harcama-liste"><div class="hint">Yenile'ye basın.</div></div>
         <div id="harcama-msg"></div>
+      </div>
+    </section>
+
+    <!-- AVANS — SALT OKUNUR (41. dosya, 3; Tayfun 20 Ekim)
+         Avans girişi puantajda kalıyor. Burada yalnız gösteriliyor ki
+         aynı avans iki yerden girilmesin. -->
+    <section id="tab-avans" hidden>
+      <div class="card">
+        <div class="arasi">
+          <span class="eyebrow">Avans</span>
+          <button class="btn ghost sm" id="btn-avans-yenile" type="button">Yenile</button>
+        </div>
+        <div class="grid2" style="margin-top:8px">
+          <div class="field"><label for="av-project">Proje</label><select id="av-project"></select></div>
+          <div class="field"><label for="av-month">Ay</label><input id="av-month" type="month"></div>
+        </div>
+        <div id="avans-liste" style="margin-top:10px"><div class="hint">Yenile'ye basın.</div></div>
+        <div class="hint" style="margin-top:10px">
+          Avans <b>Puantaj</b> sekmesinden girilir; burada yalnız görüntülenir.
+        </div>
+        <div id="avans-msg"></div>
       </div>
     </section>
 
@@ -653,7 +690,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
             <option>Geo MRA 2 Yeşil</option><option>Geo MRA 3 Mavi</option><option>Wattel Bordo</option><option>Wattel Bordo Turbo</option><option>Neolit 5/7</option><option>Diğer</option></select></div>
           <div class="field"><label for="b-serial">Seri no</label><input id="b-serial" placeholder="varsa"></div>
         </div>
-        <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label><input id="b-from" type="number" inputmode="decimal">
+        <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label><input id="b-from" type="number" min="0" inputmode="decimal">
           <div class="hint" id="b-from-hint">Kuyu seçilince kuyunun bulunduğu metre kendiliğinden yazılır. Farklıysa değiştirin.</div></div>
         <button class="btn" id="btn-bit-install" type="button">Matkabı tak</button>
         <div id="bit-msg"></div>
@@ -663,7 +700,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <span class="eyebrow">Matkap çıkar</span>
         <div class="field"><label for="b-open">Takılı matkap <span class="req">*</span></label><select id="b-open"></select></div>
         <div class="grid2">
-          <div class="field"><label for="b-to">Çıktığı metre <span class="req">*</span></label><input id="b-to" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="b-to">Çıktığı metre <span class="req">*</span></label><input id="b-to" type="number" min="0" inputmode="decimal"></div>
           <div class="field"><label for="b-status">Durum <span class="req">*</span></label>
             <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option></select></div>
         </div>
@@ -702,7 +739,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="grid2">
           <div class="field"><label for="st-dir">Hareket <span class="req">*</span></label>
             <select id="st-dir"><option value="giris">Sahaya giriş</option><option value="cikis">Kullanım / çıkış</option><option value="iade">İade</option></select></div>
-          <div class="field"><label for="st-qty">Miktar <span class="req">*</span></label><input id="st-qty" type="number" inputmode="decimal"></div>
+          <div class="field"><label for="st-qty">Miktar <span class="req">*</span></label><input id="st-qty" type="number" min="0" inputmode="decimal"></div>
         </div>
         <div class="field"><label for="st-note">Not</label><input id="st-note" placeholder="isteğe bağlı"></div>
         <button class="btn" id="btn-stock" type="button">Stok hareketini kaydet</button>
@@ -881,6 +918,11 @@ if(location.protocol === "file:"){
 
 var $ = function(s){ return document.querySelector(s); };
 var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+/* innerHTML'e giren veritabanı metni için. Ofis sayfalarında app-shell.js'te
+   aynısı var; saha panelinde yoktu. */
+var esc = function(s){ return String(s == null ? "" : s)
+  .replace(/[&<>"]/g, function(c){
+    return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]; }); };
 /* Biçim tek yerden: dil kullanıcının seçimi, para birimi firmanın ayarı.
    Koda "tr-TR" ya da "₺" yazılmıyor — ihracat hazırlığı (25. dosya). */
 var BICIM = { dil:"tr-TR", para:"TRY", sim:"₺" };
@@ -1047,7 +1089,7 @@ function opt(sel, items, labelFn, emptyLabel){
 function fillSelects(){
   if(!MASTER) return;
   var pr = MASTER.projects||[], ma = MASTER.machines||[], pe = MASTER.personnel||[];
-  ["#f-project","#y-project","#e-project","#p-project","#s-project"].forEach(function(s){
+  ["#f-project","#y-project","#e-project","#p-project","#s-project","#av-project"].forEach(function(s){
     opt(s, pr, function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); });
     /* Şefin tek şantiyesi var; her sekmede yeniden seçtirmenin anlamı yok.
        Seçilmemiş bırakmak, düğmelerin sessizce "proje seçin" demesine yol açıyordu. */
@@ -1331,7 +1373,7 @@ $("#btn-new-well").addEventListener("click", function(){
       '<input id="nw-az" type="number" inputmode="numeric" min="0" max="360" placeholder="0–360"></div>' +
     '</div>' +
     '<div class="hint">Eğim ve azimut kuyuya bir kere girilir, sonra değişmez.</div>' +
-    '<div class="field"><label for="nw-planned">Planlanan derinlik (m)</label><input id="nw-planned" type="number" inputmode="decimal" placeholder="işverenin verdiği derinlik"></div>';
+    '<div class="field"><label for="nw-planned">Planlanan derinlik (m)</label><input id="nw-planned" type="number" min="0" inputmode="decimal" placeholder="işverenin verdiği derinlik"></div>';
   var ok = document.createElement("button"); ok.className="btn"; ok.type="button"; ok.textContent="Kuyuyu oluştur";
   var no = document.createElement("button"); no.className="btn ghost"; no.type="button"; no.textContent="Vazgeç";
   wrap.appendChild(ok); wrap.appendChild(no);
@@ -1588,7 +1630,7 @@ function kalanCiz(){
     row.className = "satir";
     row.innerHTML =
       '<select class="kln-tur esnek" aria-label="Malzeme türü">' + kalanSecenek() + '</select>' +
-      '<input class="kln-qty dar" type="number" step="0.01" inputmode="decimal" ' +
+      '<input class="kln-qty dar" type="number" min="0" step="0.01" inputmode="decimal" ' +
         'placeholder="0" aria-label="Miktar">' +
       '<select class="kln-unit" style="flex:none;width:92px" aria-label="Birim">' +
         '<option value="metre">metre</option><option value="adet">adet</option></select>' +
@@ -1597,13 +1639,18 @@ function kalanCiz(){
     tur.value = r.tur || ""; qty.value = r.qty || ""; un.value = r.unit || "metre";
     /* Muhafaza borusu her zaman metre; birim seçimi kapalı kalıyor. */
     un.disabled = (r.tur || "").indexOf("cas:") === 0;
+    /* Birim "adet" ise miktar tam sayı olmalı (41. dosya, 1b). */
+    miktarKur(qty, un.value);
+    qty.classList.toggle("missing", kesirHatasi(qty));
     tur.addEventListener("change", function(){
       r.tur = tur.value;
       if(r.tur.indexOf("cas:") === 0){ r.unit = "metre"; }
       kalanCiz();
     });
-    qty.addEventListener("input", function(){ r.qty = qty.value; });
-    un.addEventListener("change", function(){ r.unit = un.value; });
+    qty.addEventListener("input", function(){ r.qty = qty.value;
+      qty.classList.toggle("missing", kesirHatasi(qty)); });
+    un.addEventListener("change", function(){ r.unit = un.value;
+      miktarKur(qty, un.value); qty.classList.toggle("missing", kesirHatasi(qty)); });
     row.querySelector(".kln-sil").addEventListener("click", function(){ KALAN.splice(i,1); kalanCiz(); });
     box.appendChild(row);
   });
@@ -1612,6 +1659,32 @@ function kalanCiz(){
 
 /* Tekrarlanan satırların başlık ve toplam satırları.
    Alan adını her satırda tekrar etmek yerine bir kez üstte yazıyoruz. */
+/* ---------------- miktar alanı: birime göre tam sayı / kesirli ----------------
+   "Karot kutusu (adet)" alanına 0,015 girilebiliyordu (41. dosya, 1b).
+   Birim zaten biliniyor; adım ondan kuruluyor. Tam sayı isteyen birimlerde
+   ok tuslari 1'er gidiyor ve kesir girilince uyari veriliyor. */
+var TAM_BIRIM = {adet:1, torba:1, bidon:1, paket:1, rulo:1};
+function birimTamMi(b){ return !!TAM_BIRIM[String(b||"").toLocaleLowerCase("tr")]; }
+function miktarKur(inp, birim){
+  if(!inp) return;
+  var tam = birimTamMi(birim);
+  inp.step = tam ? "1" : "0.01";
+  inp.min  = "0";
+  inp.setAttribute("inputmode", tam ? "numeric" : "decimal");
+  inp.placeholder = tam ? "0" : "0,00";
+  inp.dataset.birim = birim || "";
+  inp.dataset.tam = tam ? "1" : "";
+}
+/* Alanın yanında birimi yazan etiket. Seçim yapılmadan önce boş durur. */
+function birimYaz(el, birim){ if(el) el.textContent = birim || "—"; }
+/* Tam sayı isteyen birimde kesir yazıldı mı. Engellemiyor, işaretliyor. */
+function kesirHatasi(inp){
+  if(!inp || !inp.dataset.tam) return false;
+  var v = inp.value; if(v === "") return false;
+  var n = Number(String(v).replace(",", "."));
+  return isFinite(n) && Math.abs(n - Math.round(n)) > 1e-9;
+}
+
 function satirBas(adlar, esnekler){
   var d = document.createElement("div");
   d.className = "satir-bas";
@@ -1642,11 +1715,11 @@ function olcumCiz(){
     var row = document.createElement("div");
     row.className = "satir";
     row.innerHTML =
-      '<input class="olc-d orta" type="number" step="0.01" inputmode="decimal" ' +
+      '<input class="olc-d orta" type="number" min="0" step="0.01" inputmode="decimal" ' +
         'placeholder="0" aria-label="Derinlik" style="text-align:end">' +
-      '<input class="olc-a orta" type="number" step="0.1" inputmode="decimal" ' +
+      '<input class="olc-a orta" type="number" min="0" max="360" step="0.1" inputmode="decimal" ' +
         'placeholder="0" aria-label="Azimut" style="text-align:end">' +
-      '<input class="olc-e orta" type="number" step="0.1" inputmode="decimal" ' +
+      '<input class="olc-e orta" type="number" min="0" max="90" step="0.1" inputmode="decimal" ' +
         'placeholder="0" aria-label="Eğim" style="text-align:end">' +
       '<button class="sil olc-sil" type="button" aria-label="Bu ölçüm satırını sil">×</button>';
     var d = row.querySelector(".olc-d"), a = row.querySelector(".olc-a"), e = row.querySelector(".olc-e");
@@ -1679,7 +1752,7 @@ function kullanilanCiz(){
   var box = $("#kullanilan-liste"); if(!box) return;
   box.innerHTML = "";
   if(!KULLANILAN.length){ box.innerHTML = '<div class="hint">Malzeme eklenmedi.</div>'; return; }
-  box.appendChild(satirBas(["Malzeme", "Miktar"], [1, 0]));
+  box.appendChild(satirBas(["Malzeme", "Miktar", "Birim"], [1, 0, 0]));
   KULLANILAN.forEach(function(r,i){
     var row = document.createElement("div");
     row.className = "satir";
@@ -1688,13 +1761,24 @@ function kullanilanCiz(){
       '<option value="">— seçin —</option>' + kullanilanMalzemeler().map(function(m){
         return '<option value="' + m.id + '">' + m.name + ' (' + m.unit + ')</option>'; }).join("") +
       '</select>' +
-      '<input class="kul-qty dar" type="number" step="0.01" inputmode="decimal" ' +
+      '<input class="kul-qty dar" type="number" min="0" step="0.01" inputmode="decimal" ' +
         'placeholder="0" aria-label="Miktar">' +
+      '<span class="birim-et" aria-live="polite">—</span>' +
       '<button class="sil kul-sil" type="button" aria-label="Bu malzeme satırını sil">×</button>';
-    var mt = row.querySelector(".kul-mat"), q = row.querySelector(".kul-qty");
+    var mt = row.querySelector(".kul-mat"), q = row.querySelector(".kul-qty"),
+        be = row.querySelector(".birim-et");
     mt.value = r.material_id || ""; q.value = r.qty || "";
-    mt.addEventListener("change", function(){ r.material_id = mt.value; });
-    q.addEventListener("input", function(){ r.qty = q.value; kullanilanToplam(); });
+    /* Miktarın tam sayı mı kesirli mi olacağını malzemenin birimi söylüyor. */
+    function birimUygula(){
+      var m = kullanilanMalzemeler().filter(function(x){ return x.id === mt.value; })[0];
+      var u = m ? m.unit : "";
+      miktarKur(q, u); birimYaz(be, u);
+      q.classList.toggle("missing", kesirHatasi(q));
+    }
+    birimUygula();
+    mt.addEventListener("change", function(){ r.material_id = mt.value; birimUygula(); });
+    q.addEventListener("input", function(){ r.qty = q.value;
+      q.classList.toggle("missing", kesirHatasi(q)); kullanilanToplam(); });
     row.querySelector(".kul-sil").addEventListener("click", function(){ KULLANILAN.splice(i,1); kullanilanCiz(); });
     box.appendChild(row);
   });
@@ -2171,6 +2255,39 @@ function enqueue(item){ return obAdd(item).then(refreshQueue).then(function(){ i
 /* ---------------- kaydetme ---------------- */
 function filesOf(input){ var out=[]; for(var i=0;i<input.files.length;i++) out.push(input.files[i]); return out; }
 
+/* Kayıttan önce sayı alanlarını tarar. Döndürdüğü liste UYARI metinleridir;
+   hiçbiri kaydı durdurmaz (41. dosya, 1c). */
+function sayiSorunlari(){
+  var u = [];
+  function malzemeAdi(id){
+    var m = (malzemeler() || []).filter(function(x){ return x.id === id; })[0];
+    return m ? m.name : "malzeme";
+  }
+  KULLANILAN.forEach(function(r){
+    if(!r.material_id) return;
+    var n = Number(String(r.qty == null ? "" : r.qty).replace(",", "."));
+    if(r.qty === "" || !isFinite(n) || n <= 0)
+      u.push(malzemeAdi(r.material_id) + " miktarı " +
+             (n < 0 ? "eksi" : "boş ya da sıfır") + " — bu satır kaydedilmedi");
+    else {
+      var m = (malzemeler() || []).filter(function(x){ return x.id === r.material_id; })[0];
+      if(m && birimTamMi(m.unit) && Math.abs(n - Math.round(n)) > 1e-9)
+        u.push(m.name + " " + m.unit + " ile sayılıyor, " + r.qty + " yazılmış");
+    }
+  });
+  KALAN.forEach(function(r){
+    if(!r.tur) return;
+    var n = Number(String(r.qty == null ? "" : r.qty).replace(",", "."));
+    if(r.qty === "" || !isFinite(n) || n <= 0)
+      u.push("Kuyuda kalan malzeme miktarı boş ya da sıfır — bu satır kaydedilmedi");
+    else if(birimTamMi(r.unit) && Math.abs(n - Math.round(n)) > 1e-9)
+      u.push("Kuyuda kalan malzeme adet ile sayılıyor, " + r.qty + " yazılmış");
+  });
+  var f = Number($("#f-fuel").value);
+  if($("#f-fuel").value !== "" && (!isFinite(f) || f < 0)) u.push("Mazot eksi girilmiş");
+  return u;
+}
+
 $("#btn-save-shift").addEventListener("click", function(){
   var fi = firstIncomplete();
   if(fi !== 0){
@@ -2184,6 +2301,11 @@ $("#btn-save-shift").addEventListener("click", function(){
      başarılı olduğu hâlde ekranda "Kaydedilmedi" yazısı kalıyor ve şef
      vardiyayı ikinci kez giriyor. */
   msg($("#shift-msg"), ""); msg($("#step-msg"), "");
+  /* Sayı kontrolü (41. dosya, 1c). Kaydı ENGELLEMİYOR — kaydet düğmesi
+     kilitlenmez kuralı. Ama 0/eksi satırlar gönderilmeden eleniyordu ve
+     şef bunu göremiyordu: "2 kalem" yazarken bir satır sessizce düşüyordu.
+     Artık ne düştüğü kayıttan sonra yazılıyor. */
+  var sayiUyari = sayiSorunlari();
   var crew = [];
   if($("#f-driller1").value) crew.push({personnel_id:$("#f-driller1").value, crew_role:"sondor"});
   ISCI.forEach(function(v){
@@ -2238,6 +2360,8 @@ $("#btn-save-shift").addEventListener("click", function(){
     var w = currentWell();
     if(w){ w.current_depth = savedDepth; try{ localStorage.setItem("sp_master", JSON.stringify(MASTER)); }catch(e){} }
     showDone(wellCode, metraj, fuel, item.payload.work_date, item.payload.shift_slot);
+    if(sayiUyari.length)
+      msg($("#done-uyari"), "<b>Dikkat:</b><br>• " + sayiUyari.join("<br>• "), "err");
     if(duzeltmeMi) msg($("#shift-msg"), "Düzeltme kaydedildi. Eski kayıt güncellendi.", "ok");
     if(navigator.onLine) setTimeout(loadRecent, 1200);
   });
@@ -2258,6 +2382,10 @@ function showDone(wellCode, metraj, fuel, date, slot){
     "<div>" + wellCode + " · " + tl(metraj) + " m · " + tl(fuel) + " lt mazot</div>" +
     "<div class='hint'>" + date + " · " + shift + " vardiyası · " +
     (navigator.onLine ? "merkeze gönderiliyor" : "bağlantı gelince gönderilecek") + "</div>";
+  /* Sayı uyarıları buraya yazılıyor: kayıt gitti ama bir satır elendiyse
+     şef bunu görmeli (41. dosya, 1c). */
+  var uy = document.createElement("div"); uy.id = "done-uyari"; uy.style.marginTop = "10px";
+  c.appendChild(uy);
   var b = document.createElement("button");
   b.className = "btn"; b.type = "button"; b.textContent = "Yeni vardiya gir";
   c.appendChild(b);
@@ -2411,6 +2539,41 @@ $("#btn-save-exp").addEventListener("click", function(){
     if(navigator.onLine) setTimeout(loadHarcama, 1200);
   });
 });
+
+/* ---------------- avans dökümü (salt okunur) ----------------
+   Veri puantajdan geliyor; attendance_summary zaten kişi başına avansı
+   döndürüyor, yeni sorgu gerekmedi. Giriş alanı YOK — avans yalnız
+   Puantaj sekmesinden girilir (41. dosya, 3; Tayfun 20 Ekim). */
+function avansYukle(){
+  var kutu = $("#avans-liste");
+  var proje = $("#av-project").value;
+  if(!$("#av-month").value) $("#av-month").value = todayStr().slice(0,7);
+  if(!proje){ kutu.innerHTML = '<div class="hint">Önce proje seçin.</div>'; return; }
+  if(!navigator.onLine || !sb){
+    kutu.innerHTML = '<div class="hint">Bağlantı yokken avans dökümü görüntülenemez.</div>'; return; }
+  kutu.innerHTML = '<div class="hint">Yükleniyor…</div>';
+  var ay = $("#av-month").value + "-01";
+  sb.rpc("attendance_summary", {p_project:proje, p_month:ay}).then(function(r){
+    if(r.error){ kutu.innerHTML = '<div class="hint">' + esc(r.error.message) + '</div>'; return; }
+    var rows = (r.data || []).filter(function(x){ return Number(x.avans) > 0; });
+    if(!rows.length){ kutu.innerHTML = '<div class="hint">Bu ay avans kaydı yok.</div>'; return; }
+    rows.sort(function(a,b){ return Number(b.avans) - Number(a.avans); });
+    var toplam = rows.reduce(function(t,x){ return t + Number(x.avans||0); }, 0);
+    kutu.innerHTML = "";
+    kutu.appendChild(satirBas(["Kişi", "Avans"], [1, 0]));
+    rows.forEach(function(x){
+      var d = document.createElement("div"); d.className = "satir";
+      d.innerHTML = '<span class="esnek">' + esc(x.name) + '</span>' +
+                    '<span class="dar">' + money(x.avans) + '</span>' +
+                    '<span class="bos"></span>';
+      kutu.appendChild(d);
+    });
+    kutu.appendChild(satirTop("Toplam", money(toplam)));
+  });
+}
+$("#btn-avans-yenile").addEventListener("click", avansYukle);
+$("#av-project").addEventListener("change", avansYukle);
+$("#av-month").addEventListener("change", avansYukle);
 
 function loadHarcama(){
   var proje = $("#e-project").value;
@@ -3640,19 +3803,38 @@ $("#btn-tanim").addEventListener("click", function(){
 });
 
 /* ---------------- sekmeler ---------------- */
+/* Gider sekmesinin açık bölümü. Şerit bunu değiştiriyor (41. dosya, 3).
+   Kiralama bölümü kodlanınca listeye eklenecek. */
+var GIDER_BOLUM = "yakit";
+var TUM_BOLUM = ["vardiya","malzeme","makine","gserit","yakit","nakit","avans",
+                 "puantaj","ozet","kuyruk"];
+
+function giderCiz(){
+  $$('.segment[data-seg="gider"] button').forEach(function(o){
+    o.setAttribute("aria-pressed", String(o.dataset.v === GIDER_BOLUM)); });
+  ["yakit","nakit","avans"].forEach(function(t){
+    $("#tab-"+t).hidden = (t !== GIDER_BOLUM); });
+  if(GIDER_BOLUM === "yakit") loadYakit();
+  if(GIDER_BOLUM === "nakit") loadHarcama();
+  if(GIDER_BOLUM === "avans") avansYukle();
+}
+$$('.segment[data-seg="gider"] button').forEach(function(b){
+  b.addEventListener("click", function(){ GIDER_BOLUM = b.dataset.v; giderCiz(); });
+});
+
 $$("#tabs button").forEach(function(b){
   b.addEventListener("click", function(){
     $$("#tabs button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
-    var map = {vardiya:["vardiya"], malzeme:["malzeme"], makine:["makine"], gider:["yakit","nakit"],
+    var map = {vardiya:["vardiya"], malzeme:["malzeme"], makine:["makine"],
+               gider:["gserit"],
                puantaj:["puantaj"], ozet:["ozet"], kuyruk:["kuyruk"]};
     var acik = map[b.dataset.tab] || [];
-    ["vardiya","malzeme","makine","yakit","nakit","puantaj","ozet","kuyruk"].forEach(function(t){
-      $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
+    TUM_BOLUM.forEach(function(t){ $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
     if(b.dataset.tab === "kuyruk") refreshQueue();
     if(b.dataset.tab === "puantaj"){ attCiz(); attLoad(true); }
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
     if(b.dataset.tab === "makine"){ bakimYukle(); acikArizaYukle(); }
-    if(b.dataset.tab === "gider"){ loadYakit(); loadHarcama(); }
+    if(b.dataset.tab === "gider") giderCiz();
     window.scrollTo(0,0);
   });
 });
@@ -3663,7 +3845,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "28";
+var SURUM = "30";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
@@ -3822,6 +4004,17 @@ function start(){
     .then(function(){ if(navigator.onLine){ syncAll(); loadRecent(); } })
     .catch(function(e){ if(e !== "kapi") console.warn(e); });
 }
+/* Yakıt cinsi listesi TEK KAYNAKTAN. Daha önce iki ayrı yerde elle
+   yazılıydı ve değer ile etiket aynıydı; ekranda "madeni_yag" görünüyordu
+   (41. dosya, 2). Değer veritabanına gittiği için DEĞİŞMİYOR, yalnız
+   etiket Türkçeleşti. */
+var YAKIT_CINS = [["mazot","Mazot"],["benzin","Benzin"],
+                  ["adblue","AdBlue"],["madeni_yag","Madeni yağ"]];
+$$("select[data-yakit-cins]").forEach(function(sel){
+  sel.innerHTML = YAKIT_CINS.map(function(x){
+    return '<option value="' + x[0] + '">' + x[1] + '</option>'; }).join("");
+});
+
 if(!cfg.url || !cfg.key){ show("scr-setup"); }
 else {
   makeClient();
