@@ -241,7 +241,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .metin-dugme:active{opacity:.6}
 .saga{display:flex;justify-content:flex-end}
 .ayrac-ust{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
-.dizi{display:flex;align-items:center;gap:8px;margin-top:10px}
+.dizi{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+/* Kiralama kartındaki küçük işaretler: "yakıt bize ait" gibi */
+.rozet{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;
+  font-weight:600;letter-spacing:.02em;background:var(--accent-soft);
+  color:var(--accent-ink);border:1px solid var(--line)}
 
 /* --- katlanır başlık --- */
 .katla{width:100%;display:flex;align-items:center;gap:8px;background:var(--line-soft);
@@ -547,12 +551,12 @@ td:first-child{text-align:start;color:var(--ink-2)}
     <!-- GİDER BÖLÜM ŞERİDİ (41. dosya, 3)
          Gider sekmesi dört kart taşıyacak; hepsi alt alta durunca şef
          kaydırmadan bulamıyordu. Şerit tek seferde tek bölüm gösteriyor.
-         KİRALAMA DÜĞMESİ BİLEREK YOK: bölüm henüz kodlanmadı, olmayan
-         yere götüren düğme konmuyor (32. dosya, yapım notu 3). -->
+         Kiralama bölümü 34. adımla (20 Ekim) eklendi. -->
     <section id="tab-gserit" hidden>
       <div class="segment" data-seg="gider" style="margin-bottom:12px">
         <button type="button" data-v="yakit" aria-pressed="true">Yakıt</button>
         <button type="button" data-v="nakit" aria-pressed="false">Harcama</button>
+        <button type="button" data-v="kira" aria-pressed="false">Kiralama</button>
         <button type="button" data-v="avans" aria-pressed="false">Avans</button>
       </div>
     </section>
@@ -639,6 +643,22 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <div id="harcama-liste"><div class="hint">Yenile'ye basın.</div></div>
         <div id="harcama-msg"></div>
+      </div>
+    </section>
+
+    <!-- KİRALAMA — iş makinası ve araç (34. dosya + Tayfun'un 20 Ekim cevapları)
+         Ücret biçimi üç türlü: saatlikte vardiya başına saat, günlükte
+         çalıştı/çalışmadı, götürüde sabit tutar. Tutarlar KDV DAHİL. -->
+    <section id="tab-kira" hidden>
+      <div class="card">
+        <div class="arasi">
+          <span class="eyebrow">Kiralık makine ve araç</span>
+          <button class="metin-dugme" id="btn-kira-yeni" type="button">+ Yeni kiralama</button>
+        </div>
+        <div class="field" style="margin-top:8px"><label for="kr-project">Proje</label>
+          <select id="kr-project"></select></div>
+        <div id="kira-liste" style="margin-top:10px"><div class="hint">Yükleniyor…</div></div>
+        <div id="kira-msg"></div>
       </div>
     </section>
 
@@ -1089,7 +1109,7 @@ function opt(sel, items, labelFn, emptyLabel){
 function fillSelects(){
   if(!MASTER) return;
   var pr = MASTER.projects||[], ma = MASTER.machines||[], pe = MASTER.personnel||[];
-  ["#f-project","#y-project","#e-project","#p-project","#s-project","#av-project"].forEach(function(s){
+  ["#f-project","#y-project","#e-project","#p-project","#s-project","#av-project","#kr-project"].forEach(function(s){
     opt(s, pr, function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); });
     /* Şefin tek şantiyesi var; her sekmede yeniden seçtirmenin anlamı yok.
        Seçilmemiş bırakmak, düğmelerin sessizce "proje seçin" demesine yol açıyordu. */
@@ -2540,6 +2560,325 @@ $("#btn-save-exp").addEventListener("click", function(){
   });
 });
 
+/* ================= KİRALAMA =================
+   34. dosya + Tayfun'un 20 Ekim cevapları. "Araç kiralama" ile "iş makinası
+   kiralama" aynı kayıt; yalnız ekipman türü değişiyor.
+   Ücret biçimi üçü de var: saatlik (vardiya başına saat), günlük
+   (çalıştı/çalışmadı), götürü (sabit tutar). Tutarlar KDV DAHİL.
+   Tedarikçi serbest metin — liste tutulmuyor, çünkü tedarikçiler çok
+   değişken ve önemli olan neyin kiralandığı. */
+var KIRA_EKIPMAN = [
+  ["kepce","Kepçe / JCB"], ["ekskavator","Ekskavatör"], ["kamyon","Kamyon"],
+  ["vinc","Vinç"], ["forklift","Forklift"], ["tanker","Tanker"],
+  ["pikap","Pikap"], ["servis_araci","Servis aracı"], ["jenerator","Jeneratör"],
+  ["su_tankeri","Su tankeri"], ["diger","Diğer"]
+];
+var KIRA_BICIM = [["saatlik","Saatlik"], ["gunluk","Günlük"], ["goturu","Götürü"]];
+var KIRA_IS = ["yol açma","platform hazırlama","taşıma","kurtarma","diğer"];
+var KIRALAR = [];
+
+function kiraAd(k){
+  var x = KIRA_EKIPMAN.filter(function(e){ return e[0] === k; })[0];
+  return x ? x[1] : (k || "—");
+}
+function kiraBicimAd(k){
+  var x = KIRA_BICIM.filter(function(e){ return e[0] === k; })[0];
+  return x ? x[1] : (k || "—");
+}
+function kiraProje(){ return $("#kr-project").value || $("#f-project").value || ""; }
+
+function kiraYukle(){
+  var kutu = $("#kira-liste"), pr = kiraProje();
+  if(!pr){ kutu.innerHTML = '<div class="hint">Önce proje seçin.</div>'; return; }
+  if(!navigator.onLine || !sb){
+    kutu.innerHTML = '<div class="hint">Bağlantı yokken kiralama listesi görüntülenemez.</div>'; return; }
+  kutu.innerHTML = '<div class="hint">Yükleniyor…</div>';
+  sb.rpc("kiralama_listesi", {p_project:pr}).then(function(r){
+    if(r.error){ kutu.innerHTML = '<div class="hint">' + esc(r.error.message) + '</div>'; return; }
+    KIRALAR = r.data || [];
+    kiraCiz();
+  });
+}
+
+function kiraCiz(){
+  var kutu = $("#kira-liste"); kutu.innerHTML = "";
+  if(!KIRALAR.length){
+    kutu.innerHTML = '<div class="hint">Kiralama kaydı yok. ' +
+      'Sahaya kiralık makine ya da araç geldiyse "Yeni kiralama" ile açın.</div>';
+    return;
+  }
+  KIRALAR.forEach(function(k){
+    var d = document.createElement("div");
+    d.className = "card";
+    d.style.marginTop = "10px";
+    var bilgi = [];
+    if(k.tedarikci) bilgi.push(esc(k.tedarikci));
+    if(k.yapilan_is) bilgi.push(esc(k.yapilan_is));
+    var ucret = k.ucret_bicimi === "goturu"
+      ? "götürü " + money(k.goturu_tutar)
+      : kiraBicimAd(k.ucret_bicimi).toLocaleLowerCase("tr") + " " + money(k.birim_ucret);
+    var sure = k.ucret_bicimi === "saatlik" ? tl(k.toplam_saat, 1) + " saat"
+             : k.ucret_bicimi === "gunluk"  ? k.calisilan_gun + " gün"
+             : "—";
+    d.innerHTML =
+      '<div class="arasi"><b>' + kiraAd(k.ekipman) + (k.tanim ? " · " + esc(k.tanim) : "") + '</b>' +
+        (k.acik ? '<span class="stok-rozet az">DEVAM EDİYOR</span>'
+                : '<span class="stok-rozet">BİTTİ</span>') + '</div>' +
+      (bilgi.length ? '<div class="hint">' + bilgi.join(" · ") + '</div>' : "") +
+      '<div class="hint">' + k.baslangic + (k.bitis ? " – " + k.bitis : "'den beri") +
+        " · " + ucret + " <b>(KDV dahil)</b></div>" +
+      (k.yakit_bizden || k.musteriye_yansit
+        ? '<div class="dizi">' +
+          (k.yakit_bizden ? '<span class="rozet">yakıt bize ait</span>' : "") +
+          (k.musteriye_yansit ? '<span class="rozet">müşteriye yansıtılacak</span>' : "") +
+          '</div>' : "") +
+      '<div class="ikili" style="margin-top:10px">' +
+        '<div class="olcu"><div class="et">Çalışma</div><div class="dg">' + sure + '</div></div>' +
+        '<div class="olcu"><div class="et">Tutar</div><div class="dg">' + money(k.tutar) + '</div></div>' +
+      '</div>';
+    var dizi = document.createElement("div");
+    dizi.className = "dizi";
+    if(k.acik && k.ucret_bicimi !== "goturu"){
+      var bs = document.createElement("button");
+      bs.className = "btn ghost sm"; bs.type = "button";
+      bs.textContent = (k.ucret_bicimi === "saatlik") ? "Saat gir" : "Çalıştı işaretle";
+      bs.addEventListener("click", function(){ kiraCalismaAc(k); });
+      dizi.appendChild(bs);
+    }
+    if(k.acik){
+      var bk = document.createElement("button");
+      bk.className = "btn ghost sm"; bk.type = "button"; bk.textContent = "Kiralamayı bitir";
+      bk.addEventListener("click", function(){ kiraKapat(k); });
+      dizi.appendChild(bk);
+    } else {
+      var ba = document.createElement("button");
+      ba.className = "btn ghost sm"; ba.type = "button"; ba.textContent = "Yeniden aç";
+      ba.addEventListener("click", function(){ kiraTekrarAc(k); });
+      dizi.appendChild(ba);
+    }
+    var bd = document.createElement("button");
+    bd.className = "metin-dugme"; bd.type = "button"; bd.textContent = "Dökümü gör";
+    bd.addEventListener("click", function(){ kiraDokum(k, d); });
+    dizi.appendChild(bd);
+    d.appendChild(dizi);
+    kutu.appendChild(d);
+  });
+}
+
+/* ---- yeni kiralama ---- */
+$("#btn-kira-yeni").addEventListener("click", function(){
+  if($("#kr-yeni")) { $("#kr-yeni").remove(); return; }
+  if(!kiraProje()){ msg($("#kira-msg"), "Önce proje seçin.", "err"); return; }
+  var w = document.createElement("div");
+  w.className = "card"; w.id = "kr-yeni"; w.style.marginTop = "10px";
+  w.innerHTML =
+    '<span class="eyebrow">Yeni kiralama</span>' +
+    '<div class="field" style="margin-top:8px"><label for="kr-ekipman">Ekipman <span class="req">*</span></label>' +
+      '<select id="kr-ekipman">' + KIRA_EKIPMAN.map(function(e){
+        return '<option value="' + e[0] + '">' + e[1] + '</option>'; }).join("") + '</select></div>' +
+    '<div class="field"><label for="kr-tanim">Tanım</label>' +
+      '<input id="kr-tanim" placeholder="plaka ya da &quot;sarı JCB&quot;"></div>' +
+    '<div class="field"><label for="kr-tedarikci">Tedarikçi</label>' +
+      '<input id="kr-tedarikci" placeholder="firma ya da kişi (zorunlu değil)"></div>' +
+    '<div class="grid2">' +
+      '<div class="field"><label for="kr-bicim">Ücret biçimi <span class="req">*</span></label>' +
+        '<select id="kr-bicim">' + KIRA_BICIM.map(function(e){
+          return '<option value="' + e[0] + '">' + e[1] + '</option>'; }).join("") + '</select></div>' +
+      '<div class="field"><label for="kr-ucret" id="kr-ucret-et">Saat ücreti (<span class="para-sim">₺</span>) <span class="req">*</span></label>' +
+        '<input id="kr-ucret" type="number" min="0" step="0.01" inputmode="decimal"></div>' +
+    '</div>' +
+    '<div class="hint">Tutarlar <b>KDV dahil</b> girilir — fatura da KDV dahil geldiği için karşılaştırma aynı esasta yapılıyor.</div>' +
+    '<div class="grid2" style="margin-top:10px">' +
+      '<div class="field"><label for="kr-bas">Başlangıç <span class="req">*</span></label>' +
+        '<input id="kr-bas" type="date" value="' + todayStr() + '"></div>' +
+      '<div class="field"><label for="kr-is">Yapılan iş</label>' +
+        '<select id="kr-is"><option value="">— seçin —</option>' +
+        KIRA_IS.map(function(x){ return '<option>' + x + '</option>'; }).join("") + '</select></div>' +
+    '</div>' +
+    '<label class="dizi"><input type="checkbox" id="kr-yakit" style="width:auto;min-height:0">' +
+      '<span>Yakıt bize ait</span></label>' +
+    '<div class="hint">İşaretlerseniz bu ekipman araç listesine eklenir, verdiğiniz mazotu Yakıt bölümünden girersiniz.</div>' +
+    '<label class="dizi" style="margin-top:8px"><input type="checkbox" id="kr-yansit" style="width:auto;min-height:0">' +
+      '<span>Müşteriye yansıtılacak</span></label>' +
+    '<div class="field" style="margin-top:8px"><label for="kr-aciklama">Açıklama</label>' +
+      '<input id="kr-aciklama" placeholder="isteğe bağlı"></div>';
+  var ok = document.createElement("button");
+  ok.className = "btn"; ok.type = "button"; ok.textContent = "Kiralamayı aç";
+  var no = document.createElement("button");
+  no.className = "btn ghost"; no.type = "button"; no.textContent = "Vazgeç";
+  w.appendChild(ok); w.appendChild(no);
+  $("#kira-liste").before(w);
+  no.addEventListener("click", function(){ w.remove(); });
+
+  /* Ücret etiketi biçime göre değişiyor; götürüde tek tutar isteniyor. */
+  function etiketKur(){
+    var b = $("#kr-bicim").value;
+    $("#kr-ucret-et").innerHTML =
+      (b === "saatlik" ? "Saat ücreti" : b === "gunluk" ? "Gün ücreti" : "Toplam tutar") +
+      ' (<span class="para-sim">₺</span>) <span class="req">*</span>';
+    $$(".para-sim").forEach(function(e){ e.textContent = paraSim(); });
+  }
+  etiketKur();
+  $("#kr-bicim").addEventListener("change", etiketKur);
+
+  ok.addEventListener("click", function(){
+    var bicim = $("#kr-bicim").value, ucret = Number($("#kr-ucret").value);
+    if(!$("#kr-ucret").value || !isFinite(ucret) || ucret < 0){
+      msg($("#kira-msg"), "Ücret yazılmalı.", "err"); return; }
+    if(!$("#kr-bas").value){ msg($("#kira-msg"), "Başlangıç tarihi gerekli.", "err"); return; }
+    if(!navigator.onLine || !sb){
+      msg($("#kira-msg"), "Kiralama açmak için bağlantı gerekiyor.", "err"); return; }
+    /* Değerler form KAPANMADAN okunuyor: aşağıda w.remove() çağrıldıktan
+       sonra alanlar DOM'da olmuyor. */
+    var yakitBizden = $("#kr-yakit").checked;
+    ok.disabled = true;
+    sb.rpc("kiralama_ekle", {
+      p_project: kiraProje(), p_ekipman: $("#kr-ekipman").value,
+      p_ucret_bicimi: bicim,
+      p_birim_ucret: (bicim === "goturu") ? null : ucret,
+      p_goturu_tutar: (bicim === "goturu") ? ucret : null,
+      p_baslangic: $("#kr-bas").value,
+      p_tanim: $("#kr-tanim").value.trim() || null,
+      p_tedarikci: $("#kr-tedarikci").value.trim() || null,
+      p_yapilan_is: $("#kr-is").value || null,
+      p_yakit_bizden: yakitBizden,
+      p_musteriye_yansit: $("#kr-yansit").checked,
+      p_aciklama: $("#kr-aciklama").value.trim() || null,
+      p_client: uuid()
+    }).then(function(r){
+      ok.disabled = false;
+      if(r.error){ msg($("#kira-msg"), r.error.message, "err"); return; }
+      w.remove();
+      msg($("#kira-msg"), "Kiralama açıldı." +
+        (yakitBizden ? " Araç listesine de eklendi, mazotunu Yakıt bölümünden girebilirsiniz." : ""), "ok");
+      kiraYukle();
+      if(yakitBizden) loadMaster(true);
+    });
+  });
+});
+
+/* ---- çalışma girişi ---- */
+function kiraCalismaAc(k){
+  var eski = $("#kr-cal"); if(eski) eski.remove();
+  var w = document.createElement("div");
+  w.className = "card"; w.id = "kr-cal"; w.style.marginTop = "10px";
+  var saatlik = (k.ucret_bicimi === "saatlik");
+  w.innerHTML =
+    '<span class="eyebrow">' + kiraAd(k.ekipman) + (k.tanim ? " · " + esc(k.tanim) : "") + '</span>' +
+    '<div class="grid2" style="margin-top:8px">' +
+      '<div class="field"><label for="krc-date">Tarih <span class="req">*</span></label>' +
+        '<input id="krc-date" type="date" value="' + todayStr() + '"></div>' +
+      (saatlik
+        ? '<div class="field"><label for="krc-shift">Vardiya <span class="req">*</span></label>' +
+          '<select id="krc-shift"></select></div>'
+        : '<div class="field"><label for="krc-durum">Durum</label>' +
+          '<select id="krc-durum"><option value="1">Çalıştı</option>' +
+          '<option value="0">Çalışmadı</option></select></div>') +
+    '</div>' +
+    (saatlik
+      ? '<div class="field"><label for="krc-saat">Bu vardiyada çalıştığı saat <span class="req">*</span></label>' +
+        '<input id="krc-saat" type="number" min="0" max="24" step="0.5" inputmode="decimal" placeholder="0"></div>'
+      : '<div class="hint">Günlük kiralamada saat girilmez; gün çalıştıysa işaretlenir.</div>') +
+    '<div class="field"><label for="krc-not">Açıklama</label><input id="krc-not" placeholder="isteğe bağlı"></div>';
+  var ok = document.createElement("button");
+  ok.className = "btn"; ok.type = "button"; ok.textContent = "Kaydet";
+  var no = document.createElement("button");
+  no.className = "btn ghost"; no.type = "button"; no.textContent = "Vazgeç";
+  w.appendChild(ok); w.appendChild(no);
+  $("#kira-liste").before(w);
+  no.addEventListener("click", function(){ w.remove(); });
+
+  if(saatlik) kiraVardiyaDoldur();
+  $("#krc-date") && $("#krc-date").addEventListener("change", function(){ if(saatlik) kiraVardiyaDoldur(); });
+
+  ok.addEventListener("click", function(){
+    if(!navigator.onLine || !sb){
+      msg($("#kira-msg"), "Çalışma kaydı için bağlantı gerekiyor.", "err"); return; }
+    var p = {p_rental:k.id, p_date:$("#krc-date").value || todayStr(),
+             p_aciklama: $("#krc-not").value.trim() || null, p_client: uuid()};
+    if(saatlik){
+      if(!$("#krc-shift").value){ msg($("#kira-msg"), "Vardiya seçin.", "err"); return; }
+      var s = Number($("#krc-saat").value);
+      if(!$("#krc-saat").value || !isFinite(s) || s <= 0){
+        msg($("#kira-msg"), "Saat sıfırdan büyük olmalı.", "err"); return; }
+      p.p_shift = $("#krc-shift").value; p.p_saat = s;
+    } else {
+      p.p_calisti = ($("#krc-durum").value === "1");
+    }
+    ok.disabled = true;
+    sb.rpc("kiralama_calisma", p).then(function(r){
+      ok.disabled = false;
+      if(r.error){ msg($("#kira-msg"), r.error.message, "err"); return; }
+      w.remove();
+      msg($("#kira-msg"), "Çalışma kaydedildi.", "ok");
+      kiraYukle();
+    });
+  });
+}
+
+/* Saatlik kiralamada o günün vardiyaları listeleniyor. Vardiya kaydı yoksa
+   şef önce vardiyayı girmeli — saat bir vardiyaya bağlanıyor. */
+function kiraVardiyaDoldur(){
+  var sel = $("#krc-shift"); if(!sel) return;
+  sel.innerHTML = '<option value="">— yükleniyor —</option>';
+  if(!navigator.onLine || !sb){ sel.innerHTML = '<option value="">bağlantı yok</option>'; return; }
+  sb.from("shifts").select("id,shift_slot,work_date")
+    .eq("project_id", kiraProje()).eq("work_date", $("#krc-date").value || todayStr())
+    .order("shift_slot").then(function(r){
+      var rows = (r && r.data) || [];
+      if(!rows.length){
+        sel.innerHTML = '<option value="">bu güne vardiya girilmemiş</option>'; return; }
+      sel.innerHTML = rows.map(function(x){
+        var vd = slotBilgi(kiraProje(), x.shift_slot);
+        return '<option value="' + x.id + '">' + (vd ? vd.label : x.shift_slot + ". vardiya") + '</option>';
+      }).join("");
+    });
+}
+
+function kiraKapat(k){
+  if(!navigator.onLine || !sb){
+    msg($("#kira-msg"), "Bağlantı gerekiyor.", "err"); return; }
+  var t = prompt("Kiralama hangi tarihte bitti?", todayStr());
+  if(!t) return;
+  sb.rpc("kiralama_kapat", {p_rental:k.id, p_bitis:t}).then(function(r){
+    if(r.error){ msg($("#kira-msg"), r.error.message, "err"); return; }
+    msg($("#kira-msg"), "Kiralama kapatıldı.", "ok");
+    kiraYukle(); if(k.yakit_bizden) loadMaster(true);
+  });
+}
+function kiraTekrarAc(k){
+  if(!navigator.onLine || !sb){
+    msg($("#kira-msg"), "Bağlantı gerekiyor.", "err"); return; }
+  sb.rpc("kiralama_ac_tekrar", {p_rental:k.id}).then(function(r){
+    if(r.error){ msg($("#kira-msg"), r.error.message, "err"); return; }
+    msg($("#kira-msg"), "Kiralama yeniden açıldı.", "ok");
+    kiraYukle(); if(k.yakit_bizden) loadMaster(true);
+  });
+}
+function kiraDokum(k, kart){
+  var eski = kart.querySelector(".kr-dokum"); if(eski){ eski.remove(); return; }
+  var d = document.createElement("div"); d.className = "kr-dokum ayrac-ust";
+  d.innerHTML = '<div class="hint">Yükleniyor…</div>';
+  kart.appendChild(d);
+  if(!navigator.onLine || !sb){ d.innerHTML = '<div class="hint">Bağlantı gerekiyor.</div>'; return; }
+  sb.rpc("kiralama_dokum", {p_rental:k.id}).then(function(r){
+    if(r.error){ d.innerHTML = '<div class="hint">' + esc(r.error.message) + '</div>'; return; }
+    var rows = r.data || [];
+    if(!rows.length){ d.innerHTML = '<div class="hint">Henüz çalışma kaydı yok.</div>'; return; }
+    d.innerHTML = "";
+    d.appendChild(satirBas(["Tarih", k.ucret_bicimi === "saatlik" ? "Saat" : "Gün"], [1, 0]));
+    rows.forEach(function(x){
+      var s = document.createElement("div"); s.className = "satir";
+      s.innerHTML = '<span class="esnek">' + x.tarih +
+        (x.vardiya ? ' <span class="hint">· ' + esc(x.vardiya) + '</span>' : "") + '</span>' +
+        '<span class="dar">' + (x.saat != null ? tl(x.saat, 1) : "çalıştı") + '</span>' +
+        '<span class="bos"></span>';
+      d.appendChild(s);
+    });
+  });
+}
+$("#kr-project").addEventListener("change", kiraYukle);
+
 /* ---------------- avans dökümü (salt okunur) ----------------
    Veri puantajdan geliyor; attendance_summary zaten kişi başına avansı
    döndürüyor, yeni sorgu gerekmedi. Giriş alanı YOK — avans yalnız
@@ -3806,16 +4145,17 @@ $("#btn-tanim").addEventListener("click", function(){
 /* Gider sekmesinin açık bölümü. Şerit bunu değiştiriyor (41. dosya, 3).
    Kiralama bölümü kodlanınca listeye eklenecek. */
 var GIDER_BOLUM = "yakit";
-var TUM_BOLUM = ["vardiya","malzeme","makine","gserit","yakit","nakit","avans",
+var TUM_BOLUM = ["vardiya","malzeme","makine","gserit","yakit","nakit","kira","avans",
                  "puantaj","ozet","kuyruk"];
 
 function giderCiz(){
   $$('.segment[data-seg="gider"] button').forEach(function(o){
     o.setAttribute("aria-pressed", String(o.dataset.v === GIDER_BOLUM)); });
-  ["yakit","nakit","avans"].forEach(function(t){
+  ["yakit","nakit","kira","avans"].forEach(function(t){
     $("#tab-"+t).hidden = (t !== GIDER_BOLUM); });
   if(GIDER_BOLUM === "yakit") loadYakit();
   if(GIDER_BOLUM === "nakit") loadHarcama();
+  if(GIDER_BOLUM === "kira")  kiraYukle();
   if(GIDER_BOLUM === "avans") avansYukle();
 }
 $$('.segment[data-seg="gider"] button').forEach(function(b){
@@ -3845,7 +4185,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "30";
+var SURUM = "31";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
