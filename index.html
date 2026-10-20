@@ -120,6 +120,11 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .ekip-satir:last-child{border-bottom:0}
 .q-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
 .q-satir.takildi{border-color:var(--bad);background:var(--bad-soft)}
+/* Takılan kayıt uyarısı — "kaydedildi" diyen ekranın içinde (20 Ekim dersi) */
+.uyari-kutu{border:1px solid var(--bad);background:var(--bad-soft);color:var(--bad);
+  border-radius:10px;padding:10px 12px;text-align:start}
+.uyari-kutu .hint{color:var(--bad);opacity:.9}
+.tabs button.takildi{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
 .kayit{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
 .duzelt-cevap{margin-top:8px}
 .kayit-ust{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -1590,14 +1595,77 @@ function kuyununCapi(){
   if(w && w.drop_diameter) return w.drop_diameter;
   return $("#f-dia").value || "PW";
 }
+/* ============================================================
+   ÇAP DÜŞÜMÜ — nereden geldiği yazıyor, geri alınabiliyor
+   ============================================================
+   Tayfun, 20 Ekim: "Ben çap düşürme girmedim ama girmişim gibi çıkıyor."
+   CD-005'te "42,00 m'de HQ'ya düşürülmüş" yazıyordu, kuyu 40,00 m'ydi.
+
+   Üç eksik vardı:
+     · uyarı yalnız telefondaki önbellekten okunuyordu; merkeze gitti mi
+       gitmedi mi belli değildi
+     · metre doğrulanmıyordu, kuyunun dibinden derine düşüm yazılabiliyordu
+     · geri alma yolu yoktu, düğme kalıcı kapanıyordu
+
+   Artık uyarı tarihi ve kimi söylüyor, "Yanlış girdim" düğmesi var ve
+   metre kuyunun delinmiş aralığıyla sınırlı (sunucuda da: 37. adım).
+   ============================================================ */
 function capDusHazirla(){
   var w = currentWell();
   if(!w){ $("#btn-cap-dus").disabled = false; return; }
-  if(w.drop_depth != null){
-    msg($("#cap-msg"), "Bu kuyuda çap " + tl(w.drop_depth) + " m'de " + (w.drop_diameter||"") +
-        " çapına düşürülmüş. Bir kuyuda bir kere düşer.", "warn");
-    $("#cap-dus-wrap").hidden = true;
-  } else { msg($("#cap-msg"), ""); }
+  if(w.drop_depth == null){ msg($("#cap-msg"), ""); capGeriGoster(false); return; }
+
+  var bekleyen = (queue || []).some(function(it){
+    return it.kind === "cap_dus" && it.payload && it.payload.well_id === w.id; });
+  var kaynak = bekleyen
+    ? "Henüz merkeze gitmedi — Bekleyen sekmesinde duruyor."
+    : (w.drop_at ? trd2(w.drop_at) + " tarihinde kaydedildi." : "Kaydın tarihi bilinmiyor (eski kayıt).");
+
+  msg($("#cap-msg"), "Bu kuyuda çap <b>" + tl(w.drop_depth) + " m</b>'de <b>" +
+      esc(w.drop_diameter||"") + "</b> çapına düşürülmüş.<br>" + esc(kaynak) +
+      " Bir kuyuda bir kere düşer.", bekleyen ? "warn" : "warn");
+  $("#cap-dus-wrap").hidden = true;
+  capGeriGoster(true);
+}
+
+/* "Yanlış girdim" — sunucudaki kaydı da geri alır, düzeltme izine yazar. */
+function capGeriGoster(ac){
+  var eskiD = $("#btn-cap-geri");
+  if(!ac){ if(eskiD) eskiD.remove(); return; }
+  if(eskiD) return;
+  var b = document.createElement("button");
+  b.id = "btn-cap-geri"; b.type = "button";
+  b.className = "btn ghost sm"; b.style.marginTop = "8px";
+  b.textContent = "Yanlış girdim — düşümü geri al";
+  b.addEventListener("click", capGeriAl);
+  $("#cap-msg").parentNode.insertBefore(b, $("#cap-msg").nextSibling);
+}
+
+function capGeriAl(){
+  var w = currentWell(); if(!w) return;
+  var b = $("#btn-cap-geri");
+  if(b && b.dataset.onay !== "1"){
+    b.dataset.onay = "1";
+    b.textContent = "Emin misiniz? Bir daha dokunun";
+    setTimeout(function(){ if(b){ b.dataset.onay = ""; b.textContent = "Yanlış girdim — düşümü geri al"; } }, 4000);
+    return;
+  }
+  if(!navigator.onLine || !sb){
+    msg($("#cap-msg"), "Geri alma için bağlantı gerekiyor — bu kayıt merkezde düzeltiliyor.", "err");
+    return;
+  }
+  msg($("#cap-msg"), "Geri alınıyor…");
+  Promise.resolve(sb.rpc("cap_dus_geri_al", {p_well: realWellId(w.id), p_sebep: "şef: yanlış girildi"}))
+    .then(function(r){
+      if(r && r.error) throw new Error(r.error.message);
+      w.drop_depth = null; w.drop_diameter = null; w.drop_at = null; w.drop_by = null;
+      try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
+      capGeriGoster(false);
+      msg($("#cap-msg"), "Çap düşümü geri alındı. Yeniden girebilirsiniz.", "ok");
+    })
+    .catch(function(e){
+      msg($("#cap-msg"), "Geri alınamadı: " + hataTr(e && e.message ? e.message : e), "err");
+    });
 }
 $("#btn-cap-dus").addEventListener("click", function(){
   var w = currentWell();
@@ -1617,6 +1685,15 @@ $("#btn-cap-onay").addEventListener("click", function(){
   if(isNaN(m)){ msg($("#cap-msg"), "Çapın düştüğü metreyi yazın.", "err"); return; }
   var simdi = kuyununCapi(), yeni = birAltCap(simdi);
   if(!yeni){ msg($("#cap-msg"), simdi + " çapından daha alta düşülemez.", "err"); return; }
+  /* 20 Ekim: 40,00 m'lik kuyuya 42,00 m'de düşüm yazılabiliyordu.
+     Aynı kural sunucuda da var (37. adım) — burada şef anında görsün. */
+  if(m <= 0){ msg($("#cap-msg"), "Çapın düştüğü metre sıfırdan büyük olmalı.", "err"); return; }
+  var dip = depth();
+  if(m > dip){
+    msg($("#cap-msg"), "Çap " + tl(m) + " m'de düşemez: kuyu " + tl(dip) +
+        " m'ye kadar delinmiş. Önce metrajı girin, sonra düşümü.", "err");
+    return;
+  }
   w.drop_depth = m; w.drop_diameter = yeni;
   try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
   enqueue({ id:uuid(), kind:"cap_dus", created:Date.now(),
@@ -2235,6 +2312,59 @@ function vardiyaDuzelt(sat, satirEl){
 /* ---------------- kuyruk ---------------- */
 var queue = [];
 var SON_KUYU = null;  /* kaydedilen kuyu: liste yenilenince genişlesin */
+/* ============================================================
+   TAKILAN KAYIT ŞEFİN GÖZÜNE GİRİYOR
+   ============================================================
+   20 Ekim'de bulunan asıl hata buydu. Panel kaydı kuyruğa alıyor, ekrana
+   "Vardiya kaydedildi · merkeze gönderiliyor" yazıyordu. Gönderim
+   reddedilince o ekran bir daha değişmiyordu: şef yeşil ekranı görüyor,
+   kaydın takıldığını yalnız Bekleyen sekmesine girerse öğreniyordu.
+   Metraj kaybı da, çap düşümü hayaleti de bu sessizlikte yaşadı.
+
+   Artık takılan kayıt üç yerden bağırıyor:
+     · vardiya bitiş ekranında kırmızı uyarı + Bekleyen'e götüren düğme
+     · Bekleyen sekmesi başlığında sayı
+     · bağlantı rozeti kırmızıya dönüyor
+   ============================================================ */
+function takilanUyar(items){
+  var takilan = (items || []).filter(function(x){ return !!x.hata; });
+  var n = takilan.length;
+
+  /* Sekme başlığındaki sayı — hangi sekmede olursa olsun görünür */
+  var sek = $('[data-tab="kuyruk"]');
+  if(sek){
+    sek.textContent = n ? "Bekleyen (" + n + " takıldı)" : "Bekleyen";
+    sek.classList.toggle("takildi", n > 0);
+  }
+  var chip = $("#netchip");
+  if(chip) chip.setAttribute("data-takildi", String(n > 0));
+
+  /* Vardiya bitiş ekranı: "kaydedildi" diyen kutunun içine uyarı */
+  var uy = $("#done-uyari");
+  if(!uy) return;
+  /* Sayı uyarıları da aynı kutuya yazılıyor; onları ezmemek için kendi
+     kabımıza koyuyoruz. */
+  var eski = uy.querySelector(".takildi-kutu");
+  if(eski) eski.remove();
+  if(!n){ return; }
+  var mesaj = takilan[0].hata;
+  var k = document.createElement("div");
+  k.classList.add("takildi-kutu");
+  k.className = "uyari-kutu takildi-kutu";
+  k.style.marginTop = "8px";
+  k.innerHTML = "<b>Merkeze gönderilemedi</b><div class='hint'>" +
+    esc(mesaj) + (n > 1 ? "  (ve " + (n - 1) + " kayıt daha)" : "") +
+    "</div><div class='hint'>Kayıt telefonda duruyor, kaybolmadı.</div>";
+  var g = document.createElement("button");
+  g.type = "button"; g.className = "btn ghost sm"; g.style.marginTop = "8px";
+  g.textContent = "Bekleyen kayıtları aç";
+  g.addEventListener("click", function(){
+    var b = $('[data-tab="kuyruk"]'); if(b) b.click();
+  });
+  k.appendChild(g);
+  uy.appendChild(k);
+}
+
 function refreshQueue(){
   return obAll().then(function(items){
     queue = items;
@@ -2246,6 +2376,7 @@ function refreshQueue(){
     $("#nettext").setAttribute("data-sayi", String(items.length));
     $("#nettext").textContent = (navigator.onLine ? "Çevrimiçi" : "Çevrimdışı") + " · " + items.length;
     $("#netchip").setAttribute("data-off", String(!navigator.onLine));
+    takilanUyar(items);
     var box = $("#q-list"); box.innerHTML = "";
     if(!items.length){ box.innerHTML = '<div class="hint">Bekleyen kayıt yok.</div>'; return; }
     items.sort(function(a,b){ return a.created - b.created; }).forEach(function(it){
@@ -2421,6 +2552,10 @@ function showDone(wellCode, metraj, fuel, date, slot){
   c.appendChild(b);
   wrap.appendChild(c);
   b.addEventListener("click", resetForm);
+  /* Kuyruk bu ekrandan ÖNCE gönderilmiş olabilir (enqueue → syncAll →
+     showDone sırası). O yüzden takılan kayıt sorusunu burada bir daha
+     soruyoruz, yoksa yeşil ekran son söz oluyor — 20 Ekim'deki sessizlik. */
+  obAll().then(takilanUyar).catch(function(){});
   loadRecent();
 }
 function resetForm(){
@@ -3643,10 +3778,11 @@ function durumAdi(v){
   var d = ATT_STATUS.filter(function(s){ return s[0] === v; })[0];
   return d ? d[1] : v;
 }
-/* Bir kayıt istisna mı? Çalıştı + avans yok + tek çalışma yok ise değildir. */
+/* Bir kayıt istisna mı? Çalıştı + avans yok ise değildir.
+   ("tek çalışma" 20 Ekim 2026'da kavram olarak kaldırıldı.) */
 function istisnaMi(x){
   return !!x && ((x.status && x.status !== "calisti") ||
-                 Number(x.advance_amount || 0) > 0 || !!x.single_shift);
+                 Number(x.advance_amount || 0) > 0);
 }
 
 function santiyeAdi(){
@@ -3744,15 +3880,13 @@ function attCiz(){
       ATT_IST[id].advance_amount = adv.value ? Number(adv.value) : null; });
     alt.appendChild(sel); alt.appendChild(adv);
 
-    var tek = document.createElement("label");
-    tek.style.cssText = "display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px";
-    var cb = document.createElement("input");
-    cb.type = "checkbox"; cb.dataset.tek = id; cb.style.cssText = "width:20px;min-height:20px";
-    cb.checked = !!v.single_shift;
-    cb.addEventListener("change", function(){ ATT_IST[id].single_shift = cb.checked; });
-    tek.appendChild(cb); tek.appendChild(document.createTextNode("Tek çalışma"));
+    /* "Tek çalışma" kutucuğu 20 Ekim 2026'da kaldırıldı.
+       Tayfun: "Nereden geldi bilmiyorum, kaldır onu bence."
+       Alan (attendance.single_shift) silinmedi — Ağustos aktarımında kâğıt
+       rapordan gelen gerçek veri var ve altı rapor fonksiyonu onu sayıyor.
+       Yeni kayıtlarda her zaman false yazılıyor. */
 
-    d.appendChild(ust); d.appendChild(alt); d.appendChild(tek);
+    d.appendChild(ust); d.appendChild(alt);
     card.appendChild(d);
   });
   box.appendChild(card);
@@ -3834,7 +3968,7 @@ function attLoad(sessiz){
         if(istisnaMi(x)) ATT_IST[x.personnel_id] = {
           status: x.status || "calisti",
           advance_amount: x.advance_amount || null,
-          single_shift: !!x.single_shift };
+          single_shift: false };   /* kavram kaldırıldı, 20.10.2026 */
       });
       ATT_YUKLU = anahtar;
       attCiz();
@@ -3870,7 +4004,7 @@ $("#btn-att-save").addEventListener("click", function(){
     var v = ATT_IST[p.id];
     return { personnel_id: p.id,
              status: (v && v.status) || "calisti",
-             single_shift: !!(v && v.single_shift),
+             single_shift: false,   /* kavram kaldırıldı, 20.10.2026 */
              advance_amount: (v && v.advance_amount) ? Number(v.advance_amount) : null };
   });
   var k = Object.keys(ATT_IST).length;
@@ -4280,7 +4414,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "34";
+var SURUM = "35";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
