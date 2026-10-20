@@ -3621,12 +3621,61 @@ function santiyeAdi(){
   var t = o ? o.textContent : "";
   return t.indexOf(" · ") > -1 ? t.split(" · ").pop() : t;
 }
+/* Puantaj özeti artık VARDİYA VARDİYA (41. dosya, 4. bulgu).
+   Veri puantaj_gun()'dan geliyor; şef ekibi vardiya girişinde zaten seçtiği
+   için burada ikinci kez girmiyor. PUANTAJ_GUN boşsa eski özet gösteriliyor
+   (çevrimdışı ya da henüz yüklenmemiş). */
+var PUANTAJ_GUN = null;
+
 function attOzet(){
   var n = ekip().length, k = Object.keys(ATT_IST).length;
-  $("#att-ozet").innerHTML = n
-    ? '<span class="hint">' + santiyeAdi() + " · " + ($("#p-date").value||"") + "</span><br><b>" +
-      n + " kişi</b> · " + (k ? k + " istisna, kalan " + (n - k) + " kişi çalıştı" : "hepsi çalıştı")
-    : "Bu şantiyede bu tarihte görevli kimse yok. Aşağıdan <b>Saha ekibi</b> bölümünden kişi alın.";
+  var kutu = $("#att-ozet");
+  if(!n){
+    kutu.innerHTML = "Bu şantiyede bu tarihte görevli kimse yok. " +
+      "Aşağıdan <b>Saha ekibi</b> bölümünden kişi alın.";
+    $("#ekip-ozet").textContent = "0 kişi · " + ($("#p-date").value || "");
+    return;
+  }
+  var bas = '<span class="hint">' + santiyeAdi() + " · " + ($("#p-date").value||"") + "</span>";
+
+  if(!PUANTAJ_GUN || !PUANTAJ_GUN.vardiya_girildi){
+    /* Bu güne hiç vardiya girilmemiş: vardiya ayrımı yapılamaz. */
+    kutu.innerHTML = bas + "<br><b>" + n + " kişi</b> · " +
+      (k ? k + " istisna, kalan " + (n - k) + " kişi çalıştı" : "hepsi çalıştı") +
+      '<div class="hint" style="margin-top:6px">Bu güne henüz vardiya girilmemiş; ' +
+      'gece/gündüz ayrımı vardiya girildikten sonra çıkar.</div>';
+  } else {
+    var h = bas;
+    (PUANTAJ_GUN.vardiyalar || []).forEach(function(v){
+      var kisiler = v.kisiler || [];
+      h += '<div class="ayrac-ust"><b>' + esc(v.ad).toLocaleUpperCase("tr") + '</b>' +
+           ' <span class="hint">' + saatKisa(v.bas) + "–" + saatKisa(v.bit) + " · " +
+           kisiler.length + ' kişi</span>';
+      h += kisiler.length
+        ? '<div class="hint" style="margin-top:3px">' +
+            kisiler.map(function(x){ return esc(x.ad); }).join(" · ") + "</div>"
+        : '<div class="hint" style="margin-top:3px">ekip girilmemiş</div>';
+      h += "</div>";
+    });
+    var vz = PUANTAJ_GUN.vardiyasiz || [];
+    if(vz.length){
+      h += '<div class="ayrac-ust"><b>VARDİYAYA GİRMEYEN</b> ' +
+           '<span class="hint">' + vz.length + ' kişi · tam gün</span>' +
+           '<div class="hint" style="margin-top:3px">' +
+           vz.map(function(x){ return esc(x.ad) + " (" + gorevAdi(x.gorev) + ")"; }).join(" · ") +
+           "</div></div>";
+    }
+    /* Metraj üreten biri hiçbir vardiyada yoksa bu bir hatadır: ya izinli,
+       ya şef ekibe yazmayı unuttu. Sessizce "çalıştı" sayılmamalı. */
+    var um = PUANTAJ_GUN.vardiyasiz_metrajci || [];
+    if(um.length){
+      h += '<div class="msg warn" style="margin-top:10px">⚠ <b>' + um.length +
+           ' kişi hiçbir vardiyada görünmüyor:</b> ' +
+           um.map(function(x){ return esc(x.ad); }).join(", ") +
+           "<br>İzinliyse aşağıdan istisna ekleyin; unutulduysa vardiya ekibini düzeltin.</div>";
+    }
+    kutu.innerHTML = h;
+  }
   $("#ekip-ozet").textContent = n + " kişi · " + ($("#p-date").value || "");
 }
 
@@ -3731,8 +3780,17 @@ function attLoad(sessiz){
   var anahtar = attAnahtar();
   msg($("#att-msg"), "Getiriliyor…");
   return ekipYukle().then(function(){
-    return sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value}); })
-    .then(function(r){
+    /* İki çağrı birlikte: istisnalar ve vardiya dağılımı.
+       puantaj_gun henüz kurulmamışsa (eski sunucu) hata yutuluyor ve
+       ekran eski haliyle çalışmaya devam ediyor. */
+    return Promise.all([
+      sb.rpc("attendance_of_day", {p_project:$("#p-project").value, p_date:$("#p-date").value}),
+      sb.rpc("puantaj_gun", {p_project:$("#p-project").value, p_date:$("#p-date").value})
+        .catch(function(){ return {data:null, error:true}; })
+    ]); })
+    .then(function(res){
+      var r = res[0], pg = res[1];
+      PUANTAJ_GUN = (pg && !pg.error) ? pg.data : null;
       if(r.error){ ATT_YUKLU = null; msg($("#att-msg"), r.error.message, "err"); return; }
       ATT_IST = {};
       (r.data||[]).forEach(function(x){
@@ -4185,7 +4243,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "31";
+var SURUM = "32";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
