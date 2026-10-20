@@ -3076,27 +3076,46 @@ function sendItem(it, tenant){
         if(r.error) throw r.error;
         if(!r.data || !r.data.id) throw new Error("Vardiya kaydedildi ama merkez kimlik döndürmedi.");
         var sid = r.data.id;
-        return sb.from("shift_runs").delete().eq("shift_id", sid).then(function(){
-          return sb.from("shift_runs").insert(it.runs.map(function(x,i){
-            return {tenant_id:tenant, shift_id:sid, seq:i+1, diameter:x.diameter, from_m:x.from_m, to_m:x.to_m, personnel_id:x.personnel_id};
-          }));
+        /* HER ADIMIN HATASI KONTROL EDİLİYOR.
+           Supabase hata durumunda REDDETMİYOR, {error} ile çözümleniyor.
+           Önceden yalnız vardiya başlığının hatasına bakılıyordu; manevra,
+           ekip ve malzeme hataları sessizce yutuluyor, kuyruk kaydı
+           siliniyordu. Sonuç: vardiya kaydedilmiş görünüyor ama METRAJI
+           YOK (20 Ekim'de sahada görülen hata). Artık hata atılıyor,
+           kayıt kuyrukta kalıyor ve sebebi "Bekleyen" sekmesinde yazıyor. */
+        function bak(etiket){
+          return function(res){
+            if(res && res.error) throw new Error(etiket + ": " + res.error.message);
+            return res;
+          };
+        }
+        return sb.from("shift_runs").delete().eq("shift_id", sid)
+          .then(bak("Eski manevralar silinemedi"))
+          .then(function(){
+            if(!it.runs || !it.runs.length) return null;
+            return sb.from("shift_runs").insert(it.runs.map(function(x,i){
+              return {tenant_id:tenant, shift_id:sid, seq:i+1, diameter:x.diameter, from_m:x.from_m, to_m:x.to_m, personnel_id:x.personnel_id};
+            })).then(bak("Metraj (manevra) kaydedilemedi"));
         }).then(function(){
           if(!it.crew.length) return null;
           return sb.from("shift_crew").upsert(it.crew.map(function(c){
-            return {shift_id:sid, personnel_id:c.personnel_id, crew_role:c.crew_role}; }), {onConflict:"shift_id,personnel_id"});
+            return {shift_id:sid, personnel_id:c.personnel_id, crew_role:c.crew_role}; }), {onConflict:"shift_id,personnel_id"})
+            .then(bak("Ekip kaydedilemedi"));
         }).then(function(){
           /* Kuyuda kullanılan malzeme — çoklu satır, kuyuda kalan değil */
           if(!it.used || !it.used.length) return null;
           return sb.from("shift_materials").insert(it.used.map(function(u){
             return {tenant_id:tenant, shift_id:sid, material_id:u.material_id,
-                    qty:Number(u.qty), lost_in_hole:false}; }));
+                    qty:Number(u.qty), lost_in_hole:false}; }))
+            .then(bak("Kullanılan malzeme kaydedilemedi"));
         }).then(function(){
           /* Kuyu sonu: muhafaza borusu, kuyuda kalan malzeme ve ölçümler */
           if(!it.kuyusonu) return null;
           var k = it.kuyusonu;
           if(!(k.casings||[]).length && !(k.other||[]).length && !(k.surveys||[]).length) return null;
           return sb.rpc("kuyu_sonu_kaydet", {p_shift:sid, p_well:wid,
-            p_casings:k.casings||[], p_other:k.other||[], p_surveys:k.surveys||[]});
+            p_casings:k.casings||[], p_other:k.other||[], p_surveys:k.surveys||[]})
+            .then(bak("Kuyu sonu kaydedilemedi"));
         }).then(function(){ return obDel(it.id); });
       });
   }
@@ -4261,7 +4280,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "33";
+var SURUM = "34";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
