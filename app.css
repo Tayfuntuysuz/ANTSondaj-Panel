@@ -461,3 +461,8 @@ tbody tr.kotu td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
 tbody tr.uyari td{background:var(--warn-soft)}
 tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .tabs button .pill{margin-inline-start:6px;font-size:10.5px;padding:1px 6px}
+
+/* Reddetme ekranında açık oturumun kime ait olduğu — şirketin sahibine
+   "yöneticinizle görüşün" demek bir şey anlatmıyor (21 Ekim). */
+.sp-hesap{margin:10px 0 12px;font-size:13px;color:var(--ink-2);
+  border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card)}

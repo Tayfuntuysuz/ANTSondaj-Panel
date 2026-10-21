@@ -313,12 +313,38 @@ function ilkSayfa(){
   var s = SAYFALAR.filter(function(x){ return izin[x.k]; })[0];
   return s ? sayfaHedef(s) : "index.html";
 }
-function uyariEkrani(baslik, metin){
+/* Reddetme ekrani HANGI HESAPLA girildigini soylemek ZORUNDA.
+   21 Ekim: Tayfun yonetici panelini acmaya calisti, ekran "Santiye sefi
+   rolu bu sayfayi goruntuleyemiyor, yoneticinizle gorusun" dedi. Kendisi
+   zaten yonetici; tarayicida sef hesabiyla oturum acikti. Ekran ne hangi
+   hesapla girildigini soyluyor ne de cikis yolu veriyordu — sirketin
+   sahibine "yoneticinizle gorusun" demek bir sey anlatmiyor. */
+function oturumSatiri(){
+  if(!erisim || (!erisim.kullanici && !erisim.rol_adi)) return "";
+  var kim = esc(erisim.kullanici || "");
+  var rol = esc(erisim.rol_adi || "");
+  return '<div class="sp-hesap">Açık oturum: <b>' + (kim || "—") + '</b>' +
+         (rol ? ' · ' + rol : '') +
+         (erisim.firma ? ' · ' + esc(erisim.firma) : '') + '</div>';
+}
+function uyariEkrani(baslik, metin, cikisla){
   temizle();
   var hedef = ilkSayfa();
   tamEkran('<div class="sp-orta"><h2>'+esc(baslik)+'</h2>' +
     '<div class="msg err">'+metin+'</div>' +
-    '<button class="btn gh" onclick="location.href=\''+hedef+'\'">Başlangıç sayfası</button></div>');
+    oturumSatiri() +
+    '<button class="btn gh" onclick="location.href=\''+hedef+'\'">Başlangıç sayfası</button>' +
+    (cikisla === false ? '' :
+      '<button class="btn gh" id="sp-cikis-uyari" type="button" style="margin-top:8px">' +
+      'Çıkış yap ve başka hesapla gir</button>') +
+    '</div>');
+  var c = document.getElementById("sp-cikis-uyari");
+  if(c) c.addEventListener("click", function(){
+    c.disabled = true; c.textContent = "Çıkılıyor…";
+    if(!sb){ location.reload(); return; }
+    Promise.resolve(sb.auth.signOut()).then(function(){ location.reload(); })
+      .catch(function(){ location.reload(); });
+  });
 }
 
 /* ---------- menü ---------- */
@@ -378,7 +404,8 @@ function yetkiAl(){
     if(!izin){
       uyariEkrani("Bu sayfaya erişiminiz yok",
         "<b>"+esc(erisim.rol_adi||"")+"</b> rolü bu sayfayı görüntüleyemiyor. " +
-        "Yetki gerekiyorsa yöneticinizle görüşün.");
+        "Yetkiniz olması gerekiyorsa başka bir hesapla girmiş olabilirsiniz — " +
+        "aşağıda açık oturumun kimin olduğu yazıyor.");
       return;
     }
     AYAR.yetki = izin;
