@@ -155,6 +155,10 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .chip{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 9px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
 .chip[aria-pressed="true"]{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:600}
 .chip[aria-pressed="true"]::before{content:"✓ "}
+/* Duruş kartındaki seçim satırları: telefonda sığsın diye sarıyor,
+   dokunma alanı 44px'in altına düşmüyor. */
+.secim{display:flex;flex-wrap:wrap;gap:6px}
+.secim .chip{min-height:40px;padding:8px 11px}
 .steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .steps button{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 14px;min-height:44px;font-size:13px;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:5px}
 .steps button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
@@ -445,33 +449,95 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <textarea id="f-check-note" placeholder="Hangi madde neden uygun değil?"></textarea>
         </div>
 
-        <!-- ARIZA: makineye bağlı, vardiyayla sınırlı değil -->
+        <!-- ============================================================
+             DURUŞ — iki tür: arıza (makine bozuk) ve bekleme (makine sağlam)
+             ============================================================
+             Kartın adı 20 Ekim'e kadar "Arıza"ydı. Bekleme de saat yiyor
+             (su, müşteri, malzeme, hava, yol) ama girilecek yeri yoktu.
+             Tayfun, 18 Ekim: "Evet şimdi gelsin."
+
+             Şef SAAT GİRMİYOR, yalnız başlangıç–bitiş anını söylüyor.
+             Kayıp saati program vardiya penceresiyle kesiştirip yazıyor
+             (30d). Şef yazarsa yanlış yazar.
+             ============================================================ -->
         <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">
-          <span class="eyebrow">Arıza</span>
+          <span class="eyebrow">Duruş</span>
           <!-- Kart neye yazdığını başlığında gösterir: hangi makine, hangi
                kuyu, hangi gün, hangi vardiya. Şef 1. adımda ne seçtiğini
                hatırlamak zorunda kalmasın. (19. dosya, 2b) -->
           <div class="bant" id="ar-baslik" style="border-radius:10px;margin:2px 0 4px">—</div>
-          <div class="hint">Vardiyada arıza olduysa yazın. Makine fabrikaya gittiyse bitiş saatini
-            boş bırakın — arıza açık kalır, Makine sekmesinden takip edilir.</div>
-          <div id="acik-ariza"></div>
-          <div class="grid2">
-            <div class="field"><label for="ar-kind">Arıza tipi</label>
-              <select id="ar-kind"><option value="">— yok —</option><option value="hidrolik">Hidrolik</option>
-              <option value="rotasyon">Rotasyon</option><option value="mekanik">Mekanik</option>
-              <option value="elektrik">Elektrik</option><option value="diger">Diğer</option></select></div>
-            <div class="field"><label for="ar-bas">Başlangıç saati</label><input id="ar-bas" type="time"></div>
+
+          <!-- Devam eden arıza varsa yeni arıza kartı yerine BU çıkıyor:
+               şef ikinci kayıt açarsa aynı duruş iki kere sayılır (30c). -->
+          <div id="devam-ariza"></div>
+
+          <div id="durus-giris">
+            <div class="field">
+              <label>Duruş türü</label>
+              <div class="secim" id="durus-tur">
+                <button type="button" class="chip" data-durus="ariza" aria-pressed="false">Arıza</button>
+                <button type="button" class="chip" data-durus="bekleme" aria-pressed="false">Bekleme</button>
+              </div>
+              <div class="hint">Arıza: makine bozuk. Bekleme: makine sağlam, iş yok.</div>
+            </div>
+
+            <!-- ---------- ARIZA ---------- -->
+            <div id="durus-ariza" hidden>
+              <div class="grid2">
+                <div class="field"><label for="ar-kind">Arıza tipi</label>
+                  <select id="ar-kind"><option value="">— seçin —</option><option value="hidrolik">Hidrolik</option>
+                  <option value="rotasyon">Rotasyon</option><option value="mekanik">Mekanik</option>
+                  <option value="elektrik">Elektrik</option><option value="diger">Diğer</option></select></div>
+                <!-- Saat seçici kendi listemiz: tarayıcının type="time" alanı
+                     gece yarısını aşan aralıkta (min 20:00 > max 08:00)
+                     min/max kuralını telefonlarda tutarsız uyguluyor. -->
+                <div class="field"><label for="ar-bas">Başlangıç saati</label>
+                  <select id="ar-bas"></select></div>
+              </div>
+              <div class="field">
+                <label>Vardiya biterken</label>
+                <div class="secim" id="ar-son">
+                  <button type="button" class="chip" data-son="giderildi" aria-pressed="false">Giderildi, makine çalıştı</button>
+                  <button type="button" class="chip" data-son="devam" aria-pressed="false">Hâlâ duruyor</button>
+                  <button type="button" class="chip" data-son="fabrika" aria-pressed="false">Fabrikaya gönderildi</button>
+                </div>
+              </div>
+              <div class="field" id="ar-bit-wrap" hidden>
+                <label for="ar-bit">Makinenin çalıştığı saat</label>
+                <select id="ar-bit"></select>
+              </div>
+              <!-- Program tarihi kendisi hesaplıyor ama SESSİZ KALMIYOR:
+                   hangi güne yazdığını buraya yazıyor. (19. dosya, 2a) -->
+              <div class="hint" id="ar-tarih-not" style="color:var(--warn)"></div>
+              <div class="field"><label for="ar-note">Açıklama</label><input id="ar-note" placeholder="Ne oldu, ne yapıldı"></div>
+              <button class="btn ghost sm" id="btn-ariza-kaydet" type="button">Arızayı kaydet</button>
+            </div>
+
+            <!-- ---------- BEKLEME ---------- -->
+            <div id="durus-bekleme" hidden>
+              <div class="grid2">
+                <div class="field"><label for="bk-sebep">Bekleme sebebi</label>
+                  <select id="bk-sebep"><option value="">— seçin —</option>
+                  <option value="su">Su</option><option value="musteri">Müşteri</option>
+                  <option value="malzeme">Malzeme / parça</option><option value="hava">Hava</option>
+                  <option value="yol">Yol / erişim</option><option value="diger">Diğer</option></select></div>
+                <div class="field"><label for="bk-bas">Başlangıç saati</label>
+                  <select id="bk-bas"></select></div>
+              </div>
+              <div class="grid2">
+                <div class="field"><label for="bk-bit">Bitiş saati</label>
+                  <select id="bk-bit"></select></div>
+                <div class="field"><label>Süre</label>
+                  <div class="bant" id="bk-sure" style="border-radius:10px">—</div></div>
+              </div>
+              <div class="field"><label for="bk-note">Açıklama</label><input id="bk-note" placeholder="Neyi beklediniz"></div>
+              <button class="btn ghost sm" id="btn-bekleme-kaydet" type="button">Beklemeyi kaydet</button>
+              <div id="bk-liste" style="margin-top:8px"></div>
+            </div>
           </div>
-          <div class="grid2">
-            <div class="field"><label for="ar-bit">Bitiş saati</label><input id="ar-bit" type="time"></div>
-            <div class="field"><label for="ar-bitgun">Bitiş günü</label><input id="ar-bitgun" type="date"></div>
-          </div>
-          <!-- Program tarihi kendisi hesaplıyor ama SESSİZ KALMIYOR:
-               hangi güne yazdığını buraya yazıyor. (19. dosya, 2a) -->
-          <div class="hint" id="ar-tarih-not" style="color:var(--warn)"></div>
-          <div class="field"><label for="ar-note">Açıklama</label><input id="ar-note" placeholder="Ne oldu, ne yapıldı"></div>
-          <button class="btn ghost sm" id="btn-ariza-kaydet" type="button">Arızayı kaydet</button>
+
           <div id="ar-msg"></div>
+          <div id="acik-ariza" style="margin-top:10px"></div>
         </div>
         <button class="btn ghost ilerle" type="button" data-next="4" style="margin-top:12px">İlerle →</button>
       </div>
@@ -1359,7 +1425,14 @@ $("#f-project").addEventListener("change", function(){
   fillMachines(); fillWells(); fillYakitHedef(); fillVardiya();
 });
 $("#y-project").addEventListener("change", function(){ fillYakitHedef(); });
-$("#f-shift").addEventListener("change", function(){ vardiyaModu(); ekipOneriYukle(); });
+$("#f-shift").addEventListener("change", function(){
+  vardiyaModu(); ekipOneriYukle();
+  /* Saat seçici listesi vardiyadan geliyor (30a) — vardiya değişince
+     liste de değişmek zorunda. */
+  saatSecicilerKur();
+});
+$("#f-date").addEventListener("change", function(){ saatSecicilerKur(); });
+$("#f-machine").addEventListener("change", function(){ devamArizaCiz(); });
 /* Kuyu seçilince: makine listesi daralır ve takıldığı metre kuyunun
    bulunduğu derinlikle dolar. Şef sıfırdan yazarsa 960 yerine 96 yazıyor. */
 $("#b-well").addEventListener("change", function(){
@@ -1373,6 +1446,9 @@ $("#b-well").addEventListener("change", function(){
 });
 $("#f-well").addEventListener("change", function(){
   runs = []; renderRuns(); refreshState(); ekipOneriYukle(); capDusHazirla();
+  /* Saat seçicileri vardiya aralığına göre kuruluyor: vardiya ya da tarih
+     değişince liste de değişmek zorunda (30a). */
+  saatSecicilerKur(); devamArizaCiz();
 });
 
 $("#btn-new-well").addEventListener("click", function(){
@@ -1512,28 +1588,325 @@ function arizaBaslikCiz(){
   }
 }
 function trd2(s){ var p = String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+/* ============================================================
+   SAAT SEÇİCİ — vardiya aralığı, 15 dakikalık adımlar
+   ============================================================
+   Tayfun, 18 Ekim: "Arızanın başlangıç saati seçilirken vardiyanın
+   başlangıç ve bitişi aralığında seçim yapılabilsin, bu aralığı vardiya
+   seçiminden al."
+
+   Tarayıcının <input type="time"> alanı gece yarısını aşan aralıkta
+   (min 20:00 > max 08:00) min/max kuralını telefonlarda tutarsız
+   uyguluyor — kendi listemizi kuruyoruz. Paket 1'de ertelenen 19. madde
+   de böylece kapanıyor.
+
+   Liste gece vardiyasında 20:00'den başlayıp 08:00'de bitiyor; şef
+   "ertesi gün" diye düşünmek zorunda kalmıyor, gün etiketi yanında yazıyor.
+   ============================================================ */
+var SAAT_ADIM = 15;
+
+function vardiyaAralik(){
+  var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
+  if(!vd) return null;
+  var g = $("#f-date").value || todayStr();
+  function dk(t){ var p = String(t).split(":"); return Number(p[0])*60 + Number(p[1]||0); }
+  var bas = dk(vd.starts), bit = dk(vd.ends);
+  var sure = vd.next_day ? (24*60 - bas + bit) : (bit - bas);
+  return {gun:g, basDk:bas, sure:sure, ertesi:!!vd.next_day, label:vd.label};
+}
+
+/* n dakika sonrası: {saat:"HH:MM", gun:"YYYY-MM-DD", ertesi:bool} */
+function aralikAn(a, n){
+  var t = a.basDk + n;
+  var ertesi = t >= 24*60;
+  var m = t % (24*60);
+  var hh = ("0" + Math.floor(m/60)).slice(-2), mm = ("0" + (m%60)).slice(-2);
+  return {saat:hh + ":" + mm, gun: ertesi ? gunEkle(a.gun, 1) : a.gun, ertesi:ertesi};
+}
+
+/* Seçiciyi doldurur. ilkDk: listenin başlayacağı dakika (bekleme bitişi
+   başlangıçtan sonra olmalı). */
+function saatSeciciKur(sel, ilkDk){
+  var el = $(sel); if(!el) return;
+  var a = vardiyaAralik();
+  var onceki = el.value;
+  el.innerHTML = '<option value="">— seçin —</option>';
+  if(!a){
+    el.innerHTML = '<option value="">önce vardiyayı seçin</option>';
+    return;
+  }
+  for(var n = (ilkDk == null ? 0 : ilkDk); n <= a.sure; n += SAAT_ADIM){
+    var an = aralikAn(a, n);
+    var o = document.createElement("option");
+    o.value = an.saat;
+    o.dataset.dk = String(n);
+    o.dataset.gun = an.gun;
+    o.textContent = an.saat + (an.ertesi ? " (ertesi gün)" : "");
+    el.appendChild(o);
+  }
+  if(onceki) el.value = onceki;
+}
+
+function saatSecicilerKur(){
+  saatSeciciKur("#ar-bas", 0);
+  saatSeciciKur("#bk-bas", 0);
+  var bd = $("#bk-bas") && $("#bk-bas").selectedOptions[0]
+    ? Number($("#bk-bas").selectedOptions[0].dataset.dk || 0) : 0;
+  saatSeciciKur("#bk-bit", bd + SAAT_ADIM);
+  var ad = $("#ar-bas") && $("#ar-bas").selectedOptions[0]
+    ? Number($("#ar-bas").selectedOptions[0].dataset.dk || 0) : 0;
+  saatSeciciKur("#ar-bit", ad + SAAT_ADIM);
+  beklemeSureCiz();
+}
+
+/* Seçilen saatin tam anı — gün etiketini seçicinin kendisi taşıyor,
+   panel ayrıca hesaplamıyor. */
+function secilenAn(sel){
+  var el = $(sel); if(!el || !el.value) return null;
+  var o = el.selectedOptions[0];
+  var gun = (o && o.dataset.gun) || $("#f-date").value || todayStr();
+  return {ts: gun + "T" + el.value + ":00", gun:gun, saat:el.value,
+          dk: Number((o && o.dataset.dk) || 0)};
+}
+
+/* ============================================================
+   DURUŞ TÜRÜ — arıza / bekleme
+   ============================================================ */
+var DURUS_TUR = "";
+function durusTurSec(t){
+  DURUS_TUR = (DURUS_TUR === t) ? "" : t;
+  $$('#durus-tur .chip').forEach(function(b){
+    b.setAttribute("aria-pressed", String(b.dataset.durus === DURUS_TUR)); });
+  $("#durus-ariza").hidden  = (DURUS_TUR !== "ariza");
+  $("#durus-bekleme").hidden = (DURUS_TUR !== "bekleme");
+  if(DURUS_TUR) saatSecicilerKur();
+  msg($("#ar-msg"), "");
+}
+$$('#durus-tur .chip').forEach(function(b){
+  b.addEventListener("click", function(){ durusTurSec(b.dataset.durus); }); });
+
+/* Vardiya sonu üç seçenek (30b). "Bitiş günü" alanı kalktı: arıza vardiya
+   içinde bittiyse gün hesaplanabiliyor, vardiyayı aşıyorsa şef bitişi
+   zaten bilmiyor. */
+var AR_SON = "";
+$$('#ar-son .chip').forEach(function(b){
+  b.addEventListener("click", function(){
+    AR_SON = (AR_SON === b.dataset.son) ? "" : b.dataset.son;
+    $$('#ar-son .chip').forEach(function(x){
+      x.setAttribute("aria-pressed", String(x.dataset.son === AR_SON)); });
+    $("#ar-bit-wrap").hidden = (AR_SON !== "giderildi");
+    if(AR_SON === "giderildi") saatSecicilerKur();
+  });
+});
+
+$("#ar-bas").addEventListener("change", function(){ saatSecicilerKur(); arizaBaslikCiz(); });
+$("#bk-bas").addEventListener("change", saatSecicilerKur);
+$("#bk-bit").addEventListener("change", beklemeSureCiz);
+
+function beklemeSureCiz(){
+  var el = $("#bk-sure"); if(!el) return;
+  var b = secilenAn("#bk-bas"), t = secilenAn("#bk-bit");
+  if(!b || !t){ el.textContent = "—"; el.className = "bant"; return; }
+  var saat = (t.dk - b.dk) / 60;
+  if(saat <= 0){ el.textContent = "bitiş başlangıçtan sonra olmalı"; el.className = "bant uy"; return; }
+  el.className = "bant";
+  el.textContent = tl(saat, (saat % 1 ? 2 : 0)) + " saat";
+}
+
+/* ============================================================
+   ARIZA KAYDET
+   ============================================================ */
 $("#btn-ariza-kaydet").addEventListener("click", function(){
-  var tip = $("#ar-kind").value, bas = $("#ar-bas").value;
-  if(!tip){ msg($("#ar-msg"), "Arıza tipi seçilmedi. Arıza yoksa bu kartı boş bırakın.", "err"); return; }
+  var tip = $("#ar-kind").value;
+  if(!tip){ msg($("#ar-msg"), "Arıza tipi seçilmedi.", "err"); return; }
+  var bas = secilenAn("#ar-bas");
   if(!bas){ msg($("#ar-msg"), "Arızanın başlangıç saati zorunlu.", "err"); return; }
   if(!$("#f-machine").value){ msg($("#ar-msg"), "Önce 1. adımda makineyi seçin — arıza makineye yazılıyor.", "err"); return; }
-  var basTs = arizaSaati(arizaGunu(bas), bas);
-  var bitTs = arizaSaati($("#ar-bitgun").value || arizaGunu($("#ar-bit").value), $("#ar-bit").value);
-  if(bitTs && bitTs < basTs){ msg($("#ar-msg"), "Bitiş, başlangıçtan önce olamaz. Ertesi güne sarktıysa bitiş gününü değiştirin.", "err"); return; }
+  if(!AR_SON){
+    msg($("#ar-msg"), "Vardiya biterken arızanın ne olduğunu seçin: giderildi, hâlâ duruyor ya da fabrikaya gönderildi.", "err");
+    return;
+  }
+  var bitTs = null;
+  if(AR_SON === "giderildi"){
+    var bit = secilenAn("#ar-bit");
+    if(!bit){ msg($("#ar-msg"), "Makinenin çalışmaya başladığı saati seçin.", "err"); return; }
+    if(bit.dk <= bas.dk){ msg($("#ar-msg"), "Çalışma saati arızanın başlangıcından sonra olmalı.", "err"); return; }
+    bitTs = bit.ts;
+  }
   enqueue({ id:uuid(), kind:"fault", created:Date.now(),
     title:"Arıza · " + ($("#ar-kind").selectedOptions[0]||{textContent:""}).textContent,
-    sub: ($("#f-machine").selectedOptions[0]||{textContent:""}).textContent + " · " + bas,
+    sub: ($("#f-machine").selectedOptions[0]||{textContent:""}).textContent + " · " + bas.saat,
     payload:{ client_uuid:uuid(), project_id:$("#f-project").value,
       machine_id:$("#f-machine").value, well_id:$("#f-well").value || null,
-      kind:tip, started_at:basTs, ended_at:bitTs,
+      kind:tip, started_at:bas.ts, ended_at:bitTs,
+      fabrika: AR_SON === "fabrika",
       note:$("#ar-note").value.trim() || null } }).then(function(){
     $("#ar-kind").value=""; $("#ar-bas").value=""; $("#ar-bit").value="";
-    $("#ar-bitgun").value=""; $("#ar-note").value="";
-    msg($("#ar-msg"), bitTs ? "Arıza kaydedildi." :
-      "Arıza <b>açık</b> kaydedildi. Makine çalışmaya başlayınca Makine sekmesinden kapatın.", "ok");
+    $("#ar-note").value="";
+    AR_SON = ""; $$('#ar-son .chip').forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+    $("#ar-bit-wrap").hidden = true;
+    msg($("#ar-msg"), bitTs
+      ? "Arıza kaydedildi. Kayıp saati program vardiyaya kendisi yazıyor."
+      : "Arıza <b>açık</b> kaydedildi. Sonraki vardiyada devam eden arıza olarak çıkacak.", "ok");
     if(navigator.onLine) setTimeout(acikArizaYukle, 900);
   });
 });
+
+/* ============================================================
+   BEKLEME KAYDET
+   ============================================================
+   30k kararı: bekleme doğrudan shift_activities'e yazılıyor. Bekleme
+   MAKİNENİN değil VARDİYANIN olayı — makine sağlam, fabrikaya gitmiyor.
+   Vardiya henüz merkeze gitmemiş olabileceği için kayıt vardiyanın
+   client_uuid'siyle gönderiliyor; sunucu vardiyayı ondan buluyor.
+   ============================================================ */
+var BEKLEMELER = [];
+$("#btn-bekleme-kaydet").addEventListener("click", function(){
+  var sebep = $("#bk-sebep").value;
+  if(!sebep){ msg($("#ar-msg"), "Bekleme sebebi seçilmedi.", "err"); return; }
+  var b = secilenAn("#bk-bas"), t = secilenAn("#bk-bit");
+  if(!b || !t){ msg($("#ar-msg"), "Beklemenin başlangıç ve bitiş saatini seçin.", "err"); return; }
+  var saat = (t.dk - b.dk) / 60;
+  if(saat <= 0){ msg($("#ar-msg"), "Bitiş, başlangıçtan sonra olmalı.", "err"); return; }
+  BEKLEMELER = BEKLEMELER.filter(function(x){ return x.sebep !== sebep; });
+  BEKLEMELER.push({sebep:sebep, saat:saat, bas:b.saat, bit:t.saat,
+                   not:$("#bk-note").value.trim() || null});
+  $("#bk-sebep").value = ""; $("#bk-bas").value = ""; $("#bk-bit").value = "";
+  $("#bk-note").value = ""; beklemeSureCiz();
+  beklemeListeCiz();
+  msg($("#ar-msg"), "Bekleme eklendi. Vardiyayı kaydedince merkeze gidiyor.", "ok");
+  refreshState();
+});
+
+function beklemeSebepAdi(k){
+  return ({su:"Su", musteri:"Müşteri", malzeme:"Malzeme / parça",
+           hava:"Hava", yol:"Yol / erişim", diger:"Diğer"})[k] || k;
+}
+function beklemeListeCiz(){
+  var el = $("#bk-liste"); if(!el) return;
+  if(!BEKLEMELER.length){ el.innerHTML = '<div class="hint">Bekleme eklenmedi.</div>'; return; }
+  el.innerHTML = BEKLEMELER.map(function(x, i){
+    return '<div class="kayit"><div class="kayit-ust"><b>' + esc(beklemeSebepAdi(x.sebep)) +
+      '</b><span class="hint">' + esc(x.bas) + "–" + esc(x.bit) + ' · ' + tl(x.saat, (x.saat % 1 ? 2 : 0)) +
+      ' saat</span></div><div class="kayit-alt"><span class="hint">' + esc(x.not || "") +
+      '</span><span class="kayit-dugme"><button class="btn ghost mini bk-sil" type="button" data-i="' +
+      i + '">Kaldır</button></span></div></div>';
+  }).join("");
+  $$(".bk-sil").forEach(function(b){
+    b.addEventListener("click", function(){
+      BEKLEMELER.splice(Number(b.dataset.i), 1); beklemeListeCiz(); refreshState(); }); });
+}
+
+/* ============================================================
+   DEVAM EDEN ARIZA (30c) + "BU VARDİYADA HİÇ ÇALIŞMADI" (30j)
+   ============================================================
+   Sonraki vardiyada boş arıza kartı yerine bu çıkıyor. Şef yeni arıza
+   AÇMIYOR — açarsa aynı duruş iki kere sayılır. Sadece devam edeni
+   kapatıyor ya da devrediyor.
+   ============================================================ */
+var HIC_CALISMADI = false;
+function makineninArizasi(){
+  var mid = $("#f-machine").value;
+  if(!mid) return null;
+  return (ACIK_ARIZA || []).filter(function(f){ return f.makine_id === mid; })[0] || null;
+}
+function devamArizaCiz(){
+  var el = $("#devam-ariza"); if(!el) return;
+  var f = makineninArizasi();
+  if(!f){
+    el.innerHTML = "";
+    if($("#durus-giris")) $("#durus-giris").hidden = false;
+    return;
+  }
+  /* Açık arıza varken yeni duruş girişi kapanıyor: ikinci kayıt aynı
+     duruşu iki kere saydırır. */
+  if($("#durus-giris")) $("#durus-giris").hidden = true;
+
+  el.innerHTML =
+    '<div class="kayit" style="border-color:var(--warn);background:var(--warn-soft)">' +
+      '<div class="kayit-ust"><b>DEVAM EDEN ARIZA</b>' +
+        '<span class="pill ' + (f.durum === "fabrikada" ? "bad" : "warn") + '">' +
+        (f.durum === "fabrikada" ? "fabrikada" : "açık") + '</span></div>' +
+      '<div class="hint">' + esc(f.makine) + ' · ' + esc(f.tip) +
+        (f.kuyu ? ' · ' + esc(f.kuyu) : "") + ' · ' +
+        esc(String(f.baslangic||"").slice(0,16).replace("T"," ")) + "'den beri · " +
+        tl(f.saat, 1) + ' saat</div>' +
+      '<div class="field" style="margin-top:10px"><label>Bu vardiyada</label>' +
+        '<div class="secim" id="dv-son">' +
+          '<button type="button" class="chip" data-dv="calisti" aria-pressed="false">Makine çalışmaya başladı</button>' +
+          '<button type="button" class="chip" data-dv="durdu" aria-pressed="false">Vardiya boyunca durdu</button>' +
+          '<button type="button" class="chip" data-dv="fabrika" aria-pressed="false">Fabrikada</button>' +
+        '</div></div>' +
+      '<div class="field" id="dv-saat-wrap" hidden><label for="dv-saat">Çalışmaya başladığı saat</label>' +
+        '<select id="dv-saat"></select></div>' +
+      '<button class="btn ghost sm" id="btn-dv-kaydet" type="button">Kaydet</button>' +
+      '<button class="btn ghost sm" id="btn-hic-calismadi" type="button" style="margin-top:8px">' +
+        'Makine arızası — bu vardiyada hiç çalışmadı</button>' +
+    '</div>';
+
+  var DV = "";
+  $$('#dv-son .chip').forEach(function(b){
+    b.addEventListener("click", function(){
+      DV = (DV === b.dataset.dv) ? "" : b.dataset.dv;
+      $$('#dv-son .chip').forEach(function(x){
+        x.setAttribute("aria-pressed", String(x.dataset.dv === DV)); });
+      $("#dv-saat-wrap").hidden = (DV !== "calisti");
+      if(DV === "calisti") saatSeciciKur("#dv-saat", 0);
+    });
+  });
+
+  $("#btn-dv-kaydet").addEventListener("click", function(){
+    if(!DV){ msg($("#ar-msg"), "Bu vardiyada arızanın ne olduğunu seçin.", "err"); return; }
+    if(DV === "durdu"){
+      hicCalismadiIsaretle(f.tip);
+      return;
+    }
+    if(DV === "fabrika"){ arizaDurum(f.id, "fabrikada"); return; }
+    var an = secilenAn("#dv-saat");
+    if(!an){ msg($("#ar-msg"), "Makinenin çalışmaya başladığı saati seçin.", "err"); return; }
+    arizaDurum(f.id, "giderildi", an.ts);
+  });
+
+  $("#btn-hic-calismadi").addEventListener("click", function(){
+    hicCalismadiIsaretle(f.tip);
+  });
+}
+
+/* 30j: metraj 0, vardiya süresinin tamamı arıza, 4. ve 5. adım kapanıyor
+   ve "eksik" uyarısı vermiyor. Ekip, puantaj, yemek, prim NORMAL işliyor —
+   adam sahada, parası işliyor. */
+function hicCalismadiIsaretle(tip){
+  HIC_CALISMADI = true;
+  CALISMADI_TIP = tip || "mekanik";
+  runs = []; renderRuns();
+  $("#f-to").value = "";
+  msg($("#ar-msg"), "<b>Bu vardiyada makine hiç çalışmadı.</b> Metraj sıfır, " +
+      "vardiyanın tamamı arıza yazılacak. Ekip ve puantaj normal işliyor — " +
+      "kaydedip çıkabilirsiniz.", "warn");
+  refreshState();
+  calismadiSeridiCiz();
+}
+var CALISMADI_TIP = "mekanik";
+function calismadiSeridiCiz(){
+  var el = $("#calismadi-serit");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "calismadi-serit";
+    el.className = "bant uy";
+    el.style.cssText = "border-radius:10px;margin:8px 0";
+    var h = $("#serit-ust");
+    if(h && h.parentNode) h.parentNode.insertBefore(el, h.nextSibling);
+  }
+  el.hidden = !HIC_CALISMADI;
+  if(HIC_CALISMADI){
+    el.innerHTML = "Makine arızası — bu vardiyada hiç çalışmadı. " +
+      '<button class="btn ghost mini" type="button" id="btn-calismadi-geri">Geri al</button>';
+    var g = $("#btn-calismadi-geri");
+    if(g) g.addEventListener("click", function(){
+      HIC_CALISMADI = false; msg($("#ar-msg"), ""); refreshState(); calismadiSeridiCiz(); });
+  }
+}
+
 function acikArizaYukle(){
   var pid = $("#f-project").value;
   ["#acik-ariza","#mak-ariza"].forEach(function(s){ if($(s)) $(s).innerHTML = ""; });
@@ -1545,6 +1918,32 @@ function acikArizaYukle(){
   });
 }
 var ACIK_ARIZA = [];
+/* Kuyunun makinesi arızalı mı? (30g, 30h)
+   `open_faults` 38. adımdan beri kuyuyu da döndürüyor; eski merkezlerde
+   alan boş gelirse satır hiç yazılmıyor, hata vermiyor. */
+function kuyuArizaYazisi(wellId){
+  var f = (ACIK_ARIZA || []).filter(function(x){ return x.kuyu_id === wellId; })[0];
+  if(!f) return "";
+  return '<span class="hint" style="display:block;margin-top:2px;color:var(--warn)">' +
+    '⚠ makine arızalı (' + esc(f.makine) + '), ' +
+    esc(String(f.baslangic||"").slice(0,16).replace("T"," ")) + "'den beri</span>";
+}
+/* Açık arıza listesi yenilenince kuyu kartlarındaki satır da yenilenir.
+   Liste zaten çizilmişse baştan çizmek yerine satır yerinde güncelleniyor. */
+function kuyuArizaCiz(){
+  $$(".kuyu-kart").forEach(function(k){
+    var id = k.dataset.well;
+    var b = k.querySelector(".kuyu-ac"); if(!b) return;
+    var eski = b.querySelector(".kuyu-ariza");
+    if(eski) eski.remove();
+    var yazi = kuyuArizaYazisi(id);
+    if(!yazi) return;
+    var d = document.createElement("span");
+    d.className = "kuyu-ariza";
+    d.innerHTML = yazi;
+    b.appendChild(d);
+  });
+}
 function acikArizaCiz(){
   var html;
   if(!ACIK_ARIZA.length){
@@ -1565,18 +1964,23 @@ function acikArizaCiz(){
     }).join("");
   }
   ["#acik-ariza","#mak-ariza"].forEach(function(s){ if($(s)) $(s).innerHTML = html; });
+  devamArizaCiz();
+  kuyuArizaCiz();
   $$(".ar-fab").forEach(function(b){
     b.addEventListener("click", function(){ arizaDurum(b.dataset.id, "fabrikada"); }); });
   $$(".ar-bitti").forEach(function(b){
     b.addEventListener("click", function(){ arizaDurum(b.dataset.id, "giderildi"); }); });
 }
-function arizaDurum(id, durum){
+/* 30f: arıza kapatılırken SAAT zorunlu. `fault_state` p_when'i zaten
+   kabul ediyordu, panel göndermiyordu — gece 03:00'te tamir edilen arıza
+   sabah 08:00'de kapatılınca 5 saat fazla duruş yazılıyordu. */
+function arizaDurum(id, durum, nezaman){
   if(!navigator.onLine || !sb){ msg($("#ar-msg"), "Durum değiştirmek için bağlantı gerekiyor.", "err"); return; }
-  sb.rpc("fault_state", {p_fault:id, p_state:durum}).then(function(r){
+  Promise.resolve(sb.rpc("fault_state", {p_fault:id, p_state:durum, p_when:nezaman || null})).then(function(r){
     if(r.error){ msg($("#ar-msg"), hataTr(r.error.message), "err"); return; }
     msg($("#ar-msg"), durum === "fabrikada"
       ? "Makine fabrikaya gönderildi olarak işaretlendi. Takip sürüyor."
-      : "Arıza giderildi olarak kapatıldı.", "ok");
+      : "Arıza giderildi olarak kapatıldı. Kayıp saat yeniden hesaplandı.", "ok");
     acikArizaYukle();
   });
 }
@@ -2012,8 +2416,11 @@ function stepProblems(n){
     if(c === 0) p.push("kontrol listesi");
     else if(c < CHECKS.length && !$("#f-check-note").value.trim()) p.push("uygunsuzluk açıklaması");
   }
-  if(n === 4){ if(!runs.length) p.push("en az bir manevra"); }
-  if(n === 5){ if($("#f-fuel").value === "") p.push("mazot"); }
+  /* 30j: "bu vardiyada hiç çalışmadı" işaretliyse 4. ve 5. adım eksik
+     saymıyor. Metraj yok çünkü makine çalışmadı; mazot da yakılmadı.
+     Ekip (2) ve kontrol (3) duruyor — adam sahada, puantajı işliyor. */
+  if(n === 4){ if(!HIC_CALISMADI && !runs.length) p.push("en az bir manevra"); }
+  if(n === 5){ if(!HIC_CALISMADI && $("#f-fuel").value === "") p.push("mazot"); }
   return p;
 }
 function firstIncomplete(){
@@ -2122,6 +2529,15 @@ function slotSaat(vd){
   if(f <= 0) f += 24*60;
   return f/60;
 }
+/* Bu vardiyanın duruş saati — panelin kendi hesabı.
+   "Hiç çalışmadı" işaretliyse vardiyanın tamamı. */
+function durusSaati(){
+  var a = vardiyaAralik();
+  var sure = a ? a.sure / 60 : 0;
+  if(HIC_CALISMADI) return sure;
+  var bekleme = BEKLEMELER.reduce(function(t, x){ return t + Number(x.saat || 0); }, 0);
+  return Math.min(bekleme, sure || bekleme);
+}
 function seritAltCiz(){
   var el = $("#serit-alt"); if(!el) return;
   var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
@@ -2130,6 +2546,17 @@ function seritAltCiz(){
   var parca = [];
   parca.push('<span class="gc">' + tl(totalM()) + ' m</span>');
   if(sa) parca.push('<span class="num">' + tl(sa, (sa % 1 ? 1 : 0)) + ' saat</span>');
+  /* Duruş girildiğinde şeritte görünüyor (31. dosya):
+       18,50 m · 12 saat · ⚠ 6,0 saat duruş · 6,0 saat çalışma
+     Rakam panelin kendi hesabı; merkezin hesabı kaydettikten sonra
+     `vardiya_saat_ozeti` ile geliyor ve ikisi tutmak zorunda. */
+  var durus = durusSaati();
+  if(durus > 0){
+    parca.push('<span class="num" style="color:var(--warn)">⚠ ' +
+      tl(durus, (durus % 1 ? 1 : 0)) + ' saat duruş</span>');
+    if(sa) parca.push('<span class="num">' + tl(Math.max(sa - durus, 0),
+      ((sa - durus) % 1 ? 1 : 0)) + ' saat çalışma</span>');
+  }
   if(yakit !== "") parca.push('<span class="num">' + yakit + ' lt</span>');
   el.innerHTML = parca.join('<span style="color:var(--ink-3)">·</span>') +
     '<span class="sn">' + sonEsitleme() + '</span>';
@@ -2517,7 +2944,30 @@ $("#btn-save-shift").addEventListener("click", function(){
   var savedDepth = depth();
   var duzeltmeMi = !!DUZELT;
   DUZELT = null; duzeltSeridi();
+  /* Duruş kayıtları vardiyanın PEŞİNDEN gidiyor. Kuyruk sıralı gönderdiği
+     için sıra geldiğinde vardiya merkezde kayıtlı oluyor; sunucu vardiyayı
+     `client_uuid`den buluyor. Vardiya henüz gitmemişse açık hata dönüp
+     kuyrukta kalıyorlar — sessizce kaybolmuyorlar (20 Ekim dersi). */
+  var cu = item.payload.client_uuid;
+  var durusKuyrugu = [];
+  if(HIC_CALISMADI){
+    durusKuyrugu.push({ id:uuid(), kind:"calismadi", created:Date.now()+1,
+      title:"Hiç çalışmadı · " + wellCode,
+      sub:"makine arızası · " + item.payload.work_date,
+      payload:{ client_uuid:cu, kind:CALISMADI_TIP } });
+  }
+  BEKLEMELER.forEach(function(b, i){
+    durusKuyrugu.push({ id:uuid(), kind:"bekleme", created:Date.now()+2+i,
+      title:"Bekleme · " + beklemeSebepAdi(b.sebep),
+      sub:tl(b.saat, (b.saat % 1 ? 2 : 0)) + " saat · " + item.payload.work_date,
+      payload:{ client_uuid:cu, sebep:b.sebep, saat:b.saat, note:b.not } });
+  });
+
   enqueue(item).then(function(){
+    return durusKuyrugu.reduce(function(ch, q){
+      return ch.then(function(){ return enqueue(q); });
+    }, Promise.resolve());
+  }).then(function(){
     var w = currentWell();
     if(w){ w.current_depth = savedDepth; try{ localStorage.setItem("sp_master", JSON.stringify(MASTER)); }catch(e){} }
     showDone(wellCode, metraj, fuel, item.payload.work_date, item.payload.shift_slot);
@@ -2568,7 +3018,15 @@ function resetForm(){
   $("#ekip-kaynak").textContent = "";
   $("#nak-note").value = ""; msg($("#nak-msg"), "");
   $("#ar-kind").value = ""; $("#ar-bas").value = ""; $("#ar-bit").value = "";
-  $("#ar-bitgun").value = ""; $("#ar-note").value = ""; msg($("#ar-msg"), "");
+  $("#ar-note").value = ""; msg($("#ar-msg"), "");
+  /* Duruş kartı sıfırlanıyor: yeni vardiyaya eski beklemeler taşınmasın. */
+  BEKLEMELER = []; beklemeListeCiz();
+  HIC_CALISMADI = false; calismadiSeridiCiz();
+  AR_SON = ""; $$('#ar-son .chip').forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+  if($("#ar-bit-wrap")) $("#ar-bit-wrap").hidden = true;
+  $("#bk-sebep").value = ""; $("#bk-bas").value = ""; $("#bk-bit").value = "";
+  $("#bk-note").value = ""; beklemeSureCiz();
+  durusTurSec("");
   msg($("#cap-msg"), ""); $("#cap-dus-wrap").hidden = true;
   $$("#checks .chip").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
   countChecks();
@@ -3265,6 +3723,27 @@ function sendItem(it, tenant){
       p_kind:it.payload.kind, p_started:it.payload.started_at, p_ended:it.payload.ended_at,
       p_note:it.payload.note, p_well:realWellId(it.payload.well_id), p_shift:null,
       p_client:it.payload.client_uuid})
+      .then(function(r){ if(r.error) throw r.error;
+        /* "Fabrikaya gönderildi" seçeneği: kayıt açık kalıyor ama durumu
+           fabrikada oluyor — Makine sekmesinden takip ediliyor. */
+        if(!it.payload.fabrika || !r.data || !r.data.id) return null;
+        return Promise.resolve(sb.rpc("fault_state", {p_fault:r.data.id,
+          p_state:"fabrikada", p_when:it.payload.started_at, p_note:null}))
+          .then(function(r2){ if(r2 && r2.error) throw new Error("Fabrika durumu yazılamadı: " + r2.error.message); });
+      })
+      .then(function(){ return obDel(it.id); });
+  }
+  if(it.kind === "calismadi"){
+    /* 30j · "bu vardiyada hiç çalışmadı": vardiyanın tamamı arıza olarak
+       yazılıyor. Vardiya merkezde yoksa fonksiyon açık hata döndürüyor ve
+       kayıt kuyrukta kalıyor. */
+    return sb.rpc("vardiya_calismadi_cu", {p_client:it.payload.client_uuid,
+      p_kind:it.payload.kind || "mekanik", p_not:it.payload.note || null})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  if(it.kind === "bekleme"){
+    return sb.rpc("bekleme_kaydet_cu", {p_client:it.payload.client_uuid,
+      p_sebep:it.payload.sebep, p_saat:it.payload.saat, p_not:it.payload.note || null})
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
   }
   if(it.kind === "maintenance"){
@@ -3398,7 +3877,12 @@ function loadRecent(){
           (son[w.id] ? "son kayıt " + son[w.id] : "kayıt yok") +
           (adet[w.id] ? " · " + adet[w.id] + " vardiya" : "") +
           (w.drop_depth != null ? " · " + tl(w.drop_depth) + " m'de " + (w.drop_diameter||"") : "") +
-        '</span></button>' +
+        '</span>' +
+        /* 30g: kuyuya bakan herkes neden ilerleme olmadığını görsün.
+           SAKLANAN bir alan değil, hesaplanan bir yazı: makine fabrikaya
+           gidip kuyuya başka kule atanırsa kendiliğinden kalkıyor. */
+        kuyuArizaYazisi(w.id) +
+        '</button>' +
         '<div class="kuyu-vardiyalar" hidden style="padding:0 12px 10px"></div></div>';
     }).join("");
     $$(".kuyu-ac").forEach(function(b){
@@ -4414,7 +4898,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "35";
+var SURUM = "36";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
