@@ -861,6 +861,25 @@ td:first-child{text-align:start;color:var(--ink-2)}
           gönderildiyse burada işaretleyin; arıza kapanana kadar takip sürer.</div>
         <div id="mak-ariza"><div class="hint">Yenile'ye basın.</div></div>
       </div>
+
+      <!-- ============================================================
+           ARAÇ BELGELERİ — şefin kendi şantiyesi ve kendi zimmeti
+           ============================================================
+           Tayfun, 19 Ekim: "Zimmetli kişi saha şefiyse uyarı onun
+           panelinde de çıkar."
+
+           Şef belge GİRMİYOR, yalnız görüyor. Tarihleri muhasebe giriyor
+           ("muhasebenin girmesi gereken veriler").
+           ============================================================ -->
+      <div class="card" style="margin-top:12px">
+        <div class="arasi">
+          <span class="eyebrow">Araç belgeleri</span>
+          <button class="btn ghost sm" id="btn-arac-yenile" type="button">Yenile</button>
+        </div>
+        <div class="hint">Şantiyenizdeki ve size zimmetli araçların muayene, sigorta ve kasko
+          tarihleri. Süresi dolana yakın burada uyarı çıkar; tarihleri muhasebe girer.</div>
+        <div id="arac-belge"><div class="hint">Yenile'ye basın.</div></div>
+      </div>
     </section>
 
     <!-- PUANTAJ -->
@@ -1710,7 +1729,7 @@ function beklemeSureCiz(){
   var saat = (t.dk - b.dk) / 60;
   if(saat <= 0){ el.textContent = "bitiş başlangıçtan sonra olmalı"; el.className = "bant uy"; return; }
   el.className = "bant";
-  el.textContent = tl(saat, (saat % 1 ? 2 : 0)) + " saat";
+  el.textContent = sureYaz(saat);
 }
 
 /* ============================================================
@@ -1787,8 +1806,8 @@ function beklemeListeCiz(){
   if(!BEKLEMELER.length){ el.innerHTML = '<div class="hint">Bekleme eklenmedi.</div>'; return; }
   el.innerHTML = BEKLEMELER.map(function(x, i){
     return '<div class="kayit"><div class="kayit-ust"><b>' + esc(beklemeSebepAdi(x.sebep)) +
-      '</b><span class="hint">' + esc(x.bas) + "–" + esc(x.bit) + ' · ' + tl(x.saat, (x.saat % 1 ? 2 : 0)) +
-      ' saat</span></div><div class="kayit-alt"><span class="hint">' + esc(x.not || "") +
+      '</b><span class="hint">' + esc(x.bas) + "–" + esc(x.bit) + ' · ' + sureYaz(x.saat) +
+      '</span></div><div class="kayit-alt"><span class="hint">' + esc(x.not || "") +
       '</span><span class="kayit-dugme"><button class="btn ghost mini bk-sil" type="button" data-i="' +
       i + '">Kaldır</button></span></div></div>';
   }).join("");
@@ -1830,7 +1849,7 @@ function devamArizaCiz(){
       '<div class="hint">' + esc(f.makine) + ' · ' + esc(f.tip) +
         (f.kuyu ? ' · ' + esc(f.kuyu) : "") + ' · ' +
         esc(String(f.baslangic||"").slice(0,16).replace("T"," ")) + "'den beri · " +
-        tl(f.saat, 1) + ' saat</div>' +
+        sureYaz(f.saat) + '</div>' +
       '<div class="field" style="margin-top:10px"><label>Bu vardiyada</label>' +
         '<div class="secim" id="dv-son">' +
           '<button type="button" class="chip" data-dv="calisti" aria-pressed="false">Makine çalışmaya başladı</button>' +
@@ -1954,7 +1973,7 @@ function acikArizaCiz(){
         '<span class="pill ' + (f.durum === "fabrikada" ? "bad" : "warn") + '">' +
         (f.durum === "fabrikada" ? "fabrikada" : "açık") + '</span>' +
         '<span class="hint">' + String(f.baslangic||"").slice(0,16).replace("T"," ") +
-        '’den beri · ' + tl(f.saat) + ' saat</span></div>' +
+        '’den beri · ' + sureYaz(f.saat) + '</span></div>' +
         '<div class="kayit-alt"><span class="hint">' + (f.aciklama || "") + '</span>' +
         '<span class="kayit-dugme">' +
           (f.durum === "fabrikada" ? "" :
@@ -1974,6 +1993,57 @@ function acikArizaCiz(){
 /* 30f: arıza kapatılırken SAAT zorunlu. `fault_state` p_when'i zaten
    kabul ediyordu, panel göndermiyordu — gece 03:00'te tamir edilen arıza
    sabah 08:00'de kapatılınca 5 saat fazla duruş yazılıyordu. */
+/* ============================================================
+   ARAÇ BELGE UYARILARI (36e)
+   ============================================================
+   `arac_uyarilarim()` şefin şantiyesindeki ve kendi zimmetindeki
+   araçları birlikte döndürüyor. Eski merkezlerde fonksiyon yoksa kart
+   sessizce boş kalıyor — şef hata ekranı görmüyor.
+   ============================================================ */
+var BELGE_AD = {muayene:"Muayene", sigorta:"Trafik sigortası", kasko:"Kasko",
+                egzoz:"Egzoz", k_belgesi:"K belgesi", diger:"Diğer"};
+function aracBelgeYukle(){
+  var el = $("#arac-belge"); if(!el) return;
+  if(!navigator.onLine || !sb){
+    el.innerHTML = '<div class="hint">Bağlantı gelince yüklenecek.</div>'; return; }
+  el.innerHTML = '<div class="hint">Getiriliyor…</div>';
+  Promise.resolve(sb.rpc("arac_uyarilarim")).then(function(r){
+    if(r && r.error){
+      el.innerHTML = '<div class="hint">Araç belgeleri getirilemedi: ' +
+        esc(hataTr(r.error.message)) + '</div>';
+      return;
+    }
+    aracBelgeCiz(r.data || []);
+  }).catch(function(e){
+    el.innerHTML = '<div class="hint">Araç belgeleri getirilemedi.</div>';
+  });
+}
+function aracBelgeCiz(liste){
+  var el = $("#arac-belge"); if(!el) return;
+  var onemli = (liste || []).filter(function(x){
+    return x.durum === "gecti" || x.durum === "yaklasti"; });
+  if(!onemli.length){
+    el.innerHTML = '<div class="hint">Süresi dolmak üzere olan belge yok.</div>';
+    return;
+  }
+  onemli.sort(function(a,b){ return Number(a.kalan) - Number(b.kalan); });
+  el.innerHTML = onemli.map(function(x){
+    var gun = Number(x.kalan);
+    var ne = gun < 0 ? Math.abs(gun) + " gün önce doldu" : gun + " gün kaldı";
+    return '<div class="kayit" style="border-color:var(--' + (x.durum === "gecti" ? "bad" : "warn") +
+      ');background:var(--' + (x.durum === "gecti" ? "bad" : "warn") + '-soft)">' +
+      '<div class="kayit-ust"><b>' + esc(x.plaka) + '</b>' +
+        '<span class="pill ' + (x.durum === "gecti" ? "bad" : "warn") + '">' +
+        esc(BELGE_AD[x.tur] || x.tur) + '</span>' +
+        '<span class="hint">' + esc(ne) + '</span></div>' +
+      '<div class="kayit-alt"><span class="hint">' + esc(x.arac || "") +
+        (x.zimmetli ? ' · zimmet: ' + esc(x.zimmetli) : "") +
+        ' · bitiş ' + esc(trd2(x.bitis)) + '</span></div></div>';
+  }).join("");
+}
+var _ab = $("#btn-arac-yenile");
+if(_ab) _ab.addEventListener("click", aracBelgeYukle);
+
 function arizaDurum(id, durum, nezaman){
   if(!navigator.onLine || !sb){ msg($("#ar-msg"), "Durum değiştirmek için bağlantı gerekiyor.", "err"); return; }
   Promise.resolve(sb.rpc("fault_state", {p_fault:id, p_state:durum, p_when:nezaman || null})).then(function(r){
@@ -2165,6 +2235,27 @@ function kalanCiz(){
    "Karot kutusu (adet)" alanına 0,015 girilebiliyordu (41. dosya, 1b).
    Birim zaten biliniyor; adım ondan kuruluyor. Tam sayı isteyen birimlerde
    ok tuslari 1'er gidiyor ve kesir girilince uyari veriliyor. */
+/* ============================================================
+   SÜRE YAZIMI — bir saatten azsa DAKİKA
+   ============================================================
+   Tayfun, 21 Ekim: "0,75 saat değil, 1 saatten az ise dk yazsın."
+   Sahada kimse "sıfır virgül yetmiş beş saat" demiyor.
+
+     0,25 →  15 dk      1,00 →  1 saat
+     0,75 →  45 dk      1,25 →  1 saat 15 dk
+                        12,0 →  12 saat
+
+   YALNIZ EKRANDA. Veride saat olarak duruyor (shift_activities.hours),
+   rapor ve hakediş aynı birimden okumaya devam ediyor. */
+function sureYaz(saat){
+  var s = Number(saat || 0);
+  if(!isFinite(s) || s <= 0) return "0 dk";
+  var dk = Math.round(s * 60);
+  if(dk < 60) return dk + " dk";
+  var tam = Math.floor(dk / 60), kalan = dk % 60;
+  return tam + " saat" + (kalan ? " " + kalan + " dk" : "");
+}
+
 var TAM_BIRIM = {adet:1, torba:1, bidon:1, paket:1, rulo:1};
 function birimTamMi(b){ return !!TAM_BIRIM[String(b||"").toLocaleLowerCase("tr")]; }
 function miktarKur(inp, birim){
@@ -2553,9 +2644,8 @@ function seritAltCiz(){
   var durus = durusSaati();
   if(durus > 0){
     parca.push('<span class="num" style="color:var(--warn)">⚠ ' +
-      tl(durus, (durus % 1 ? 1 : 0)) + ' saat duruş</span>');
-    if(sa) parca.push('<span class="num">' + tl(Math.max(sa - durus, 0),
-      ((sa - durus) % 1 ? 1 : 0)) + ' saat çalışma</span>');
+      sureYaz(durus) + ' duruş</span>');
+    if(sa) parca.push('<span class="num">' + sureYaz(Math.max(sa - durus, 0)) + ' çalışma</span>');
   }
   if(yakit !== "") parca.push('<span class="num">' + yakit + ' lt</span>');
   el.innerHTML = parca.join('<span style="color:var(--ink-3)">·</span>') +
@@ -2959,7 +3049,7 @@ $("#btn-save-shift").addEventListener("click", function(){
   BEKLEMELER.forEach(function(b, i){
     durusKuyrugu.push({ id:uuid(), kind:"bekleme", created:Date.now()+2+i,
       title:"Bekleme · " + beklemeSebepAdi(b.sebep),
-      sub:tl(b.saat, (b.saat % 1 ? 2 : 0)) + " saat · " + item.payload.work_date,
+      sub:sureYaz(b.saat) + " · " + item.payload.work_date,
       payload:{ client_uuid:cu, sebep:b.sebep, saat:b.saat, note:b.not } });
   });
 
@@ -4886,7 +4976,7 @@ $$("#tabs button").forEach(function(b){
     if(b.dataset.tab === "kuyruk") refreshQueue();
     if(b.dataset.tab === "puantaj"){ attCiz(); attLoad(true); }
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
-    if(b.dataset.tab === "makine"){ bakimYukle(); acikArizaYukle(); }
+    if(b.dataset.tab === "makine"){ bakimYukle(); acikArizaYukle(); aracBelgeYukle(); }
     if(b.dataset.tab === "gider") giderCiz();
     window.scrollTo(0,0);
   });
@@ -4898,7 +4988,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "36";
+var SURUM = "37";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

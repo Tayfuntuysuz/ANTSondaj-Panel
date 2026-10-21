@@ -45,6 +45,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <button data-t="tahsilat">Tahsilat</button>
       <button data-t="sozlesme">Sözleşmeler</button>
       <button data-t="banka">Banka ekstresi</button>
+      <button data-t="arac">Araç belgeleri<span id="arac-rozet" class="pill bad" hidden></span></button>
       <button data-t="ozet">Özet</button>
     </div>
 
@@ -189,6 +190,54 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     </section>
 
     <!-- ---------------- ÖZET ---------------- -->
+    <!-- ============================================================
+         ARAÇ BELGELERİ — muayene · sigorta · kasko
+         ============================================================
+         Tayfun, 19 Ekim: "Kasko tarih vs bunlar muhasebenin girmesi
+         gereken veriler, o tarafta işlenecek. Tarihler girildiğinde bitiş
+         süreleri de girilecek ve bitmeye yakın uyarı verecekler."
+
+         Uyarı yönetici, muhasebe ve ZİMMETLİ KİŞİye gidiyor; zimmetli
+         kişi saha şefiyse kendi panelinde de görüyor.
+         ============================================================ -->
+    <section data-p="arac" hidden>
+      <div class="card">
+        <h3>Süresi dolan ve dolmak üzere olan belgeler</h3>
+        <div class="note">60 gün kala turuncu, süresi geçince kırmızı. Yenileme girildiğinde
+          eski kayıt uyarı vermeyi bırakır — silmeye gerek yok.</div>
+        <div id="arac-uyari"></div>
+      </div>
+
+      <div class="card">
+        <h3>Belge girişi</h3>
+        <div class="grid">
+          <div class="field" style="grid-column:span 2"><label>Araç</label><select id="ab-arac"></select></div>
+          <div class="field"><label>Belge türü</label>
+            <select id="ab-tur">
+              <option value="muayene">Muayene</option>
+              <option value="sigorta">Trafik sigortası</option>
+              <option value="kasko">Kasko</option>
+              <option value="egzoz">Egzoz</option>
+              <option value="k_belgesi">K belgesi</option>
+              <option value="diger">Diğer</option>
+            </select></div>
+          <div class="field"><label>Başlangıç</label><input id="ab-bas" type="date"></div>
+          <div class="field"><label>Bitiş <span class="req">*</span></label><input id="ab-bit" type="date"></div>
+          <div class="field"><label>Şirket</label><input id="ab-sirket" placeholder="NEOVA, QUICK, KORU…"></div>
+          <div class="field"><label>Tutar</label><input id="ab-tutar" type="number" inputmode="decimal" step="0.01"></div>
+          <div class="field" style="grid-column:span 2"><label>Not</label><input id="ab-not"></div>
+        </div>
+        <button class="btn" id="btn-ab-kaydet" type="button">Belgeyi kaydet</button>
+        <div id="ab-msg"></div>
+      </div>
+
+      <div class="card">
+        <h3>Araç kütüğü</h3>
+        <div class="note">Zimmetli kişi ve şantiye bilgisi saha listesinden gelir; burada yalnız görünür.</div>
+        <div class="scroll" id="arac-liste"></div>
+      </div>
+    </section>
+
     <section data-p="ozet" hidden>
       <div class="card"><h3>Gider grupları</h3><div class="bars" id="o-grup"></div></div>
       <div class="card"><h3>En yüksek kategoriler</h3><div class="bars" id="o-kat"></div></div>
@@ -240,6 +289,131 @@ $$("#tabs button").forEach(function(b){
     $$("#tabs button").forEach(function(x){ x.classList.remove("on"); });
     b.classList.add("on");
     $$("section[data-p]").forEach(function(s){ s.hidden = (s.dataset.p !== b.dataset.t); });
+    if(b.dataset.t === "arac") aracYukle();
+  });
+});
+
+/* ============================================================
+   ARAÇ BELGELERİ
+   ============================================================
+   Muayene, sigorta ve kasko tarihlerini muhasebe giriyor; panel süresi
+   dolana yakın uyarıyor. Uyarı eşiği bakım kartındakiyle aynı: 60 gün
+   kala turuncu, geçince kırmızı.
+   ============================================================ */
+var ARACLAR = [];
+var BELGE_AD = {muayene:"Muayene", sigorta:"Trafik sigortası", kasko:"Kasko",
+                egzoz:"Egzoz", k_belgesi:"K belgesi", diger:"Diğer"};
+
+function trd(s){ if(!s) return "—"; var p=String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+
+/* DİKKAT: burada `#ab-msg` TEMİZLENMİYOR. Önceki sürümde kayıttan sonra
+   aracYukle() çağrılıyor ve "kaydedildi" yazısını anında siliyordu —
+   muhasebeci kaydın gidip gitmediğini göremiyordu. Mesajı kim yazdıysa
+   o siliyor. */
+function aracYukle(){
+  return Promise.all([
+    Promise.resolve(sb.from("vehicles")
+      .select("id,plate,kind,brand_model,model_year,project_id,zimmetli_personel_id")
+      .eq("is_active", true).order("plate")),
+    Promise.resolve(sb.rpc("arac_belge_durumu", {p_project:null, p_kisi:null}))
+  ]).then(function(r){
+    var av = r[0], uy = r[1];
+    if(av && av.error){ msg($("#ab-msg"), esc(av.error.message), "err"); return; }
+    ARACLAR = (av && av.data) || [];
+    aracSecKur();
+    aracListeCiz();
+    uyariCiz((uy && !uy.error) ? (uy.data || []) : [],
+             (uy && uy.error) ? uy.error.message : null);
+  });
+}
+
+function aracSecKur(){
+  var sel = $("#ab-arac"); if(!sel) return;
+  var eski = sel.value;
+  sel.innerHTML = '<option value="">— seçin —</option>';
+  ARACLAR.forEach(function(a){
+    var o = document.createElement("option");
+    o.value = a.id;
+    o.textContent = a.plate + (a.brand_model ? " · " + a.brand_model : "");
+    sel.appendChild(o);
+  });
+  if(eski) sel.value = eski;
+}
+
+function uyariCiz(liste, hata){
+  var el = $("#arac-uyari"); if(!el) return;
+  if(hata){
+    el.innerHTML = '<div class="msg err">Uyarılar getirilemedi: ' + esc(hata) + '</div>';
+    return;
+  }
+  var gecti = liste.filter(function(x){ return x.durum === "gecti"; });
+  var yakin = liste.filter(function(x){ return x.durum === "yaklasti"; });
+
+  /* Sekme başlığındaki rozet: muhasebeci bu sekmeye girmeden de görsün. */
+  var roz = $("#arac-rozet");
+  if(roz){
+    var n = gecti.length + yakin.length;
+    roz.hidden = (n === 0);
+    roz.textContent = n ? String(n) : "";
+    roz.className = gecti.length ? "pill bad" : "pill warn";
+  }
+
+  if(!gecti.length && !yakin.length){
+    el.innerHTML = '<div class="note">120 gün içinde dolan belge yok.</div>';
+    return;
+  }
+  function satir(x){
+    var gun = Number(x.kalan);
+    var ne = gun < 0 ? Math.abs(gun) + " gün önce doldu" : gun + " gün kaldı";
+    return '<tr class="' + (x.durum === "gecti" ? "kotu" : "uyari") + '">' +
+      '<td><b>' + esc(x.plaka) + '</b><br><span class="hint">' + esc(x.arac || "") + '</span></td>' +
+      '<td>' + esc(BELGE_AD[x.tur] || x.tur) + '</td>' +
+      '<td>' + trd(x.bitis) + '</td>' +
+      '<td>' + esc(ne) + '</td>' +
+      '<td>' + esc(x.sirket || "") + '</td>' +
+      '<td>' + esc(x.zimmetli || "—") + '</td></tr>';
+  }
+  el.innerHTML =
+    (gecti.length ? '<div class="msg err"><b>' + gecti.length +
+      ' belgenin süresi geçmiş.</b> Araç trafiğe çıkmamalı.</div>' : "") +
+    '<div class="scroll"><table><thead><tr><th>Araç</th><th>Belge</th><th>Bitiş</th>' +
+    '<th>Durum</th><th>Şirket</th><th>Zimmetli</th></tr></thead><tbody>' +
+    gecti.concat(yakin).map(satir).join("") + '</tbody></table></div>';
+}
+
+function aracListeCiz(){
+  var el = $("#arac-liste"); if(!el) return;
+  if(!ARACLAR.length){ el.innerHTML = '<div class="note">Araç kaydı yok.</div>'; return; }
+  el.innerHTML = '<table><thead><tr><th>Plaka</th><th>Marka / model</th><th>Yıl</th>' +
+    '<th>Tür</th></tr></thead><tbody>' +
+    ARACLAR.map(function(a){
+      return '<tr><td><b>' + esc(a.plate) + '</b></td><td>' + esc(a.brand_model || "—") +
+        '</td><td>' + (a.model_year || "—") + '</td><td>' + esc(a.kind || "") + '</td></tr>';
+    }).join("") + '</tbody></table>';
+}
+
+$("#btn-ab-kaydet").addEventListener("click", function(){
+  var arac = $("#ab-arac").value, bit = $("#ab-bit").value;
+  if(!arac){ msg($("#ab-msg"), "Araç seçilmedi.", "err"); return; }
+  if(!bit){ msg($("#ab-msg"), "Bitiş tarihi zorunlu — uyarı ona dayanıyor.", "err"); return; }
+  var bas = $("#ab-bas").value || null;
+  if(bas && bas > bit){ msg($("#ab-msg"), "Bitiş, başlangıçtan önce olamaz.", "err"); return; }
+  msg($("#ab-msg"), "Kaydediliyor…");
+  Promise.resolve(sb.rpc("arac_belge_kaydet", {
+    p_vehicle: arac, p_kind: $("#ab-tur").value, p_ends: bit, p_starts: bas,
+    p_company: $("#ab-sirket").value.trim() || null,
+    p_amount: $("#ab-tutar").value === "" ? null : Number($("#ab-tutar").value),
+    p_note: $("#ab-not").value.trim() || null
+  })).then(function(r){
+    if(r && r.error) throw new Error(r.error.message);
+    var d = r.data || {};
+    msg($("#ab-msg"), esc(d.plaka || "") + " · " + esc(BELGE_AD[d.tur] || "") +
+        " · " + trd(d.bitis) + " kaydedildi.", "ok");
+    $("#ab-bas").value = ""; $("#ab-bit").value = "";
+    $("#ab-sirket").value = ""; $("#ab-tutar").value = ""; $("#ab-not").value = "";
+    return aracYukle();
+  }).catch(function(e){
+    msg($("#ab-msg"), esc((e && e.message) || String(e)), "err");
   });
 });
 

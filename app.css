@@ -453,3 +453,11 @@ td select{text-align:start}
 /* yalnız ekran okuyucu için */
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);
   clip-path:inset(50%);white-space:nowrap}
+
+/* Araç belge uyarıları — bakım kartındaki renk kuralının aynısı:
+   60 gün kala turuncu, süresi geçince kırmızı. */
+tbody tr.kotu td{background:var(--bad-soft)}
+tbody tr.kotu td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+tbody tr.uyari td{background:var(--warn-soft)}
+tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+.tabs button .pill{margin-inline-start:6px;font-size:10.5px;padding:1px 6px}
