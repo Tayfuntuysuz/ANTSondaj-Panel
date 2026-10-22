@@ -402,7 +402,8 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="hint" id="f-shift-hint"></div>
         <div class="hint" id="f-date-not" style="color:var(--warn)"></div>
         <div id="sondaj-alanlar">
-          <div class="field"><label for="f-machine">Makine <span class="req">*</span></label><select id="f-machine" data-req="1"></select></div>
+          <div class="field"><label for="f-machine">Makine <span class="req">*</span></label><select id="f-machine" data-req="1"></select>
+            <div class="hint" id="f-makine-kaynak"></div></div>
           <div class="field" id="alan-kuyu" style="margin-top:10px">
             <div class="arasi"><label for="f-well">Kuyu <span class="req">*</span></label>
               <button class="metin-dugme" id="btn-new-well" type="button">+ Yeni kuyu ekle</button></div>
@@ -677,6 +678,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <div class="field"><label for="y-hedef">Kime verildi <span class="req">*</span></label><select id="y-hedef"></select>
           <div class="hint" id="y-hedef-hint"></div></div>
+        <div class="field" id="y-diger-wrap" hidden>
+          <label for="y-diger">Ne olduğunu yazın <span class="req">*</span></label>
+          <input id="y-diger" placeholder="örn. kiralık JCB, jeneratör, misafir araç 34 ABC 123">
+          <div class="hint">Plakası kütükte olmayan araç ya da ekipman. Yazılmazsa
+            yakıt bakiyesinde sahipsiz kalıyor.</div></div>
         <div class="field" id="y-shift-wrap" hidden><label for="y-shift">Hangi vardiya <span class="req">*</span></label>
           <select id="y-shift"><option value="">— seçin —</option><option value="gunduz">Gündüz</option><option value="gece">Gece</option></select></div>
         <div class="grid2">
@@ -772,7 +778,8 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <!-- Kuyu önce sorulur: makine listesi ve takıldığı metre ona göre kurulur. -->
         <div class="field"><label for="b-well">Kuyu <span class="req">*</span></label><select id="b-well"></select></div>
         <div class="grid2">
-          <div class="field"><label for="b-machine">Makine <span class="req">*</span></label><select id="b-machine"></select></div>
+          <div class="field"><label for="b-machine">Makine <span class="req">*</span></label><select id="b-machine"></select>
+            <div class="hint" id="b-makine-kaynak"></div></div>
           <div class="field"><label for="b-dia">Çap <span class="req">*</span></label>
             <select id="b-dia"><option value="">— seçin —</option><option>HQ</option><option>PQ</option><option>NQ</option><option>PW</option></select></div>
         </div>
@@ -794,7 +801,17 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="grid2">
           <div class="field"><label for="b-to">Çıktığı metre <span class="req">*</span></label><input id="b-to" type="number" min="0" inputmode="decimal"></div>
           <div class="field"><label for="b-status">Durum <span class="req">*</span></label>
-            <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option></select></div>
+            <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option></select>
+              <!-- Tayfun, 22 Ekim: "Bitti ve matris döktü arasındaki fark nedir?"
+                   Üç durum kâğıt aylık rapordan geliyor ama ekranda açıklaması
+                   yoktu. Şef de aynı soruyu soracak. -->
+              <div class="hint" id="b-status-hint">
+                <b>Bitti:</b> ömrünü tamamladı, matris aşındı, ilerleme düştü.<br>
+                <b>Matris döktü:</b> erken bitti — gövde aşınarak değil kopup dökülerek gitti.<br>
+                <b>Kullanılır:</b> ömrü var, başka sebeple çıkarıldı (çap değişti, kuyu bitti).<br>
+                Ayrı tutuluyor: "şu marka şu formasyonda döküyor" ile "şu kulede döküyor"
+                farklı iki sorun — biri matkap seçimi, diğeri çalışma koşulu.
+              </div></div>
         </div>
         <div class="field"><label for="b-formasyon">Formasyon</label>
           <select id="b-formasyon">
@@ -892,7 +909,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <div id="att-ozet" class="ozet-kutu">Yükleniyor…</div>
         <div id="att-msg"></div>
-        <button class="btn ghost" id="btn-att-exc" type="button">+ İstisna ekle</button>
+        <button class="btn ghost" id="btn-att-exc" type="button">+ Kişi durumu değiştir</button>
         <div id="att-sec" hidden>
           <label for="att-ara" id="att-ara-et" style="margin-top:10px;display:block">Ekipte ara</label>
           <div class="ara-kutu">
@@ -902,8 +919,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </div>
           <div id="att-sonuc" class="ara-sonuc"></div>
         </div>
-        <div class="hint">Yazmadığınız herkes <b>çalıştı</b> sayılır. Yalnız izinli, raporlu,
-          avans alan ya da tek çalışan kişileri ekleyin.</div>
+        <!-- Tayfun, 22 Ekim: "İstisna ekle" yazısı, vardiya ekibi de ekranda
+             görününce anlamını kaybediyor. Düğme kısaldı, ne yaptığını alt
+             yazı anlatıyor. -->
+        <div class="hint">Yazmadığınız herkes <b>çalıştı</b> sayılır. Kuleye girenler
+          vardiyadan geldi. İzinli, raporlu ya da avans alan kişileri buradan ekleyin.</div>
       </div>
 
       <div id="att-list" style="margin-top:12px"></div>
@@ -1210,8 +1230,7 @@ function fillSelects(){
   fillYakitHedef();
   /* Gece ve gündüzde tek sondör var; 2. sondör ve "manevrayı yapan sondör"
      alanları kaldırıldı (Tayfun, 17 Ekim). İşçi sayısı ekle/çıkar ile artıyor. */
-  var drillers = pe.filter(function(p){ return p.kind === "sondor"; });
-  opt("#f-driller1", drillers, function(p){ return p.full_name; });
+  sondorListesiCiz();
   var mats = MASTER.materials || [];
   opt("#st-material", mats, function(m){ return m.name + " (" + m.unit + ")"; });
   fillVardiya();
@@ -1256,25 +1275,115 @@ function fillMachines(){
 /* Yakıt "kime verildi": o şantiyenin kuleleri + traktör/pompa/araçlar.
    Şantiyeye bağlanmamış araç (project_id boş) her sahada görünür — plaka
    listesi sahadan dönene kadar kimse araçsız kalmasın. */
+/* ============================================================
+   "KİME MAZOT VERİLDİ" LİSTESİ (22 Ekim)
+   ============================================================
+   Tayfun: "Çok fazla araç çıkıyor. Binek araçlar mazotu burdan
+   almazlar, onları çıkar. Sadece şantiyeye tanımlı araçlar olsun, bir
+   de diğer kısmı olsun. Diğer de açıklama yapabilsin."
+
+   Listede: şantiyenin kuleleri + şantiyeye tanımlı araçlar + Diğer.
+   Listede DEĞİL: binek araçlar, başka şantiyenin araçları.
+
+   "Şantiyesi girilmemiş araç her sahada görünür" kuralı kalktı. O kural
+   16. dosyada bilerek konmuştu — plaka listesi sahadan dönene kadar
+   kimse araçsız kalmasın diye. Artık araçlar tanımlı. Ama hiç tanımlı
+   aracı olmayan bir şantiyede liste bomboş kalmasın diye eski davranış
+   orada sürüyor, altında uyarısıyla.
+   ============================================================ */
+var BINEK_TUR = {binek:1, otomobil:1, binek_arac:1};
+function binekMi(v){
+  return !!BINEK_TUR[String(v && v.kind || "").toLocaleLowerCase("tr")];
+}
 function fillYakitHedef(){
   var pid = $("#y-project").value || $("#f-project").value;
+  var araclar = ((MASTER && MASTER.vehicles) || []).filter(function(v){
+    return !binekMi(v);
+  });
+  var sahada = araclar.filter(function(v){ return pid && v.project_id === pid; });
+  /* Şantiyeye hiç araç tanımlanmamışsa eski davranışa düşülüyor. */
+  var yedek = !sahada.length;
+  var secilen = yedek
+    ? araclar.filter(function(v){ return !pid || !v.project_id || v.project_id === pid; })
+    : sahada;
+
   var hedefler = projeMakineleri(pid).map(function(m){
       return {id:"m:"+m.id, ad:makineEtiketi(m, pid)}; })
-    .concat(((MASTER && MASTER.vehicles) || []).filter(function(v){
-      return !pid || !v.project_id || v.project_id === pid;
-    }).map(function(v){
+    .concat(secilen.map(function(v){
       var etiket = v.plate + (v.fuel_class === "kule_destek" ? " · saha ekipmanı" : "");
-      return {id:"v:"+v.id, ad:etiket, bagsiz:!v.project_id};
-    }));
+      return {id:"v:"+v.id, ad:etiket};
+    }))
+    /* Sahaya misafir araç, kiralık kepçe, jeneratör gelebiliyor. Kütükte
+       olmayan bir şeye mazot verildiğinde şef ya yanlış plaka seçiyor ya
+       hiç girmiyor; ikisi de yakıt bakiyesini bozuyor. */
+    .concat([{id:"diger", ad:"Diğer — kütükte olmayan araç/ekipman"}]);
+
   opt("#y-hedef", hedefler, function(h){ return h.ad; });
-  /* Henüz şantiyeye bağlanmamış araç varsa listede neden durduğu yazılır —
-     yoksa şef kendi sahasında olmayan bir plakayı görüp tereddüt ediyor. */
-  var bagsiz = hedefler.filter(function(h){ return h.bagsiz; }).length;
   var ip = $("#y-hedef-hint");
-  if(ip) ip.textContent = bagsiz
-    ? bagsiz + " araç henüz bir şantiyeye bağlanmamış; bu yüzden her sahada görünüyor."
+  if(ip) ip.textContent = yedek
+    ? "Bu şantiyeye araç tanımlanmamış; şirketin bütün araçları listeleniyor."
     : "";
+  yakitDigerGoster();
 }
+/* "Diğer" seçilince açıklama alanı açılıyor ve zorunlu oluyor —
+   plakası olmayan bir şeye verilen yakıt, ne olduğu yazılmazsa
+   bakiyede sahipsiz kalıyor. */
+function yakitDigerGoster(){
+  var w = $("#y-diger-wrap"); if(!w) return;
+  w.hidden = ($("#y-hedef").value !== "diger");
+}
+/* ============================================================
+   KUYU SEÇİLİNCE MAKİNE KENDİLİĞİNDEN GELSİN (22 Ekim)
+   ============================================================
+   Tayfun: "Bir makina bir kuyuda çalışmaya başladığı zaman yer
+   değiştirmesi çok nadir. Kuyu seçildiğinde makina da gelsin."
+
+   KİLİTLENMİYOR, DOLUYOR. Nadir de olsa kule değişiyor; kilitlemek o
+   günü girilemez yapar. Ve yalnız alan BOŞKEN dolduruyor — şef elle
+   seçtiyse programın onu ezmesi, hiç doldurmamaktan kötü.
+   ============================================================ */
+var KUYUMAK = {};       /* kuyu_id -> en son vardiyanın makine_id'si */
+
+function kuyununMakinesi(wid){
+  if(!wid) return null;
+  if(KUYUMAK[wid]) return KUYUMAK[wid];
+  /* Merkeze gidilemiyorsa: o kuyunun şantiyesinde tek makine varsa odur. */
+  var w = (MASTER && MASTER.wells || []).filter(function(x){ return x.id === wid; })[0];
+  var liste = projeMakineleri(w ? w.project_id : $("#f-project").value);
+  return liste.length === 1 ? liste[0].id : null;
+}
+
+/* O kuyuda EN SON vardiya girilen makineyi merkezden okur ve seçicileri
+   doldurur. Bir kere okunup saklanıyor. */
+function kuyuMakineGetir(wid, sonra){
+  if(!wid){ if(sonra) sonra(null); return; }
+  if(KUYUMAK[wid] !== undefined){ if(sonra) sonra(KUYUMAK[wid]); return; }
+  if(!navigator.onLine || !sb){ if(sonra) sonra(kuyununMakinesi(wid)); return; }
+  Promise.resolve(sb.from("shifts").select("machine_id,work_date,shift_slot")
+    .eq("well_id", wid).order("work_date", {ascending:false}).limit(20))
+    .then(function(r){
+      if(r && r.error) throw new Error(r.error.message);
+      var sat = (r.data || []).filter(function(x){ return x.machine_id; })[0];
+      KUYUMAK[wid] = sat ? sat.machine_id : null;
+      if(sonra) sonra(KUYUMAK[wid] || kuyununMakinesi(wid));
+    })
+    .catch(function(){ if(sonra) sonra(kuyununMakinesi(wid)); });
+}
+
+/* Seçiciyi yalnız BOŞSA doldurur ve nereden geldiğini yazar. */
+function makineDoldur(sel, wid, ipucuSel){
+  var el = $(sel); if(!el || el.value) return;
+  kuyuMakineGetir(wid, function(mid){
+    if(!mid || el.value) return;
+    var varMi = Array.prototype.some.call(el.options, function(o){ return o.value === mid; });
+    if(!varMi) return;
+    el.value = mid;
+    var ip = ipucuSel ? $(ipucuSel) : null;
+    if(ip) ip.textContent = "Makine, bu kuyuda en son çalışan kuleden geldi. Değiştirebilirsiniz.";
+    refreshState();
+  });
+}
+
 /* Matkap takma: makine listesi KUYUYA göre. O kuyuda vardiyası olan
    makine(ler) varsa yalnız onlar, yoksa o şantiyenin makineleri. */
 var BITMAK = {};        /* kuyu_id -> [makine_id] */
@@ -1289,6 +1398,8 @@ function bitMakineleri(){
   }
   opt("#b-machine", liste, function(m){ return makineEtiketi(m, pid); });
   if(liste.length === 1) $("#b-machine").value = liste[0].id;
+  /* Tek makine yoksa kuyuda en son çalışan kuleyi getir (22 Ekim). */
+  makineDoldur("#b-machine", wid, "#b-makine-kaynak");
 }
 function bitKuyuMakineYukle(){
   var wid = $("#b-well").value;
@@ -1386,6 +1497,43 @@ var ISCI = [];          /* seçili işçi/yardımcı personel kimlikleri */
 function yardimcilar(){
   return ((MASTER && MASTER.personnel) || []).filter(function(p){ return p.kind !== "sondor"; });
 }
+
+/* ============================================================
+   AYNI KİŞİ İKİ KERE SEÇİLEMESİN (22 Ekim)
+   ============================================================
+   Tayfun: "Kurtuluş'u seçtim, aşağıya yeni işçi eklemek istiyorum,
+   listede tekrar gözüküyor. Aynı kişiyi 2 kere ekleyemeyeceğime göre
+   listeden düşsün."
+
+   İNCELİK: kişi KENDİ satırında görünmeye devam etmek zorunda, yoksa
+   seçili değer kaybolur. Her liste "bu vardiyada seçilmişler eksi
+   kendi değeri" diye kuruluyor.
+   ============================================================ */
+function seciliKisiler(){
+  var d = {};
+  var s1 = $("#f-driller1") ? $("#f-driller1").value : "";
+  if(s1) d[s1] = 1;
+  ISCI.forEach(function(x){ if(x) d[x] = 1; });
+  return d;
+}
+/* Bir seçim listesini, başkasının aldığı kişileri eleyerek kurar. */
+function kisiSecenek(liste, kendi){
+  var alinan = seciliKisiler();
+  return '<option value="">— seçin —</option>' +
+    liste.filter(function(p){ return p.id === kendi || !alinan[p.id]; })
+         .map(function(p){
+           return '<option value="' + p.id + '">' + esc(p.full_name) + '</option>'; })
+         .join("");
+}
+/* Sondör listesi de aynı kuralla yeniden kuruluyor. */
+function sondorListesiCiz(){
+  var sel = $("#f-driller1"); if(!sel) return;
+  var kendi = sel.value;
+  var sondorler = ((MASTER && MASTER.personnel) || [])
+    .filter(function(p){ return p.kind === "sondor"; });
+  sel.innerHTML = kisiSecenek(sondorler, kendi);
+  sel.value = kendi || "";
+}
 function isciCiz(){
   var box = $("#f-helpers"); if(!box) return;
   box.innerHTML = "";
@@ -1396,20 +1544,24 @@ function isciCiz(){
     var sel = document.createElement("select");
     sel.className = "esnek";
     sel.setAttribute("aria-label", (i+1) + ". işçi");
-    sel.innerHTML = '<option value="">— seçin —</option>' + yardimcilar().map(function(p){
-      return '<option value="' + p.id + '">' + p.full_name + '</option>'; }).join("");
+    sel.innerHTML = kisiSecenek(yardimcilar(), pid);
     sel.value = pid || "";
-    sel.addEventListener("change", function(){ ISCI[i] = sel.value; refreshState(); });
+    /* Seçim değişince BÜTÜN listeler yeniden kuruluyor: yeni seçilen
+       kişi diğerlerinden düşsün, bırakılan kişi geri gelsin. */
+    sel.addEventListener("change", function(){
+      ISCI[i] = sel.value; isciCiz(); sondorListesiCiz(); refreshState(); });
     var sil = document.createElement("button");
     sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
     var ad = (yardimcilar().filter(function(p){ return p.id === pid; })[0] || {}).full_name;
     sil.setAttribute("aria-label", (ad ? ad : (i+1) + ". işçi") + " satırını sil");
-    sil.addEventListener("click", function(){ ISCI.splice(i,1); isciCiz(); refreshState(); });
+    sil.addEventListener("click", function(){
+      ISCI.splice(i,1); isciCiz(); sondorListesiCiz(); refreshState(); });
     row.appendChild(sel); row.appendChild(sil);
     box.appendChild(row);
   });
 }
 $("#btn-helper-add").addEventListener("click", function(){ ISCI.push(""); isciCiz(); });
+$("#f-driller1").addEventListener("change", function(){ isciCiz(); });
 
 /* Kuyu seçilince ekip kendiliğinden gelir: o kuyuda en son girilen vardiyanın
    ekibi, yoksa kuyu tanımındaki ekip. İkisi de değiştirilebilir. */
@@ -1422,7 +1574,7 @@ function ekipOneriYukle(){
     if(sondor) $("#f-driller1").value = sondor.personnel_id;
     ISCI = ekip.filter(function(c){ return c.crew_role !== "sondor"; })
                .map(function(c){ return c.personnel_id; });
-    isciCiz();
+    isciCiz(); sondorListesiCiz();
     $("#ekip-kaynak").textContent = (kaynak === "son_vardiya")
       ? "Ekip, bu kuyuda en son girilen vardiyadan geldi. Değiştirebilirsiniz."
       : "Ekip, kuyu açılırken tanımlanan ekipten geldi. Değiştirebilirsiniz.";
@@ -1468,6 +1620,8 @@ $("#f-well").addEventListener("change", function(){
   /* Saat seçicileri vardiya aralığına göre kuruluyor: vardiya ya da tarih
      değişince liste de değişmek zorunda (30a). */
   saatSecicilerKur(); devamArizaCiz();
+  /* Kuyu seçildi: makine boşsa o kuyuda en son çalışan kuleyle doluyor. */
+  makineDoldur("#f-machine", $("#f-well").value, "#f-makine-kaynak");
 });
 
 $("#btn-new-well").addEventListener("click", function(){
@@ -1607,6 +1761,16 @@ function arizaBaslikCiz(){
   }
 }
 function trd2(s){ var p = String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+var AY_ADLARI = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
+                 "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+/* "2026-10" ya da "2026-10-01" → "Ekim 2026". Özette ve puantajda
+   kullanıcıya ay adıyla konuşmak için; "2026-10" kimseye bir şey demiyor. */
+function ayYaz(s){
+  var p = String(s || "").slice(0,7).split("-");
+  var i = Number(p[1]) - 1;
+  if(!p[0] || !(i >= 0 && i < 12)) return String(s || "");
+  return AY_ADLARI[i] + " " + p[0];
+}
 /* ============================================================
    SAAT SEÇİCİ — vardiya aralığı, 15 dakikalık adımlar
    ============================================================
@@ -3134,6 +3298,9 @@ $("#btn-save-fuel").addEventListener("click", function(){
   /* hedef "m:<id>" ise kule, "v:<id>" ise traktör/pompa/araç */
   var kule = hedef.indexOf("m:") === 0 ? hedef.slice(2) : null;
   var arac = hedef.indexOf("v:") === 0 ? hedef.slice(2) : null;
+  var digerAd = (hedef === "diger") ? $("#y-diger").value.trim() : "";
+  if(hedef === "diger" && !digerAd){
+    msg($("#fuel-msg"), "\"Diğer\" seçtiniz — yakıtın kime verildiğini yazın.", "err"); return; }
   /* Kuleye verilen yakıt hangi vardiyaya ait olduğu bilinmeden işe yaramaz:
      vardiya bazlı litre/metre bu alandan hesaplanıyor. */
   if(kule && !$("#y-shift").value){
@@ -3145,9 +3312,12 @@ $("#btn-save-fuel").addEventListener("click", function(){
       machine_id:kule, vehicle_id:arac, shift:($("#y-shift").value || null),
       fuel_type:$("#y-type").value, liters:l,
       amount: $("#y-amount").value ? Number($("#y-amount").value) : null,
-      note: $("#y-note").value.trim() || null } }).then(function(){
+      /* "Diğer"in ne olduğu nota yazılıyor: makine ve araç kimliği yok,
+         tek iz burası. */
+      note: [digerAd ? "Diğer: " + digerAd : "", $("#y-note").value.trim()]
+              .filter(Boolean).join(" · ") || null } }).then(function(){
     $("#y-liters").value=""; $("#y-amount").value=""; $("#y-note").value="";
-    $("#y-shift").value="";
+    $("#y-shift").value=""; $("#y-diger").value="";
     msg($("#fuel-msg"), "Kaydedildi.", "ok");
     if(navigator.onLine) setTimeout(loadYakit, 900);
   });
@@ -3205,6 +3375,7 @@ $("#btn-yakit-yenile").addEventListener("click", loadYakit);
 
 /* Vardiya yalnız kule için sorulur. Traktör, pompa ve araçlarda vardiya yoktur. */
 $("#y-hedef").addEventListener("change", function(){
+  yakitDigerGoster();
   var kule = $("#y-hedef").value.indexOf("m:") === 0;
   $("#y-shift-wrap").hidden = !kule;
   if(!kule) $("#y-shift").value = "";
@@ -4051,9 +4222,24 @@ $("#btn-summary").addEventListener("click", function(){
     /* Kayıt olmayan ayda monthly_summary boş dönebiliyor; eskiden burada
        sayfa çöküyordu (Cannot read properties of null) ve çöken sayfa
        sonraki düğmeleri de bozuyordu. */
-    if(!d){ msg($("#sum-msg"), "");
-      $("#sum-out").innerHTML = '<div class="card hint">Bu ay için kayıt yok.</div>';
-      return; }
+    /* 7. bulgu (Tayfun, 22 Ekim): "şu anda mevcut haliyle özet getir
+       dediğimde girilmiş metrajı getirmesi gerekmiyor mu? Ben vardiya
+       kaydetmedim henüz."
+       Hiç vardiya girilmemiş ayda sıfır dolu bir tablo göstermek yanlış
+       bilgi: "0 m delinmiş" değil, "bu aya ait kayıt yok". Kuyuların
+       AÇILIŞ derinlikleri de bu rakamlara girmiyor — onlar panele devir
+       edilen eski metraj, bu ayın işi değil. İkisini de açıkça yazıyoruz. */
+    var ayMetni = ayYaz($("#s-month").value || m);
+    if(!d || Number(d.shifts || 0) === 0){
+      msg($("#sum-msg"), "");
+      $("#sum-out").innerHTML =
+        '<div class="card"><span class="eyebrow">Kayıt yok</span>' +
+        '<div><b>' + esc(ayMetni) + '</b> için panele girilmiş vardiya yok.</div>' +
+        '<div class="hint" style="margin-top:6px">Vardiya girildikçe metraj, mazot ve ' +
+        'harcama burada toplanacak. Kuyuların açılış derinlikleri bu rakamlara ' +
+        'girmez — onlar panelden önceki metraj.</div></div>';
+      return;
+    }
     msg($("#sum-msg"), "");
     function bars(title, rows, key){
       if(!rows || !rows.length) return "";
@@ -4369,6 +4555,7 @@ function santiyeAdi(){
    için burada ikinci kez girmiyor. PUANTAJ_GUN boşsa eski özet gösteriliyor
    (çevrimdışı ya da henüz yüklenmemiş). */
 var PUANTAJ_GUN = null;
+var BEKLENEN_EKIP = null;   /* o güne vardiya girilmemişken: son vardiyanın ekibi */
 
 function attOzet(){
   var n = ekip().length, k = Object.keys(ATT_IST).length;
@@ -4382,11 +4569,33 @@ function attOzet(){
   var bas = '<span class="hint">' + santiyeAdi() + " · " + ($("#p-date").value||"") + "</span>";
 
   if(!PUANTAJ_GUN || !PUANTAJ_GUN.vardiya_girildi){
-    /* Bu güne hiç vardiya girilmemiş: vardiya ayrımı yapılamaz. */
-    kutu.innerHTML = bas + "<br><b>" + n + " kişi</b> · " +
-      (k ? k + " istisna, kalan " + (n - k) + " kişi çalıştı" : "hepsi çalıştı") +
-      '<div class="hint" style="margin-top:6px">Bu güne henüz vardiya girilmemiş; ' +
-      'gece/gündüz ayrımı vardiya girildikten sonra çıkar.</div>';
+    /* Bu güne hiç vardiya girilmemiş. Yine de kimin beklendiği
+       gösteriliyor: aynı vardiyanın en son girilen gününün ekibi
+       (22 Ekim kararı). Puantajı DOLDURMUYOR — yevmiye kuralı aynı:
+       yazılmayan herkes çalıştı sayılıyor. */
+    var h0 = bas + "<br><b>" + n + " kişi</b> · " +
+      (k ? k + " kişinin durumu değişti, kalan " + (n - k) + " kişi çalıştı"
+         : "hepsi çalıştı");
+    var bek = BEKLENEN_EKIP || [];
+    if(bek.length){
+      bek.forEach(function(v){
+        var kisiler = v.kisiler || [];
+        if(!kisiler.length) return;
+        h0 += '<div class="ayrac-ust"><b>' + esc(v.ad).toLocaleUpperCase("tr") +
+              ' · BEKLENEN EKİP</b> <span class="hint">' +
+              esc(trd2(v.tarih)) + " vardiyasından" +
+              (v.kuyu ? " · " + esc(v.kuyu) : "") + "</span>" +
+              '<div class="hint" style="margin-top:3px">' +
+              kisiler.map(function(x){ return esc(x.ad); }).join(" · ") + "</div></div>";
+      });
+      h0 += '<div class="hint" style="margin-top:6px">Bu güne henüz vardiya ' +
+            'girilmemiş. Yukarıdakiler son vardiyanın ekibi — vardiya girilince ' +
+            'kesinleşir.</div>';
+    } else {
+      h0 += '<div class="hint" style="margin-top:6px">Bu güne henüz vardiya girilmemiş; ' +
+            'gece/gündüz ayrımı vardiya girildikten sonra çıkar.</div>';
+    }
+    kutu.innerHTML = h0;
   } else {
     var h = bas;
     (PUANTAJ_GUN.vardiyalar || []).forEach(function(v){
@@ -4415,7 +4624,7 @@ function attOzet(){
       h += '<div class="msg warn" style="margin-top:10px">⚠ <b>' + um.length +
            ' kişi hiçbir vardiyada görünmüyor:</b> ' +
            um.map(function(x){ return esc(x.ad); }).join(", ") +
-           "<br>İzinliyse aşağıdan istisna ekleyin; unutulduysa vardiya ekibini düzeltin.</div>";
+           "<br>İzinliyse aşağıdan durumunu değiştirin; unutulduysa vardiya ekibini düzeltin.</div>";
     }
     kutu.innerHTML = h;
   }
@@ -4436,7 +4645,7 @@ function attCiz(){
     var ad = document.createElement("b"); ad.textContent = kisiAdi(id);
     var sil = document.createElement("button");
     sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
-    sil.setAttribute("aria-label", kisiAdi(id) + " istisnasını kaldır");
+    sil.setAttribute("aria-label", kisiAdi(id) + " durum kaydını kaldır");
     sil.addEventListener("click", function(){ delete ATT_IST[id]; attCiz(); });
     ust.appendChild(ad); ust.appendChild(sil);
 
@@ -4488,7 +4697,7 @@ function suz(liste, q){
 $("#btn-att-exc").addEventListener("click", function(){
   var ac = $("#att-sec").hidden;
   $("#att-sec").hidden = !ac;
-  $("#btn-att-exc").textContent = ac ? "Kapat" : "+ İstisna ekle";
+  $("#btn-att-exc").textContent = ac ? "Kapat" : "+ Kişi durumu değiştir";
   if(ac){ $("#att-ara").value = ""; attAraCiz(); $("#att-ara").focus(); }
 });
 function attAraCiz(){
@@ -4499,7 +4708,7 @@ function attAraCiz(){
   if(et) et.textContent = "Ekipte ara (" + kalan.length + " kişi)";
   araCiz($("#att-sonuc"), suz(kalan, $("#att-ara").value), function(p){
     ATT_IST[p.id] = {status:"izin", advance_amount:null, single_shift:false};
-    $("#att-sec").hidden = true; $("#btn-att-exc").textContent = "+ İstisna ekle";
+    $("#att-sec").hidden = true; $("#btn-att-exc").textContent = "+ Kişi durumu değiştir";
     attCiz();
     msg($("#att-msg"), p.full_name + " eklendi — durumunu aşağıdan seçin.", "ok");
   }, "Bu isimde kimse yok. Yeni kişi yöneticiden eklenir.");
@@ -4531,11 +4740,16 @@ function attLoad(sessiz){
         {p_project:$("#p-project").value, p_date:$("#p-date").value})),
       Promise.resolve(sb.rpc("puantaj_gun",
         {p_project:$("#p-project").value, p_date:$("#p-date").value}))
+        .catch(function(){ return {data:null, error:true}; }),
+      /* Eski merkezde bu fonksiyon yoksa kart eski haliyle çalışsın. */
+      Promise.resolve(sb.rpc("puantaj_beklenen_ekip",
+        {p_project:$("#p-project").value, p_date:$("#p-date").value}))
         .catch(function(){ return {data:null, error:true}; })
     ]); })
     .then(function(res){
-      var r = res[0], pg = res[1];
+      var r = res[0], pg = res[1], be = res[2];
       PUANTAJ_GUN = (pg && !pg.error) ? pg.data : null;
+      BEKLENEN_EKIP = (be && !be.error) ? (be.data || []) : null;
       if(r.error){ ATT_YUKLU = null; msg($("#att-msg"), r.error.message, "err"); return; }
       ATT_IST = {};
       (r.data||[]).forEach(function(x){
@@ -4548,7 +4762,7 @@ function attLoad(sessiz){
       attCiz();
       var k = Object.keys(ATT_IST).length;
       msg($("#att-msg"), (r.data||[]).length
-        ? (k ? k + " istisna yüklendi." : "Kayıt var, istisna yok — herkes çalışmış.")
+        ? (k ? k + " kişide durum değişikliği yüklendi." : "Kayıt var, durum değişikliği yok — herkes çalışmış.")
         : "Bu gün için kayıt yok.", "ok");
     });
 }
@@ -4587,7 +4801,7 @@ $("#btn-att-save").addEventListener("click", function(){
     payload:{ project_id:$("#p-project").value, work_date:$("#p-date").value, rows:rows } }).then(function(){
     ATT_YUKLU = attAnahtar();
     msg($("#att-msg2"), rows.length + " kişi kaydedildi · " + $("#p-date").value + " · " +
-        (k ? k + " istisna" : "istisna yok") +
+        (k ? k + " kişide durum değişikliği" : "herkes çalıştı") +
         (navigator.onLine ? "" : " · bağlantı gelince gönderilecek"), "ok");
     msg($("#att-msg"), "");
   });
@@ -4988,7 +5202,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "38";
+var SURUM = "39";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
