@@ -11,6 +11,11 @@
 window.SP = (function(){
 "use strict";
 
+/* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
+   "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
+   anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
+var SURUM = "40";
+
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
 var $$ = function(s, k){ return Array.prototype.slice.call((k||document).querySelectorAll(s)); };
@@ -54,7 +59,14 @@ var IC = {
   ofis:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h2M13 9h2M9 13h2M13 13h2M9 17h6"/>',
   ayar:'<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 14.6a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1 2 2 0 1 1-4 0 1.6 1.6 0 0 0-2.7-1.1 2 2 0 1 1-2.8-2.8 1.6 1.6 0 0 0-1.1-2.7 2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.1-2.7 2 2 0 1 1 2.8-2.8 1.6 1.6 0 0 0 2.7-1.1 2 2 0 1 1 4 0 1.6 1.6 0 0 0 2.7 1.1 2 2 0 1 1 2.8 2.8 1.6 1.6 0 0 0 1.1 2.7 2 2 0 1 1 0 4 1.6 1.6 0 0 0-1.4.9z"/>',
   kalkan:'<path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V7l8-4z"/>',
-  saat:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  saat:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  /* 22 Ekim: menüde dört ikon ikiz çıkmıştı (ayar 2, para 2, kişi 2,
+     rapor 3). Tekrarlayan ikon ikonu işlevsiz yapıyor — göz ikona
+     değil yazıya bakmak zorunda kalıyor. Her satıra kendi ikonu. */
+  takvim:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/>',
+  cuzdan:'<path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H5a2 2 0 0 1-2-2z"/><circle cx="17" cy="14" r="1.2"/>',
+  grafik:'<path d="M3 3v18h18M7 16v-5M12 16V7M17 16v-8"/>',
+  kilit:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
 };
 function ikon(k){
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '+
@@ -62,29 +74,65 @@ function ikon(k){
 }
 
 /* ---------- menü tanımı: sayfa anahtarı -> dosya, ad, ikon, grup ---------- */
+/* 22 Ekim · Tayfun: "Sol taraftaki menüyü kategorilendirip azaltalım."
+   Eski hâli 6 grup / 11 satırdı; üç grupta tek satır vardı, "Merkez ofis"
+   ve "Maaş tablosu" analiz grubunda duruyordu (ikisi de para), iki satır
+   da olmayan sayfalara gidiyordu. Yeni hâli 32. dosyadaki karar:
+   4 grup, rolüne göre 8 satıra kadar.
+
+   Alanlar:
+     k      yetki anahtarı (page_access)
+     d      hedef · dv  rol listede değilse kullanılacak hedef
+     g      grup · i  ikon (hiçbir ikon iki satırda tekrarlanmıyor)
+     cift   eş sayfa kümesi — menüde TEK satır, sayfanın üstünde şerit
+     bas    kümenin menüde görünen adını taşıyan satır
+     sekme  şeritteki kısa ad
+     yok    ekranı henüz yazılmadı — menüde hiç gösterilmez */
 var SAYFALAR = [
-  {k:"panel",    d:"panel.html",     ad:"Genel bakış",        i:"pano",   g:"Genel"},
-  {k:"rapor",    d:"rapor.html",     ad:"Aylık rapor",        i:"rapor",  g:"Genel"},
-  {k:"saha",     d:"index.html",     ad:"Vardiya girişi",     i:"kule",   g:"Günlük iş"},
+  {k:"panel",    d:"panel.html",     ad:"Genel bakış",        i:"pano",   g:"Günlük"},
+  {k:"saha",     d:"index.html",     ad:"Vardiya girişi",     i:"kule",   g:"Günlük"},
+  /* Puantaj tek sayfa anahtari ama iki ayri hedef (39. dosya karari):
+     saha sefi kendi PWA'sinda girer, digerleri panel.html'deki salt okunur
+     ozete gider. Yoneticinin kendi puantaj sayfasi (puantaj.html, 32. dosya)
+     yapilinca "dv" oraya cevrilecek. */
+  {k:"kuyular",  d:"panel.html#kuyular", ad:"Kuyular",        i:"kuyu",   g:"Günlük"},
   /* Puantaj tek sayfa anahtari ama iki ayri hedef (39. dosya karari):
      saha sefi kendi PWA'sinda girer, digerleri panel.html'deki salt okunur
      ozete gider. Yoneticinin kendi puantaj sayfasi (puantaj.html, 32. dosya)
      yapilinca "dv" oraya cevrilecek. */
   {k:"puantaj",  d:"index.html#puantaj", dv:"panel.html#puantaj",
-                 roller:{site_chief:1}, ad:"Puantaj",          i:"kisi",   g:"Günlük iş"},
-  {k:"kuyular",  d:"panel.html#kuyular", ad:"Kuyular",        i:"kuyu",   g:"Saha"},
-  {k:"sefozet",  d:"panel.html",     ad:"Saha özetim",        i:"pano",   g:"Saham"},
-  {k:"santiyeler", d:"santiyeler.html", ad:"Şantiye karşılaştırma", i:"pano", g:"Analiz"},
-  {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"para",   g:"Analiz"},
-  {k:"ofis",     d:"ofis.html",      ad:"Merkez ofis",        i:"ofis",   g:"Analiz"},
-  {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"kisi",   g:"Analiz"},
-  {k:"muhasebe", d:"muhasebe.html",  ad:"Muhasebe",           i:"para",   g:"Finans"},
-  {k:"hakedis",  d:"muhasebe.html#fatura", ad:"Hakediş",      i:"rapor",  g:"Finans"},
-  {k:"anaveri",  d:"yonetim.html",   ad:"Ana veri ve projeler", i:"ayar", g:"Yönetim"},
-  {k:"kullanicilar", d:"ofis.html#kullanicilar", ad:"Kullanıcılar", i:"ayar", g:"Yönetim"},
-  {k:"isveren",  d:"isveren.html",   ad:"Raporlarım",         i:"kalkan", g:"Raporlar"}
+                 roller:{site_chief:1}, ad:"Puantaj",          i:"takvim", g:"Günlük"},
+  {k:"sefozet",  d:"panel.html",     ad:"Saha özetim",        i:"pano",   g:"Günlük"},
+
+  {k:"rapor",    d:"rapor.html",     ad:"Aylık rapor",        i:"rapor",  g:"Ay sonu"},
+  /* Ay kilidi (aykilidi.html) ve Hakediş (hakedis.html) buraya gelecek.
+     Hakediş bugüne kadar muhasebe.html#fatura'ya gidiyordu — orada
+     öyle bir ekran yok, satır boşluğa tıklatıyordu. Ekranı olmayan
+     satır gösterilmiyor: şefin sessizce çalışmayan "kaydet" düğmesiyle
+     aynı hata (32. dosya kuralı). */
+  {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş",            i:"kilit",  g:"Ay sonu", yok:1},
+
+  /* PARA — "Merkez ofis" ve "Maaş tablosu" analiz grubundaydı, ikisi de
+     para. Muhasebe ile Merkez ofis tek satırda, sayfa üstünde şeritle. */
+  {k:"muhasebe", d:"muhasebe.html",  ad:"Muhasebe",           i:"para",   g:"Para",
+                 cift:"muhasebe", bas:1, sekme:"Muhasebe"},
+  {k:"ofis",     d:"ofis.html",      ad:"Merkez ofis",        i:"ofis",   g:"Para",
+                 cift:"muhasebe", sekme:"Merkez ofis"},
+  {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"cuzdan", g:"Para"},
+
+  /* ANALİZ + YÖNETİM — şantiye karşılaştırma ile şirket performansı
+     tek satırda. santiyeler.html bugüne kadar HİÇBİR role verilmemişti;
+     sayfa çalışıyordu ama kimse açamıyordu (32. dosya, 1. sorun). */
+  {k:"santiyeler", d:"santiyeler.html", ad:"Analiz",          i:"grafik", g:"Analiz ve yönetim",
+                 cift:"analiz", bas:1, sekme:"Şantiyeler"},
+  {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"grafik", g:"Analiz ve yönetim",
+                 cift:"analiz", sekme:"Şirket performansı"},
+  {k:"anaveri",  d:"yonetim.html",   ad:"Ana veri ve projeler", i:"ayar", g:"Analiz ve yönetim"},
+  {k:"kullanicilar", d:"kullanicilar.html", ad:"Kullanıcılar", i:"kisi",  g:"Analiz ve yönetim", yok:1},
+
+  {k:"isveren",  d:"isveren.html",   ad:"Raporlarım",         i:"kalkan", g:"Raporlarım"}
 ];
-var GRUP_SIRA = ["Genel","Günlük iş","Saha","Saham","Analiz","Finans","Raporlar","Yönetim"];
+var GRUP_SIRA = ["Günlük","Ay sonu","Para","Analiz ve yönetim","Raporlarım"];
 
 /* ---------- durum ---------- */
 var sb = null, erisim = null, cfg = {url:"", key:""}, AYAR = {};
@@ -122,7 +170,7 @@ function kabukKur(){
         '<span class="txt"><span class="t" id="sp-firma">Sondaj Panel</span>' +
         '<span class="s" id="sp-rol">—</span></span></div>' +
       '<div id="sp-menu"></div>' +
-      '<div class="foot">Sürüm 2.0</div>' +
+      '<div class="foot">Sürüm ' + SURUM + '</div>' +
     '</aside>' +
     '<div class="sp-main">' +
       '<div class="sp-top">' +
@@ -355,23 +403,83 @@ function sayfaHedef(s){
   return s.d;
 }
 
-function menuKur(){
+/* Kullanicinin acabildigi sayfalar, menude gosterilecek hale getirilmis:
+   ekrani olmayanlar atiliyor, es sayfalar tek satira katlaniyor. */
+function menuSatirlari(){
   var izin = erisim.sayfalar || {};
-  var gruplar = {};
+  var ciftler = {}, satirlar = [];
   SAYFALAR.forEach(function(s){
-    var y = izin[s.k]; if(!y) return;
-    (gruplar[s.g] = gruplar[s.g] || []).push({s:s, y:y});
+    if(s.yok) return;                 /* ekrani henuz yok */
+    var y = izin[s.k]; if(!y) return; /* yetkisi yok */
+    if(!s.cift){ satirlar.push({ad:s.ad, i:s.i, g:s.g, uyeler:[{s:s, y:y}]}); return; }
+    /* Es kume: menude TEK satir. Satirin adini "bas" tasiyor ama hedefi
+       kullanicinin acabildigi ILK uye belirliyor — patron santiyeler'i
+       goremeyip sirket'i gorebiliyor, satir yine calismali. */
+    var c = ciftler[s.cift];
+    if(!c){ c = ciftler[s.cift] = {uyeler:[]}; satirlar.push(c); }
+    c.uyeler.push({s:s, y:y});
+    /* Satirin adi "bas" uyesinden; o kullaniciya kapaliysa ilk acik
+       uyenin adindan. Boylece satir her durumda bir ad tasiyor. */
+    if(s.bas || !c.ad){ c.ad = s.ad; c.i = s.i; c.g = s.g; }
   });
-  var html = GRUP_SIRA.filter(function(g){ return gruplar[g]; }).map(function(g){
-    return '<div class="sp-grp"><div class="lbl">'+esc(g)+'</div><nav class="sp-nav">' +
-      gruplar[g].map(function(x){
-        var aktif = (x.s.k === AYAR.sayfa);
-        return '<a href="'+sayfaHedef(x.s)+'" class="'+(aktif?"on":"")+'">'+ikon(x.s.i) +
-               '<span>'+esc(x.s.ad)+'</span>' +
-               (x.y === "gir" ? '<span class="tag">giriş</span>' : '') + '</a>';
+  return satirlar.map(function(r){
+    var ilk = r.uyeler[0];
+    return {
+      k: ilk.s.k,
+      ad: r.ad, i: r.i, g: r.g,
+      hedef: sayfaHedef(ilk.s),
+      /* Satir, kumedeki herhangi bir sayfa acikken isaretli kalmali;
+         yoksa Merkez ofis'teyken menude hicbir sey secili gorunmuyor. */
+      anahtarlar: r.uyeler.map(function(u){ return u.s.k; }),
+      /* "giris" etiketi: kumede yazma yetkisi olan tek bir uye varsa bile. */
+      y: r.uyeler.some(function(u){ return u.y === "gir"; }) ? "gir" : "gor"
+    };
+  });
+}
+
+function menuKur(){
+  var gruplar = {};
+  menuSatirlari().forEach(function(r){ (gruplar[r.g] = gruplar[r.g] || []).push(r); });
+  var acikGruplar = GRUP_SIRA.filter(function(g){ return gruplar[g]; });
+  /* Rolun tek grubu varsa baslik hic yazilmiyor (32. dosya kurali):
+     sef "GUNLUK" basligini okuyup bir sey ogrenmiyor. */
+  var basliklar = acikGruplar.length > 1;
+  var html = acikGruplar.map(function(g){
+    return '<div class="sp-grp">' +
+      (basliklar ? '<div class="lbl">'+esc(g)+'</div>' : '') + '<nav class="sp-nav">' +
+      gruplar[g].map(function(r){
+        var aktif = r.anahtarlar.indexOf(AYAR.sayfa) >= 0;
+        return '<a href="'+r.hedef+'" class="'+(aktif?"on":"")+'">'+ikon(r.i) +
+               '<span>'+esc(r.ad)+'</span>' +
+               (r.y === "gir" ? '<span class="tag">giriş</span>' : '') + '</a>';
       }).join("") + '</nav></div>';
   }).join("");
   $("#sp-menu").innerHTML = html || '<div class="sp-grp"><div class="lbl">Menü boş</div></div>';
+}
+
+/* Es sayfalarin serit menusu — sayfanin ustunde, baslik ile icerik
+   arasinda. Menuden bir satir eksilirken sayfalar birbirine baglaniyor;
+   tek uye aciksa serit hic cizilmiyor, yoksa tek dugmelik bir sekme
+   cubugu kullaniciya hicbir sey soylemez. */
+function esSeridiKur(){
+  var eski = document.getElementById("sp-serit");
+  if(eski) eski.remove();
+  var bu = SAYFALAR.filter(function(s){ return s.k === AYAR.sayfa; })[0];
+  if(!bu || !bu.cift) return;
+  var izin = erisim.sayfalar || {};
+  var uyeler = SAYFALAR.filter(function(s){
+    return s.cift === bu.cift && !s.yok && izin[s.k]; });
+  if(uyeler.length < 2) return;
+  var d = document.createElement("div");
+  d.className = "sp-serit"; d.id = "sp-serit";
+  d.setAttribute("role", "tablist");
+  d.innerHTML = uyeler.map(function(s){
+    var aktif = (s.k === AYAR.sayfa);
+    return '<a href="' + sayfaHedef(s) + '" role="tab" aria-selected="' + aktif + '"' +
+           (aktif ? ' class="on"' : '') + '>' + esc(s.sekme || s.ad) + '</a>';
+  }).join("");
+  var ic = document.getElementById("sp-icerik");
+  if(ic && ic.parentNode) ic.parentNode.insertBefore(d, ic);
 }
 
 function ustKur(){
@@ -400,7 +508,21 @@ function yetkiAl(){
         "Bu kullanıcı için firma profili oluşturulmamış. Yöneticinizden hesabınızı tanımlamasını isteyin.");
       return;
     }
+    /* Bir dosya birden fazla yetki anahtarıyla açılabiliyor: panel.html
+       yöneticide "panel", şefte "sefozet". Tek anahtara bakılınca şefin
+       menüsündeki "Saha özetim" satırı kendi reddetme duvarına
+       çarpıyordu — satır menüde duruyor, tıklayınca "erişiminiz yok"
+       diyor. 22 Ekim'de düzenek yakaladı.
+       Eşleşen anahtar AYAR.sayfa'ya yazılıyor ki menüde doğru satır
+       işaretli kalsın. */
     var izin = (erisim.sayfalar || {})[AYAR.sayfa];
+    if(!izin && AYAR.esanahtar){
+      [].concat(AYAR.esanahtar).some(function(k){
+        var y = (erisim.sayfalar || {})[k];
+        if(y){ izin = y; AYAR.sayfa = k; return true; }
+        return false;
+      });
+    }
     if(!izin){
       uyariEkrani("Bu sayfaya erişiminiz yok",
         "<b>"+esc(erisim.rol_adi||"")+"</b> rolü bu sayfayı görüntüleyemiyor. " +
@@ -411,7 +533,7 @@ function yetkiAl(){
     AYAR.yetki = izin;
     bicimKur();
     $("#sp-shell").hidden = false;
-    menuKur(); ustKur();
+    menuKur(); ustKur(); esSeridiKur();
     if(typeof AYAR.hazir === "function") AYAR.hazir(erisim, izin);
   }).catch(function(e){
     kurulumEkrani("Sunucuya ulaşılamadı: " + (e && e.message ? e.message : e) +

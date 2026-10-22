@@ -31,11 +31,22 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     </div>
     <div id="msg" style="margin-top:12px"></div>
 
+    <!-- Dönemde hiç vardiya yoksa sıfır dolu tablo yerine tek cümle.
+         "0 m delinmiş" ile "bu aya kayıt girilmemiş" aynı şey değil;
+         birincisi yanlış bilgi (22 Ekim, saha panelindeki 7. maddenin
+         yönetici karşılığı). -->
+    <div id="bos-donem" hidden></div>
+
+    <div class="donem-blok">
     <div class="tiles" id="tiles"></div>
+
+    <!-- 22 Ekim · Tayfun: "Yönetici ilk etapta yapılan metrajlara bakar."
+         Ekran o soruyla açılıyor; mazot ve maliyet aşağıdaki kendi
+         bölümüne indi. -->
+    <div class="sechead"><h2>Bu ay ne kadar deldik?</h2><span>Günlük ilerleme, makine ve saha dağılımı</span></div>
 
     <div class="kuleler" id="kuleler"></div>
 
-    <div class="sechead"><h2>Metraj</h2><span>Delgi ve teslim</span></div>
     <div class="grid g2">
       <div class="card"><h3>Günlük metraj</h3><div class="note">Seçilen dönemde delinen metre</div><div id="chart-daily"></div></div>
       <div class="card"><h3>Makine delgi grafiği</h3><div class="note">Kesik çizgi makinelerin ortalaması</div><div id="chart-machine"></div></div>
@@ -45,7 +56,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div class="card"><h3>Sahalara göre delgi</h3><div class="note">Maden arama ve maden planlama ayrımı</div><div class="bars" id="chart-saha"></div></div>
     </div>
 
-    <div class="sechead"><h2>Sondörler</h2><span>Haftalık ilerleme ve yıllık toplam</span></div>
+    <div class="sechead"><h2>Sondörler ne yaptı?</h2><span>Haftalık ilerleme ve yıllık toplam</span></div>
     <div class="card">
       <h3>Haftalık ilerleme çizelgesi</h3>
       <div class="note">1–7, 8–15, 16–22 ve 23–31 arası; iptal edilen kuyular hariç</div>
@@ -58,7 +69,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div class="scroll" id="yearly"></div>
     </div>
 
-    <div class="sechead" id="kuyular"><h2>Kuyular</h2><span>Durum ve biten kuyu takibi</span></div>
+    <div class="sechead" id="kuyular"><h2>Kuyular nerede?</h2><span>Derinlik, kesit ve biten kuyu takibi</span></div>
 
     <div class="card">
       <div class="row" style="align-items:center">
@@ -80,7 +91,10 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div class="card"><h3>Biten kuyular</h3><div class="note">Dönem içinde tamamlananlar</div><div class="scroll" id="done-wells"></div></div>
     </div>
 
-    <div class="sechead"><h2>Maliyet</h2><span>Yakıt, harcamalar, matkap</span></div>
+    <div class="sechead"><h2>Bu metraj kaça mal oldu?</h2><span>Yakıt, harcamalar, matkap</span></div>
+    <!-- Mazot ve metre başı maliyet üstteki altılı ızgaradan buraya indi:
+         ilk bakışta metraj, para ikinci kademede (22 Ekim kararı). -->
+    <div class="tiles" id="tiles-maliyet"></div>
     <div class="grid g2">
       <div class="card"><h3>Makine performansı</h3><div class="note">Metraj, mazot ve metre başına tüketim</div><div class="scroll" id="machines"></div></div>
       <div class="card"><h3>Yakıt dağılımı</h3><div class="note">Makine ve araç bazında tutar</div><div class="bars" id="fuel"></div></div>
@@ -95,14 +109,20 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div class="card"><h3>Takılı matkaplar</h3><div class="note">Şu an makinelerde bulunanlar</div><div class="scroll" id="openbits"></div></div>
     </div>
 
-    <!-- Araç belgeleri: muayene/sigorta/kasko süresi dolanlar.
+    </div><!-- /donem-blok -->
+
+    <!-- Araç belgeleri DÖNEME BAĞLI DEĞİL: süresi dolan muayene ve
+         sigortalar, o ay vardiya girilmiş olsun olmasın uyarı veriyor.
+         Bu yüzden boş dönemde de görünür kalıyor.
          Tarihleri muhasebe giriyor, yönetici burada görüyor (36e). -->
     <div class="card"><h3>Araç belgeleri</h3>
       <div class="note">Süresi geçmiş ve 60 gün içinde dolacak muayene, sigorta ve kaskolar</div>
       <div class="scroll" id="arac-belge"></div></div>
 
-    <div class="sechead" id="puantaj"><h2>Puantaj</h2><span>Çalışılan gün, izin, avans</span></div>
-    <div class="card"><div class="scroll" id="attendance"></div></div>
+    <div class="donem-blok">
+      <div class="sechead" id="puantaj"><h2>Puantaj</h2><span>Çalışılan gün, izin, avans</span></div>
+      <div class="card"><div class="scroll" id="attendance"></div></div>
+    </div>
 
     <p class="foot">Bütün rakamlar sahadaki günlük vardiya kayıtlarından türetilir. İptal edilen kuyu metrajı delgi toplamına girer; sondör metrajına, teslim edilen metraja ve prime girmez.</p>
   </div>
@@ -123,7 +143,7 @@ function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return
 
 var sb=null, MASTER=null;
 
-SP.boot({sayfa:"panel", baslik:"Genel bakış", hazir:function(){
+SP.boot({sayfa:"panel", esanahtar:["sefozet","kuyular","puantaj"], baslik:"Genel bakış", hazir:function(){
   sb = SP.sb;
   boot();
   $("#k-sec").addEventListener("change", kuyuCiz);
@@ -347,18 +367,57 @@ function kuleleriCiz(liste){
   }).join("");
 }
 
+/* "2026-10" → "Ekim 2026". Kullanıcıya ay adıyla konuşuyoruz;
+   "2026-10" kimseye bir şey anlatmıyor. */
+var AY_ADLARI = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
+                 "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+function ayYaz(yil, ay){
+  var i = Number(ay) - 1;
+  return (i >= 0 && i < 12 ? AY_ADLARI[i] + " " : "") + yil;
+}
+function kutular(hedef, satirlar){
+  $(hedef).innerHTML = satirlar.filter(Boolean).map(function(x){
+    return '<div class="tile"><div class="k">'+x[0]+'</div><div class="v num">'+x[1]+
+           '</div><div class="s">'+x[2]+'</div></div>'; }).join("");
+}
+
 function renderDash(d){
   var t=d.totals;
   var ltPerM = t.meters>0 ? t.fuel_liters/t.meters : 0;
   var costPerM = t.meters>0 ? (Number(t.fuel_amount)+Number(t.cash)+Number(t.bank))/t.meters : 0;
-  $("#tiles").innerHTML=[
+
+  /* Dönemde hiç vardiya yoksa altı kutuluk sıfır ızgarası ve on tane
+     "veri yok" kartı gösterilmiyor; tek cümle yazılıyor. Araç belgeleri
+     döneme bağlı olmadığı için orada kalıyor. */
+  var bos = !(Number(t.shifts) || 0);
+  $("#bos-donem").hidden = !bos;
+  Array.prototype.forEach.call(document.querySelectorAll(".donem-blok"),
+    function(e){ e.hidden = bos; });
+  if(bos){
+    $("#bos-donem").innerHTML =
+      '<div class="card"><h3>Kayıt yok</h3>' +
+      '<div><b>' + esc(ayYaz($("#f-year").value, $("#f-month").value)) +
+      '</b> için panele girilmiş vardiya yok.</div>' +
+      '<div class="note" style="margin-top:6px">Vardiya girildikçe metraj, mazot ve ' +
+      'harcama burada toplanacak. Kuyuların açılış derinlikleri bu rakamlara girmez — ' +
+      'onlar panelden önceki metraj.</div></div>';
+    aracBelgeYukle();
+    return;
+  }
+
+  /* ÜSTTE YALNIZ METRAJ (22 Ekim). İptal kuyu sıfırsa kutusu hiç
+     çıkmıyor — "İptal kuyu 0,00" bilgi değil gürültü. */
+  kutular("#tiles", [
     ['Delinen metraj', tl(t.meters)+'<small>m</small>', t.work_days+' gün · '+t.shifts+' vardiya'],
     ['Teslim edilen', tl(t.delivered)+'<small>m</small>', t.wells_done+' kuyu bitti · '+t.wells_open+' devam'],
-    ['İptal kuyu', tl(t.cancelled)+'<small>m</small>', 'Hakedişe girmez'],
+    Number(t.cancelled) > 0
+      ? ['İptal kuyu', tl(t.cancelled)+'<small>m</small>', 'Hakedişe girmez'] : null
+  ]);
+  kutular("#tiles-maliyet", [
     ['Mazot', tl(t.fuel_liters)+'<small>lt</small>', money(t.fuel_amount)],
     ['Metre başı mazot', tl(ltPerM)+'<small>lt/m</small>', 'Dönem ortalaması'],
     ['Metre başı maliyet', money(costPerM), 'Mazot + harcamalar']
-  ].map(function(x){ return '<div class="tile"><div class="k">'+x[0]+'</div><div class="v num">'+x[1]+'</div><div class="s">'+x[2]+'</div></div>'; }).join("");
+  ]);
 
   vbars($("#chart-daily"), (d.daily||[]).map(function(r){
     return {label:r.d, short:String(r.d).slice(8,10), a:r.meters}; }), {aria:"Günlük metraj"});

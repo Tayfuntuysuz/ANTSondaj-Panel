@@ -113,6 +113,17 @@ a{color:inherit;text-decoration:none}
   display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
 .sp-kisi .ad{font-size:12.5px;font-weight:600;line-height:1.15}
 .sp-kisi .rol{font-size:10.5px;color:var(--ink-3)}
+/* Eş sayfa şeridi — menüden bir satır eksilirken sayfalar birbirine
+   bağlanıyor (22 Ekim menü sadeleştirmesi). Başlıkla içerik arasında,
+   üst çubuğa yapışık duruyor ki hangi ikizde olunduğu kaybolmasın. */
+.sp-serit{display:flex;gap:4px;padding:9px 20px 0;flex-wrap:wrap}
+.sp-serit a{padding:7px 13px;border-radius:8px 8px 0 0;font-size:13.5px;font-weight:500;
+  color:var(--ink-3);border:1px solid transparent;border-bottom:0;line-height:1.2}
+.sp-serit a:hover{color:var(--ink);background:var(--yumusak)}
+.sp-serit a.on{background:var(--card);border-color:var(--line);color:var(--ink);
+  box-shadow:0 -1px 0 var(--accent-2) inset}
+@media (max-width:640px){ .sp-serit{padding-inline:13px} }
+
 .sp-icerik{padding:18px 20px 52px;max-width:1300px;width:100%}
 
 /* ---------- kart ---------- */
