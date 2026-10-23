@@ -557,6 +557,45 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div id="run-msg"></div>
         <table><thead><tr><th>Çap</th><th>Başlangıç</th><th>Bitiş</th><th>Manevra</th><th></th></tr></thead><tbody id="runs"></tbody></table>
 
+        <!-- ============================================================
+             İLERLEME OLMAYAN VARDİYA — 23 Ekim, Murat'ın bildirdiği engel
+             ============================================================
+             "Takım çekilip tekrar kuyuya inildi, kuyu içi ölçümler
+             alındığı için metraj ilerlemesi yapılmadı. Sistem kayıt
+             yapılmasına izin vermiyor."
+
+             Önceden tek kaçış "makine hiç çalışmadı"ydı; o da vardiyanın
+             tamamını ARIZA yazıyor. Çalışan kuleyi arızalı göstermek hem
+             duruş istatistiğini bozuyor hem hakedişte aleyhimize dönüyor.
+             Burası ayrı yol: makine çalıştı, metraj yok.
+             ============================================================ -->
+        <div class="ayrac-ust" id="ilerleme-yok-blok">
+          <div class="arasi">
+            <span class="eyebrow">İlerleme olmadı mı?</span>
+            <button class="btn ghost sm" id="btn-ilerleme-yok" type="button">Bu vardiyada ilerleme olmadı</button>
+          </div>
+          <div class="hint">Takım çekildi, ölçüm alındı, muhafaza indirildi — metraj ilerlemediyse buradan işaretleyin.
+            Makine arızalıysa bunu değil 3. adımdaki arıza kaydını kullanın.</div>
+          <div id="iy-wrap" hidden style="margin-top:10px">
+            <div class="field"><label for="iy-sebep">Sebep <span class="req">*</span></label>
+              <select id="iy-sebep">
+                <option value="">— seçin —</option>
+                <option value="olcum">Kuyu içi ölçüm</option>
+                <option value="takim">Takım çekme / indirme</option>
+                <option value="muhafaza">Muhafaza borusu indirme</option>
+                <option value="temizleme">Kuyu temizleme / yıkama</option>
+                <option value="diger">Diğer</option>
+              </select></div>
+            <div class="field" id="iy-not-wrap" hidden><label for="iy-not">Ne yapıldı <span class="req">*</span></label>
+              <input id="iy-not" placeholder="Örn. jeofizik loglama ekibi bekledi"></div>
+            <div class="hint" id="iy-olcum-uyari" hidden>Ölçüm seçtiniz — aşağıdaki
+              <b>Kuyu ölçümü</b> bölümüne aldığınız ölçümleri yazın. Hakedişte ayrı
+              kalem olarak faturalanıyor.</div>
+            <button class="btn ghost sm" id="btn-iy-geri" type="button" style="margin-top:8px">Vazgeç</button>
+          </div>
+          <div id="iy-msg"></div>
+        </div>
+
         <!-- ÇAP DÜŞTÜ: bir kuyuda bir kere, bir alt çapa -->
         <div class="ayrac-ust">
           <div class="arasi">
@@ -572,16 +611,24 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <div id="cap-msg"></div>
         </div>
 
-        <!-- KUYU SONU: kalan malzeme + ölçüm -->
+        <!-- KUYU SONU: kuyuda kalan malzeme -->
         <div id="kuyusonu-wrap" hidden class="ayrac-ust">
           <span class="eyebrow">Kuyuda kalan malzeme</span>
           <div class="hint">Muhafaza borusu ve tij metre olarak girilir. Birden fazla satır eklenebilir.</div>
           <div id="kalan-liste"></div>
           <button class="btn ghost sm" id="btn-kalan-add" type="button"
             style="align-self:flex-start">Satır ekle</button>
+        </div>
 
-          <div class="eyebrow" style="margin-top:14px">Kuyu ölçümü</div>
-          <div class="hint">Derinlik, azimut ve eğim. Birden fazla ölçüm eklenebilir.</div>
+        <!-- KUYU ÖLÇÜMÜ — 23 Ekim'e kadar YALNIZ kuyu kapanışında
+             görünüyordu; o yüzden bugüne kadar hiç ölçüm girilmemiş.
+             Oysa sapma ölçümü kuyu sürerken, takım çekilirken alınıyor
+             ve hakedişin faturalanan kalemi. Artık kuyu sonunda VE
+             "ilerleme olmadı · ölçüm" seçildiğinde açılıyor. -->
+        <div id="olcum-wrap" hidden class="ayrac-ust">
+          <span class="eyebrow">Kuyu ölçümü</span>
+          <div class="hint">Kuyunun o derinlikteki gerçek eğimi ve azimutu.
+            Birden fazla ölçüm eklenebilir.</div>
           <div id="olcum-liste"></div>
           <button class="btn ghost sm" id="btn-olcum-add" type="button"
             style="align-self:flex-start">Ölçüm ekle</button>
@@ -2481,12 +2528,21 @@ function olcumCiz(){
       '<button class="sil olc-sil" type="button" aria-label="Bu ölçüm satırını sil">×</button>';
     var d = row.querySelector(".olc-d"), a = row.querySelector(".olc-a"), e = row.querySelector(".olc-e");
     d.value = o.derinlik || ""; a.value = o.azimut || ""; e.value = o.egim || "";
-    d.addEventListener("input", function(){ o.derinlik = d.value; });
+    /* refreshState: ölçüm artık 4. adımın eksiklerinden biri olabiliyor
+       ("ilerleme yok · ölçüm"). Yazıldığı anda adım çubuğu ✓'e dönmezse
+       şef hâlâ bir şey eksik sanıyor (23 Ekim, sınama yakaladı). */
+    d.addEventListener("input", function(){ o.derinlik = d.value; refreshState(); });
     a.addEventListener("input", function(){ o.azimut = a.value; });
     e.addEventListener("input", function(){ o.egim = e.value; });
     row.querySelector(".olc-sil").addEventListener("click", function(){ OLCUM.splice(i,1); olcumCiz(); });
     box.appendChild(row);
   });
+}
+/* Derinliği yazılmış ölçümler — hem doğrulama hem gönderim aynı
+   süzgeci kullansın ki ekranda "1 ölçüm var" derken boş satır
+   gönderilmesin. */
+function gecerliOlcumler(){
+  return OLCUM.filter(function(o){ return o.derinlik !== "" && o.derinlik != null; });
 }
 $("#btn-olcum-add").addEventListener("click", function(){
   var w = currentWell();
@@ -2496,9 +2552,75 @@ $("#btn-olcum-add").addEventListener("click", function(){
 function kuyuSonuGoster(){
   var son = $("#f-end").value === "kuyu_sonu";
   $("#kuyusonu-wrap").hidden = !son;
-  if(son && !KALAN.length && !OLCUM.length){ KALAN.push({tur:"", qty:"", unit:"metre"}); kalanCiz(); }
+  /* Ölçüm bölümü kuyu sonunda VE "ilerleme olmadı · ölçüm" seçildiğinde
+     açılıyor; ikisi birbirinden bağımsız (23 Ekim). */
+  $("#olcum-wrap").hidden = !(son || (ILERLEME_YOK && IY_SEBEP === "olcum"));
+  if(son && !KALAN.length){ KALAN.push({tur:"", qty:"", unit:"metre"}); kalanCiz(); }
 }
 $("#f-end").addEventListener("change", kuyuSonuGoster);
+
+/* ============================================================
+   İLERLEME OLMAYAN VARDİYA (23 Ekim · Murat'ın bildirdiği engel)
+   ============================================================
+   "Hiç çalışmadı"dan farkı: makine ÇALIŞTI, yalnız metraj ilerlemedi.
+   Arıza yazılmıyor, saatler çalışma sayılıyor, mazot zorunlu kalıyor.
+   ============================================================ */
+var ILERLEME_YOK = false, IY_SEBEP = "", IY_NOT = "";
+var IY_AD = {olcum:"Kuyu içi ölçüm", takim:"Takım çekme / indirme",
+             muhafaza:"Muhafaza borusu indirme",
+             temizleme:"Kuyu temizleme / yıkama", diger:"Diğer"};
+
+function ilerlemeYokCiz(){
+  $("#iy-wrap").hidden = !ILERLEME_YOK;
+  $("#btn-ilerleme-yok").hidden = ILERLEME_YOK;
+  $("#iy-not-wrap").hidden = (IY_SEBEP !== "diger");
+  $("#iy-olcum-uyari").hidden = (IY_SEBEP !== "olcum");
+  /* Manevra eklemenin bir anlamı kalmıyor: ikisi aynı anda olamaz. */
+  $("#btn-add-run").disabled = ILERLEME_YOK;
+  kuyuSonuGoster();
+  refreshState();
+  ilerlemeSeridiCiz();
+}
+function ilerlemeSeridiCiz(){
+  var el = $("#iy-serit");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "iy-serit"; el.className = "bant uy";
+    el.style.cssText = "border-radius:10px;margin:8px 0";
+    var h = $("#serit-ust");
+    if(h && h.parentNode) h.parentNode.insertBefore(el, h.nextSibling);
+  }
+  el.hidden = !ILERLEME_YOK;
+  if(ILERLEME_YOK){
+    el.textContent = "İlerleme yok" +
+      (IY_SEBEP ? " · " + (IY_AD[IY_SEBEP] || IY_SEBEP) : "") +
+      " — metraj sıfır, makine çalıştı.";
+  }
+}
+$("#btn-ilerleme-yok").addEventListener("click", function(){
+  if(runs.length){
+    msg($("#iy-msg"), "Bu vardiyada manevra yazılmış. Önce manevraları silin.", "err");
+    return;
+  }
+  ILERLEME_YOK = true; msg($("#iy-msg"), ""); ilerlemeYokCiz();
+});
+$("#btn-iy-geri").addEventListener("click", function(){
+  ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
+  $("#iy-sebep").value = ""; $("#iy-not").value = "";
+  msg($("#iy-msg"), ""); ilerlemeYokCiz();
+});
+$("#iy-sebep").addEventListener("change", function(){
+  IY_SEBEP = $("#iy-sebep").value;
+  /* Ölçüm seçilince ilk satır kendiliğinden açılıyor — şef "ölçüm ekle"
+     düğmesini aramasın, hakedişin kalemi sessizce boş kalmasın. */
+  if(IY_SEBEP === "olcum" && !OLCUM.length){
+    var w = currentWell();
+    OLCUM.push({derinlik:"", azimut:(w && w.azimuth) || "", egim:(w && w.dip) || ""});
+    olcumCiz();
+  }
+  ilerlemeYokCiz();
+});
+$("#iy-not").addEventListener("input", function(){ IY_NOT = $("#iy-not").value; refreshState(); });
 
 /* ---------------- kuyuda kullanılan malzeme (tüketim) ---------------- */
 function kullanilanMalzemeler(){
@@ -2674,7 +2796,20 @@ function stepProblems(n){
   /* 30j: "bu vardiyada hiç çalışmadı" işaretliyse 4. ve 5. adım eksik
      saymıyor. Metraj yok çünkü makine çalışmadı; mazot da yakılmadı.
      Ekip (2) ve kontrol (3) duruyor — adam sahada, puantajı işliyor. */
-  if(n === 4){ if(!HIC_CALISMADI && !runs.length) p.push("en az bir manevra"); }
+  /* 23 Ekim · ilerleme olmayan vardiya: manevra zorunluluğu kalkıyor
+     ama yerine SEBEP zorunlu oluyor — sebepsiz "ilerleme yok" altı ay
+     sonra kimseye bir şey anlatmıyor. */
+  if(n === 4){
+    if(ILERLEME_YOK){
+      if(!IY_SEBEP) p.push("ilerleme olmama sebebi");
+      else if(IY_SEBEP === "diger" && !$("#iy-not").value.trim()) p.push("ne yapıldığı");
+      else if(IY_SEBEP === "olcum" && !gecerliOlcumler().length) p.push("en az bir ölçüm");
+    }
+    else if(!HIC_CALISMADI && !runs.length) p.push("en az bir manevra");
+  }
+  /* Mazot: "hiç çalışmadı"da kalkıyor, "ilerleme yok"ta KALKMIYOR —
+     takım çekip indirirken motor çalışıyor, mazot yanıyor
+     (Tayfun, 23 Ekim: "makina çalışıyorsa mazot zorunlu"). */
   if(n === 5){ if(!HIC_CALISMADI && $("#f-fuel").value === "") p.push("mazot"); }
   return p;
 }
@@ -3192,7 +3327,9 @@ $("#btn-save-shift").addEventListener("click", function(){
                     .map(function(r){ return {diameter:r.tur.slice(4), metre:Number(r.qty)}; }),
       other:   KALAN.filter(function(r){ return r.tur.indexOf("mat:") === 0 && Number(r.qty) > 0; })
                     .map(function(r){ return {material_id:r.tur.slice(4), qty:Number(r.qty), unit:r.unit||"metre"}; }),
-      surveys: OLCUM.filter(function(o){ return o.derinlik !== "" && o.derinlik != null; })
+      /* Ölçümler kuyu sonunda da ayrı kuyruk kaydıyla gidiyor (aşağıda),
+         burada boş bırakılıyor — tek yol olsun, iki yerden yazılmasın. */
+      surveys: []
     } : null
   };
   var savedDepth = depth();
@@ -3209,6 +3346,22 @@ $("#btn-save-shift").addEventListener("click", function(){
       title:"Hiç çalışmadı · " + wellCode,
       sub:"makine arızası · " + item.payload.work_date,
       payload:{ client_uuid:cu, kind:CALISMADI_TIP } });
+  }
+  /* İlerleme olmayan vardiya ve ölçümler de vardiyanın PEŞİNDEN gidiyor;
+     sunucu ikisini de client_uuid'den buluyor. Sıra önemli: önce işaret,
+     sonra ölçümler (23 Ekim). */
+  if(ILERLEME_YOK){
+    durusKuyrugu.push({ id:uuid(), kind:"ilerlemesiz", created:Date.now()+1,
+      title:"İlerleme yok · " + wellCode,
+      sub:(IY_AD[IY_SEBEP] || IY_SEBEP) + " · " + item.payload.work_date,
+      payload:{ client_uuid:cu, sebep:IY_SEBEP, note:$("#iy-not").value.trim() || null } });
+  }
+  var olcumler = gecerliOlcumler();
+  if(olcumler.length){
+    durusKuyrugu.push({ id:uuid(), kind:"olcum", created:Date.now()+2,
+      title:"Kuyu ölçümü · " + wellCode,
+      sub:olcumler.length + " ölçüm · " + item.payload.work_date,
+      payload:{ client_uuid:cu, surveys:olcumler } });
   }
   BEKLEMELER.forEach(function(b, i){
     durusKuyrugu.push({ id:uuid(), kind:"bekleme", created:Date.now()+2+i,
@@ -3276,6 +3429,11 @@ function resetForm(){
   /* Duruş kartı sıfırlanıyor: yeni vardiyaya eski beklemeler taşınmasın. */
   BEKLEMELER = []; beklemeListeCiz();
   HIC_CALISMADI = false; calismadiSeridiCiz();
+  ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
+  if($("#iy-sebep")) $("#iy-sebep").value = "";
+  if($("#iy-not")) $("#iy-not").value = "";
+  if($("#btn-add-run")) $("#btn-add-run").disabled = false;
+  ilerlemeYokCiz();
   AR_SON = ""; $$('#ar-son .chip').forEach(function(x){ x.setAttribute("aria-pressed","false"); });
   if($("#ar-bit-wrap")) $("#ar-bit-wrap").hidden = true;
   $("#bk-sebep").value = ""; $("#bk-bas").value = ""; $("#bk-bit").value = "";
@@ -4000,6 +4158,19 @@ function sendItem(it, tenant){
        kayıt kuyrukta kalıyor. */
     return sb.rpc("vardiya_calismadi_cu", {p_client:it.payload.client_uuid,
       p_kind:it.payload.kind || "mekanik", p_not:it.payload.note || null})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  if(it.kind === "ilerlemesiz"){
+    /* Makine çalıştı ama metraj ilerlemedi. Arıza YAZILMIYOR — sunucu
+       yalnız sebebi vardiyaya işliyor (48. adım). */
+    return sb.rpc("ilerlemesiz_vardiya_cu", {p_client:it.payload.client_uuid,
+      p_sebep:it.payload.sebep, p_not:it.payload.note || null})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  if(it.kind === "olcum"){
+    /* Kuyu içi sapma ölçümleri — hakedişin faturalanan kalemi. */
+    return sb.rpc("olcum_kaydet_cu", {p_client:it.payload.client_uuid,
+      p_surveys:it.payload.surveys || []})
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
   }
   if(it.kind === "bekleme"){
@@ -5202,7 +5373,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "41";
+var SURUM = "42";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
