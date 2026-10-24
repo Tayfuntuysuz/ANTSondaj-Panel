@@ -118,6 +118,11 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .ekip-satir{display:flex;justify-content:space-between;align-items:center;gap:8px;
   padding:9px 0;border-bottom:1px solid var(--line-soft)}
 .ekip-satir:last-child{border-bottom:0}
+/* Görev başlığı (65. dosya). Kendi çizgisi YOK: üstündeki satırın alt
+   çizgisi zaten ayırıyor, ikisi birden olunca çift çizgi çıkıyordu. */
+.ekip-grup{display:flex;justify-content:space-between;align-items:baseline;
+  gap:8px;padding:15px 0 4px}
+.ekip-grup:first-child{padding-top:2px}
 .q-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
 .q-satir.takildi{border-color:var(--bad);background:var(--bad-soft)}
 /* Takılan kayıt uyarısı — "kaydedildi" diyen ekranın içinde (20 Ekim dersi) */
@@ -843,14 +848,40 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <div class="field"><label for="b-dia">Çap <span class="req">*</span></label>
             <select id="b-dia"><option value="">— seçin —</option><option>HQ</option><option>PQ</option><option>NQ</option><option>PW</option></select></div>
         </div>
+        <!-- MARKA (64. dosya) — liste 8'den 30'a çıktı ve artık kütükten
+             geliyor. Murat'ın 45 satırlık tablosunda 25 marka vardı,
+             listede yalnız 2'si tutuyordu; kalanı "Diğer" seçilip marka
+             tamamen kayboluyordu. "Hangi marka hangi formasyonda kaç
+             metre yapıyor" sorusu bu yüzden cevapsızdı.
+             Marka ve sertlik TEK alan (Tayfun, 24 Ekim). -->
         <div class="grid2">
           <div class="field"><label for="b-brand">Marka <span class="req">*</span></label>
-            <select id="b-brand"><option value="">— seçin —</option><option>Terekalmaz 5/7</option><option>Terekalmaz 5/7 (çıkma)</option>
-            <option>Geo MRA 2 Yeşil</option><option>Geo MRA 3 Mavi</option><option>Wattel Bordo</option><option>Wattel Bordo Turbo</option><option>Neolit 5/7</option><option>Diğer</option></select></div>
+            <select id="b-brand"></select></div>
           <div class="field"><label for="b-serial">Seri no</label><input id="b-serial" placeholder="varsa"></div>
         </div>
-        <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label><input id="b-from" type="number" min="0" inputmode="decimal">
-          <div class="hint" id="b-from-hint">Kuyu seçilince kuyunun bulunduğu metre kendiliğinden yazılır. Farklıysa değiştirin.</div></div>
+        <!-- "Diğer" seçilince: yazı kutusu çıkıyor ve KAYBOLMUYOR.
+             Marka hiçbir zaman "Diğer" diye kaydedilmiyor. -->
+        <div class="field" id="b-yeni-wrap" hidden>
+          <label for="b-yeni">Yeni markanın adı <span class="req">*</span></label>
+          <div class="satir">
+            <input id="b-yeni" class="esnek" placeholder="Örn. Fastdrill Red">
+            <button class="btn ghost mini" id="btn-marka-ekle" type="button">Listeye ekle</button>
+          </div>
+          <div class="hint" id="b-yeni-msg">Eklenen marka listede kalır, bir daha yazmanız gerekmez.</div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label>
+            <input id="b-from" type="number" min="0" inputmode="decimal">
+            <div class="hint" id="b-from-hint">Kuyu seçilince kuyunun bulunduğu metre kendiliğinden yazılır. Farklıysa değiştirin.</div></div>
+          <!-- ÇIKMA (ikinci el): Murat'ın tablosunda "ÇIKMA" marka
+               hanesine yazılıyordu; marka değil işaret (Tayfun, 24 Ekim). -->
+          <div class="field"><label for="b-onceki">Önceki yaptığı metre</label>
+            <input id="b-onceki" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0">
+            <div class="hint">Çıkma matkapsa daha önce kaç metre yaptığı.</div></div>
+        </div>
+        <label class="dizi" style="margin-top:4px">
+          <input type="checkbox" id="b-cikma" style="width:auto;min-height:0">
+          <span>Çıkma (ikinci el) matkap</span></label>
         <button class="btn" id="btn-bit-install" type="button">Matkabı tak</button>
         <div id="bit-msg"></div>
       </div>
@@ -861,14 +892,20 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="grid2">
           <div class="field"><label for="b-to">Çıktığı metre <span class="req">*</span></label><input id="b-to" type="number" min="0" inputmode="decimal"></div>
           <div class="field"><label for="b-status">Durum <span class="req">*</span></label>
-            <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option></select>
+            <!-- 64. dosya: Murat'ın tablosunda iki durum daha vardı —
+                 ÇAP DÜŞÜLDÜ ve KUYUDA KALDI. İkincisi önemli: kuyuda
+                 kalan matkap hem para hem balıkçılık işi; "bitti" diye
+                 yazılırsa kayboluyor. -->
+            <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option><option value="cap_dusuldu">Çap düşüldü</option><option value="kuyuda_kaldi">Kuyuda kaldı</option></select>
               <!-- Tayfun, 22 Ekim: "Bitti ve matris döktü arasındaki fark nedir?"
-                   Üç durum kâğıt aylık rapordan geliyor ama ekranda açıklaması
+                   Durumlar kâğıt aylık rapordan geliyor ama ekranda açıklaması
                    yoktu. Şef de aynı soruyu soracak. -->
               <div class="hint" id="b-status-hint">
                 <b>Bitti:</b> ömrünü tamamladı, matris aşındı, ilerleme düştü.<br>
                 <b>Matris döktü:</b> erken bitti — gövde aşınarak değil kopup dökülerek gitti.<br>
-                <b>Kullanılır:</b> ömrü var, başka sebeple çıkarıldı (çap değişti, kuyu bitti).<br>
+                <b>Kullanılır:</b> ömrü var, başka sebeple çıkarıldı.<br>
+                <b>Çap düşüldü:</b> kuyu bir alt çapa geçti, matkap o yüzden çıktı — stoğa döner.<br>
+                <b>Kuyuda kaldı:</b> matkap kuyuda kaldı, <b>kayıp</b> — stoğa dönmez.<br>
                 Ayrı tutuluyor: "şu marka şu formasyonda döküyor" ile "şu kulede döküyor"
                 farklı iki sorun — biri matkap seçimi, diğeri çalışma koşulu.
               </div></div>
@@ -968,6 +1005,12 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <div class="field"><label for="p-date">Tarih <span class="req">*</span></label><input id="p-date" type="date"></div>
         </div>
         <div id="att-ozet" class="ozet-kutu">Yükleniyor…</div>
+        <!-- 65. dosya · Tayfun: "Bu yazı gece ekibinin kartında yazıyor,
+             kafa karıştırıyor. Onu karttan çıkar, bir alta ayrı yaz."
+             Uyarı eskiden att-ozet gövdesinin sonuna ekleniyordu ve son
+             bölümün — yani GECE'nin — parçası gibi okunuyordu. Oysa
+             cümle iki vardiya için birden geçerli. -->
+        <div id="att-beklenen-not" class="hint" hidden style="margin:6px 2px 0"></div>
         <div id="att-msg"></div>
         <button class="btn ghost" id="btn-att-exc" type="button">+ Kişi durumu değiştir</button>
         <div id="att-sec" hidden>
@@ -1093,6 +1136,8 @@ td:first-child{text-align:start;color:var(--ink-2)}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
+<script src="kart.js"></script>
 <script>
 (function(){
 "use strict";
@@ -1322,6 +1367,7 @@ function fillSelects(){
   if(pr.length === 1) $("#f-project").value = pr[0].id;
   fillWells();
   sefSatiriCiz();
+  markaListesiCiz();
   $("#acct-info").textContent = (MASTER.tenant ? MASTER.tenant.name : "") + " · " +
     (MASTER.profile ? MASTER.profile.full_name + " (" + MASTER.profile.role + ")" : "");
   $("#who").textContent = MASTER.profile ? MASTER.profile.full_name.split(" ")[0] : "";
@@ -4264,7 +4310,11 @@ function sendItem(it, tenant){
   if(it.kind === "bit_install"){
     return sb.rpc("bit_install", {p_machine:it.payload.machine_id, p_well:realWellId(it.payload.well_id),
       p_brand:it.payload.brand, p_hardness:it.payload.hardness, p_diameter:it.payload.diameter,
-      p_serial:it.payload.serial, p_from:it.payload.from_m, p_date:it.payload.date})
+      p_serial:it.payload.serial, p_from:it.payload.from_m, p_date:it.payload.date,
+      /* 64. dosya: çıkma matkap ve daha önce yaptığı metre. Eski
+         kuyrukta bu iki alan yok; o yüzden varsayılanlı okunuyor. */
+      p_second_hand: !!it.payload.second_hand,
+      p_prev_meters: Number(it.payload.prev_meters || 0)})
       .then(function(r){ if(r.error) throw r.error;
         var m = {}; try { m = JSON.parse(localStorage.getItem("sp_bitmap") || "{}"); } catch(e){}
         m[it.payload.local_id] = r.data;
@@ -4432,19 +4482,41 @@ function kuyuVardiyalari(dugme){
               (s.paper_no ? ' · form ' + s.paper_no : '') + '</span>' +
               (s.status === "corrected" ? '<span class="pill warn">düzeltildi</span>' : '') +
             '</div>' +
+            /* 63. dosya · Tayfun: "Düzelt karta geçince olsun, görüntüle
+               kısmı ilk başta olsun." Bakmak isteyen artık yanlışlıkla
+               düzeltme başlatmıyor; kilit denetimi yalnız kartın
+               içindeki Düzelt'e basınca çalışıyor. */
             '<div class="kayit-alt"><span class="num">' + tl(sums[s.id]||0) + ' m</span>' +
-              '<span class="kayit-dugme"><button class="btn ghost mini duzelt" type="button" ' +
-              'data-shift="' + s.id + '">Düzelt</button></span>' +
-            '</div></div>';
+              '<span class="kayit-dugme"><button class="btn ghost mini gorun" type="button" ' +
+              'data-shift="' + s.id + '">Görüntüle</button></span>' +
+            '</div><div class="vk-yuva" hidden></div></div>';
         }).join("");
-        box.querySelectorAll(".duzelt").forEach(function(b){
+        box.querySelectorAll(".gorun").forEach(function(b){
           b.addEventListener("click", function(){
+            var kayit = b.closest(".kayit");
+            var yuva = kayit.querySelector(".vk-yuva");
+            if(!yuva.hidden){                      /* ikinci basış kapatıyor */
+              yuva.hidden = true; yuva.innerHTML = "";
+              b.textContent = "Görüntüle"; return;
+            }
             var sat = rows.filter(function(x){ return x.id === b.dataset.shift; })[0];
-            /* Cevabı BASILAN SATIRIN altına yazıyoruz. Önceden tek bir
-               #recent-msg vardı ve listenin EN ALTINDAydı: şef üstteki
-               satırda Düzelt'e basıyor, "bu kaydı siz girmediniz" yazısı
-               ekranın dışında kalıyor, düğme çalışmıyor sanıyordu. */
-            if(sat) vardiyaDuzelt(sat, b.closest(".kayit") || b.parentNode);
+            yuva.hidden = false;
+            b.textContent = "Kapat";
+            VKART.ac(sb, b.dataset.shift, yuva, function(){
+              /* Düzelt kartın içinde: cevabı da kartın altına yazıyor.
+                 Önceden tek bir #recent-msg vardı ve listenin EN
+                 ALTINDAydı; şef üstteki satırda basıyor, "bu kaydı siz
+                 girmediniz" yazısı ekranın dışında kalıyordu. */
+              if(!sat) return;
+              var d = document.createElement("div");
+              d.style.marginTop = "10px";
+              var db = document.createElement("button");
+              db.type = "button"; db.className = "btn ghost sm";
+              db.textContent = "Düzelt";
+              db.addEventListener("click", function(){ vardiyaDuzelt(sat, d); });
+              d.appendChild(db);
+              yuva.querySelector(".vk-kart").appendChild(d);
+            });
           });
         });
       });
@@ -4680,9 +4752,60 @@ $("#btn-stok-yenile").addEventListener("click", loadStok);
    kısıtlıyorsak yanlışı giriş anında yakalamak zorundayız: engellemiyoruz,
    ama sessiz de geçmiyoruz — ikinci basışta kaydediyor.
    ============================================================ */
+/* ---------------- matkap markaları (64. dosya) ----------------
+   Liste artık kütükten geliyor ve MASTER'la birlikte çevrimdışı
+   önbelleğe giriyor: şef bağlantısız da matkap takabilmeli. */
+function markalar(){
+  var l = (MASTER && MASTER.bit_brands) || [];
+  return l.slice().sort(function(a,b){ return String(a).localeCompare(String(b), "tr"); });
+}
+function markaListesiCiz(){
+  var sel = $("#b-brand"); if(!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— seçin —</option>' +
+    markalar().map(function(m){
+      return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join("") +
+    '<option value="__diger">Diğer — listede yok</option>';
+  if(cur) sel.value = cur;
+  markaDigerCiz();
+}
+/* Yazı kutusu "Diğer" seçili kaldığı sürece KAYBOLMUYOR (Tayfun). */
+function markaDigerCiz(){
+  var d = $("#b-brand").value === "__diger";
+  $("#b-yeni-wrap").hidden = !d;
+}
+$("#b-brand").addEventListener("change", markaDigerCiz);
+
+$("#btn-marka-ekle").addEventListener("click", function(){
+  var ad = $("#b-yeni").value.trim();
+  if(!ad){ msg($("#b-yeni-msg"), "Marka adı yazın.", "err"); return; }
+  if(!navigator.onLine || !sb){
+    /* Çevrimdışıyken de matkap takılabilmeli: marka kütüğe sonra
+       girer, matkabın markası şimdi yazılan adla kaydedilir. */
+    msg($("#b-yeni-msg"), "Çevrimdışısınız — marka bu matkaba yazılır, " +
+        "listeye bağlantı gelince eklenir.", "warn");
+    return;
+  }
+  sb.rpc("matkap_marka_ekle", {p_name: ad}).then(function(r){
+    if(r.error){ msg($("#b-yeni-msg"), hataTr(r.error.message), "err"); return; }
+    if(!MASTER.bit_brands) MASTER.bit_brands = [];
+    if(MASTER.bit_brands.indexOf(ad) < 0) MASTER.bit_brands.push(ad);
+    try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
+    markaListesiCiz();
+    $("#b-brand").value = ad;      /* eklenen marka hemen seçili */
+    markaDigerCiz();
+    $("#b-yeni").value = "";
+    msg($("#b-yeni-msg"), "<b>" + esc(ad) + "</b> listeye eklendi.", "ok");
+  });
+});
+
 var BITONAY = null;     /* onaylanmış sapmalı değer */
 $("#btn-bit-install").addEventListener("click", function(){
-  var mach = $("#b-machine").value, dia = $("#b-dia").value, brand = $("#b-brand").value;
+  var mach = $("#b-machine").value, dia = $("#b-dia").value;
+  /* "Diğer" bir marka DEĞİL: seçiliyse yazılan ad kullanılıyor.
+     Marka hiçbir zaman "Diğer" diye kaydedilmiyor (64. dosya). */
+  var brand = $("#b-brand").value;
+  if(brand === "__diger") brand = $("#b-yeni").value.trim();
   var from = $("#b-from").value === "" ? null : Number($("#b-from").value);
   if(!mach || !dia || !brand || from === null){ msg($("#bit-msg"), "Makine, çap, marka ve takıldığı metre zorunlu.", "err"); return; }
   var kuyu = (MASTER && MASTER.wells || []).filter(function(x){ return x.id === $("#b-well").value; })[0];
@@ -4708,8 +4831,12 @@ $("#btn-bit-install").addEventListener("click", function(){
   enqueue({ id:uuid(), kind:"bit_install", created:Date.now(),
     title:"Matkap takıldı · " + brand, sub: machName + " · " + tl(from) + " m",
     payload:{ local_id:localId, machine_id:mach, well_id:$("#b-well").value || null, brand:brand,
-              hardness:null, diameter:dia, serial:$("#b-serial").value || "", from_m:from, date:todayStr() } })
+              hardness:null, diameter:dia, serial:$("#b-serial").value || "", from_m:from,
+              date:todayStr(),
+              second_hand: $("#b-cikma").checked,
+              prev_meters: $("#b-onceki").value === "" ? 0 : Number($("#b-onceki").value) } })
   .then(function(){ $("#b-serial").value="";
+    $("#b-cikma").checked = false; $("#b-onceki").value = "";
     $("#b-from").value = (kuyu && kuyu.current_depth != null) ? Number(kuyu.current_depth) : "";
     msg($("#bit-msg"), "Matkap kaydedildi. Yanlışsa yukarıdaki listeden " +
         "<b>İptal</b> ile geri alabilirsiniz — metraj işlemeye başlamadan.", "ok"); });
@@ -4800,9 +4927,17 @@ function santiyeAdi(){
 var PUANTAJ_GUN = null;
 var BEKLENEN_EKIP = null;   /* o güne vardiya girilmemişken: son vardiyanın ekibi */
 
+/* Beklenen ekip uyarısı kartın DIŞINDA, altında duruyor (65. dosya).
+   Vardiya girilmiş günde hiç çıkmıyor. */
+function beklenenNot(metin){
+  var el = $("#att-beklenen-not"); if(!el) return;
+  el.hidden = !metin;
+  el.textContent = metin || "";
+}
 function attOzet(){
   var n = ekip().length, k = Object.keys(ATT_IST).length;
   var kutu = $("#att-ozet");
+  beklenenNot("");                  /* her çizimde sıfırla */
   if(!n){
     kutu.innerHTML = "Bu şantiyede bu tarihte görevli kimse yok. " +
       "Aşağıdan <b>Saha ekibi</b> bölümünden kişi alın.";
@@ -4831,12 +4966,11 @@ function attOzet(){
               '<div class="hint" style="margin-top:3px">' +
               kisiler.map(function(x){ return esc(x.ad); }).join(" · ") + "</div></div>";
       });
-      h0 += '<div class="hint" style="margin-top:6px">Bu güne henüz vardiya ' +
-            'girilmemiş. Yukarıdakiler son vardiyanın ekibi — vardiya girilince ' +
-            'kesinleşir.</div>';
+      beklenenNot("Bu güne henüz vardiya girilmemiş. Yukarıdakiler son " +
+                  "vardiyanın ekibi — vardiya girilince kesinleşir.");
     } else {
-      h0 += '<div class="hint" style="margin-top:6px">Bu güne henüz vardiya girilmemiş; ' +
-            'gece/gündüz ayrımı vardiya girildikten sonra çıkar.</div>';
+      beklenenNot("Bu güne henüz vardiya girilmemiş; gece/gündüz ayrımı " +
+                  "vardiya girildikten sonra çıkar.");
     }
     kutu.innerHTML = h0;
   } else {
@@ -5060,20 +5194,44 @@ $("#btn-ekip-ac").addEventListener("click", function(){
   $("#btn-ekip-ac").textContent = ac ? "Kapat" : "Düzenle";
   if(ac) ekipCiz();
 });
+/* 65. dosya · Tayfun: "Listede sondörler, yardımcılar, işçiler vs. gibi
+   bir düzen olsun. Alt başlık koyabilirsin."
+   20 kişilik düz ada göre sıralı listede "kaç sondörüm var" ancak tek tek
+   okuyarak cevaplanıyordu. Sıra ALFABETİK DEĞİL, kulede duruş sırasına
+   göre: listeye bakarken önce sondör aranıyor. */
+var EKIP_SIRA = ["sondor", "sondor_yardimcisi", "alt_eleman", "sofor",
+                 "santiye_sefi", "destek", "diger"];
 function ekipCiz(){
   var box = $("#ekip-liste"); box.innerHTML = "";
   var ks = ekip();
   if(!ks.length){ box.innerHTML = '<div class="hint">Bu tarihte bu şantiyede görevli kimse yok.</div>';
     attOzet(); return; }
-  ks.forEach(function(p){
-    var d = document.createElement("div"); d.className = "ekip-satir";
-    d.innerHTML = "<span><b>" + p.full_name + "</b><br><span class='hint'>" +
-                  gorevAdi(p.kind) +
-                  (p.from_date ? " · " + p.from_date + "'den beri" : "") + "</span></span>";
-    var cik = document.createElement("button");
-    cik.type = "button"; cik.className = "btn ghost sm"; cik.textContent = "Çıkar";
-    cik.addEventListener("click", function(){ ekipCikar(p); });
-    d.appendChild(cik); box.appendChild(d);
+  /* Listede olup EKIP_SIRA'da olmayan bir görev çıkarsa sona ekleniyor;
+     yeni bir personel_kind sessizce kaybolmasın. */
+  var gruplar = {};
+  ks.forEach(function(p){ (gruplar[p.kind] = gruplar[p.kind] || []).push(p); });
+  var sira = EKIP_SIRA.slice();
+  Object.keys(gruplar).forEach(function(k){ if(sira.indexOf(k) < 0) sira.push(k); });
+
+  sira.forEach(function(k){
+    var liste = gruplar[k];
+    if(!liste || !liste.length) return;      /* boş başlık yer kaplamasın */
+    var bas = document.createElement("div");
+    bas.className = "ekip-grup";
+    bas.innerHTML = '<span class="eyebrow">' + esc(gorevAdi(k)) + '</span>' +
+                    '<span class="hint">' + liste.length + '</span>';
+    box.appendChild(bas);
+    liste.forEach(function(p){
+      var d = document.createElement("div"); d.className = "ekip-satir";
+      /* Görev artık başlıkta; satırda tekrar yazmıyor, yerine tarih. */
+      d.innerHTML = "<span><b>" + esc(p.full_name) + "</b>" +
+                    (p.from_date ? "<br><span class='hint'>" + esc(p.from_date) +
+                                   "'den beri</span>" : "") + "</span>";
+      var cik = document.createElement("button");
+      cik.type = "button"; cik.className = "btn ghost sm"; cik.textContent = "Çıkar";
+      cik.addEventListener("click", function(){ ekipCikar(p); });
+      d.appendChild(cik); box.appendChild(d);
+    });
   });
   attOzet();
 }
@@ -5445,7 +5603,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "43";
+var SURUM = "44";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

@@ -68,6 +68,14 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div class="card"><h3>Sahalara göre delgi</h3><div class="note">Maden arama ve maden planlama ayrımı</div><div class="bars" id="chart-saha"></div></div>
     </div>
 
+    <!-- VARDİYA VARDİYA (63. dosya)
+         Tayfun: "Yöneticide de olsun, vardiyaya tıkladığında o da görsün."
+         Panelde bugüne kadar bir vardiyanın içine girecek hiçbir yol
+         yoktu; yalnız toplamlar görünüyordu. -->
+    <div class="sechead"><h2>Vardiya vardiya ne girildi?</h2>
+      <span>Satıra tıklayınca o vardiyaya yazılan her şey açılır</span></div>
+    <div class="card"><div class="scroll" id="vardiyalar"></div></div>
+
     <div class="sechead"><h2>Sondörler ne yaptı?</h2><span>Haftalık ilerleme ve yıllık toplam</span></div>
     <div class="card">
       <h3>Haftalık ilerleme çizelgesi</h3>
@@ -96,6 +104,13 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
         <div id="k-cizim"><div class="hint">Kuyu seçin.</div></div>
         <div id="k-bilgi"></div>
       </div>
+
+      <!-- MATKAP ZİNCİRİ (64. dosya)
+           Murat'ın MATKAP TAKİBİ Excel'inin panel karşılığı. Aylık
+           rapordaki matkap tablosu AYI kesiyor; bu kuyunun başından
+           sonuna gidiyor. Zincirin değeri sürekliliğinde: her satırın
+           girişi bir öncekinin çıkışı. -->
+      <div id="matkap-zincir" style="margin-top:16px"></div>
     </div>
 
     <div class="grid g2">
@@ -142,6 +157,8 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="app-shell.js"></script>
+<!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
+<script src="kart.js"></script>
 <script>
 (function(){
 "use strict";
@@ -227,8 +244,61 @@ function kuyuListesi(){
   $("#k-bilgi").innerHTML = '';
 }
 
+/* ---------------- kuyu bazlı matkap zinciri (64. dosya) ---------------- */
+var MATKAP_DURUM = {bitti:"Bitti", matris_doktu:"Matris döktü",
+  kullanilir:"Kullanılır", cap_dusuldu:"Çap düşüldü", kuyuda_kaldi:"Kuyuda kaldı"};
+
+function matkapZinciriCiz(id){
+  var box = $("#matkap-zincir");
+  if(!id){ box.innerHTML = ""; return; }
+  box.innerHTML = '<div class="note">Matkap zinciri yükleniyor…</div>';
+  sb.rpc("kuyu_matkap_zinciri", {p_well:id}).then(function(r){
+    if(r.error){ box.innerHTML = '<div class="note">Matkap zinciri okunamadı: ' +
+      esc(r.error.message) + '</div>'; return; }
+    var d = r.data || {}, s = d.satirlar || [];
+    if(!s.length){ box.innerHTML = '<div class="note">Bu kuyuda matkap kaydı yok.</div>'; return; }
+    var kopuk = s.filter(function(x){ return x.kopuk != null; }).length;
+    box.innerHTML =
+      '<h3 style="margin-top:0">Matkap zinciri</h3>' +
+      '<div class="note">' + esc(d.kuyu || "") + ' · ' + s.length + ' matkap · ' +
+        tl(d.toplam) + ' m' +
+        (kopuk ? ' · <b>' + kopuk + ' satırda zincir kopuk</b>' : '') + '</div>' +
+      '<div class="scroll"><table><thead><tr>' +
+        '<th>No</th><th>Makine</th><th>Çap</th><th>Marka</th><th>Önceki</th>' +
+        '<th>Giriş</th><th>Çıkış</th><th>Toplam</th><th>Değişim</th><th>Durum</th>' +
+      '</tr></thead><tbody>' +
+      s.map(function(x){
+        return '<tr' + (x.kopuk != null ? ' class="kotu"' : '') + '>' +
+          '<td class="num">' + x.no + '</td>' +
+          '<td>' + esc(x.makine || "—") + '</td>' +
+          '<td>' + esc(x.cap || "—") + '</td>' +
+          /* Markası boş olan matkap: eskiden "Diğer" seçilip marka
+             kaybolurdu. Eksik olduğu artık görünüyor. */
+          '<td>' + (x.marka ? esc(x.marka) : '<span class="hint">marka yazılmamış</span>') +
+            (x.cikma ? ' <span class="pill">çıkma</span>' : '') + '</td>' +
+          '<td class="num">' + (Number(x.onceki) > 0 ? tl(x.onceki) : 'sıfır') + '</td>' +
+          '<td class="num">' + tl(x.giris) +
+            (x.kopuk != null
+              ? '<div class="hint">önceki çıkıştan ' +
+                (Number(x.kopuk) > 0 ? '+' : '') + tl(x.kopuk) + ' m</div>' : '') + '</td>' +
+          '<td class="num">' + (x.acik ? '<span class="hint">takılı</span>' : tl(x.cikis)) + '</td>' +
+          '<td class="num"><b>' + (x.acik ? '—' : tl(x.metre)) + '</b></td>' +
+          '<td>' + (x.tarih ? SP.trd(x.tarih) : '<span class="hint">—</span>') + '</td>' +
+          '<td>' + (x.acik ? '<span class="pill good">takılı</span>'
+                           : esc(MATKAP_DURUM[x.durum] || x.durum || "—")) + '</td>' +
+          '</tr>'; }).join("") +
+      '</tbody><tfoot><tr><td colspan="7">Toplam</td>' +
+        '<td class="num"><b>' + tl(d.toplam) + '</b></td><td colspan="2"></td></tr>' +
+      '</tfoot></table></div>' +
+      (kopuk ? '<div class="note" style="margin-top:8px">⚠ <b>Zincir kopuk:</b> ' +
+        'bir satırın giriş metresi bir öncekinin çıkışıyla tutmuyor. Elle tutulan ' +
+        'tabloda bu hata görünmüyordu; burada işaretli.</div>' : '');
+  });
+}
+
 function kuyuCiz(){
   var id = $("#k-sec").value;
+  matkapZinciriCiz(id);
   if(!id){ $("#k-cizim").innerHTML='<div class="hint">Kuyu seçin.</div>'; $("#k-bilgi").innerHTML=''; return; }
   $("#k-cizim").innerHTML = '<div class="hint">Yükleniyor…</div>';
   sb.rpc("well_profile", {p_well:id}).then(function(r){
@@ -255,6 +325,51 @@ function kuyuCiz(){
         ["Metre", function(x){ return '<span class="num"><b>'+tl(x.metre)+'</b></span>'; }],
         ["Gün", function(x){ return x.gun; }]
       ], p.caplar, "Manevra kaydı yok.") + '</div>';
+  });
+}
+
+/* ---------------- vardiya listesi ve kartı (63. dosya) ----------------
+   Satıra tıklayınca altında kart açılıyor. Kart SALT OKUMA: yönetici
+   buradan düzeltme yapmıyor, kilit denetimi çalışmıyor. */
+var ACIK_VARDIYA = null;
+function vardiyalariCiz(liste, hata){
+  var box = $("#vardiyalar");
+  if(hata){ box.innerHTML = '<div class="note">Vardiyalar okunamadı: ' +
+    esc(hata.message) + '</div>'; return; }
+  if(!liste.length){ box.innerHTML = '<div class="note">Bu dönemde vardiya kaydı yok.</div>';
+    return; }
+  box.innerHTML =
+    '<table><thead><tr><th>Gün</th><th>Vardiya</th><th>Kuyu</th><th>Makine</th>' +
+    '<th>Metraj</th><th>Mazot</th><th></th></tr></thead><tbody>' +
+    liste.map(function(s){
+      return '<tr class="vsat" data-shift="' + esc(s.id) + '" style="cursor:pointer">' +
+        '<td>' + SP.trd(s.gun) + '</td>' +
+        '<td>' + esc(s.vardiya || "") +
+          (s.ilerleme_yok ? ' <span class="pill warn">ilerleme yok</span>' : '') +
+          (s.duzeltildi ? ' <span class="pill">düzeltildi</span>' : '') + '</td>' +
+        '<td>' + esc(s.kuyu || "—") + '</td>' +
+        '<td>' + esc(s.makine || "—") + '</td>' +
+        '<td class="num"><b>' + tl(s.metraj) + '</b></td>' +
+        '<td class="num">' + (s.mazot == null ? "—" : tl(s.mazot, 0)) + '</td>' +
+        '<td class="num"><span class="hint">göster</span></td></tr>' +
+        '<tr class="vkart" data-for="' + esc(s.id) + '" hidden>' +
+        '<td colspan="7"></td></tr>';
+    }).join("") + '</tbody></table>';
+
+  Array.prototype.forEach.call(box.querySelectorAll(".vsat"), function(tr){
+    tr.addEventListener("click", function(){
+      var id = tr.dataset.shift;
+      var kart = box.querySelector('.vkart[data-for="' + id + '"]');
+      if(!kart) return;
+      /* Aynı anda tek kart açık: liste uzun, iki kart açıkken hangi
+         satıra ait olduğu karışıyor. */
+      Array.prototype.forEach.call(box.querySelectorAll(".vkart"), function(k){
+        if(k !== kart){ k.hidden = true; k.firstChild.innerHTML = ""; } });
+      if(!kart.hidden){ kart.hidden = true; kart.firstChild.innerHTML = "";
+                        ACIK_VARDIYA = null; return; }
+      kart.hidden = false; ACIK_VARDIYA = id;
+      VKART.ac(sb, id, kart.firstChild);
+    });
   });
 }
 
@@ -285,10 +400,12 @@ function load(){
     sb.rpc("report_charts", {p_project:proj, p_year:p.y, p_month:p.m}),
     sb.rpc("stock_status", {p_project:proj}),
     sb.rpc("open_bits", {p_machine:null}),
-    sb.rpc("rig_status", {p_project:proj, p_from:p.from, p_to:p.to})
+    sb.rpc("rig_status", {p_project:proj, p_from:p.from, p_to:p.to}),
+    sb.rpc("vardiya_listesi", {p_project:proj, p_from:p.from, p_to:p.to})
   ]).then(function(res){
-    var a = res[0], b = res[1], c = res[2], e = res[3], k = res[4];
+    var a = res[0], b = res[1], c = res[2], e = res[3], k = res[4], v = res[5];
     if(k && !k.error) kuleleriCiz(k.data);
+    vardiyalariCiz(v && !v.error ? (v.data || []) : [], v && v.error);
     if(a.error || b.error){ msg(esc((a.error||b.error).message), "err"); return; }
     msg(""); renderDash(a.data); renderCharts(b.data, p);
     table($("#stock"), [

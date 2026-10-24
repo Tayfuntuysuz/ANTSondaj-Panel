@@ -1,7 +1,7 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "sondaj-panel-v43";
+var CACHE = "sondaj-panel-v44";
 /* 57. dosya: yonetim.html ("Ana veri ve projeler") listede HİÇ yoktu —
    bağlantı zayıfken o sayfa doğrudan şefin ekranına düşüyordu.
    Yeni sayfa eklendiğinde (aykilidi.html, hakedis.html) buraya da
@@ -10,7 +10,7 @@ var SHELL = [
   "./", "./index.html", "./panel.html", "./rapor.html", "./santiyeler.html",
   "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
   "./yonetim.html",
-  "./app.css", "./app-shell.js",
+  "./app.css", "./app-shell.js", "./kart.js",
   "./manifest.webmanifest", "./icon.svg", "./logo.png", "./logo-mark.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js",
   "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
