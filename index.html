@@ -425,6 +425,13 @@ td:first-child{text-align:start;color:var(--ink-2)}
       </div>
 
       <div class="card" data-pane="2" hidden style="margin-top:12px">
+        <!-- ŞANTİYE ŞEFİ (54. dosya): vardiyaya değil projeye bağlı sabit
+             personel. Seçilemez, her gün kendiliğinden. Yönetici
+             tanımlamadıysa satır HİÇ çıkmıyor — boş alan yer kaplamasın. -->
+        <div class="field" id="sef-satir" hidden>
+          <label>Şantiye şefi</label>
+          <div class="bant" id="sef-ad" style="border-radius:10px">—</div>
+        </div>
         <div class="field"><label for="f-driller1">Sondör <span class="req">*</span></label><select id="f-driller1" data-req="2"></select></div>
         <div class="field"><label>İşçi / yardımcı</label>
           <div id="f-helpers"></div>
@@ -549,13 +556,20 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <div><div class="k">Kuyu derinliği</div><div class="v num" id="ro-d">0,00 m</div></div>
         </div>
         <div class="field"><label for="f-end">Kuyu durumu</label><select id="f-end"><option value="">Devam ediyor</option><option value="kuyu_sonu">Kuyu sonu</option><option value="kuyu_iptali">Kuyu iptali</option></select></div>
-        <div class="grid2">
-          <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>PW</option><option>PQ</option><option>HQ</option><option>NQ</option></select></div>
-          <div class="field"><label for="f-to">Vardiya bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
+        <!-- Manevra alanları tek kutuda: "ilerleme olmadı" işaretlenince
+             hepsi birden GİZLENİYOR. Pasifleştirme değil gizleme — pasif
+             düğme sahada "program bozuk" dedirtiyor (58. dosya). -->
+        <div id="mv-alanlar">
+          <div class="grid2">
+            <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>PW</option><option>PQ</option><option>HQ</option><option>NQ</option></select></div>
+            <div class="field"><label for="f-to">Vardiya bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
+          </div>
+          <button class="btn eksikli" id="btn-add-run" type="button">Manevra ekle</button>
+          <div id="run-msg"></div>
+          <!-- Boş tablo yer kaplamasın: manevra yoksa gizli, böylece iki
+               düğme gerçekten alt alta geliyor. -->
+          <table id="mv-tablo" hidden><thead><tr><th>Çap</th><th>Başlangıç</th><th>Bitiş</th><th>Manevra</th><th></th></tr></thead><tbody id="runs"></tbody></table>
         </div>
-        <button class="btn eksikli" id="btn-add-run" type="button">Manevra ekle</button>
-        <div id="run-msg"></div>
-        <table><thead><tr><th>Çap</th><th>Başlangıç</th><th>Bitiş</th><th>Manevra</th><th></th></tr></thead><tbody id="runs"></tbody></table>
 
         <!-- ============================================================
              İLERLEME OLMAYAN VARDİYA — 23 Ekim, Murat'ın bildirdiği engel
@@ -569,12 +583,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
              duruş istatistiğini bozuyor hem hakedişte aleyhimize dönüyor.
              Burası ayrı yol: makine çalıştı, metraj yok.
              ============================================================ -->
-        <div class="ayrac-ust" id="ilerleme-yok-blok">
-          <div class="arasi">
-            <span class="eyebrow">İlerleme olmadı mı?</span>
-            <button class="btn ghost sm" id="btn-ilerleme-yok" type="button">Bu vardiyada ilerleme olmadı</button>
-          </div>
-          <div class="hint">Takım çekildi, ölçüm alındı, muhafaza indirildi — metraj ilerlemediyse buradan işaretleyin.
+        <div id="ilerleme-yok-blok" style="margin-top:8px">
+          <!-- Manevra ekle ile aynı genişlikte, hemen altında: aynı sorunun
+               iki cevabı, aynı dilde (58. dosya). -->
+          <button class="btn ghost" id="btn-ilerleme-yok" type="button">Bu vardiyada ilerleme olmadı</button>
+          <div class="hint" id="iy-ipucu" style="margin-top:6px">Takım çekildi, ölçüm alındı, muhafaza indirildi — metraj ilerlemediyse buradan işaretleyin.
             Makine arızalıysa bunu değil 3. adımdaki arıza kaydını kullanın.</div>
           <div id="iy-wrap" hidden style="margin-top:10px">
             <div class="field"><label for="iy-sebep">Sebep <span class="req">*</span></label>
@@ -591,7 +604,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
             <div class="hint" id="iy-olcum-uyari" hidden>Ölçüm seçtiniz — aşağıdaki
               <b>Kuyu ölçümü</b> bölümüne aldığınız ölçümleri yazın. Hakedişte ayrı
               kalem olarak faturalanıyor.</div>
-            <button class="btn ghost sm" id="btn-iy-geri" type="button" style="margin-top:8px">Vazgeç</button>
+            <button class="btn ghost" id="btn-iy-geri" type="button" style="margin-top:10px">Vazgeç — manevra yazacağım</button>
           </div>
           <div id="iy-msg"></div>
         </div>
@@ -1204,6 +1217,15 @@ function show(id){
    zaten yapildi, RLS her halukarda yaziyi sinirliyor. Rol BILINIYOR ve
    site_chief DEGILSE kapi kapanir. */
 var SAHA_ROLLERI = {site_chief:1};
+/* 57. dosya · Tayfun: "Yönetici girişi yaptığım zaman beni neden şefin
+   sayfasına atıyor?" — kök adres (manifest start_url ".") herkesi buraya
+   getiriyor. Kapı doğru çalışıyordu ama duvar gösterip bırakıyordu.
+   Artık rolün kendi ev sayfasına GÖTÜRÜYOR.
+   Hedefler page_access() ile doğrulandı: her rol kendi sayfasını açabiliyor
+   (yönetici/patron panel, muhasebe muhasebe, işveren isveren). */
+var ROL_EV = {manager:"panel.html", tenant_admin:"panel.html",
+              platform_admin:"panel.html", owner:"panel.html",
+              accountant:"muhasebe.html", employer:"isveren.html"};
 function rolu(){
   var p = (MASTER && MASTER.profile) || {};
   return p.role || "";
@@ -1211,8 +1233,23 @@ function rolu(){
 function kapiKontrol(){
   var r = rolu();
   if(!r || SAHA_ROLLERI[r]) return true;
+  var ad = rolAdi((MASTER && MASTER.profile) || {});
+  var ev = ROL_EV[r];
+  if(ev){
+    $("#kapi-metin").textContent = ad + " hesabı saha giriş ekranını kullanmaz — " +
+      "kendi panelinize götürülüyorsunuz.";
+    $("#kapi-git").setAttribute("href", ev);
+    $("#kapi-git").textContent = "Panelinize gidin";
+    show("scr-kapi");
+    /* replace: geri tuşu kullanıcıyı buraya geri getirmesin, yoksa
+       her geri basışta yeniden yönlenir. Ekran yine de kuruluyor:
+       yönlendirme engellenirse (eski tarayıcı, kilitli sekme) düğme
+       orada duruyor. */
+    try{ location.replace(ev); }catch(e){ location.href = ev; }
+    return false;
+  }
   $("#kapi-metin").textContent =
-    rolAdi((MASTER && MASTER.profile) || {}) + " hesabı saha giriş ekranını kullanmaz. " +
+    ad + " hesabı saha giriş ekranını kullanmaz. " +
     "Vardiya, puantaj ve gider kayıtlarını şantiye şefi girer; siz kendi panelinizden " +
     "görür ve düzeltirsiniz.";
   show("scr-kapi");
@@ -1284,6 +1321,7 @@ function fillSelects(){
   isciCiz();
   if(pr.length === 1) $("#f-project").value = pr[0].id;
   fillWells();
+  sefSatiriCiz();
   $("#acct-info").textContent = (MASTER.tenant ? MASTER.tenant.name : "") + " · " +
     (MASTER.profile ? MASTER.profile.full_name + " (" + MASTER.profile.role + ")" : "");
   $("#who").textContent = MASTER.profile ? MASTER.profile.full_name.split(" ")[0] : "";
@@ -1541,8 +1579,27 @@ var MOTOR_ELLE = false;
 
 /* ---------------- ekip: tek sondör + çoklu işçi ---------------- */
 var ISCI = [];          /* seçili işçi/yardımcı personel kimlikleri */
+/* 54. dosya · Tayfun: "Olmaz öyle, şef kuleye falan çıkmaz."
+   Şef hem işçi hem sondör listesinden düşüyor. Süzgeç GÖREVE göre —
+   projeye atanmış şefi süzmekten sağlam: şef alanı henüz doldurulmamış
+   bir şantiyede de doğru çalışıyor. */
+function ekipAdayi(p){ return p && p.kind !== "santiye_sefi"; }
 function yardimcilar(){
-  return ((MASTER && MASTER.personnel) || []).filter(function(p){ return p.kind !== "sondor"; });
+  return ((MASTER && MASTER.personnel) || [])
+    .filter(function(p){ return p.kind !== "sondor" && ekipAdayi(p); });
+}
+/* Projenin şefi — bootstrap_data projects satırında geliyor. */
+function projeSefi(){
+  var pid = $("#f-project") ? $("#f-project").value : "";
+  if(!pid) return null;
+  var p = ((MASTER && MASTER.projects) || []).filter(function(x){ return x.id === pid; })[0];
+  return (p && p.chief_name) ? {id:p.chief_personnel_id, ad:p.chief_name} : null;
+}
+function sefSatiriCiz(){
+  var el = $("#sef-satir"); if(!el) return;
+  var s = projeSefi();
+  el.hidden = !s;
+  if(s) $("#sef-ad").textContent = s.ad;
 }
 
 /* ============================================================
@@ -1577,7 +1634,7 @@ function sondorListesiCiz(){
   var sel = $("#f-driller1"); if(!sel) return;
   var kendi = sel.value;
   var sondorler = ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return p.kind === "sondor"; });
+    .filter(function(p){ return p.kind === "sondor" && ekipAdayi(p); });
   sel.innerHTML = kisiSecenek(sondorler, kendi);
   sel.value = kendi || "";
 }
@@ -1641,6 +1698,7 @@ $("#f-project").addEventListener("change", function(){
   /* Proje değişti: makine, kuyu, araç listeleri BİRLİKTE yenilenir. Tek tek
      yama yapmak bu hatanın her sekmede tekrar çıkmasına yol açıyordu. */
   fillMachines(); fillWells(); fillYakitHedef(); fillVardiya();
+  sefSatiriCiz();
 });
 $("#y-project").addEventListener("change", function(){ fillYakitHedef(); });
 $("#f-shift").addEventListener("change", function(){
@@ -2571,12 +2629,19 @@ var IY_AD = {olcum:"Kuyu içi ölçüm", takim:"Takım çekme / indirme",
              temizleme:"Kuyu temizleme / yıkama", diger:"Diğer"};
 
 function ilerlemeYokCiz(){
+  /* 58. dosya: pasifleştirme yok, gizleme var. İşaretliyken manevra
+     alanlarının tamamı (çap, bitiş metresi, düğme, uyarı, tablo)
+     kayboluyor; şefe doldurmadığı alan "eksik" diye gösterilmiyor. */
+  $("#mv-alanlar").hidden = ILERLEME_YOK;
+  /* Manevra yazılmışsa bu yol zaten kapalı. Hata veren düğme göstermek
+     yerine blok hiç çıkmıyor; şef satırı silince kendiliğinden dönüyor. */
+  $("#ilerleme-yok-blok").hidden = (runs.length > 0 && !ILERLEME_YOK);
   $("#iy-wrap").hidden = !ILERLEME_YOK;
   $("#btn-ilerleme-yok").hidden = ILERLEME_YOK;
+  $("#iy-ipucu").hidden = ILERLEME_YOK;
   $("#iy-not-wrap").hidden = (IY_SEBEP !== "diger");
   $("#iy-olcum-uyari").hidden = (IY_SEBEP !== "olcum");
-  /* Manevra eklemenin bir anlamı kalmıyor: ikisi aynı anda olamaz. */
-  $("#btn-add-run").disabled = ILERLEME_YOK;
+  if(ILERLEME_YOK) msg($("#run-msg"), "");
   kuyuSonuGoster();
   refreshState();
   ilerlemeSeridiCiz();
@@ -2724,16 +2789,23 @@ function renderRuns(){
        yazılıyor (Tayfun, 17 Ekim). Tabloda yerine başlangıç metresi var. */
     tr.innerHTML = "<td>"+r.diameter+"</td><td class='num'>"+tl(r.from_m)+"</td><td class='num'>"+tl(r.to_m)+
       "</td><td class='num'><b>"+tl(r.to_m-r.from_m)+"</b></td><td><button class='chip' type='button'>×</button></td>";
-    tr.querySelector("button").addEventListener("click", function(){ runs.splice(i,1); renderRuns(); refreshState(); });
+    tr.querySelector("button").addEventListener("click", function(){ runs.splice(i,1); renderRuns(); });
     tb.appendChild(tr);
   });
-  syncDepth(); refreshState();
+  /* Boş tablo başlığı ekranda yer tutmasın; manevra yoksa iki düğme
+     gerçekten alt alta dursun (58. dosya). */
+  $("#mv-tablo").hidden = !runs.length;
+  syncDepth();
+  ilerlemeYokCiz();            /* blok manevra varken gizleniyor */
 }
 function runFormReady(){
   var v = parseFloat(String($("#f-to").value).replace(",","."));
   return !!($("#f-dia").value && !isNaN(v));
 }
 function updateRunButton(){
+  /* İlerleme yokken manevra alanları gizli — doldurulmayan alanı "eksik"
+     diye göstermek çelişki oluyordu (58. dosya). */
+  if(ILERLEME_YOK){ msg($("#run-msg"), ""); return; }
   /* Pasif düğme sahada "program bozuk" dedirtiyor — kaydet düğmesinde
      kaldırdık, burada da kalkıyor. Düğme hep basılabilir; eksik varsa
      basınca ne eksik olduğunu söyler. */
@@ -2749,6 +2821,7 @@ function updateRunButton(){
 });
 $("#btn-add-run").addEventListener("click", function(){
   var v = parseFloat(String($("#f-to").value).replace(",","."));
+  if(ILERLEME_YOK) return;            /* alanlar gizliyken tetiklenmesin */
   if(!runFormReady()) {
     updateRunButton();
     var eks = [];
@@ -3432,7 +3505,6 @@ function resetForm(){
   ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
   if($("#iy-sebep")) $("#iy-sebep").value = "";
   if($("#iy-not")) $("#iy-not").value = "";
-  if($("#btn-add-run")) $("#btn-add-run").disabled = false;
   ilerlemeYokCiz();
   AR_SON = ""; $$('#ar-son .chip').forEach(function(x){ x.setAttribute("aria-pressed","false"); });
   if($("#ar-bit-wrap")) $("#ar-bit-wrap").hidden = true;
@@ -5373,7 +5445,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "42";
+var SURUM = "43";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

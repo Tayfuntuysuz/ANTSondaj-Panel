@@ -1,10 +1,15 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "sondaj-panel-v42";
+var CACHE = "sondaj-panel-v43";
+/* 57. dosya: yonetim.html ("Ana veri ve projeler") listede HİÇ yoktu —
+   bağlantı zayıfken o sayfa doğrudan şefin ekranına düşüyordu.
+   Yeni sayfa eklendiğinde (aykilidi.html, hakedis.html) buraya da
+   eklenecek. */
 var SHELL = [
   "./", "./index.html", "./panel.html", "./rapor.html", "./santiyeler.html",
   "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
+  "./yonetim.html",
   "./app.css", "./app-shell.js",
   "./manifest.webmanifest", "./icon.svg", "./logo.png", "./logo-mark.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js",
@@ -30,6 +35,31 @@ function isPage(req){
          (req.headers.get("accept") || "").indexOf("text/html") > -1;
 }
 
+/* 57. dosya: çevrimdışı son çare BAŞKA ROLÜN UYGULAMASI olmayacak.
+   Eskiden getirilemeyen her sayfa "./index.html"e düşüyordu; yönetici
+   bağlantısı bir an kopunca kendini saha ekranında buluyordu. Artık
+   istenen sayfanın kendi önbelleği, o da yoksa kısa bir not. */
+function cevrimdisiNot(url){
+  var ad = String(url && url.pathname || "").split("/").pop() || "sayfa";
+  return new Response(
+    '<!doctype html><html lang="tr"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>Çevrimdışısınız</title><style>' +
+    'body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;' +
+    'min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+    'background:#f6f7f9;color:#1b1f24;padding:24px}' +
+    '.k{max-width:380px;text-align:center;background:#fff;border:1px solid #e3e6ea;' +
+    'border-radius:14px;padding:26px}' +
+    'h1{font-size:19px;margin:0 0 10px}p{font-size:14px;line-height:1.5;color:#55606c;margin:0 0 16px}' +
+    'button{width:100%;padding:13px;border-radius:10px;border:1px solid #1b4ed8;' +
+    'background:#1b4ed8;color:#fff;font-weight:600;font-size:15px;cursor:pointer}' +
+    '</style></head><body><div class="k"><h1>Çevrimdışısınız</h1>' +
+    '<p><b>' + ad.replace(/[&<>"]/g, "") + '</b> sayfası bu cihazda kayıtlı değil, ' +
+    'bağlantı da yok. Bağlantı gelince yeniden deneyin.</p>' +
+    '<button onclick="location.reload()">Yeniden dene</button></div></body></html>',
+    {status:503, headers:{"Content-Type":"text/html; charset=utf-8"}});
+}
+
 self.addEventListener("fetch", function(e){
   var req = e.request;
   if(req.method !== "GET") return;
@@ -45,7 +75,7 @@ self.addEventListener("fetch", function(e){
         caches.open(CACHE).then(function(c){ c.put(req, copy); });
         return res;
       }).catch(function(){
-        return caches.match(req).then(function(hit){ return hit || caches.match("./index.html"); });
+        return caches.match(req).then(function(hit){ return hit || cevrimdisiNot(url); });
       })
     );
     return;
@@ -61,7 +91,11 @@ self.addEventListener("fetch", function(e){
           caches.open(CACHE).then(function(c){ c.put(req, copy); });
         }
         return res;
-      }).catch(function(){ return caches.match("./index.html"); });
+      }).catch(function(){
+        /* Eksik bir betik/stil yerine HTML döndürmek sayfayı sessizce
+           bozuyordu; dürüst cevap 504. */
+        return new Response("", {status:504, statusText:"cevrimdisi"});
+      });
     })
   );
 });

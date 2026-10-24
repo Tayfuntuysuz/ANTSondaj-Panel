@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "42";
+var SURUM = "43";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -66,7 +66,12 @@ var IC = {
   takvim:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/>',
   cuzdan:'<path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H5a2 2 0 0 1-2-2z"/><circle cx="17" cy="14" r="1.2"/>',
   grafik:'<path d="M3 3v18h18M7 16v-5M12 16V7M17 16v-8"/>',
-  kilit:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
+  kilit:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  /* 23 Ekim · yedi gruplu menü: "Hakedişler" ile "Ay kilidi", "Teklifler"
+     ile "Aylık rapor" aynı ikonu paylaşıyordu. İkiz ikon, ikonu
+     işlevsiz yapıyor — göz ikona değil yazıya bakmak zorunda kalıyor. */
+  fatura:'<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2V3z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  teklif:'<path d="M4 3h10l6 6v12H4V3z"/><path d="M14 3v6h6"/><path d="M9 17l2 2 4-5"/>'
 };
 function ikon(k){
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '+
@@ -87,7 +92,17 @@ function ikon(k){
      cift   eş sayfa kümesi — menüde TEK satır, sayfanın üstünde şerit
      bas    kümenin menüde görünen adını taşıyan satır
      sekme  şeritteki kısa ad
-     yok    ekranı henüz yazılmadı — menüde hiç gösterilmez */
+     yok    ekranı henüz yazılmadı — menüde hiç gösterilmez
+     eylem  sayfaya gitmez, bir işlev çağırır (Ayarlar)
+     herkes yetki anahtarı aranmaz, oturumu olan herkeste görünür
+
+   23 Ekim · Tayfun: "Günlük / Ay Sonu / Finans / Teklifler / Anlizler /
+   Proje yönetimi ve Tanımlamalar / Ayarlar — böyle not al."
+   Önceki hâlinden farkları: Para → FİNANS, hakediş İKİYE ayrıldı
+   (hazırlama Ay sonunda, takip Finansta), Teklifler kendi grubu,
+   Analizler kendi grubu, tanımlamalar kendi grubu, ve AYARLAR menüye
+   indi — bugüne kadar yalnız üst çubuktaki isme basarak giriliyordu,
+   menüde hiç satırı yoktu. */
 var SAYFALAR = [
   {k:"panel",    d:"panel.html",     ad:"Genel bakış",        i:"pano",   g:"Günlük"},
   {k:"saha",     d:"index.html",     ad:"Vardiya girişi",     i:"kule",   g:"Günlük"},
@@ -104,35 +119,54 @@ var SAYFALAR = [
                  roller:{site_chief:1}, ad:"Puantaj",          i:"takvim", g:"Günlük"},
   {k:"sefozet",  d:"panel.html",     ad:"Saha özetim",        i:"pano",   g:"Günlük"},
 
+  /* AY SONU — yöneticinin ay sonunda yaptığı işler, SIRASIYLA:
+     kilitle → raporunu al → hakedişi hazırla. Hakediş burada bir EYLEM;
+     kesilmiş hakedişlerin listesi Finansta (59. dosya).
+     Ekranı olmayan satır gösterilmiyor: şefin sessizce çalışmayan
+     "kaydet" düğmesiyle aynı hata (32. dosya kuralı). */
+  {k:"aykilidi", d:"aykilidi.html",  ad:"Ay kilidi",          i:"kilit",  g:"Ay sonu", yok:1},
   {k:"rapor",    d:"rapor.html",     ad:"Aylık rapor",        i:"rapor",  g:"Ay sonu"},
-  /* Ay kilidi (aykilidi.html) ve Hakediş (hakedis.html) buraya gelecek.
-     Hakediş bugüne kadar muhasebe.html#fatura'ya gidiyordu — orada
-     öyle bir ekran yok, satır boşluğa tıklatıyordu. Ekranı olmayan
-     satır gösterilmiyor: şefin sessizce çalışmayan "kaydet" düğmesiyle
-     aynı hata (32. dosya kuralı). */
-  {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş",            i:"kilit",  g:"Ay sonu", yok:1},
+  {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş hazırla",    i:"matkap", g:"Ay sonu", yok:1},
 
-  /* PARA — "Merkez ofis" ve "Maaş tablosu" analiz grubundaydı, ikisi de
-     para. Muhasebe ile Merkez ofis tek satırda, sayfa üstünde şeritle. */
-  {k:"muhasebe", d:"muhasebe.html",  ad:"Muhasebe",           i:"para",   g:"Para",
+  /* FİNANS — eski adı "Para". Hakedişler kayıt defteri: kesilmiş bütün
+     hakedişler, durumlarıyla. Kendi yetki anahtarı (hakedisler) ekran
+     yazıldığında page_access'e eklenecek. */
+  {k:"hakedisler", d:"hakedisler.html", ad:"Hakedişler",      i:"fatura", g:"Finans", yok:1},
+  {k:"muhasebe", d:"muhasebe.html",  ad:"Muhasebe",           i:"para",   g:"Finans",
                  cift:"muhasebe", bas:1, sekme:"Muhasebe"},
-  {k:"ofis",     d:"ofis.html",      ad:"Merkez ofis",        i:"ofis",   g:"Para",
+  {k:"ofis",     d:"ofis.html",      ad:"Merkez ofis",        i:"ofis",   g:"Finans",
                  cift:"muhasebe", sekme:"Merkez ofis"},
-  {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"cuzdan", g:"Para"},
+  {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"cuzdan", g:"Finans"},
 
-  /* ANALİZ + YÖNETİM — şantiye karşılaştırma ile şirket performansı
-     tek satırda. santiyeler.html bugüne kadar HİÇBİR role verilmemişti;
-     sayfa çalışıyordu ama kimse açamıyordu (32. dosya, 1. sorun). */
-  {k:"santiyeler", d:"santiyeler.html", ad:"Analiz",          i:"grafik", g:"Analiz ve yönetim",
+  /* TEKLİFLER — kendi grubu (59. dosya). Onaylanan teklif "işi aktif et"
+     ile fiyat listesini üretiyor, hakediş oradan okuyor. */
+  {k:"teklifler", d:"teklifler.html", ad:"Teklifler",         i:"teklif", g:"Teklifler", yok:1},
+
+  /* ANALİZLER — şantiye karşılaştırma ile şirket performansı tek satırda.
+     Kuyu bitiş tahmini de buraya giriyor. santiyeler.html bugüne kadar
+     HİÇBİR role verilmemişti; sayfa çalışıyordu ama kimse açamıyordu
+     (32. dosya, 1. sorun). */
+  {k:"santiyeler", d:"santiyeler.html", ad:"Analiz",          i:"grafik", g:"Analizler",
                  cift:"analiz", bas:1, sekme:"Şantiyeler"},
-  {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"grafik", g:"Analiz ve yönetim",
+  {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"grafik", g:"Analizler",
                  cift:"analiz", sekme:"Şirket performansı"},
-  {k:"anaveri",  d:"yonetim.html",   ad:"Ana veri ve projeler", i:"ayar", g:"Analiz ve yönetim"},
-  {k:"kullanicilar", d:"kullanicilar.html", ad:"Kullanıcılar", i:"kisi",  g:"Analiz ve yönetim", yok:1},
+
+  /* PROJE YÖNETİMİ VE TANIMLAMALAR — eskiden analiz grubunun içindeydi;
+     Tayfun ayırdı. Şantiye şefi ve sözleşme tarihleri de burada. */
+  {k:"anaveri",  d:"yonetim.html",   ad:"Projeler ve tanımlar", i:"ofis", g:"Proje yönetimi ve Tanımlamalar"},
+  {k:"kullanicilar", d:"kullanicilar.html", ad:"Kullanıcılar", i:"kisi",
+                 g:"Proje yönetimi ve Tanımlamalar", yok:1},
+
+  /* AYARLAR — YENİ SATIR, ad değişikliği değil. Bugüne kadar ayarlara
+     yalnız üst çubuktaki kullanıcı adına basarak giriliyordu; menüde
+     hiç satırı yoktu, yani kimse bulamıyordu. Üstteki kısayol duruyor. */
+  {k:"ayarlar",  d:"#ayarlar",       ad:"Ayarlar",            i:"ayar",   g:"Ayarlar",
+                 eylem:"ayarlar", herkes:1},
 
   {k:"isveren",  d:"isveren.html",   ad:"Raporlarım",         i:"kalkan", g:"Raporlarım"}
 ];
-var GRUP_SIRA = ["Günlük","Ay sonu","Para","Analiz ve yönetim","Raporlarım"];
+var GRUP_SIRA = ["Günlük","Ay sonu","Finans","Teklifler","Analizler",
+                 "Proje yönetimi ve Tanımlamalar","Ayarlar","Raporlarım"];
 
 /* ---------- durum ---------- */
 var sb = null, erisim = null, cfg = {url:"", key:""}, AYAR = {};
@@ -410,7 +444,10 @@ function menuSatirlari(){
   var ciftler = {}, satirlar = [];
   SAYFALAR.forEach(function(s){
     if(s.yok) return;                 /* ekrani henuz yok */
-    var y = izin[s.k]; if(!y) return; /* yetkisi yok */
+    /* "herkes" satirinin yetki anahtari yok: Ayarlar oturumu olan
+       herkesin kendi ayarlari, page_access'te karsiligi aranmaz. */
+    var y = s.herkes ? "gor" : izin[s.k];
+    if(!y) return;                    /* yetkisi yok */
     if(!s.cift){ satirlar.push({ad:s.ad, i:s.i, g:s.g, uyeler:[{s:s, y:y}]}); return; }
     /* Es kume: menude TEK satir. Satirin adini "bas" tasiyor ama hedefi
        kullanicinin acabildigi ILK uye belirliyor — patron santiyeler'i
@@ -428,6 +465,7 @@ function menuSatirlari(){
       k: ilk.s.k,
       ad: r.ad, i: r.i, g: r.g,
       hedef: sayfaHedef(ilk.s),
+      eylem: ilk.s.eylem || "",
       /* Satir, kumedeki herhangi bir sayfa acikken isaretli kalmali;
          yoksa Merkez ofis'teyken menude hicbir sey secili gorunmuyor. */
       anahtarlar: r.uyeler.map(function(u){ return u.s.k; }),
@@ -442,19 +480,37 @@ function menuKur(){
   menuSatirlari().forEach(function(r){ (gruplar[r.g] = gruplar[r.g] || []).push(r); });
   var acikGruplar = GRUP_SIRA.filter(function(g){ return gruplar[g]; });
   /* Rolun tek grubu varsa baslik hic yazilmiyor (32. dosya kurali):
-     sef "GUNLUK" basligini okuyup bir sey ogrenmiyor. */
-  var basliklar = acikGruplar.length > 1;
+     sef "GUNLUK" basligini okuyup bir sey ogrenmiyor.
+     AYARLAR bu sayima girmiyor: herkeste var, tek basina baslik
+     acmasi sefin temiz listesini bozardi. */
+  var basliklar = acikGruplar.filter(function(g){ return g !== "Ayarlar"; }).length > 1;
   var html = acikGruplar.map(function(g){
     return '<div class="sp-grp">' +
       (basliklar ? '<div class="lbl">'+esc(g)+'</div>' : '') + '<nav class="sp-nav">' +
       gruplar[g].map(function(r){
         var aktif = r.anahtarlar.indexOf(AYAR.sayfa) >= 0;
-        return '<a href="'+r.hedef+'" class="'+(aktif?"on":"")+'">'+ikon(r.i) +
+        return '<a href="'+r.hedef+'" class="'+(aktif?"on":"")+'"' +
+               (r.eylem ? ' data-eylem="'+esc(r.eylem)+'"' : '') + '>' + ikon(r.i) +
                '<span>'+esc(r.ad)+'</span>' +
-               (r.y === "gir" ? '<span class="tag">giriş</span>' : '') + '</a>';
+               /* Eylem satirinda "giris" etiketi anlamsiz: sayfaya
+                  gitmiyor, bir pencere aciyor. */
+               (r.y === "gir" && !r.eylem ? '<span class="tag">giriş</span>' : '') + '</a>';
       }).join("") + '</nav></div>';
   }).join("");
   $("#sp-menu").innerHTML = html || '<div class="sp-grp"><div class="lbl">Menü boş</div></div>';
+  /* Eylem satirlari: sayfaya gitmiyor, islev cagiriyor. Dinleyici
+     menuye BIR KERE takiliyor — menuKur yeniden cagrildiginda
+     innerHTML degisiyor ama element ayni, dinleyici birikirdi. */
+  var m = $("#sp-menu");
+  if(!m.dataset.eylemBagli){
+    m.dataset.eylemBagli = "1";
+    m.addEventListener("click", function(e){
+      var a = e.target.closest ? e.target.closest("a[data-eylem]") : null;
+      if(!a) return;
+      e.preventDefault();
+      if(a.getAttribute("data-eylem") === "ayarlar") ayarlarAc();
+    });
+  }
 }
 
 /* Es sayfalarin serit menusu — sayfanin ustunde, baslik ile icerik
@@ -734,6 +790,10 @@ var API = {
   ayarlar: ayarlarAc, tema: temaOku, temaSec: temaYaz, yaziSec: yaziYaz,
   get bicim(){ return BICIM; },
   baslik: function(t){ AYAR.baslik = t; var e = $("#sp-baslik"); if(e) e.textContent = t; },
+  /* Sürüm dışarıya da açık: düzenek "altbilgideki numara koddakiyle
+     aynı mı" diye soruyor; sabit sayı yazılırsa her pakette sınama
+     kırılır, kırılmasın diye de güncellenmez olur. */
+  surum:SURUM,
   $:$, $$:$$, esc:esc, tl:tl, money:money, iso:iso, trd:trd, msg:msg, bashrf:bashrf,
   AYLAR:AYLAR, ikon:ikon, kutular:kutular, tablo:tablo, cubuklar:cubuklar,
   kuleKart:kuleKart, kuyuKesiti:kuyuKesiti, aktiviteSeridi:aktiviteSeridi,

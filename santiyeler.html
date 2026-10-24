@@ -58,6 +58,18 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     <div class="card"><h3>Metre başı yakıt</h3><div class="note">Litre / metre — düşük olan iyi</div><div class="bars" id="yakit-bars"></div></div>
   </div>
 
+  <!-- KUYU BİTİŞ TAHMİNİ (59. dosya)
+       Tayfun: "Kuyuların mevcut delgi performansları ile belirlenen kuyu
+       derinliklerine ulaşabilecekleri yaklaşık tarih; öngörülen bitiş
+       tarihleri tanımlı ise bu performans ile planlanan tarihten ne kadar
+       ileri veya geride olduğunun göstergesi."
+       Dönem seçicisinden BAĞIMSIZ: hız her zaman son 7 gün. Geçmiş bir
+       dönemi incelerken "şu an ne kadar hızlıyız" sorusunun cevabı
+       değişmemeli. -->
+  <div class="sechead"><h2>Kuyular ne zaman biter?</h2>
+    <span>Son 7 günün hızıyla, yaklaşık</span></div>
+  <div id="tahmin">Yükleniyor…</div>
+
   <div class="sechead"><h2>Aylık seyir</h2><span>Hangi ay hangi şantiye ne yaptı</span></div>
   <div class="card">
     <div id="trend-chart"></div>
@@ -70,7 +82,13 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
   <p class="foot">Metraj, iptal edilen kuyular hariç tutularak hesaplanır; iptal sütunu ayrıca gösterilir.
   Günlük ortalama, o şantiyede vardiya kaydı bulunan gün sayısına bölünerek bulunur.
   Yakıt ve yemek yalnız bu bilgilerin raporda bulunduğu şantiyelerde dolu gelir.
-  Aynı makine kodu farklı şantiyelerde ayrı kule olarak sayılır.</p>
+  Aynı makine kodu farklı şantiyelerde ayrı kule olarak sayılır.
+  Bitiş tahmini <b>yaklaşıktır</b>: son 7 günün metrajı takvim gününe bölünür ve
+  kalan metraj aynı hızla delinecekmiş gibi sayılır. Derin kuyuda hız düşer
+  (tij uzar, manevra süresi artar, formasyon sertleşir), bu yüzden tahmin son
+  metreleri olduğundan hızlı sayar. Son 7 günde metraj yoksa kuyunun tamamının
+  ortalaması kullanılır; o da yoksa tarih yazılmaz. İleri/geri kıyası yalnız
+  sözleşme bitiş tarihi tanımlıysa çıkar.</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -91,6 +109,7 @@ SP.boot({sayfa:"santiyeler", baslik:"Şantiye karşılaştırma", hazir:function
   sb = SP.sb;
   yilAraligi();
   load();
+  tahminYukle();     /* dönem seçiminden bağımsız: bir kere, açılışta */
 }});
 
 function yilAraligi(){
@@ -115,6 +134,85 @@ function load(){
     msg("");
     ciz(r[0].data||[], r[1].data||[], r[2].data||[]);
   }).catch(function(e){ msg(esc(e.message||e),"err"); });
+}
+
+/* ---------------- kuyu bitiş tahmini ---------------- */
+function trd(s){ if(!s) return "—";
+  var p = String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+
+/* Hızın nereden geldiği EKRANDA yazıyor. "12.02.2027" ile "verisi az,
+   kuyunun tamamının ortalamasıyla 12.02.2027" aynı güvende değil;
+   yöneticinin hangisine baktığını bilmesi gerekiyor. */
+var KAYNAK_AD = {pencere:"son 7 gün", ortalama:"kuyu ortalaması", yetersiz:""};
+
+function tahminYukle(){
+  sb.rpc("kuyu_bitis_tahmini_hepsi", {}).then(function(r){
+    if(r.error){ $("#tahmin").innerHTML =
+      '<div class="card"><div class="note">Tahmin okunamadı: '+esc(r.error.message)+'</div></div>'; return; }
+    tahminCiz(r.data || []);
+  }).catch(function(e){
+    $("#tahmin").innerHTML = '<div class="card"><div class="note">Tahmin okunamadı: ' +
+      esc(e.message || e) + '</div></div>';
+  });
+}
+
+function tahminCiz(liste){
+  /* Açık kuyusu olmayan şantiye bu bölümde yer kaplamıyor. */
+  liste = (liste || []).filter(function(x){ return (x.kuyular || []).length; });
+  if(!liste.length){
+    $("#tahmin").innerHTML =
+      '<div class="card"><div class="note">Açık kuyu yok; tahmin edilecek bir şey de yok.</div></div>';
+    return;
+  }
+  $("#tahmin").innerHTML = liste.map(function(x){
+    var p = x.proje || {}, satirlar = x.kuyular || [];
+
+    /* Proje başlığı: taahhüt, delinen, hız. */
+    var ust = '<h3>' + esc(p.ad || "—") + '</h3>' +
+      '<div class="note">' +
+        (p.sozlesme_bas || p.sozlesme_bit
+          ? 'Sözleşme ' + trd(p.sozlesme_bas) + ' – ' + trd(p.sozlesme_bit) + ' · '
+          : 'Sözleşme tarihi girilmemiş · ') +
+        'Taahhüt ' + tl(p.taahhut, 0) + ' m · delinen ' + tl(p.delinen, 0) + ' m' +
+        (p.hiz ? ' · son 7 gün ' + tl(p.hiz) + ' m/gün' : ' · son 7 günde metraj yok') +
+      '</div>';
+
+    /* İleri/geri yalnız sözleşme bitişi VARSA ve hız hesaplanabildiyse.
+       Girilmemişse satır hiç çıkmıyor — boş bir "— gün" yazmak
+       yöneticiye bir şey anlatmıyor (59. dosya). */
+    var kiyas = "";
+    if(p.bitis){
+      var f = p.fark_gun;
+      kiyas = '<div class="bant ' + (f == null ? '' : (f >= 0 ? 'ok' : 'kt')) + '" ' +
+        'style="border-radius:10px;margin-top:10px">' +
+        'Bu hızla bitiş <b>' + trd(p.bitis) + '</b>' +
+        (f == null ? '' :
+          ' — sözleşmeden <b>' + Math.abs(f) + ' gün ' +
+          (f >= 0 ? 'ÖNDE' : 'GERİDE') + '</b>') +
+        '</div>';
+    }
+
+    var tb = '<table><thead><tr><th>Kuyu</th><th>Hedef</th><th>Bugün</th>' +
+      '<th>Kalan</th><th>Hız</th><th>Tahmini bitiş</th></tr></thead><tbody>' +
+      satirlar.map(function(k){
+        var hiz = k.hiz ? tl(k.hiz) + ' m/gün' : '—';
+        var tahmin = k.tahmin
+          ? '<b>' + trd(k.tahmin) + '</b>' +
+            (KAYNAK_AD[k.kaynak] ? '<div class="note">' + KAYNAK_AD[k.kaynak] + '</div>' : '')
+          : '<span class="note">' +
+            (k.planlanan_derinlik == null && k.planned_depth == null
+              ? 'planlanan derinlik girilmemiş' : 'yeterli veri yok') + '</span>';
+        return '<tr><td><b>' + esc(k.code) + '</b></td>' +
+          '<td class="num">' + (k.planned_depth == null ? '—' : tl(k.planned_depth, 0) + ' m') + '</td>' +
+          '<td class="num">' + tl(k.current_depth, 0) + ' m</td>' +
+          '<td class="num">' + tl(k.kalan, 0) + ' m</td>' +
+          '<td class="num">' + hiz + '</td>' +
+          '<td>' + tahmin + '</td></tr>';
+      }).join("") + '</tbody></table>';
+
+    return '<div class="card" style="margin-bottom:12px">' + ust + kiyas +
+           '<div class="scroll" style="margin-top:10px">' + tb + '</div></div>';
+  }).join("");
 }
 
 function table(el, cols, rows, empty, foot){

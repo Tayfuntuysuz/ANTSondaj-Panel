@@ -166,11 +166,20 @@ function boot(){
   sb.rpc("bootstrap_data").then(function(r){
     if(r.error){ msg(esc(r.error.message), "err"); return; }
     MASTER = r.data;
+    /* 23 Ekim · Tayfun: "Tek şantiye kısmı ile üstteki kısım birleşik
+       olması kafa karıştırıyor. Tek şantiye seçimi yapılmadan o
+       şantiyeye ait alttaki veriler çıkmasın."
+       Eskiden ilk proje kendiliğinden seçili geliyordu: üstte bütün
+       şantiyeler, altta tek şantiye — hangi sayının neye ait olduğu
+       karışıyordu. Artık seçici BOŞ açılıyor. */
     var sel = $("#f-project"); sel.innerHTML = "";
+    var bos = document.createElement("option");
+    bos.value = ""; bos.textContent = "— şantiye seçin —"; sel.appendChild(bos);
     (MASTER.projects||[]).forEach(function(p){
       var o=document.createElement("option"); o.value=p.id;
       o.textContent = p.name + (p.site_name ? " · " + p.site_name : ""); sel.appendChild(o);
     });
+    sel.value = "";
     var now = new Date(), ys = $("#f-year");
     for(var y = now.getFullYear()+1; y >= now.getFullYear()-3; y--){
       var o=document.createElement("option"); o.value=y; o.textContent=y; ys.appendChild(o);
@@ -183,10 +192,19 @@ function boot(){
     kuyuListesi();
     /* Sahalardan gelenler proje seçiminden bağımsız: bir kere, açılışta. */
     gelenlerYukle();
-    load();
+    load();          /* seçim boş olduğu için tek cümleyle açılıyor */
   });
 }
-$("#btn-load").addEventListener("click", load);
+/* Düğmeye basan kullanıcı bir şey bekliyor: sessiz kapı yerine neden
+   olmadığını söyle. Seçim değişikliğinde ise sessiz kapı doğrusu. */
+$("#btn-load").addEventListener("click", function(){
+  if(!$("#f-project").value){
+    msg("Önce bir şantiye seçin.", "warn");
+    $("#f-project").focus();
+    return;
+  }
+  load();
+});
 ["#f-project","#f-year","#f-month"].forEach(function(s){ $(s).addEventListener("change", load); });
 
 function period(){
@@ -200,7 +218,9 @@ function period(){
 function kuyuListesi(){
   var pid = $("#f-project").value;
   var sel = $("#k-sec");
-  var liste = (MASTER.wells||[]).filter(function(w){ return !pid || w.project_id === pid; });
+  /* Şantiye seçilmemişken bütün sahaların kuyularını tek listede
+     sıralamak, "tek şantiye" bölümünün anlamını bozuyor. */
+  var liste = pid ? (MASTER.wells||[]).filter(function(w){ return w.project_id === pid; }) : [];
   sel.innerHTML = '<option value="">— seçin —</option>' + liste.map(function(w){
     return '<option value="'+w.id+'">'+esc(w.code)+' · '+tl(w.current_depth)+' m</option>'; }).join("");
   $("#k-cizim").innerHTML = '<div class="hint">Kuyu seçin.</div>';
@@ -238,8 +258,24 @@ function kuyuCiz(){
   });
 }
 
+/* Şantiye seçilmemişken alt bölümün tamamı kapalı: kutular, grafikler,
+   tablolar çıkmıyor, yerine tek cümle. Üstteki "Sahalardan ne geldi?"
+   bloğu etkilenmiyor — o zaten proje seçiminden bağımsız. */
+function secimYok(){
+  if($("#f-project").value) return false;
+  msg("");
+  $("#bos-donem").hidden = false;
+  $("#bos-donem").innerHTML =
+    '<div class="card"><div class="hint" id="secim-yok">' +
+    'Ayrıntı için bir şantiye seçin.</div></div>';
+  Array.prototype.forEach.call(document.querySelectorAll(".donem-blok"),
+    function(el){ el.hidden = true; });
+  $("#range-label").textContent = "";
+  return true;
+}
+
 function load(){
-  if(!$("#f-project").value){ msg("Proje seçin.", "err"); return; }
+  if(secimYok()) return;
   var p = period(), proj = $("#f-project").value;
   $("#btn-rapor").href = "rapor.html#" + [proj, p.y, p.m || ""].join("|");
   $("#range-label").textContent = (p.m ? AYLAR[p.m-1] + " " + p.y : p.y + " yılı tamamı") + " · " + p.from + " → " + p.to;

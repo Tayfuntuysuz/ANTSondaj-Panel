@@ -64,6 +64,35 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
   <!-- PROJELER -->
   <section data-bol="projeler">
     <div class="card"><div id="proje-tablo"></div></div>
+
+    <!-- ŞANTİYE ŞEFİ VE SÖZLEŞME (54. ve 59. dosya)
+         Şef vardiyaya değil projeye bağlı: yönetici buradan değiştirene
+         kadar her gün aynı kişi, saha uygulamasında sabit satır olarak
+         görünüyor ve ekip listelerinde çıkmıyor.
+         Sözleşme tarihleri kuyu bitiş tahmininin ileri/geri kıyası için;
+         girilmemişse o satır analizde hiç çıkmıyor. -->
+    <div class="card" style="margin-top:12px">
+      <h3>Şantiye şefi ve sözleşme</h3>
+      <div class="not">Şef kuleye çıkmaz: ekip listelerinde görünmez, vardiya ekibine
+        yazılmaz, prim hesabına girmez. Sözleşme tarihleri boş bırakılabilir —
+        o zaman analizde "sözleşmeye göre ileri/geri" satırı çıkmaz.</div>
+      <div class="satir">
+        <div class="field"><label for="sf-proje">Şantiye</label>
+          <select id="sf-proje"></select></div>
+        <div class="field"><label for="sf-sef">Şantiye şefi</label>
+          <select id="sf-sef"></select></div>
+      </div>
+      <div class="satir">
+        <div class="field"><label for="sf-bas">Sözleşme başlangıcı</label>
+          <input id="sf-bas" type="date"></div>
+        <div class="field"><label for="sf-bit">Sözleşme bitişi</label>
+          <input id="sf-bit" type="date"></div>
+      </div>
+      <div class="hint" id="sf-durum"></div>
+      <button class="btn" id="btn-sf-kaydet" type="button" style="margin-top:10px">Kaydet</button>
+      <div id="sf-msg"></div>
+    </div>
+
     <div class="not">Bir projeyi açmak için Yeni proje sekmesini kullanın; mevcut projenin
       kuyusunu, makinesini ve ekibini de oradan ekleyebilirsiniz.</div>
   </section>
@@ -264,7 +293,8 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <script>
 (function(){
 "use strict";
-var $ = SP.$, $$ = SP.$$, esc = SP.esc, tl = SP.tl, msg = SP.msg, tablo = SP.tablo;
+var $ = SP.$, $$ = SP.$$, esc = SP.esc, tl = SP.tl, msg = SP.msg, tablo = SP.tablo,
+    trd = SP.trd;
 var sb = null, D = null;                  /* D: anaveri() sonucu */
 var KUYULAR = [], ADIM = 1, YENI_PROJE = null;
 
@@ -311,6 +341,13 @@ function ciz(){
         || '<span class="hint">tanımsız</span>'; }],
     ["Kuyu",     function(r){ return '<span class="num">'+(r.kuyu||0)+'</span>'; }],
     ["Makine",   function(r){ return '<span class="num">'+(r.makine||0)+'</span>'; }],
+    /* Şef tabloda da görünüyor: yöneticinin "hangi sahanın şefi kim"
+       sorusunu tek bakışta cevaplaması gerekiyor (54. dosya). */
+    ["Şef",      function(r){ return r.sef ? esc(r.sef)
+                     : '<span class="hint">atanmadı</span>'; }],
+    ["Sözleşme", function(r){ return (r.contract_start || r.contract_end)
+                     ? '<span class="hint">'+trd(r.contract_start)+" – "+trd(r.contract_end)+'</span>'
+                     : '<span class="hint">girilmedi</span>'; }],
     ["Durum",    function(r){ return esc(r.status); }]
   ], D.projects, "Henüz proje açılmamış.");
 
@@ -359,6 +396,14 @@ function ciz(){
   /* seçiciler */
   secDoldur("#p-musteri", D.employers, "name", "— yeni müşteri gireceğim —");
   secDoldur("#a-proje", D.projects, "ad2", "— şantiyeye bağlı değil —");
+  /* Şef seçimi: yalnız görevi "şantiye şefi" olan personel. Listede
+     sondör çıkmıyor — sunucu zaten reddediyor, ama reddedilecek bir şeyi
+     seçtirmek hata değil tuzak olur. */
+  secDoldur("#sf-proje", (D.projects||[]).filter(function(p){ return p.status === "active"; }),
+            "ad2", "— şantiye seçin —");
+  secDoldur("#sf-sef", (D.personnel||[]).filter(function(p){ return p.kind === "santiye_sefi"; }),
+            "full_name", "— şef atanmadı —");
+  sefFormDoldur();
   kutuCiz("#makine-sec", D.machines, function(m){
     return m.code + (m.santiye ? " · " + m.santiye : ""); }, "makine");
   kutuCiz("#personel-sec", D.personnel, function(p){
@@ -366,6 +411,22 @@ function ciz(){
            (p.santiye ? " · " + p.santiye : ""); }, "personel");
   kutuCiz("#arac-sec", D.vehicles, function(v){
     return v.plate + " · " + (TUR_AD[v.fuel_class] || ""); }, "arac");
+}
+/* ---------------- şantiye şefi ve sözleşme (54. · 59. dosya) ---------------- */
+function sefFormDoldur(){
+  var pid = $("#sf-proje") ? $("#sf-proje").value : "";
+  var p = (D.projects||[]).filter(function(x){ return x.id === pid; })[0];
+  $("#sf-sef").value = (p && p.chief_personnel_id) || "";
+  $("#sf-bas").value = (p && p.contract_start) || "";
+  $("#sf-bit").value = (p && p.contract_end)    || "";
+  var d = [];
+  if(!pid) d.push("Değiştirmek istediğiniz şantiyeyi seçin.");
+  else {
+    d.push(p && p.sef ? "Şu anki şef: " + esc(p.sef) : "Bu şantiyede şef atanmamış.");
+    if(!(p && p.contract_end))
+      d.push("Sözleşme bitişi girilmediği için analizde ileri/geri satırı çıkmıyor.");
+  }
+  $("#sf-durum").innerHTML = d.join(" ");
 }
 var TUR_AD = {kule_destek:"Saha ekipmanı", pickup:"Pikap", kamyon:"Kamyon",
               servis:"Servis", bilinmiyor:"Bilinmiyor", gider_notu:"Gider notu"};
@@ -624,6 +685,33 @@ $("#btn-program-kaydet").addEventListener("click", function(){
     $("#pr-ad").value = "";
     msg($("#program-msg"), "Program eklendi.", "ok");
     yukle().then(kuyuCiz);
+  });
+});
+
+/* ---------------- şantiye şefi ve sözleşme ---------------- */
+$("#sf-proje").addEventListener("change", sefFormDoldur);
+$("#btn-sf-kaydet").addEventListener("click", function(){
+  var pid = $("#sf-proje").value;
+  if(!pid){ msg($("#sf-msg"), "Önce şantiye seçin.", "err"); return; }
+  var bas = $("#sf-bas").value || null, bit = $("#sf-bit").value || null;
+  if(bas && bit && bit < bas){
+    msg($("#sf-msg"), "Sözleşme bitişi başlangıçtan önce olamaz.", "err"); return; }
+  var btn = $("#btn-sf-kaydet"); btn.disabled = true;
+  msg($("#sf-msg"), "Kaydediliyor…");
+  /* p_temizle: boş bırakılan alan "dokunma" değil "boşalt" demek.
+     Yönetici şefi kaldırmak isterse listeden "— şef atanmadı —"
+     seçiyor; bu silme işlemi sessizce yok sayılmamalı. */
+  sb.rpc("proje_sef_sozlesme_kaydet", {
+    p_project:pid, p_chief:$("#sf-sef").value || null,
+    p_start:bas, p_end:bit, p_temizle:true
+  }).then(function(r){
+    btn.disabled = false;
+    if(r.error){ msg($("#sf-msg"), esc(r.error.message), "err"); return; }
+    msg($("#sf-msg"), "Kaydedildi. Saha uygulaması bir sonraki açılışta görecek.", "ok");
+    yukle();          /* yukle() zaten ciz() → sefFormDoldur() çağırıyor */
+  }).catch(function(x){
+    btn.disabled = false;
+    msg($("#sf-msg"), esc(String(x && x.message || x)), "err");
   });
 });
 
