@@ -203,7 +203,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     <section data-p="arac" hidden>
       <div class="card">
         <h3>Süresi dolan ve dolmak üzere olan belgeler</h3>
-        <div class="note">60 gün kala turuncu, süresi geçince kırmızı. Yenileme girildiğinde
+        <div class="note">30 gün kala turuncu, süresi geçince kırmızı. Yenileme girildiğinde
           eski kayıt uyarı vermeyi bırakır — silmeye gerek yok.</div>
         <div id="arac-uyari"></div>
       </div>
@@ -297,7 +297,7 @@ $$("#tabs button").forEach(function(b){
    ARAÇ BELGELERİ
    ============================================================
    Muayene, sigorta ve kasko tarihlerini muhasebe giriyor; panel süresi
-   dolana yakın uyarıyor. Uyarı eşiği bakım kartındakiyle aynı: 60 gün
+   dolana yakın uyarıyor. Uyarı eşiği 1.11.2026'da 30 güne indi: 30 gün
    kala turuncu, geçince kırmızı.
    ============================================================ */
 var ARACLAR = [];
@@ -359,7 +359,7 @@ function uyariCiz(liste, hata){
   }
 
   if(!gecti.length && !yakin.length){
-    el.innerHTML = '<div class="note">120 gün içinde dolan belge yok.</div>';
+    el.innerHTML = '<div class="note">30 gün içinde dolan ya da süresi geçmiş belge yok.</div>';
     return;
   }
   function satir(x){

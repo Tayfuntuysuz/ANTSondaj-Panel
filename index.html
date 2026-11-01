@@ -594,8 +594,27 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <button class="btn ghost" id="btn-ilerleme-yok" type="button">Bu vardiyada ilerleme olmadı</button>
           <div class="hint" id="iy-ipucu" style="margin-top:6px">Takım çekildi, ölçüm alındı, muhafaza indirildi — metraj ilerlemediyse buradan işaretleyin.
             Makine arızalıysa bunu değil 3. adımdaki arıza kaydını kullanın.</div>
+          <!-- ============================================================
+               VARDİYA AÇIKLAMASI — 1 Kasım, Murat'ın isteği (64. dosya)
+               ============================================================
+               "İlerleme var ama 1,00 metre; takım çekilmiş, elmas
+               değiştirilmiş, takım inilmiş."
+
+               48. adımda açılan sebep alanının aynısı, yalnız artık
+               metraj sıfır olmak zorunda değil. İki kip tek kutuda:
+                 metraj yok  → "Bu vardiyada ilerleme olmadı" (sebep zorunlu)
+                 metraj var  → yalnız açıklama (sebep isteğe bağlı)
+               Alan adı veride değişmiyor; ay sonu dökümü ve hakediş
+               tarafı aynı yerden okumaya devam ediyor.
+               ============================================================ -->
           <div id="iy-wrap" hidden style="margin-top:10px">
-            <div class="field"><label for="iy-sebep">Sebep <span class="req">*</span></label>
+            <div class="arasi" id="iy-baslik-satir" hidden>
+              <span class="eyebrow" id="iy-baslik">Vardiya açıklaması</span>
+            </div>
+            <div class="hint" id="iy-aciklama-ipucu" hidden style="margin-bottom:8px">Metraj
+              yapıldı ama vardiyanın bir kısmı başka işe gittiyse buraya yazın —
+              takım çekme, ölçüm, muhafaza, kuyu temizleme. İsteğe bağlı.</div>
+            <div class="field"><label for="iy-sebep" id="iy-sebep-label">Sebep <span class="req" id="iy-sebep-req">*</span></label>
               <select id="iy-sebep">
                 <option value="">— seçin —</option>
                 <option value="olcum">Kuyu içi ölçüm</option>
@@ -670,6 +689,10 @@ td:first-child{text-align:start;color:var(--ink-2)}
 
       <div id="done-wrap" hidden style="margin-top:12px"></div>
       <div id="duzelt-serit" class="msg warn" hidden style="margin-top:12px"></div>
+      <!-- A2 · düzeltme ekranından değiştirilemeyen yan kayıtlar
+           (arıza, bekleme, malzeme, o günün gideri ve ölçümü).
+           Yalnız düzeltme sırasında doluyor. -->
+      <div id="duzelt-yan" hidden style="margin-top:12px"></div>
 
       <!-- Uzayan liste katlanır, sayısı başlıkta yazar: telefonda hep açık
            duran liste formu ekranın dışına itiyordu. (19. dosya, 4. madde) -->
@@ -2679,14 +2702,30 @@ function ilerlemeYokCiz(){
      alanlarının tamamı (çap, bitiş metresi, düğme, uyarı, tablo)
      kayboluyor; şefe doldurmadığı alan "eksik" diye gösterilmiyor. */
   $("#mv-alanlar").hidden = ILERLEME_YOK;
-  /* Manevra yazılmışsa bu yol zaten kapalı. Hata veren düğme göstermek
-     yerine blok hiç çıkmıyor; şef satırı silince kendiliğinden dönüyor. */
-  $("#ilerleme-yok-blok").hidden = (runs.length > 0 && !ILERLEME_YOK);
-  $("#iy-wrap").hidden = !ILERLEME_YOK;
-  $("#btn-ilerleme-yok").hidden = ILERLEME_YOK;
-  $("#iy-ipucu").hidden = ILERLEME_YOK;
+  /* 1 Kasım · B2: blok artık HER ZAMAN duruyor. Önceden manevra
+     yazıldığında tamamen gizleniyordu; Murat'ın "1 metre + takım
+     çekildi" durumunda yazacak yer kalmıyordu. */
+  $("#ilerleme-yok-blok").hidden = false;
+  var metrajVar = runs.length > 0;
+  /* "Bu vardiyada ilerleme olmadı" düğmesi yalnız metraj yokken anlamlı:
+     metraj yazılmışsa ilerleme olmuştur. */
+  $("#btn-ilerleme-yok").hidden = (ILERLEME_YOK || metrajVar);
+  $("#iy-ipucu").hidden = (ILERLEME_YOK || metrajVar);
+  /* Açıklama kutusu: ilerleme-yok kipinde ya da metraj varken açık.
+     Metraj yokken ve kip de kapalıyken kapalı — orada düğme konuşuyor. */
+  $("#iy-wrap").hidden = !(ILERLEME_YOK || metrajVar);
+  $("#iy-baslik-satir").hidden = !metrajVar || ILERLEME_YOK;
+  $("#iy-aciklama-ipucu").hidden = !metrajVar || ILERLEME_YOK;
+  /* Metraj varken sebep İSTEĞE BAĞLI; yıldız ve "— seçin —" yazısı
+     zorunluluk sözü veriyordu. */
+  var zorunlu = ILERLEME_YOK;
+  $("#iy-sebep-label").firstChild.nodeValue = zorunlu ? "Sebep " : "Ne yapıldı ";
+  $("#iy-sebep-req").hidden = !zorunlu;
+  var ilkSecenek = $("#iy-sebep").options[0];
+  if(ilkSecenek) ilkSecenek.textContent = zorunlu ? "— seçin —" : "— yok —";
+  $("#btn-iy-geri").hidden = !ILERLEME_YOK;
   $("#iy-not-wrap").hidden = (IY_SEBEP !== "diger");
-  $("#iy-olcum-uyari").hidden = (IY_SEBEP !== "olcum");
+  $("#iy-olcum-uyari").hidden = (IY_SEBEP !== "olcum" || !ILERLEME_YOK);
   if(ILERLEME_YOK) msg($("#run-msg"), "");
   kuyuSonuGoster();
   refreshState();
@@ -2925,6 +2964,10 @@ function stepProblems(n){
       else if(IY_SEBEP === "olcum" && !gecerliOlcumler().length) p.push("en az bir ölçüm");
     }
     else if(!HIC_CALISMADI && !runs.length) p.push("en az bir manevra");
+    /* B2 · metraj varken sebep isteğe bağlı, ama "Diğer" seçildiyse ne
+       yapıldığı zorunlu: sunucu da bunu şart koşuyor, kayıt kuyrukta
+       takılmasın. */
+    else if(IY_SEBEP === "diger" && !$("#iy-not").value.trim()) p.push("ne yapıldığı");
   }
   /* Mazot: "hiç çalışmadı"da kalkıyor, "ilerleme yok"ta KALKMIYOR —
      takım çekip indirirken motor çalışıyor, mazot yanıyor
@@ -2995,7 +3038,14 @@ function gunEkle(gun, n){
   return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
 }
 function tarihOner(vd){
-  if(TARIH_ELLE || DUZELT || !vd) return;
+  /* ⚠ DUZELT_YUKLENIYOR olmadan burada DÖRDÜNCÜ bir sessiz kayıp vardı
+     (1 Kasım, yeni sınama dosyası yakaladı). Düzeltme kaydı açarken
+     `DUZELT` daha atanmamış oluyor — en sonda atanıyor — ama
+     `vardiyaModu()` form doldurulurken çağrılıyor ve burası tarihi
+     BUGÜNE çekiyordu. Dünün vardiyası düzeltilince tarihi bugüne
+     kayıyordu; iz "tarih değişti" diyor ama şef öyle bir şey
+     yapmamış oluyordu. */
+  if(TARIH_ELLE || DUZELT || DUZELT_YUKLENIYOR || !vd) return;
   var simdi = new Date(), dkSimdi = simdi.getHours()*60 + simdi.getMinutes();
   var p = String(vd.starts || "00:00").split(":");
   var dkBas = Number(p[0])*60 + Number(p[1] || 0);
@@ -3162,10 +3212,38 @@ $$(".steps button").forEach(function(b){
    cevabı şefe gösteriliyor.
    ============================================================ */
 var DUZELT = null;   /* {shift_id, client_uuid, etiket} */
+/* Düzeltmeye girilen kayıtta vardiya açıklaması VAR MIYDI? Şef onu
+   boşaltırsa boşaltmanın da merkeze gitmesi gerekiyor; bu işaret
+   olmadan "boş gönderilmedi" ile "boş bırakıldı" ayırt edilemiyor. */
+var DUZELT_ACIKLAMA_VARDI = false;
+/* Form kayıttan doldurulurken açık. Doldurma sırasında çalışan
+   "akıllı" varsayılanlar (tarih önerisi, motor saati) kaydın kendi
+   değerlerinin üstüne yazmasın. */
+var DUZELT_YUKLENIYOR = false;
+
+/* A2 · düzeltme ekranının yan kayıt kutusu. Kart tek kaynak: kutunun
+   içeriğini kart.js çiziyor, burada yalnız yerine konuyor. */
+function duzeltYanCiz(kart, hata){
+  var el = $("#duzelt-yan"); if(!el) return;
+  if(hata){
+    el.hidden = false;
+    el.innerHTML = '<div class="msg warn">Bu vardiyanın arıza, bekleme, ' +
+      'malzeme ve gider kayıtları okunamadı: ' + hataTr(hata) +
+      '. Girilmiş olabilirler — düzeltirken silinmiş saymayın.</div>';
+    return;
+  }
+  var ic = (window.VKART && kart) ? VKART.yan(kart) : "";
+  el.hidden = !ic;
+  el.innerHTML = ic || "";
+}
+function duzeltYanTemizle(){
+  var el = $("#duzelt-yan"); if(!el) return;
+  el.hidden = true; el.innerHTML = "";
+}
 
 function duzeltSeridi(){
   var el = $("#duzelt-serit");
-  if(!DUZELT){ el.hidden = true; el.innerHTML = ""; return; }
+  if(!DUZELT){ el.hidden = true; el.innerHTML = ""; duzeltYanTemizle(); return; }
   el.hidden = false;
   el.innerHTML = "<b>Düzeltme:</b> " + DUZELT.etiket +
     " · kaydedince mevcut kayıt güncellenecek, yenisi açılmayacak. ";
@@ -3197,9 +3275,34 @@ function vardiyaDuzelt(sat, satirEl){
     return Promise.all([
       sb.from("shift_runs").select("seq,diameter,from_m,to_m,personnel_id,meters")
         .eq("shift_id", sat.id).order("seq"),
-      sb.from("shift_crew").select("personnel_id,crew_role").eq("shift_id", sat.id)
+      sb.from("shift_crew").select("personnel_id,crew_role").eq("shift_id", sat.id),
+      /* ============================================================
+         A1 · SESSİZ VERİ KAYBI (68. dosya)
+         ============================================================
+         Düzeltme ekranı bugüne kadar YALNIZ manevra ve ekibi okuyordu.
+         Motor saati, operasyon notu ve vardiya öncesi kontrol listesi
+         okunmuyor, ama KAYDEDİLİYORDU: payload bu üç alanı her seferinde
+         formdan alıyor. Form boş (ya da vardiya düzeninin varsayılanı)
+         olduğu için şef bir virgülü düzeltirken
+
+           · motor saatini vardiya düzeninin varsayılanına çeviriyor
+           · operasyon notunu TAMAMEN siliyor
+           · kontrol listesini "hepsi uygun" yapıyor
+
+         Üçü de sessiz: ekranda hiçbir uyarı çıkmıyor, kart düzeltme
+         izinde de görünmüyor (iz bu alanları tutmuyor).
+
+         Kart fonksiyonu bu üç alanı zaten döndürüyor; tek eksik onu
+         sormaktı.                                                     */
+      sb.rpc("vardiya_karti", {p_shift: sat.id})
     ]).then(function(res){
       if(res[0].error) throw res[0].error;
+      var kart = (res[2] && !res[2].error) ? (res[2].data || null) : null;
+      var kartHata = (res[2] && res[2].error) ? res[2].error.message : null;
+      /* Motor saati kayıttan geliyor: vardiya düzeninin varsayılanı
+         üstüne yazmasın diye işaret ÖNCE kaldırılıyor. */
+      if(kart && (kart.motor_bas || kart.motor_bit)) MOTOR_ELLE = true;
+      DUZELT_YUKLENIYOR = true;
       /* formu kayıtla doldur */
       $("#f-project").value = sat.project_id || "";
       fillVardiya(); fillMachines();
@@ -3226,20 +3329,97 @@ function vardiyaDuzelt(sat, satirEl){
                 to_m:Number(x.to_m), personnel_id:x.personnel_id}; });
       renderRuns();
 
-      /* kontrol listesi: kaydedilmiş hâlini bilmiyoruz, hepsi uygun sayılır */
-      $$("#checks .chip").forEach(function(c){ c.setAttribute("aria-pressed","true"); });
+      /* ---- A1 · motor saati ---- */
+      if(kart && (kart.motor_bas || kart.motor_bit)){
+        $("#f-eng1").value = saatKisa(kart.motor_bas);
+        $("#f-eng2").value = saatKisa(kart.motor_bit);
+      }
+
+      /* ---- A1 · operasyon notu
+         Not kaydedilirken iki alan birleştiriliyor:
+           "<malzeme açıklaması> | Kontrol: <uygunsuzluk açıklaması>"
+         Geri yüklerken aynı yerden ayrılıyor. Ayıramazsa HEPSİNİ
+         malzeme açıklamasına koyuyor: not kaybolmasın, yanlış kutuda
+         da olsa şefin gözünün önünde kalsın. */
+      var notMetni = (kart && kart["not"]) ? String(kart["not"]) : "";
+      var ayir = notMetni.lastIndexOf(" | Kontrol: ");
+      if(ayir >= 0){
+        $("#f-note").value = notMetni.slice(0, ayir);
+        $("#f-check-note").value = notMetni.slice(ayir + 12);
+      } else if(notMetni.indexOf("Kontrol: ") === 0){
+        $("#f-note").value = "";
+        $("#f-check-note").value = notMetni.slice(9);
+      } else {
+        $("#f-note").value = notMetni;
+        $("#f-check-note").value = "";
+      }
+
+      /* ---- A1 · vardiya öncesi kontrol listesi
+         Kayıttaki nesne {madde: true/false}. Maddeyi METNİNDEN
+         eşleştiriyoruz — kontrol listesi kodda sabit, kimlikleri yok.
+         Kayıtta geçmeyen madde (listeye sonradan eklenmiş olabilir)
+         "uygun" sayılıyor; yoksa şef hiç sorulmamış bir maddeyi
+         uygunsuz görmüş olurdu. */
+      var kt = (kart && kart.kontrol && typeof kart.kontrol === "object")
+        ? kart.kontrol : null;
+      var ktEksik = 0;
+      $$("#checks .chip").forEach(function(c){
+        var ad = c.textContent;
+        var v = (kt && Object.prototype.hasOwnProperty.call(kt, ad)) ? !!kt[ad] : true;
+        if(kt && !Object.prototype.hasOwnProperty.call(kt, ad)) ktEksik++;
+        c.setAttribute("aria-pressed", String(v));
+      });
       countChecks();
+
+      /* ---- B2 · vardiya açıklaması
+         Aynı alan iki işi görüyor: metraj sıfırsa "ilerleme olmadı"
+         kipi, sıfır değilse yalnız açıklama. Hangisi olduğunu
+         manevra sayısı söylüyor. */
+      DUZELT_ACIKLAMA_VARDI = !!(kart && kart.ilerleme_yok && kart.ilerleme_yok.sebep);
+      if(kart && kart.ilerleme_yok){
+        IY_SEBEP = kart.ilerleme_yok.sebep || "";
+        IY_NOT   = kart.ilerleme_yok["not"] || "";
+        $("#iy-sebep").value = IY_SEBEP;
+        $("#iy-not").value   = IY_NOT;
+        ILERLEME_YOK = (runs.length === 0 && !!IY_SEBEP);
+      } else {
+        ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
+        $("#iy-sebep").value = ""; $("#iy-not").value = "";
+      }
+      ilerlemeYokCiz();
+
+      /* ---- A2 · değiştirilemeyen yan kayıtlar görünür oluyor ---- */
+      duzeltYanCiz(kart, kartHata);
 
       var vdz = slotBilgi(sat.project_id, sat.shift_slot || (sat.shift === "gece" ? 2 : 1));
       DUZELT = { shift_id: sat.id, client_uuid: sat.client_uuid,
                  etiket: sat.work_date + " · " + (vdz ? vdz.label : sat.shift) };
+      DUZELT_YUKLENIYOR = false;
+      /* Tarih, doldurma sırasında bir yerden bozulduysa burada kayıttaki
+         hâline geri çekiliyor — kemer ve askı. */
+      if($("#f-date").value !== (sat.work_date || "")) $("#f-date").value = sat.work_date || "";
       duzeltSeridi();
       $("#done-wrap").hidden = true;
       $(".tabs button[data-tab=\"vardiya\"]").click();
       adimaGit(1);
       refreshState(); syncDepth();
       dur("");
-      msg($("#shift-msg"), "Kayıt açıldı. Düzeltip tekrar kaydedin.", "ok");
+      /* Şefe NE geri geldiğini söylüyoruz. "Kayıt açıldı" yetmiyordu:
+         şef motor saatinin kayıttan mı yoksa varsayılandan mı geldiğini
+         bilemiyordu. */
+      var geri = [];
+      if(kart && (kart.motor_bas || kart.motor_bit)) geri.push("motor saati");
+      if(notMetni) geri.push("not");
+      if(kt && Object.keys(kt).length) geri.push("kontrol listesi");
+      if(kart && kart.ilerleme_yok) geri.push("vardiya açıklaması");
+      msg($("#shift-msg"), "Kayıt açıldı. Düzeltip tekrar kaydedin." +
+        (geri.length ? " Kayıttan geri yüklendi: " + geri.join(", ") + "." : "") +
+        (kartHata ? " ⚠ Yan kayıtlar okunamadı (" + hataTr(kartHata) +
+                    "); motor saati, not ve kontrol listesi geri yüklenemedi " +
+                    "— kaydetmeden önce elle doldurun." : "") +
+        (ktEksik ? " Kontrol listesine " + ktEksik + " yeni madde eklenmiş, " +
+                   "onlar uygun sayıldı." : ""),
+        kartHata ? "warn" : "ok");
     });
   }).catch(function(e){ dur((e && e.message) || String(e), "err"); });
 }
@@ -3438,10 +3618,18 @@ $("#btn-save-shift").addEventListener("click", function(){
     },
     runs: runs.slice(),
     crew: crew,
-    /* Kuyuda KULLANILAN malzeme (tüketim adımı) — çoklu satır */
-    used: KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; }),
-    /* Kuyu sonu: kuyuda kalan muhafaza/tij ve kuyu ölçümleri */
-    kuyusonu: ($("#f-end").value === "kuyu_sonu") ? {
+    /* Kuyuda KULLANILAN malzeme (tüketim adımı) — çoklu satır.
+       ⚠ DÜZELTMEDE GÖNDERİLMİYOR. Malzeme satırları silinip yeniden
+       yazılmıyor, ÜSTÜNE EKLENİYOR (`shift_materials` insert). Düzeltme
+       ekranı da mevcut satırları okumuyor. İkisi birleşince "bentonit
+       4 paket" düzeltmeden sonra 8 pakete çıkıyordu. Mevcut satırlar
+       A2 kutusunda salt okunur gösteriliyor; değişmesi gerekiyorsa
+       yönetici düzeltiyor. */
+    used: DUZELT ? [] : KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; }),
+    /* Kuyu sonu: kuyuda kalan muhafaza/tij ve kuyu ölçümleri.
+       Aynı sebeple düzeltmede gönderilmiyor — `kuyu_sonu_kaydet` de
+       ekliyor, değiştirmiyor. */
+    kuyusonu: (!DUZELT && $("#f-end").value === "kuyu_sonu") ? {
       casings: KALAN.filter(function(r){ return r.tur.indexOf("cas:") === 0 && Number(r.qty) > 0; })
                     .map(function(r){ return {diameter:r.tur.slice(4), metre:Number(r.qty)}; }),
       other:   KALAN.filter(function(r){ return r.tur.indexOf("mat:") === 0 && Number(r.qty) > 0; })
@@ -3469,11 +3657,23 @@ $("#btn-save-shift").addEventListener("click", function(){
   /* İlerleme olmayan vardiya ve ölçümler de vardiyanın PEŞİNDEN gidiyor;
      sunucu ikisini de client_uuid'den buluyor. Sıra önemli: önce işaret,
      sonra ölçümler (23 Ekim). */
-  if(ILERLEME_YOK){
+  /* B2 · artık "ilerleme yok" kipi olmasa da sebep yazılabiliyor:
+     Murat'ın "1 metre yapıldı, takım çekilip inildi" durumu. Üç hâl var:
+       sebep seçili           → yaz
+       düzeltmede boşaltıldı  → SİL (sebep null gönderiliyor)
+       ikisi de değil         → hiç gönderme
+     Boşaltmanın gönderilmesi önemli: gönderilmezse şef açıklamayı
+     siliyor, merkezde eski açıklama duruyor. */
+  if(IY_SEBEP){
     durusKuyrugu.push({ id:uuid(), kind:"ilerlemesiz", created:Date.now()+1,
-      title:"İlerleme yok · " + wellCode,
+      title:(ILERLEME_YOK ? "İlerleme yok · " : "Vardiya açıklaması · ") + wellCode,
       sub:(IY_AD[IY_SEBEP] || IY_SEBEP) + " · " + item.payload.work_date,
       payload:{ client_uuid:cu, sebep:IY_SEBEP, note:$("#iy-not").value.trim() || null } });
+  } else if(duzeltmeMi && DUZELT_ACIKLAMA_VARDI){
+    durusKuyrugu.push({ id:uuid(), kind:"ilerlemesiz", created:Date.now()+1,
+      title:"Vardiya açıklaması silindi · " + wellCode,
+      sub:item.payload.work_date,
+      payload:{ client_uuid:cu, sebep:null, note:null } });
   }
   var olcumler = gecerliOlcumler();
   if(olcumler.length){
@@ -3540,6 +3740,7 @@ function resetForm(){
   $("#f-paper").value = ""; $("#f-end").value = "";
   $("#f-check-note").value = "";
   KULLANILAN = []; KALAN = []; OLCUM = []; ISCI = []; MOTOR_ELLE = false;
+  duzeltYanTemizle();
   kullanilanCiz(); kalanCiz(); olcumCiz(); kuyuSonuGoster(); isciCiz();
   $("#ekip-kaynak").textContent = "";
   $("#nak-note").value = ""; msg($("#nak-msg"), "");
@@ -3549,6 +3750,7 @@ function resetForm(){
   BEKLEMELER = []; beklemeListeCiz();
   HIC_CALISMADI = false; calismadiSeridiCiz();
   ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
+  DUZELT_ACIKLAMA_VARDI = false; DUZELT_YUKLENIYOR = false;
   if($("#iy-sebep")) $("#iy-sebep").value = "";
   if($("#iy-not")) $("#iy-not").value = "";
   ilerlemeYokCiz();
@@ -4219,13 +4421,37 @@ function sendItem(it, tenant){
             return res;
           };
         }
-        return sb.from("shift_runs").delete().eq("shift_id", sid)
-          .then(bak("Eski manevralar silinemedi"))
-          .then(function(){
-            if(!it.runs || !it.runs.length) return null;
-            return sb.from("shift_runs").insert(it.runs.map(function(x,i){
-              return {tenant_id:tenant, shift_id:sid, seq:i+1, diameter:x.diameter, from_m:x.from_m, to_m:x.to_m, personnel_id:x.personnel_id};
-            })).then(bak("Metraj (manevra) kaydedilemedi"));
+        /* ============================================================
+           A3 · METRAJ DEĞİŞİKLİĞİ İZ BIRAKIYOR (68. dosya)
+           ============================================================
+           Önceden burada iki iş vardı: sil, sonra yaz. Tetikleyici
+           bunların ikisini de yalnız ay kilidi açısından görüyor, iz
+           tutmuyordu — metraj, yani hakedişin faturalanan tek kalemi,
+           izsiz değişebiliyordu.
+
+           Artık ikisini tek fonksiyon yapıyor: eski listeyi okuyup
+           yenisiyle karşılaştırıyor, fark varsa ize yazıyor. Aynı
+           kuyruk kaydı ikinci kez gönderilirse listeler aynı olduğu
+           için iz yazılmıyor.
+
+           Fonksiyon yoksa (merkez eski sürümde) eski yola düşülüyor:
+           şef sahada kalmasın. */
+        return Promise.resolve(sb.rpc("manevra_degistir",
+                 {p_shift:sid, p_runs:(it.runs || [])}))
+          .then(function(mr){
+            if(mr && mr.error &&
+               /manevra_degistir|does not exist|schema cache/i.test(mr.error.message || "")){
+              return sb.from("shift_runs").delete().eq("shift_id", sid)
+                .then(bak("Eski manevralar silinemedi"))
+                .then(function(){
+                  if(!it.runs || !it.runs.length) return null;
+                  return sb.from("shift_runs").insert(it.runs.map(function(x,i){
+                    return {tenant_id:tenant, shift_id:sid, seq:i+1, diameter:x.diameter,
+                            from_m:x.from_m, to_m:x.to_m, personnel_id:x.personnel_id};
+                  })).then(bak("Metraj (manevra) kaydedilemedi"));
+                });
+            }
+            return bak("Metraj (manevra) kaydedilemedi")(mr);
         }).then(function(){
           if(!it.crew.length) return null;
           return sb.from("shift_crew").upsert(it.crew.map(function(c){
@@ -5603,7 +5829,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "44";
+var SURUM = "45";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

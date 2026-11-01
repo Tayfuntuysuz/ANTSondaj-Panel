@@ -54,12 +54,19 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     <button type="button" data-s="projeler" aria-pressed="true">Projeler</button>
     <button type="button" data-s="yeni" aria-pressed="false">Yeni proje</button>
     <button type="button" data-s="makineler" aria-pressed="false">Makineler</button>
-    <button type="button" data-s="araclar" aria-pressed="false">Araç ve ekipman</button>
+    <!-- Rozet: sekmeye GİRMEDEN de uyarı görünsün. Tayfun: "süresi
+         dolunca uyarı versin" — tıklanması gereken uyarı, uyarı
+         değil. -->
+    <button type="button" data-s="araclar" aria-pressed="false">Araç ve ekipman
+      <span class="pill bad" id="belge-rozet" hidden style="margin-inline-start:6px"></span></button>
     <button type="button" data-s="personel" aria-pressed="false">Personel</button>
     <button type="button" data-s="malzeme" aria-pressed="false">Malzeme</button>
     <button type="button" data-s="musteri" aria-pressed="false">Müşteriler</button>
   </div>
   <div id="msg"></div>
+  <!-- Süresi geçmiş araç belgesi uyarısı. #msg ile aynı yere yazılmıyor:
+       yukle() orayı temizliyor ve ikisi yarışıyordu. -->
+  <div id="belge-bant"></div>
 
   <!-- PROJELER -->
   <section data-bol="projeler">
@@ -197,6 +204,25 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 
   <!-- ARAÇLAR -->
   <section data-bol="araclar" hidden>
+    <!-- ============================================================
+         ARAÇ BELGE UYARISI — 1 Kasım 2026 (62. dosya)
+         ============================================================
+         Tayfun: "Araç belgeleri uyarısı yönetici ve muhasebe
+         panellerinde uygun bir bölümde olsun. Süresi dolunca uyarı
+         versin. Araç sekmesi."
+
+         Genel bakıştan kalktı, buraya geldi. Tarihleri muhasebe
+         giriyor; burası yalnız okuyor. Eşik 30 gün (53. SQL).
+         Kart yalnız UYARI VARSA çıkıyor: "uyarı yok" diye bir kart
+         ekranda yer kaplamıyor.
+         ============================================================ -->
+    <div class="card" id="belge-kart" hidden style="margin-bottom:14px">
+      <h3>Süresi dolan araç belgeleri</h3>
+      <div class="not">30 gün kala uyarı veriyor, süresi geçince kırmızı.
+        Tarihleri muhasebe giriyor; yenileme girildiğinde eski kayıt
+        uyarı vermeyi bırakıyor.</div>
+      <div id="belge-uyari" style="margin-top:10px"></div>
+    </div>
     <div class="card">
       <h3>Araç ve ekipman tanımı</h3>
       <div class="not">Tür, yakıt raporunu belirler: <b>saha ekipmanı</b> (traktör, su pompası)
@@ -271,6 +297,33 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div id="program-liste"></div>
       <div id="program-msg"></div>
     </div>
+
+    <!-- ============================================================
+         MATKAP MARKALARI — 1 Kasım 2026 (64. dosya, 2. madde)
+         ============================================================
+         50. adım tabloyu kurdu ve sahaya "Diğer → yaz → listeye ekle"
+         yolunu açtı; listenin kendi ekranı yoktu. Sahada yanlış yazılan
+         bir marka ("Watel Bordo") listeye kalıcı yerleşiyor ve kimse
+         düzeltemiyordu — markanın kendi tablosu olmasının gerekçesi tam
+         buydu.
+
+         Ad düzeltildiğinde GEÇMİŞ MATKAP KAYITLARI DA taşınıyor
+         (`bits.brand` metin tutuyor); yalnız listeyi düzeltmek aynı
+         markayı iki ayrı marka gibi raporlardı.
+         ============================================================ -->
+    <div class="card" style="margin-top:14px">
+      <h3>Matkap markaları</h3>
+      <div class="not">Sahada matkap takılırken seçilen liste. Yeni marka sahadan da
+        eklenebiliyor; <b>düzeltmek ve pasifleştirmek yalnız buradan</b> yapılıyor.
+        Pasif marka sahada listede çıkmaz, eski kayıtlarda durur.</div>
+      <div class="satir">
+        <div class="field"><label for="mk-ad">Marka adı</label>
+          <input id="mk-ad" placeholder="Wattel Bordo"></div>
+        <button class="btn gh" id="btn-marka-kaydet" type="button">Ekle</button>
+      </div>
+      <div id="marka-msg"></div>
+      <div id="marka-liste" style="margin-top:10px"></div>
+    </div>
   </section>
 
   <!-- MÜŞTERİLER -->
@@ -307,7 +360,26 @@ SP.boot({ sayfa:"anaveri", baslik:"Ana veri ve projeler", hazir:function(){
   }
   vardiyaSatirlari(); kuyuEkle();
   yukle();
+  belgeRozet();
 }});
+
+/* Sekme rozeti: tek sayı, açılışta soruluyor. Tam liste sekmeye
+   girildiğinde okunuyor. */
+function belgeRozet(){
+  Promise.resolve(sb.rpc("arac_belge_sayisi", {p_project:null, p_kisi:null}))
+    .then(function(r){
+      var roz = $("#belge-rozet"); if(!roz || !r || r.error) return;
+      var d = r.data || {};
+      var n = Number(d.gecti || 0) + Number(d.yaklasti || 0);
+      roz.hidden = (n === 0);
+      roz.textContent = n ? String(n) : "";
+      roz.className = Number(d.gecti || 0) ? "pill bad" : "pill warn";
+      if(Number(d.gecti || 0)){
+        msg($("#belge-bant"), Number(d.gecti) + " araç belgesinin süresi geçmiş — " +
+          "Araç ve ekipman sekmesinde listelendi.", "err");
+      }
+    }).catch(function(){});
+}
 
 function yukle(){
   msg($("#msg"), "Yükleniyor…");
@@ -324,6 +396,11 @@ $$("#sekmeler button").forEach(function(b){
   b.addEventListener("click", function(){
     $$("#sekmeler button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
     $$("[data-bol]").forEach(function(s){ s.hidden = (s.dataset.bol !== b.dataset.s); });
+    /* Sekmeye girildiğinde o sekmenin kendi verisi okunuyor. Açılışta
+       hepsini okumak sayfayı yavaşlatıyordu; belge durumu ve marka
+       listesi `anaveri()` içinde değil. */
+    if(b.dataset.s === "araclar") belgeYukle();
+    if(b.dataset.s === "malzeme" && !MARKALAR.length) markaYukle();
     window.scrollTo(0,0);
   });
 });
@@ -685,6 +762,163 @@ $("#btn-program-kaydet").addEventListener("click", function(){
     $("#pr-ad").value = "";
     msg($("#program-msg"), "Program eklendi.", "ok");
     yukle().then(kuyuCiz);
+  });
+});
+
+/* ============================================================
+   ARAÇ BELGE UYARISI (62. dosya · 1 Kasım)
+   ============================================================
+   Genel bakıştan kalkıp buraya geldi. `anaveri()` içine konmadı:
+   belge durumu dönemle değil BUGÜNLE ilgili ve sayfanın her
+   açılışında yeniden hesaplanması gerekiyor. O yüzden sekmeye
+   girildiğinde ayrıca sorulyor.
+   ============================================================ */
+var BELGE_AD = {muayene:"Muayene", sigorta:"Trafik sigortası", kasko:"Kasko",
+                egzoz:"Egzoz", k_belgesi:"K belgesi", diger:"Diğer"};
+var BELGE_OKUNDU = false;
+
+function belgeYukle(zorla){
+  if(BELGE_OKUNDU && !zorla) return;
+  BELGE_OKUNDU = true;
+  Promise.resolve(sb.rpc("arac_belge_durumu", {p_project:null, p_kisi:null}))
+    .then(function(r){
+      if(r && r.error){
+        /* Sessizce boş bırakmıyoruz: uyarının çalışmadığını bilmek,
+           uyarı olmadığını sanmaktan iyi. */
+        $("#belge-kart").hidden = false;
+        $("#belge-uyari").innerHTML =
+          '<div class="msg err">Belge durumu getirilemedi: ' + esc(r.error.message) +
+          '. Süresi geçmiş belge olabilir.</div>';
+        return;
+      }
+      belgeCiz(r.data || []);
+    }).catch(function(e){
+      $("#belge-kart").hidden = false;
+      $("#belge-uyari").innerHTML = '<div class="msg err">Belge durumu getirilemedi: ' +
+        esc((e && e.message) || e) + '</div>';
+    });
+}
+
+function belgeCiz(liste){
+  var gecti = liste.filter(function(x){ return x.durum === "gecti"; });
+  var yakin = liste.filter(function(x){ return x.durum === "yaklasti"; });
+  /* Uyarı yoksa kart hiç çıkmıyor — "uyarı yok" kartı gürültü. */
+  if(!gecti.length && !yakin.length){ $("#belge-kart").hidden = true; return; }
+  $("#belge-kart").hidden = false;
+  var sirali = gecti.concat(yakin).sort(function(a,b){
+    return Number(a.kalan) - Number(b.kalan); });
+  $("#belge-uyari").innerHTML =
+    (gecti.length ? '<div class="msg err"><b>' + gecti.length +
+      ' belgenin süresi geçmiş.</b> O araç trafiğe çıkmamalı.</div>' : "") +
+    tablo([
+      ["Araç", function(x){ return '<b>' + esc(x.plaka) + '</b>' +
+        (x.arac ? '<div class="hint">' + esc(x.arac) + '</div>' : ''); }],
+      ["Belge", function(x){ return esc(BELGE_AD[x.tur] || x.tur); }],
+      ["Bitiş", function(x){ return trd(x.bitis); }],
+      ["Durum", function(x){ var g = Number(x.kalan);
+        return '<span class="pill ' + (x.durum === "gecti" ? "bad" : "warn") + '">' +
+          (g < 0 ? Math.abs(g) + " gün önce doldu" : g + " gün kaldı") + '</span>'; }],
+      ["Şirket", function(x){ return esc(x.sirket || "—"); }],
+      ["Zimmetli", function(x){ return esc(x.zimmetli || "—"); }]
+    ], sirali, "");
+}
+
+/* ============================================================
+   MATKAP MARKALARI (64. dosya · 1 Kasım)
+   ============================================================
+   `bit_brands` tek kaynak. Sahadan EKLEME serbest (Murat gece 2'de
+   yeni marka yazabilmeli), DÜZELTME ve PASİFLEŞTİRME yalnız burada
+   ve yalnız yöneticide — ad değişikliği geçmiş matkap raporlarının
+   tamamını etkiliyor.
+   ============================================================ */
+var MARKALAR = [];
+
+function markaYukle(){
+  return Promise.resolve(sb.from("bit_brands").select("id,name,is_active").order("name"))
+    .then(function(r){
+      if(r.error){
+        $("#marka-liste").innerHTML = '<div class="msg err">Marka listesi okunamadı: ' +
+          esc(r.error.message) + '</div>';
+        return;
+      }
+      MARKALAR = r.data || [];
+      markaCiz();
+    });
+}
+
+function markaCiz(){
+  if(!MARKALAR.length){
+    $("#marka-liste").innerHTML = '<div class="hint">Marka tanımlanmamış.</div>';
+    return;
+  }
+  var aktif = MARKALAR.filter(function(m){ return m.is_active; }).length;
+  $("#marka-liste").innerHTML =
+    '<div class="hint" style="margin-bottom:6px">' + aktif + ' etkin · ' +
+    (MARKALAR.length - aktif) + ' pasif</div>' +
+    tablo([
+      ["Marka", function(m){ return m.is_active
+          ? '<b>' + esc(m.name) + '</b>'
+          : '<span style="opacity:.55">' + esc(m.name) + '</span>'; }],
+      ["Durum", function(m){ return m.is_active
+          ? '<span class="pill">etkin</span>'
+          : '<span class="pill warn">pasif</span>'; }],
+      ["", function(m){
+        return '<button class="btn gh sm marka-ad" type="button" data-id="' + m.id +
+               '">Adını düzelt</button> ' +
+               '<button class="btn gh sm marka-dur" type="button" data-id="' + m.id +
+               '" data-aktif="' + (m.is_active ? "1" : "0") + '">' +
+               (m.is_active ? "Pasifleştir" : "Geri aç") + '</button>'; }]
+    ], MARKALAR, "");
+
+  $$("#marka-liste .marka-ad").forEach(function(b){
+    b.addEventListener("click", function(){ markaAdiDuzelt(b.dataset.id); });
+  });
+  $$("#marka-liste .marka-dur").forEach(function(b){
+    b.addEventListener("click", function(){
+      markaGuncelle(b.dataset.id, null, b.dataset.aktif !== "1");
+    });
+  });
+}
+
+function markaAdiDuzelt(id){
+  var m = MARKALAR.filter(function(x){ return x.id === id; })[0];
+  if(!m) return;
+  /* prompt yerine satır içi alan: telefonda prompt kapanınca yazdığı
+     kaybolan bir ekran istemiyoruz. */
+  var yeni = window.prompt("Marka adı — düzeltilince bu markayla kayıtlı " +
+    "bütün matkap kayıtları da yeni ada taşınır:", m.name);
+  if(yeni === null) return;
+  yeni = yeni.trim();
+  if(!yeni){ msg($("#marka-msg"), "Marka adı boş olamaz.", "err"); return; }
+  if(yeni === m.name){ msg($("#marka-msg"), "Ad değişmedi.", "warn"); return; }
+  markaGuncelle(id, yeni, null);
+}
+
+function markaGuncelle(id, ad, aktif){
+  msg($("#marka-msg"), "Kaydediliyor…");
+  Promise.resolve(sb.rpc("matkap_marka_guncelle",
+      {p_id:id, p_name:ad, p_aktif:aktif})).then(function(r){
+    if(r.error){ msg($("#marka-msg"), esc(r.error.message), "err"); return; }
+    var d = r.data || {};
+    msg($("#marka-msg"), ad
+      ? "“" + esc(d.eski) + "” → “" + esc(d.yeni) + "” olarak düzeltildi" +
+        (Number(d.matkap) > 0 ? " · " + d.matkap + " matkap kaydı taşındı." : ".")
+      : ((d.aktif ? "“" + esc(d.yeni) + "” geri açıldı." :
+                    "“" + esc(d.yeni) + "” pasifleştirildi, sahada listede çıkmayacak.")),
+      "ok");
+    markaYukle();
+  });
+}
+
+$("#btn-marka-kaydet").addEventListener("click", function(){
+  var ad = $("#mk-ad").value.trim();
+  if(!ad){ msg($("#marka-msg"), "Marka adı zorunlu.", "err"); return; }
+  msg($("#marka-msg"), "Ekleniyor…");
+  Promise.resolve(sb.rpc("matkap_marka_ekle", {p_name:ad})).then(function(r){
+    if(r.error){ msg($("#marka-msg"), esc(r.error.message), "err"); return; }
+    $("#mk-ad").value = "";
+    msg($("#marka-msg"), "Marka eklendi.", "ok");
+    markaYukle();
   });
 });
 
