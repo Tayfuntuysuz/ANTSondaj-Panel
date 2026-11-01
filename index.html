@@ -1379,15 +1379,69 @@ function opt(sel, items, labelFn, emptyLabel){
   (items||[]).forEach(function(it){ var o=document.createElement("option"); o.value=it.id; o.textContent=labelFn(it); el.appendChild(o); });
   if(cur) el.value = cur;
 }
+/* ============================================================
+   TEK ŞANTİYE SEÇİMİ — BÜTÜN SEKMELER AYNI PROJEDE (1 Kasım 2026)
+   ============================================================
+   1 Kasım'da sahada şu oldu: vardiya sekmesinde DENEME şantiyesi
+   seçiliyken puantaj sekmesinde Amasya seçiliydi. Vardiya DENEME'ye
+   yazıldı, Amasya'nın puantajı boş kaldı ve "neden kimse çalışmıyor"
+   diye bakıldı. Yedi ayrı seçici vardı ve hiçbiri ötekinden haberdar
+   değildi.
+
+   Kuralı Tayfun koydu: "Her kullanıcı kendi sahasını görecek şekilde
+   proje otomatik gelsin."
+
+     tek şantiye  → seçici hiç görünmüyor, proje kendiliğinden seçili
+     çok şantiye  → seçici duruyor ama BİRİNDE değişince HEPSİ değişiyor
+
+   Çok şantiyeyi yalnız Tayfun ve Osman görüyor (all_sites); Murat zaten
+   tek sahaya kilitli, onun ekranında seçici tamamen kalkıyor.
+   ============================================================ */
+var PROJE_SECICILER = ["#f-project","#y-project","#e-project","#p-project",
+                       "#s-project","#av-project","#kr-project"];
+
+function aktifProje(){ return $("#f-project") ? $("#f-project").value : ""; }
+
+/* Bir sekmede proje değişti: ötekiler de aynı projeye geçiyor.
+   Değeri yazmak YETMİYOR — her sekmenin kendi yenilemesi `change`
+   olayına bağlı ve programatik atama olay tetiklemiyor. O yüzden olay
+   elle gönderiliyor; bayrak da bunun geri dönüp sonsuz döngü
+   yapmasını engelliyor. */
+var PROJE_SENK = false;
+function projeSec(pid, kaynak){
+  if(PROJE_SENK) return;
+  PROJE_SENK = true;
+  try {
+    PROJE_SECICILER.forEach(function(s){
+      var el = $(s); if(!el || s === kaynak) return;
+      if(el.value === pid) return;
+      el.value = pid;
+      el.dispatchEvent(new Event("change"));
+    });
+  } finally { PROJE_SENK = false; }
+}
+
+/* Tek şantiyesi olan kullanıcıda seçiciler gizleniyor. Pasifleştirme
+   değil GİZLEME: pasif alan sahada "program bozuk" dedirtiyor
+   (58. dosya). */
+function projeSeciciGoster(tekMi){
+  PROJE_SECICILER.forEach(function(s){
+    var el = $(s); if(!el) return;
+    var kap = el.closest(".field") || el.parentNode;
+    if(kap) kap.hidden = tekMi;
+  });
+}
+
 function fillSelects(){
   if(!MASTER) return;
   var pr = MASTER.projects||[], ma = MASTER.machines||[], pe = MASTER.personnel||[];
-  ["#f-project","#y-project","#e-project","#p-project","#s-project","#av-project","#kr-project"].forEach(function(s){
+  PROJE_SECICILER.forEach(function(s){
     opt(s, pr, function(p){ return p.name + (p.site_name ? " · " + p.site_name : ""); });
     /* Şefin tek şantiyesi var; her sekmede yeniden seçtirmenin anlamı yok.
        Seçilmemiş bırakmak, düğmelerin sessizce "proje seçin" demesine yol açıyordu. */
     if(pr.length === 1 && !$(s).value) $(s).value = pr[0].id;
   });
+  projeSeciciGoster(pr.length === 1);
   fillMachines();
   fillYakitHedef();
   /* Gece ve gündüzde tek sondör var; 2. sondör ve "manevrayı yapan sondör"
@@ -1772,6 +1826,13 @@ function ekipOneriYukle(){
     uygula(r.data.ekip || [], r.data.kaynak);
   }).catch(function(){ uygula(yerel, "kuyu_tanimi"); });
 }
+/* Senkron dinleyicisi ÖNCE bağlanıyor: her seçici önce ötekileri
+   kendine eşitliyor, sonra o sekmenin kendi yenilemesi çalışıyor. */
+PROJE_SECICILER.forEach(function(s){
+  var el = $(s); if(!el) return;
+  el.addEventListener("change", function(){ projeSec(el.value, s); });
+});
+
 $("#f-project").addEventListener("change", function(){
   runs = []; renderRuns();
   /* Proje değişti: makine, kuyu, araç listeleri BİRLİKTE yenilenir. Tek tek
@@ -3007,7 +3068,16 @@ function refreshState(){
   var w = currentWell();
   var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
   var tarih = $("#f-date").value ? $("#f-date").value.split("-").reverse().slice(0,2).join(".") : "";
-  $("#sum-well").textContent = (w ? w.code : "kuyu seçilmedi") +
+  /* 1 Kasım: ŞANTİYE ADI şeride girdi. Birden fazla şantiye gören bir
+     hesapta (Tayfun, Osman) vardiyanın hangi sahaya yazıldığını
+     söyleyen tek yer burasıydı ve orada yazmıyordu — 1 Kasım'da bir
+     vardiya Amasya yerine DENEME şantiyesine yazıldı ve ancak puantaj
+     boş çıkınca farkedildi. Tek şantiyeli hesapta yazılmıyor: orada
+     yanlış şantiye diye bir şey yok, şerit de dar. */
+  var cokSaha = ((MASTER && MASTER.projects) || []).length > 1;
+  var saha = cokSaha ? projeAdi($("#f-project").value) : "";
+  $("#sum-well").textContent = (saha ? saha + " · " : "") +
+    (w ? w.code : "kuyu seçilmedi") +
     (tarih ? " · " + tarih : "") + (vd ? " · " + vd.label : (nakliyeMi() ? " · Nakliye" : ""));
   $("#sum-meters").textContent = tl(totalM()) + " m";
   arizaBaslikCiz();
@@ -5940,7 +6010,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "46";
+var SURUM = "47";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
