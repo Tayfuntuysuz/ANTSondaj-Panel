@@ -153,7 +153,11 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          30 güne indi (53. SQL). -->
     <div class="donem-blok">
       <div class="sechead" id="puantaj"><h2>Puantaj</h2><span>Çalışılan gün, izin, avans</span></div>
-      <div class="card"><div class="scroll" id="attendance"></div></div>
+      <div class="card">
+        <div class="note">Çalışanlar vardiyadan sayılıyor: kuleye çıkan çalıştı,
+          çıkmayan sayılmaz. Şef, şoför ve aşçı vardiyaya girmeden tam gün sayılır.
+          İzin, rapor ve avans şefin puantaj ekranından geliyor.</div>
+        <div class="scroll" id="attendance"></div></div>
     </div>
 
     <p class="foot">Bütün rakamlar sahadaki günlük vardiya kayıtlarından türetilir. İptal edilen kuyu metrajı delgi toplamına girer; sondör metrajına, teslim edilen metraja ve prime girmez.</p>
@@ -684,6 +688,12 @@ function renderDash(d){
     ["Ad",function(r){return esc(r.name);}],
     ["Görev",function(r){return esc(String(r.kind).replace(/_/g," "));}],
     ["Çalıştı",function(r){return '<span class="num">'+r.calisti+'</span>';}],
+    /* 71. dosya: gün sayısı yanında VARDİYA sayısı. Aynı gün iki
+       vardiyaya çıkan kişi gün sütununda bir kere görünüyor.
+       Vardiyaya girmeden çalışanlarda (şef, şoför, aşçı) sıfır —
+       tam gün sayılıyorlar, vardiyaları yok. */
+    ["Vardiya",function(r){return '<span class="num">'+
+       (Number(r.vardiya) ? r.vardiya : '—')+'</span>';}],
     ["İzin",function(r){return '<span class="num">'+r.izin+'</span>';}],
     ["Rapor",function(r){return '<span class="num">'+r.rapor+'</span>';}],
     ["Tek çalışma",function(r){return '<span class="num">'+r.tek+'</span>';}],

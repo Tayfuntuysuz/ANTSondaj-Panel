@@ -108,6 +108,10 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .ara-kutu svg{position:absolute;inset-inline-start:11px;top:50%;margin-top:-9px;
   width:18px;height:18px;color:var(--ink-3);pointer-events:none}
 .ara-kutu input{padding-inline-start:37px}
+.pua-kisiler{display:flex;flex-wrap:wrap;gap:6px}
+.pua-kisi{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);
+  border-radius:999px;padding:4px 6px 4px 11px;font-size:13.5px}
+.pua-kisi .sil{min-height:0;padding:0 4px;font-size:16px;line-height:1}
 .ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
 .ara-sonuc button{display:block;width:100%;text-align:start;border:0;background:none;padding:11px 12px;
   border-bottom:1px solid var(--line-soft);font:inherit;color:inherit;cursor:pointer;min-height:44px}
@@ -1047,9 +1051,15 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <!-- Tayfun, 22 Ekim: "İstisna ekle" yazısı, vardiya ekibi de ekranda
              görününce anlamını kaybediyor. Düğme kısaldı, ne yaptığını alt
-             yazı anlatıyor. -->
-        <div class="hint">Yazmadığınız herkes <b>çalıştı</b> sayılır. Kuleye girenler
-          vardiyadan geldi. İzinli, raporlu ya da avans alan kişileri buradan ekleyin.</div>
+             yazı anlatıyor.
+
+             1 Kasım · 71. dosya: "Yazmadığınız herkes çalıştı sayılır"
+             kuralı KALKTI. Puantaj artık vardiyadan türetiliyor; kuleye
+             çıkmayan sondör o gün çalışmamış sayılıyor. Yazı buna göre
+             değişti. -->
+        <div class="hint">Puantaj <b>vardiyadan</b> geliyor: kuleye çıkan çalıştı
+          sayılır, çıkmayan sayılmaz. Şef, şoför ve aşçı vardiyaya girmeden
+          çalıştı sayılır. İzinli, raporlu ya da avans alan kişileri buradan ekleyin.</div>
       </div>
 
       <div id="att-list" style="margin-top:12px"></div>
@@ -5172,66 +5182,160 @@ function attOzet(){
   }
   var bas = '<span class="hint">' + santiyeAdi() + " · " + ($("#p-date").value||"") + "</span>";
 
-  if(!PUANTAJ_GUN || !PUANTAJ_GUN.vardiya_girildi){
-    /* Bu güne hiç vardiya girilmemiş. Yine de kimin beklendiği
-       gösteriliyor: aynı vardiyanın en son girilen gününün ekibi
-       (22 Ekim kararı). Puantajı DOLDURMUYOR — yevmiye kuralı aynı:
-       yazılmayan herkes çalıştı sayılıyor. */
-    var h0 = bas + "<br><b>" + n + " kişi</b> · " +
-      (k ? k + " kişinin durumu değişti, kalan " + (n - k) + " kişi çalıştı"
-         : "hepsi çalıştı");
-    var bek = BEKLENEN_EKIP || [];
-    if(bek.length){
-      bek.forEach(function(v){
-        var kisiler = v.kisiler || [];
-        if(!kisiler.length) return;
-        h0 += '<div class="ayrac-ust"><b>' + esc(v.ad).toLocaleUpperCase("tr") +
-              ' · BEKLENEN EKİP</b> <span class="hint">' +
-              esc(trd2(v.tarih)) + " vardiyasından" +
-              (v.kuyu ? " · " + esc(v.kuyu) : "") + "</span>" +
-              '<div class="hint" style="margin-top:3px">' +
-              kisiler.map(function(x){ return esc(x.ad); }).join(" · ") + "</div></div>";
-      });
-      beklenenNot("Bu güne henüz vardiya girilmemiş. Yukarıdakiler son " +
-                  "vardiyanın ekibi — vardiya girilince kesinleşir.");
-    } else {
-      beklenenNot("Bu güne henüz vardiya girilmemiş; gece/gündüz ayrımı " +
-                  "vardiya girildikten sonra çıkar.");
-    }
-    kutu.innerHTML = h0;
-  } else {
-    var h = bas;
-    (PUANTAJ_GUN.vardiyalar || []).forEach(function(v){
-      var kisiler = v.kisiler || [];
-      h += '<div class="ayrac-ust"><b>' + esc(v.ad).toLocaleUpperCase("tr") + '</b>' +
-           ' <span class="hint">' + saatKisa(v.bas) + "–" + saatKisa(v.bit) + " · " +
-           kisiler.length + ' kişi</span>';
-      h += kisiler.length
-        ? '<div class="hint" style="margin-top:3px">' +
-            kisiler.map(function(x){ return esc(x.ad); }).join(" · ") + "</div>"
-        : '<div class="hint" style="margin-top:3px">ekip girilmemiş</div>';
-      h += "</div>";
-    });
-    var vz = PUANTAJ_GUN.vardiyasiz || [];
-    if(vz.length){
-      h += '<div class="ayrac-ust"><b>VARDİYAYA GİRMEYEN</b> ' +
-           '<span class="hint">' + vz.length + ' kişi · tam gün</span>' +
-           '<div class="hint" style="margin-top:3px">' +
-           vz.map(function(x){ return esc(x.ad) + " (" + gorevAdi(x.gorev) + ")"; }).join(" · ") +
-           "</div></div>";
-    }
-    /* Metraj üreten biri hiçbir vardiyada yoksa bu bir hatadır: ya izinli,
-       ya şef ekibe yazmayı unuttu. Sessizce "çalıştı" sayılmamalı. */
-    var um = PUANTAJ_GUN.vardiyasiz_metrajci || [];
-    if(um.length){
-      h += '<div class="msg warn" style="margin-top:10px">⚠ <b>' + um.length +
-           ' kişi hiçbir vardiyada görünmüyor:</b> ' +
-           um.map(function(x){ return esc(x.ad); }).join(", ") +
-           "<br>İzinliyse aşağıdan durumunu değiştirin; unutulduysa vardiya ekibini düzeltin.</div>";
-    }
-    kutu.innerHTML = h;
+  if(!PUANTAJ_GUN){
+    /* Merkeze ulaşılamadı. Uydurma sayı göstermektense ne olduğunu
+       söylüyoruz — "herkes çalıştı" varsayımı artık geçerli değil. */
+    kutu.innerHTML = bas + "<br>Günün puantajı getirilemedi. Bağlantı gelince " +
+      "tekrar deneyin; istisna girişi çevrimdışı da çalışıyor.";
+    $("#ekip-ozet").textContent = n + " kişi · " + ($("#p-date").value || "");
+    return;
   }
+
+  /* ============================================================
+     1 Kasım · 71. dosya: ekran artık kendi kuralını uygulamıyor.
+     "Kim çalıştı" sorusunun cevabı merkezden (v_puantaj) geliyor;
+     burada yalnız gösteriliyor. Önceden ekran sahaya atanmış 20
+     kişinin hepsini "çalıştı" sayıyordu, oysa bir vardiyaya 3 kişi
+     çıkıyor.
+     ============================================================ */
+  var h = bas;
+
+  if(!PUANTAJ_GUN.turetme_basladi){
+    /* Türetme başlamadan önceki günler: eski kayıt ne diyorsa o. */
+    h += '<div class="msg warn" style="margin-top:8px">Bu tarih puantajın ' +
+         'vardiyadan türetilmeye başladığı günden önce. Ekranda eski kayıt ' +
+         'görünüyor; vardiya girişi bu günün puantajını değiştirmez.</div>';
+  }
+
+  /* ---- vardiya vardiya: ekle / çıkar burada ---- */
+  (PUANTAJ_GUN.vardiyalar || []).forEach(function(v){
+    var kisiler = v.kisiler || [];
+    h += '<div class="ayrac-ust" data-slot="' + v.slot + '">' +
+         '<div class="arasi"><b>' + esc(v.ad).toLocaleUpperCase("tr") + '</b>' +
+         ' <span class="hint">' + saatKisa(v.bas) + "–" + saatKisa(v.bit) + " · " +
+         kisiler.length + ' kişi</span>' +
+         (v.girildi ? '<button class="btn ghost sm pua-ekle" type="button" ' +
+                      'data-slot="' + v.slot + '">+ Kişi</button>' : '') +
+         '</div>';
+    h += kisiler.length
+      ? '<div class="pua-kisiler" style="margin-top:4px">' +
+          kisiler.map(function(x){
+            return '<span class="pua-kisi">' + esc(x.ad) +
+                   '<button type="button" class="sil pua-cikar" data-slot="' + v.slot +
+                   '" data-kisi="' + x.id + '" aria-label="' + esc(x.ad) +
+                   ' bu vardiyadan çıkar">×</button></span>'; }).join("") +
+        "</div>"
+      : '<div class="hint" style="margin-top:3px">' +
+        (v.girildi ? "ekip girilmemiş" : "vardiya girilmemiş") + "</div>";
+    h += "</div>";
+  });
+
+  /* ---- vardiyaya girmeden çalıştı sayılanlar ---- */
+  var vz = PUANTAJ_GUN.vardiyasiz || [];
+  if(vz.length){
+    h += '<div class="ayrac-ust"><b>VARDİYAYA GİRMEYEN</b> ' +
+         '<span class="hint">' + vz.length + ' kişi · tam gün sayılıyor</span>' +
+         '<div class="hint" style="margin-top:3px">' +
+         vz.map(function(x){ return esc(x.ad) + " (" + gorevAdi(x.gorev) + ")"; }).join(" · ") +
+         "</div></div>";
+  }
+
+  /* ---- ÇALIŞMADI: eskiden bu kişiler sessizce "çalıştı" sayılıyordu ---- */
+  var cm = PUANTAJ_GUN.calismadi || [];
+  if(cm.length){
+    h += '<div class="ayrac-ust"><b>ÇALIŞMADI</b> ' +
+         '<span class="hint">' + cm.length + ' kişi · hiçbir vardiyada yok</span>' +
+         '<div class="hint" style="margin-top:3px;opacity:.75">' +
+         cm.map(function(x){ return esc(x.ad); }).join(" · ") + "</div>" +
+         '<div class="hint" style="margin-top:3px">Biri çalıştıysa yukarıdan ' +
+         'o vardiyaya <b>+ Kişi</b> ile ekleyin.</div></div>';
+  }
+
+  h += '<div style="margin-top:10px"><b>' + (PUANTAJ_GUN.calisan_sayisi || 0) +
+       ' kişi çalıştı</b> sayılıyor' +
+       (k ? " · " + k + " kişide durum değişikliği" : "") + '.</div>';
+
+  if(!PUANTAJ_GUN.vardiya_girildi){
+    beklenenNot("Bu güne henüz vardiya girilmemiş. Vardiya girilince kuleye " +
+                "çıkanlar buraya kendiliğinden düşecek.");
+  }
+  kutu.innerHTML = h;
+  puaDugmeleriBagla();
   $("#ekip-ozet").textContent = n + " kişi · " + ($("#p-date").value || "");
+}
+
+/* ============================================================
+   PUANTAJDAN VARDİYA EKİBİNİ DÜZELTME (71. dosya)
+   ============================================================
+   Tayfun: "Puantajdan çıkarırsa da vardiya listesinden çıkar demek,
+   yani o vardiyada çalışmadı."
+
+   Puantaj vardiyadan türetildiği için çıkarmanın tek doğru karşılığı
+   kişiyi o VARDİYANIN ekibinden çıkarmak. Gün içinde iki vardiya
+   olduğu için hangi vardiya olduğu her düğmede yazılı — gün bazlı bir
+   düğme hangi ekibi değiştirdiğini söyleyemezdi.
+
+   Çevrimdışı çalışmıyor: vardiya ekibi merkezdeki kaydı değiştiriyor
+   ve ay kilidi denetiminden geçiyor. İstisna girişi (izin, avans)
+   çevrimdışı çalışmaya devam ediyor.
+   ============================================================ */
+function puaDugmeleriBagla(){
+  $$("#att-ozet .pua-cikar").forEach(function(b){
+    b.addEventListener("click", function(){
+      puaEkipDegis(Number(b.dataset.slot), b.dataset.kisi, false);
+    });
+  });
+  $$("#att-ozet .pua-ekle").forEach(function(b){
+    b.addEventListener("click", function(){ puaEkleAc(Number(b.dataset.slot), b); });
+  });
+}
+
+function puaEkipDegis(slot, kisi, ekle){
+  if(!navigator.onLine || !sb){
+    msg($("#att-msg"), "Vardiya ekibini değiştirmek için bağlantı gerekiyor.", "err");
+    return Promise.resolve();
+  }
+  msg($("#att-msg"), ekle ? "Ekleniyor…" : "Çıkarılıyor…");
+  return Promise.resolve(sb.rpc("puantaj_vardiya_ekip", {
+    p_project: $("#p-project").value, p_date: $("#p-date").value,
+    p_slot: slot, p_personnel: kisi, p_ekle: !!ekle
+  })).then(function(r){
+    if(r.error){ msg($("#att-msg"), hataTr(r.error.message), "err"); return; }
+    var d = r.data || {};
+    msg($("#att-msg"), esc(d.ad || "") + " " + (ekle ? "eklendi" : "çıkarıldı") +
+        " · " + slot + ". vardiya", "ok");
+    ATT_YUKLU = null;             /* gün yeniden getirilsin */
+    return attLoad(true);
+  }).catch(function(e){
+    msg($("#att-msg"), hataTr((e && e.message) || String(e)), "err");
+  });
+}
+
+/* "+ Kişi": o vardiyada OLMAYAN saha personelini listeler. */
+function puaEkleAc(slot, dugme){
+  var eski = $("#pua-ekle-kutu");
+  if(eski){ eski.remove(); if(eski.dataset.slot === String(slot)) return; }
+  var vard = (PUANTAJ_GUN && PUANTAJ_GUN.vardiyalar || [])
+               .filter(function(v){ return Number(v.slot) === slot; })[0] || {};
+  var iceride = (vard.kisiler || []).map(function(x){ return x.id; });
+  var aday = ekip().filter(function(p){ return iceride.indexOf(p.id) < 0; });
+  var kutu = document.createElement("div");
+  kutu.id = "pua-ekle-kutu"; kutu.dataset.slot = String(slot);
+  kutu.className = "ara-sonuc"; kutu.style.marginTop = "6px";
+  if(!aday.length){
+    kutu.innerHTML = '<div class="hint">Sahadaki herkes bu vardiyada.</div>';
+  } else {
+    aday.sort(function(a,b){ return a.full_name.localeCompare(b.full_name, "tr"); });
+    aday.forEach(function(p){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "ara-satir";
+      b.innerHTML = esc(p.full_name) + ' <span class="hint">' + gorevAdi(p.kind) + "</span>";
+      b.addEventListener("click", function(){
+        kutu.remove(); puaEkipDegis(slot, p.id, true); });
+      kutu.appendChild(b);
+    });
+  }
+  dugme.closest(".ayrac-ust").appendChild(kutu);
 }
 
 function attCiz(){
@@ -5344,10 +5448,11 @@ function attLoad(sessiz){
       Promise.resolve(sb.rpc("puantaj_gun",
         {p_project:$("#p-project").value, p_date:$("#p-date").value}))
         .catch(function(){ return {data:null, error:true}; }),
-      /* Eski merkezde bu fonksiyon yoksa kart eski haliyle çalışsın. */
-      Promise.resolve(sb.rpc("puantaj_beklenen_ekip",
-        {p_project:$("#p-project").value, p_date:$("#p-date").value}))
-        .catch(function(){ return {data:null, error:true}; })
+      /* 71. dosya: "beklenen ekip" tahmini KALKTI. Puantaj artık
+         vardiyadan türetiliyor; girilmemiş bir günün ekibini başka
+         günden tahmin etmek, türetilmiş rakamın yanında yanıltıcı
+         olurdu. Gün girilmemişse ekran bunu açıkça söylüyor. */
+      Promise.resolve({data:null, error:true})
     ]); })
     .then(function(res){
       var r = res[0], pg = res[1], be = res[2];
@@ -5391,20 +5496,26 @@ $("#btn-att-save").addEventListener("click", function(){
         "yoksa o güne girilmiş kayıtların üzerine yazılır.", "err");
     return;
   }
-  var rows = kisiler.map(function(p){
-    var v = ATT_IST[p.id];
-    return { personnel_id: p.id,
-             status: (v && v.status) || "calisti",
+  /* 71. dosya · artık YALNIZ İSTİSNALAR gönderiliyor. "Çalıştı"
+     satırları yazılmıyor: o bilgi vardiyadan türetiliyor. Eskiden
+     ekipteki herkes için satır yazılıyordu ve sahaya atanmış 20
+     kişinin hepsi her gün çalıştı sayılıyordu. */
+  var rows = Object.keys(ATT_IST).map(function(id){
+    var v = ATT_IST[id] || {};
+    return { personnel_id: id,
+             status: v.status || "calisti",
              single_shift: false,   /* kavram kaldırıldı, 20.10.2026 */
-             advance_amount: (v && v.advance_amount) ? Number(v.advance_amount) : null };
+             advance_amount: v.advance_amount ? Number(v.advance_amount) : null };
   });
-  var k = Object.keys(ATT_IST).length;
+  var k = rows.length;
   enqueue({ id:uuid(), kind:"attendance", created:Date.now(),
     title:"Puantaj · " + $("#p-date").value, sub: rows.length + " personel",
     payload:{ project_id:$("#p-project").value, work_date:$("#p-date").value, rows:rows } }).then(function(){
     ATT_YUKLU = attAnahtar();
-    msg($("#att-msg2"), rows.length + " kişi kaydedildi · " + $("#p-date").value + " · " +
-        (k ? k + " kişide durum değişikliği" : "herkes çalıştı") +
+    msg($("#att-msg2"), (k ? k + " kişinin durumu kaydedildi"
+                           : "İstisna kalmadı — kayıtlı durumlar temizlendi") +
+        " · " + $("#p-date").value +
+        ". Çalışanlar vardiyadan sayılıyor" +
         (navigator.onLine ? "" : " · bağlantı gelince gönderilecek"), "ok");
     msg($("#att-msg"), "");
   });
@@ -5829,7 +5940,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "45";
+var SURUM = "46";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

@@ -1,7 +1,7 @@
 /* Sondaj Panel — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "sondaj-panel-v45";
+var CACHE = "sondaj-panel-v46";
 /* 57. dosya: yonetim.html ("Ana veri ve projeler") listede HİÇ yoktu —
    bağlantı zayıfken o sayfa doğrudan şefin ekranına düşüyordu.
    Yeni sayfa eklendiğinde (aykilidi.html, hakedis.html) buraya da
