@@ -1,7 +1,7 @@
-/* Sondaj Panel — çevrimdışı uygulama kabuğu
+/* Collarlog — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "sondaj-panel-v47";
+var CACHE = "collarlog-v48";
 /* 57. dosya: yonetim.html ("Ana veri ve projeler") listede HİÇ yoktu —
    bağlantı zayıfken o sayfa doğrudan şefin ekranına düşüyordu.
    Yeni sayfa eklendiğinde (aykilidi.html, hakedis.html) buraya da
@@ -12,6 +12,12 @@ var SHELL = [
   "./yonetim.html",
   "./app.css", "./app-shell.js", "./kart.js",
   "./manifest.webmanifest", "./icon.svg", "./logo.png", "./logo-mark.png",
+  /* Ürün logosu da önbellekte: sahada bağlantı yokken marka yerine
+     kırık resim görünmesin. Beyaz sürüm üst bar ve koyu tema için. */
+  "./logo/collarlog-logo.svg", "./logo/collarlog-logo-beyaz.svg",
+  "./logo/collarlog-ikon.svg", "./logo/collarlog-ikon-kare.svg",
+  "./logo/favicon.svg", "./logo/favicon.ico",
+  "./logo/png/apple-touch-icon.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js",
   "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
 ];

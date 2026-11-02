@@ -98,7 +98,12 @@ a{color:inherit;text-decoration:none}
 .sp-nav .tag{margin-inline-start:auto;font-size:9.5px;background:var(--nav-etiket);
   padding:1px 6px;border-radius:20px;color:var(--nav-etiket-yazi);letter-spacing:.04em}
 .sp-side .foot{margin-top:auto;padding:11px 14px;border-top:1px solid var(--nav-cizgi);
-  font-size:11px;color:var(--nav-ink-2)}
+  font-size:11px;color:var(--nav-ink-2);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+/* Ürün logosu (Collarlog). Yan bar TEMADAN BAĞIMSIZ koyu lacivert,
+   o yüzden her zaman beyaz sürüm — tema anahtarı yok. Paket kuralı
+   24 px; menünün alt şeridi dar olduğu için yazılı logo 22 px'e
+   indi ve altına tam sığıyor. */
+.sp-side .foot .urun{height:22px;width:auto;display:block}
 
 .sp-main{display:flex;flex-direction:column;min-width:0}
 .sp-top{background:var(--card);border-bottom:1px solid var(--line);padding:10px 20px;

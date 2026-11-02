@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "47";
+var SURUM = "48";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -204,7 +204,19 @@ function kabukKur(){
         '<span class="txt"><span class="t" id="sp-firma">Sondaj Panel</span>' +
         '<span class="s" id="sp-rol">—</span></span></div>' +
       '<div id="sp-menu"></div>' +
-      '<div class="foot">Sürüm ' + SURUM + '</div>' +
+      /* Ürün markası yan barın altında (2 Kasım 2026). Üstteki marka
+         alanı MÜŞTERİNİN firma adı ve logosu — orası kiracıya ait,
+         dokunulmuyor. Collarlog ürünün adı; sekme ikonunda, giriş
+         ekranında ve burada görünüyor. */
+      /* ⚠ HER ZAMAN BEYAZ SÜRÜM. Önce temaya göre değiştiriyordum;
+         ekran görüntüsü aldığımda yazının kaybolduğu görüldü — yan bar
+         temadan bağımsız HER ZAMAN koyu lacivert, açık temada bile.
+         Sınamalar "açık temada açık sürüm görünüyor" diye geçiyordu;
+         doğru olan soru zeminin rengiydi. */
+      '<div class="foot">' +
+        '<img class="urun" src="logo/collarlog-logo-beyaz.svg" alt="Collarlog" ' +
+          'onerror="this.onerror=null;this.remove()">' +
+        '<span>Sürüm ' + SURUM + '</span></div>' +
     '</aside>' +
     '<div class="sp-main">' +
       '<div class="sp-top">' +
@@ -337,8 +349,8 @@ function temizle(){ $$(".sp-tam").forEach(function(e){ e.remove(); }); }
 function kurulumEkrani(hata){
   temizle();
   var d = tamEkran(
-    '<div class="sp-orta"><div class="logo"><img src="logo.png" alt="" ' +
-      'onerror="this.onerror=null;this.src=\'icon.svg\'"></div>' +
+    '<div class="sp-orta"><div class="logo"><img src="logo/collarlog-logo.svg" ' +
+      'alt="Collarlog" onerror="this.onerror=null;this.src=\'logo.png\'"></div>' +
     '<h2>Bağlantı kurulumu</h2>' +
     '<div class="hint">Bu adım bir kez yapılır; bilgiler bu tarayıcıya kaydedilir.</div>' +
     '<input id="cfg-url" type="url" placeholder="Proje adresi — https://xxxx.supabase.co" autocomplete="off">' +
@@ -365,8 +377,8 @@ function kurulumEkrani(hata){
 function girisEkrani(hata){
   temizle();
   tamEkran(
-    '<div class="sp-orta"><div class="logo"><img src="logo.png" alt="" ' +
-      'onerror="this.onerror=null;this.src=\'icon.svg\'"></div>' +
+    '<div class="sp-orta"><div class="logo"><img src="logo/collarlog-logo.svg" ' +
+      'alt="Collarlog" onerror="this.onerror=null;this.src=\'logo.png\'"></div>' +
     '<h2>Giriş</h2>' +
     '<input id="gr-mail" type="email" placeholder="E-posta" autocomplete="username">' +
     '<input id="gr-pass" type="password" placeholder="Parola" autocomplete="current-password">' +

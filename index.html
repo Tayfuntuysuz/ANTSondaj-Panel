@@ -7,9 +7,12 @@ try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
 if(_t)document.documentElement.setAttribute("data-tema",_t);
 if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sondaj Panel</title>
+<title>Collarlog</title>
+<link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="logo/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#123146">
+<meta name="theme-color" content="#16212A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -112,6 +115,8 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .pua-kisi{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);
   border-radius:999px;padding:4px 6px 4px 11px;font-size:13.5px}
 .pua-kisi .sil{min-height:0;padding:0 4px;font-size:16px;line-height:1}
+.bar .marka{display:flex;align-items:center;line-height:0}
+.bar .marka img{height:26px;width:auto;display:block}
 .ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
 .ara-sonuc button{display:block;width:100%;text-align:start;border:0;background:none;padding:11px 12px;
   border-bottom:1px solid var(--line-soft);font:inherit;color:inherit;cursor:pointer;min-height:44px}
@@ -337,7 +342,12 @@ td:first-child{text-align:start;color:var(--ink-2)}
 
 <div class="app">
   <header class="bar">
-    <b>Sondaj Panel</b>
+    <!-- Ürün markası (2 Kasım 2026). Üst bar koyu olduğu için beyaz
+         logo kullanılıyor; dosya gelmezse yazıya düşüyor ki marka hiç
+         görünmemektense adıyla görünsün. -->
+    <a class="marka" href="." aria-label="Collarlog"><img src="logo/collarlog-logo-beyaz.svg"
+      alt="Collarlog" onerror="this.onerror=null;this.replaceWith(
+      Object.assign(document.createElement('b'),{textContent:'Collarlog'}))"></a>
     <!-- Ayarlar girişi: kullanıcı adı. Alt sekmelere sekizinci sekme
          eklenmiyor — telefonda zaten yedi tane var. -->
     <button id="who" class="whobtn" type="button" aria-label="Ayarlar"></button>
@@ -6010,7 +6020,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "47";
+var SURUM = "48";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
@@ -6093,7 +6103,7 @@ function ayarlarAc(){
         '<div class="card">' +
           '<div class="li" style="border:0;padding:0">' +
             '<span><b>Sürüm ' + SURUM + '</b>' +
-              '<br><span class="hint">Sondaj Panel</span></span>' +
+              '<br><span class="hint">Collarlog · Sürüm ' + SURUM + '</span></span>' +
             '<button class="btn ghost sm teh" type="button" id="ay-cikis">Çıkış</button></div>' +
         '</div>' +
 

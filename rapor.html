@@ -6,8 +6,12 @@
      Kagit her zaman beyaz, punto A4 sayfa duzenine gore sabit. Kullanicinin
      koyu tema / buyuk yazi secimi diger panelleri etkiler, bu sayfayi etkilemez. -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sondaj Panel · Aylık Rapor</title>
-<link rel="icon" href="icon.svg">
+<title>Collarlog · Aylık Rapor</title>
+<link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="logo/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#16212A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -34,7 +38,15 @@ select,input,button{font:inherit}
 .btn.alt{background:transparent;color:#cfe3ec;border:1px solid rgba(255,255,255,.3)}
 .toolbar a{color:#cfe3ec;font-size:12px;align-self:center}
 .sheet{max-width:1000px;margin:18px auto;padding:0 14px 60px}
-.page{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:26px 30px;margin-bottom:16px}
+.page{background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  padding:26px 30px 34px;margin-bottom:16px;position:relative}
+/* ÜRÜN ALTLIĞI (2 Kasım 2026). Her rapor sayfasının altında Collarlog
+   yazıyor. Arka plan görseli DEĞİL bilerek yazı: tarayıcılar yazdırırken
+   arka planları varsayılan olarak basmıyor, altlık da kâğıtta kaybolurdu.
+   Üstteki antet müşterinin firma logosu — o kiracıya ait, dokunulmuyor. */
+.page::after{content:"Collarlog";position:absolute;right:30px;bottom:12px;
+  font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);opacity:.7}
 .page h2{font-size:20px;border-bottom:2px solid var(--accent);padding-bottom:6px;margin-bottom:4px}
 .page .sub{font-size:11px;color:var(--ink-3);margin-bottom:14px}
 
