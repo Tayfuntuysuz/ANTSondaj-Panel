@@ -55,30 +55,46 @@ h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;font-weight:600}
 .num{font-variant-numeric:tabular-nums}
 .app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--card)}
 header.bar{background:var(--navy);color:var(--navy-ink);padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30}
-header.bar b{font-family:"Barlow Condensed",sans-serif;font-size:19px;letter-spacing:.04em;
-  text-transform:uppercase;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis}
-header.bar .netchip,header.bar .whobtn{flex:none}
-@media (max-width:430px){
-  header.bar b{font-size:17.5px}
-  /* cevrimiciyken yalniz nokta + bekleyen sayisi */
-  .netchip.dar #nettext{font-size:0}
-  .netchip.dar #nettext::after{content:attr(data-sayi);font-size:13.5px}
-}
-.netchip{display:flex;align-items:center;gap:6px;border:1px solid var(--navy-cizgi);border-radius:999px;padding:8px 12px;min-height:38px;font-size:12px;background:none;color:var(--navy-ink-2);cursor:pointer}
-.whobtn{border:1px solid var(--navy-cizgi);background:none;color:var(--navy-ink-2);border-radius:999px;
-  padding:8px 12px;min-height:38px;font-size:12px;cursor:pointer;width:auto;white-space:nowrap;
-  max-width:140px;overflow:hidden;text-overflow:ellipsis}
-.netchip .dot{width:8px;height:8px;border-radius:50%;background:var(--bar-iyi)}
-.netchip[data-off="true"] .dot{background:var(--bar-uyari)}
+/* Solda KULLANICININ firma adı — ürün adı değil (75. dosya). Ekleri
+   kırpılmış kısa ad; altında rol ve şantiye. Collarlog sağda, simge
+   olarak (74. dosya: koyu zeminde beyaz sürüm). */
+header.bar .firma{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+header.bar .firma b{font-family:"Barlow Condensed",sans-serif;font-size:19px;letter-spacing:.04em;
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+header.bar .firma .alt{font-size:11.5px;color:var(--navy-ink-2);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+header.bar .marka,header.bar .hesapbtn{flex:none}
+@media (max-width:430px){ header.bar .firma b{font-size:17.5px} }
+/* Hesap düğmesi: mevcut Ayarlar ekranını açıyor. İkinci bir hesap
+   ekranı yok — Bekleyen'den gelen hesap bilgisi ve çıkış da oraya
+   taşındı (79. dosya). */
+.hesapbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--navy-cizgi);
+  background:none;color:var(--navy-ink);font-family:"Barlow Condensed",sans-serif;
+  font-size:15px;font-weight:600;letter-spacing:.04em;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center}
 main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
-nav.tabs{display:flex;border-top:1px solid var(--line);background:var(--card-2);position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
-nav.tabs button{position:relative;flex:1;border:0;background:none;color:var(--ink-3);font:inherit;font-size:12px;padding:15px 2px 15px;min-height:48px;cursor:pointer;border-top:2px solid transparent;margin-top:-1px;white-space:nowrap}
-nav.tabs button[aria-pressed="true"]{color:var(--accent-ink);border-top-color:var(--accent);font-weight:600}
-/* Rozet sekmenin ustune biner: akista yer kaplarsa yedi sekme tek satira sigmiyor. */
-nav.tabs button .uyari{position:absolute;top:1px;inset-inline-end:2px;
-  background:var(--bad);color:var(--dolu-yazi);border-radius:999px;min-width:14px;height:14px;
-  line-height:14px;font-size:9.5px;padding:0 3px;font-weight:700;text-align:center}
+/* ALT SEKMELER — petrol yeşili, soldan sağa koyudan açığa (79. dosya).
+   Yedi sekme 390 px'e sığmıyordu, sonuncusu ekrandan taşıyordu;
+   Bekleyen kalkınca altıya indi. */
+nav.tabs{display:flex;position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav.tabs button{position:relative;flex:1 1 0;min-width:0;border:0;color:#fff;font:inherit;
+  font-size:11.5px;padding:9px 2px;min-height:64px;cursor:pointer;
+  border-top:4px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+/* ⚠ SÖNÜKLÜK `opacity` İLE DEĞİL, YAZI RENGİYLE. opacity bütün elemanı
+   yarı saydam yapıyor — ZEMİNİ DE. Arkadaki bant yazıları sekme
+   çubuğunun içinden sızıyordu; 390 px ekran görüntüsünde yakalandı. */
+nav.tabs button:not([aria-pressed="true"]){color:rgba(255,255,255,.76)}
+nav.tabs button svg{width:20px;height:20px;flex:none}
+nav.tabs button[data-renk="1"]{background:#0E2E2D}
+nav.tabs button[data-renk="2"]{background:#113B3A}
+nav.tabs button[data-renk="3"]{background:#154846}
+nav.tabs button[data-renk="4"]{background:#195553}
+nav.tabs button[data-renk="5"]{background:#1D6260}
+nav.tabs button[data-renk="6"]{background:#22706D}
+nav.tabs button[aria-pressed="true"]{border-top-color:var(--turuncu);font-weight:700}
+/* Güvenlik alanı (iPhone çene boşluğu) da koyu kalsın. */
+nav.tabs{background:#22706D}
 .field{display:flex;flex-direction:column;gap:5px}
 label{font-size:12.5px;color:var(--ink-2);font-weight:500}
 label .req{color:var(--bad);font-weight:700}
@@ -116,7 +132,7 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
   border-radius:999px;padding:4px 6px 4px 11px;font-size:13.5px}
 .pua-kisi .sil{min-height:0;padding:0 4px;font-size:16px;line-height:1}
 .bar .marka{display:flex;align-items:center;line-height:0}
-.bar .marka img{height:26px;width:auto;display:block}
+.bar .marka img{height:28px;width:auto;display:block}
 .ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
 .ara-sonuc button{display:block;width:100%;text-align:start;border:0;background:none;padding:11px 12px;
   border-bottom:1px solid var(--line-soft);font:inherit;color:inherit;cursor:pointer;min-height:44px}
@@ -173,12 +189,68 @@ td:first-child{text-align:start;color:var(--ink-2)}
    dokunma alanı 44px'in altına düşmüyor. */
 .secim{display:flex;flex-wrap:wrap;gap:6px}
 .secim .chip{min-height:40px;padding:8px 11px}
-.steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
-.steps button{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 14px;min-height:44px;font-size:13px;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:5px}
-.steps button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
-.steps button[data-state="ok"]:not([aria-pressed="true"]){border-color:var(--good);color:var(--good)}
-.steps button[data-state="locked"]{opacity:.5}
-.steps .mark{font-size:11px}
+/* ============================================================
+   ADIM BANTLARI (79. dosya · 5 Kasım 2026)
+   ------------------------------------------------------------
+   Burada duran şey eskiden `.steps` idi: beş düğme yan yana,
+   `overflow-x:auto` ile yana kayan bir şerit. Birine basınca o
+   adımın kartı görünüyor, DİĞERLERİ GİZLENİYORDU. Tayfun'un
+   "yatay geçiş" diye şikâyet ettiği şey tam olarak buydu.
+   Artık beş adım alt alta duruyor; hiçbiri gizlenmiyor, sadece
+   kapanıyor. Hareket hep aşağı doğru.
+   ============================================================ */
+/* Renk merdiveni: yukarıdan aşağıya koyudan açığa. Koyu temada
+   aralık DARALTILIYOR (en açık bant mid-slate'te duruyor), yoksa
+   gece ekranı göz alıyor; "koyudan açığa" kuralı iki temada da
+   geçerli. Koyu temada bütün bantlarda yazı beyaz. */
+:root{
+  --bant-1:#16212A;--bant-2:#263848;--bant-3:#44596B;--bant-4:#A7B8C5;--bant-5:#D6E0E7;
+  --bant-ink-1:#fff;--bant-ink-2:#fff;--bant-ink-3:#fff;
+  --bant-ink-4:#16212A;--bant-ink-5:#16212A;
+  --turuncu:#E8731A;--bant-cerceve:#B9C6D0;
+}
+@media (prefers-color-scheme:dark){:root:not([data-tema="acik"]){
+  --bant-1:#0B1116;--bant-2:#15202A;--bant-3:#1F2E3A;--bant-4:#2C3E4C;--bant-5:#3C4E5C;
+  --bant-ink-4:#fff;--bant-ink-5:#fff;--bant-cerceve:#2b4150;}}
+:root[data-tema="koyu"]{
+  --bant-1:#0B1116;--bant-2:#15202A;--bant-3:#1F2E3A;--bant-4:#2C3E4C;--bant-5:#3C4E5C;
+  --bant-ink-4:#fff;--bant-ink-5:#fff;--bant-cerceve:#2b4150;}
+/* Bantlar ekranı boydan boya kaplıyor, aralarında boşluk yok. */
+.adimlar{margin:0 -16px;display:flex;flex-direction:column}
+.adim-bant{background:var(--bant);color:var(--bant-ink)}
+.adim-bant[data-renk="1"]{--bant:var(--bant-1);--bant-ink:var(--bant-ink-1)}
+.adim-bant[data-renk="2"]{--bant:var(--bant-2);--bant-ink:var(--bant-ink-2)}
+.adim-bant[data-renk="3"]{--bant:var(--bant-3);--bant-ink:var(--bant-ink-3)}
+.adim-bant[data-renk="4"]{--bant:var(--bant-4);--bant-ink:var(--bant-ink-4)}
+.adim-bant[data-renk="5"]{--bant:var(--bant-5);--bant-ink:var(--bant-ink-5)}
+.adim-bas{width:100%;display:flex;align-items:center;gap:10px;background:none;border:0;
+  color:inherit;font:inherit;text-align:start;cursor:pointer;padding:0 16px;min-height:46px}
+.adim-bas .nk{flex:none;width:22px;height:22px;border-radius:50%;
+  border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;line-height:1}
+.adim-bant.ok .nk{background:#fff;border-color:#fff;color:#16212A}
+.adim-bant.acik .nk{background:var(--turuncu);border-color:var(--turuncu);color:#16212A}
+.adim-ad{font-family:"Barlow Condensed",sans-serif;font-size:16px;letter-spacing:.05em;
+  text-transform:uppercase;font-weight:600;flex:none}
+.adim-ozet{flex:1 1 auto;min-width:0;font-size:12.5px;opacity:.82;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adim-im{flex:none;font-size:12px;opacity:.75;white-space:nowrap}
+.adim-bant.eksik .adim-im{color:var(--turuncu);opacity:1;font-weight:700}
+.adim-ic{padding:0 16px 14px}
+/* Bandın içindeki form: beyaz kart, ince çerçeve. */
+.adim-ic > .card{background:var(--card);border:1.5px solid var(--bant-cerceve);
+  border-radius:14px;color:var(--ink)}
+
+/* --- tek alt çubuk: solda çalışan toplam, sağda kaydet --- */
+.kaydet-cubuk{position:sticky;bottom:var(--tab-h,64px);z-index:19;background:var(--card);
+  border-top:1px solid var(--line);margin:0 -16px;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;gap:8px}
+.kaydet-cubuk .kc-sat{display:flex;align-items:center;gap:12px}
+.kaydet-cubuk .kc-sayi{flex:1 1 auto;min-width:0;font-size:12.5px;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kaydet-cubuk .kc-sayi .gc{font-weight:600;color:var(--ink)}
+.kaydet-cubuk .btn{width:auto;flex:none;padding:12px 18px}
+.kc-mesaj:empty{display:none}
 .msg{font-size:13px;padding:10px 12px;border-radius:10px;border-inline-start:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
 .msg.err{border-inline-start-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
 .msg.ok{border-inline-start-color:var(--good);background:var(--good-soft);color:var(--good)}
@@ -297,22 +369,45 @@ td:first-child{text-align:start;color:var(--ink-2)}
   border-radius:10px;min-height:46px;font-size:13.5px;cursor:pointer;font-weight:500;width:auto}
 .segment button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
 
-/* --- vardiya şeritleri: üstte bağlam, altta çalışan toplam --- */
-.serit-ust{position:sticky;top:var(--bar-h,56px);z-index:18;background:var(--card);
-  border-bottom:1px solid var(--line);padding:8px 16px;display:flex;align-items:center;gap:8px;
-  margin:0 -16px}
-.serit-ust .ad{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:600;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.serit-ust .sayi{margin-inline-start:auto;font-size:14px;color:var(--ink-2);
-  font-variant-numeric:tabular-nums;flex:none}
-.serit-eksik{position:sticky;top:calc(var(--bar-h,56px) + 37px);z-index:18;background:var(--warn-soft);
-  color:var(--warn);font-size:12.5px;padding:5px 16px;margin:0 -16px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.serit-alt{position:sticky;bottom:var(--tab-h,48px);z-index:19;background:var(--card);border-top:1px solid var(--line);
-  padding:7px 16px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-2);
-  margin:0 -16px}
-.serit-alt .gc{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
-.serit-alt .sn{margin-inline-start:auto;color:var(--ink-3)}
+/* ============================================================
+   KUYRUK ŞERİDİ (79. dosya)
+   ------------------------------------------------------------
+   Bekleyen sekmesinin yerine geçiyor. Başlığın hemen altında,
+   HER SEKMEDE görünür. Kuyruk boşken de kaybolmuyor: koddaki
+   eski not "sahada en çok sorulan soru 'gitti mi'" diyor,
+   sessizlik o sorunun cevabı değil. Boşken ince yeşil satır.
+   Ay kilidi uyarısı da bu şeritte çıkıyor — eskiden 1. adımın
+   içindeydi ve bant kapanınca kayboluyordu.
+   ============================================================ */
+.kserit{position:sticky;top:var(--bar-h,56px);z-index:21;display:block;width:100%;
+  border:0;border-bottom:1px solid var(--line);text-align:start;cursor:pointer;
+  font:inherit;padding:7px 16px;min-height:40px;
+  background:var(--good-soft);color:var(--good)}
+.kserit .ks-ad{font-size:12.5px;font-weight:600;display:block}
+.kserit .ks-alt{font-size:11.5px;opacity:.85;display:block}
+.kserit[data-durum="bekliyor"]{background:#FFF3E3;color:#7A3F06}
+.kserit[data-durum="takildi"]{background:#FDE8E6;color:#9B1C14}
+.kserit[data-durum="kilit"]{background:#FDE8E6;color:#9B1C14}
+:root[data-tema="koyu"] .kserit[data-durum="bekliyor"]{background:#332715;color:#f0c27a}
+:root[data-tema="koyu"] .kserit[data-durum="takildi"],
+:root[data-tema="koyu"] .kserit[data-durum="kilit"]{background:#35191a;color:#f0a79c}
+@media (prefers-color-scheme:dark){:root:not([data-tema="acik"]) .kserit[data-durum="bekliyor"]{background:#332715;color:#f0c27a}
+  :root:not([data-tema="acik"]) .kserit[data-durum="takildi"],
+  :root:not([data-tema="acik"]) .kserit[data-durum="kilit"]{background:#35191a;color:#f0a79c}}
+
+/* --- alttan açılan sayfa: Gönderilmeyen kayıtlar --- */
+.sayfa-ort{position:fixed;inset:0;z-index:55;background:var(--perde);
+  display:flex;align-items:flex-end;justify-content:center}
+.sayfa-kut{background:var(--bg);width:100%;max-width:520px;max-height:88dvh;
+  border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.sayfa-bas{display:flex;align-items:flex-start;gap:10px;padding:14px 16px 10px;
+  border-bottom:1px solid var(--line)}
+.sayfa-bas h2{font-size:20px}
+.sayfa-bas .kapa{border:0;background:none;color:var(--ink-3);font-size:24px;line-height:1;
+  cursor:pointer;min-width:44px;min-height:44px;width:auto;margin-inline-start:auto}
+.sayfa-govde{padding:14px 16px;overflow-y:auto;flex:1}
+.sayfa-dip{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--line)}
 
 /* --- ayarlar örtüsü --- */
 .ayar-ort{position:fixed;inset:0;z-index:60;background:var(--perde);
@@ -341,18 +436,30 @@ td:first-child{text-align:start;color:var(--ink-2)}
 <body>
 
 <div class="app">
+  <!-- ÜST BAŞLIK (79. dosya · 5 Kasım 2026)
+       Solda KULLANICININ firma adı, kısaltılmış (75. dosya: "orada
+       belirgin şekilde programı kullanan firmanın adı yazacak").
+       Sağda Collarlog SİMGE olarak ve hesap düğmesi. Bağlantı rozeti
+       kalktı: işini artık başlığın altındaki kuyruk şeridi yapıyor. -->
   <header class="bar">
-    <!-- Ürün markası (2 Kasım 2026). Üst bar koyu olduğu için beyaz
-         logo kullanılıyor; dosya gelmezse yazıya düşüyor ki marka hiç
-         görünmemektense adıyla görünsün. -->
-    <a class="marka" href="." aria-label="Collarlog"><img src="logo/collarlog-logo-beyaz.svg"
-      alt="Collarlog" onerror="this.onerror=null;this.replaceWith(
-      Object.assign(document.createElement('b'),{textContent:'Collarlog'}))"></a>
-    <!-- Ayarlar girişi: kullanıcı adı. Alt sekmelere sekizinci sekme
-         eklenmiyor — telefonda zaten yedi tane var. -->
-    <button id="who" class="whobtn" type="button" aria-label="Ayarlar"></button>
-    <button class="netchip" id="netchip" type="button"><span class="dot"></span><span id="nettext">—</span></button>
+    <div class="firma">
+      <b id="bar-firma">—</b>
+      <span class="alt" id="bar-alt"></span>
+    </div>
+    <!-- ⚠ BEYAZ SÜRÜM. `collarlog-ikon.svg` koyu lacivert halkalı;
+         koyu başlıkta kaybolur. Aynı hatayı 2 Kasım'da yan barda
+         yapmıştım, ekran görüntüsü yakalamıştı. Turuncu yalnız
+         halkanın içindeki nokta — paketin kendi kuralı. -->
+    <a class="marka" href="." aria-label="Collarlog"><img src="logo/collarlog-ikon-beyaz.svg"
+      alt="Collarlog" onerror="this.onerror=null;this.src='logo/collarlog-logo-beyaz.svg'"></a>
+    <!-- Hesap ve ayarlar. Tek ekran: tema, yazı boyutu, dil, şifre,
+         eşitleme + hesap bilgisi + çıkış. -->
+    <button id="who" class="hesapbtn" type="button" aria-label="Hesap ve ayarlar"></button>
   </header>
+
+  <!-- KUYRUK ŞERİDİ — Bekleyen sekmesinin yerine (79. dosya).
+       Her sekmede görünür; ay kilidi uyarısı da burada çıkar. -->
+  <button class="kserit" id="kuyruk-serit" type="button" hidden></button>
 
   <!-- KURULUM -->
   <main id="scr-setup" hidden>
@@ -395,24 +502,17 @@ td:first-child{text-align:start;color:var(--ink-2)}
 
     <!-- VARDİYA -->
     <section id="tab-vardiya">
-      <!-- Üstte bağlam (değişmez), altta çalışan toplam (değişir).
-           Şerit kaydırınca kaybolmuyor; başlığın hemen altına yapışıyor. -->
-      <div class="serit-ust" id="serit-ust">
-        <span class="ad" id="sum-well">—</span>
-        <span class="sayi" id="sum-meters">0,00 m</span>
-      </div>
-      <div class="serit-eksik" id="sum-todo">Adım 1 ile başlayın.</div>
-
-      <div class="steps" role="group" aria-label="Adım" style="margin-top:12px">
-        <button type="button" data-step="1" aria-pressed="true">1 · Vardiya <span class="mark"></span></button>
-        <button type="button" data-step="2" aria-pressed="false">2 · Ekip <span class="mark"></span></button>
-        <button type="button" data-step="3" aria-pressed="false">3 · Kontrol &amp; Arıza <span class="mark"></span></button>
-        <button type="button" data-step="4" aria-pressed="false">4 · Delgi <span class="mark"></span></button>
-        <button type="button" data-step="5" aria-pressed="false">5 · Tüketim <span class="mark"></span></button>
-      </div>
-      <div id="step-msg" style="margin-top:10px"></div>
-
-      <div class="card" data-pane="1" style="margin-top:12px">
+      <div class="adimlar" id="bantlar">
+        <section class="adim-bant" data-bant="1" data-renk="1">
+          <button class="adim-bas" type="button" data-bant-bas="1"
+                  aria-expanded="true" aria-controls="bant-ic-1">
+            <span class="nk">1</span>
+            <span class="adim-ad">Vardiya</span>
+            <span class="adim-ozet"></span>
+            <span class="adim-im"></span>
+          </button>
+          <div class="adim-ic" id="bant-ic-1">
+      <div class="card" data-pane="1" style="margin-top:0">
         <div class="field"><label for="f-project">Proje <span class="req">*</span></label><select id="f-project" data-req="1"></select></div>
         <div class="grid2">
           <div class="field"><label for="f-date">Tarih <span class="req">*</span></label><input type="date" id="f-date" data-req="1"></div>
@@ -420,9 +520,9 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <div class="hint" id="f-shift-hint"></div>
         <div class="hint" id="f-date-not" style="color:var(--warn)"></div>
-        <!-- Ay kilidi uyarısı: tarih seçilir seçilmez, 5 adım doldurulmadan
-             önce görünüyor (57. dosya). -->
-        <div id="f-kilit"></div>
+        <!-- Ay kilidi uyarısı buradan KALKTI (79. dosya): bant
+             kapanınca kayboluyordu. Artık başlığın altındaki kuyruk
+             şeridinde, her sekmede görünüyor. -->
         <div id="sondaj-alanlar">
           <div class="field"><label for="f-machine">Makine <span class="req">*</span></label><select id="f-machine" data-req="1"></select>
             <div class="hint" id="f-makine-kaynak"></div></div>
@@ -435,18 +535,19 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <button class="btn ghost ilerle" type="button" data-next="2">İlerle →</button>
       </div>
+          </div>
+        </section>
 
-      <!-- NAKLİYE: sondaj yapılmayan gün. Kuyu, makine, metraj, mazot yok. -->
-      <div class="card" id="nak-wrap" hidden style="margin-top:12px">
-        <span class="eyebrow">Nakliye</span>
-        <div class="hint" id="nak-hint"></div>
-        <div class="field"><label for="nak-note">Ne yapıldı / ne taşındı</label>
-          <textarea id="nak-note" placeholder="Örn: 2 kamyon tij ve muhafaza borusu indirildi"></textarea></div>
-        <button class="btn" id="btn-save-nak" type="button">Nakliye gününü kaydet</button>
-        <div id="nak-msg"></div>
-      </div>
-
-      <div class="card" data-pane="2" hidden style="margin-top:12px">
+        <section class="adim-bant" data-bant="2" data-renk="2">
+          <button class="adim-bas" type="button" data-bant-bas="2"
+                  aria-expanded="false" aria-controls="bant-ic-2">
+            <span class="nk">2</span>
+            <span class="adim-ad">Ekip</span>
+            <span class="adim-ozet"></span>
+            <span class="adim-im"></span>
+          </button>
+          <div class="adim-ic" id="bant-ic-2" hidden>
+      <div class="card" data-pane="2" style="margin-top:0">
         <!-- ŞANTİYE ŞEFİ (54. dosya): vardiyaya değil projeye bağlı sabit
              personel. Seçilemez, her gün kendiliğinden. Yönetici
              tanımlamadıysa satır HİÇ çıkmıyor — boş alan yer kaplamasın. -->
@@ -466,8 +567,19 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <button class="btn ghost ilerle" type="button" data-next="3">İlerle →</button>
       </div>
+          </div>
+        </section>
 
-      <div class="card" data-pane="3" hidden style="margin-top:12px">
+        <section class="adim-bant" data-bant="3" data-renk="3">
+          <button class="adim-bas" type="button" data-bant-bas="3"
+                  aria-expanded="false" aria-controls="bant-ic-3">
+            <span class="nk">3</span>
+            <span class="adim-ad">Kontrol &amp; Arıza</span>
+            <span class="adim-ozet"></span>
+            <span class="adim-im"></span>
+          </button>
+          <div class="adim-ic" id="bant-ic-3" hidden>
+      <div class="card" data-pane="3" style="margin-top:0">
         <div class="arasi">
           <span class="eyebrow">Çalışma öncesi kontroller</span>
           <button class="btn ghost sm" id="btn-check-all" type="button">Tümü uygun</button>
@@ -571,8 +683,19 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <button class="btn ghost ilerle" type="button" data-next="4" style="margin-top:12px">İlerle →</button>
       </div>
+          </div>
+        </section>
 
-      <div class="card" data-pane="4" hidden style="margin-top:12px">
+        <section class="adim-bant" data-bant="4" data-renk="4">
+          <button class="adim-bas" type="button" data-bant-bas="4"
+                  aria-expanded="false" aria-controls="bant-ic-4">
+            <span class="nk">4</span>
+            <span class="adim-ad">Delgi</span>
+            <span class="adim-ozet"></span>
+            <span class="adim-im"></span>
+          </button>
+          <div class="adim-ic" id="bant-ic-4" hidden>
+      <div class="card" data-pane="4" style="margin-top:0">
         <div class="readout">
           <div><div class="k">Vardiya metrajı</div><div class="v num" id="ro-m">0,00 m</div></div>
           <div><div class="k">Kuyu derinliği</div><div class="v num" id="ro-d">0,00 m</div></div>
@@ -689,8 +812,19 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <button class="btn ghost ilerle" type="button" data-next="5" style="margin-top:12px">İlerle →</button>
       </div>
+          </div>
+        </section>
 
-      <div class="card" data-pane="5" hidden style="margin-top:12px">
+        <section class="adim-bant" data-bant="5" data-renk="5">
+          <button class="adim-bas" type="button" data-bant-bas="5"
+                  aria-expanded="false" aria-controls="bant-ic-5">
+            <span class="nk">5</span>
+            <span class="adim-ad">Tüketim</span>
+            <span class="adim-ozet"></span>
+            <span class="adim-im"></span>
+          </button>
+          <div class="adim-ic" id="bant-ic-5" hidden>
+      <div class="card" data-pane="5" style="margin-top:0">
         <div class="field"><label for="f-fuel">Bu vardiyada <b>harcanan</b> mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" min="0" inputmode="decimal" data-req="5"></div>
         <div class="hint">Bu kulenin bu vardiyada <b>yaktığı</b> mazot. Sahaya gelen tankeri buraya değil,
           Gider sekmesindeki "Sahaya gelen akaryakıt" kartına yazın. Hiç yakılmadıysa 0.</div>
@@ -700,8 +834,35 @@ td:first-child{text-align:start;color:var(--ink-2)}
           style="align-self:flex-start">Malzeme ekle</button>
         <div class="field" style="margin-top:12px"><label for="f-note">Kullanılan malzemeler açıklaması</label>
           <textarea id="f-note" placeholder="Örn: 2 adet matkap ucu, bentonit takviyesi"></textarea></div>
-        <button class="btn" id="btn-save-shift" type="button">Vardiyayı kaydet</button>
-        <div id="shift-msg"></div>
+      </div>
+          </div>
+        </section>
+
+      </div><!-- /bantlar -->
+
+      <!-- NAKLİYE: sondaj yapılmayan gün. Kuyu, makine, metraj, mazot yok. -->
+      <div class="card" id="nak-wrap" hidden style="margin-top:12px">
+        <span class="eyebrow">Nakliye</span>
+        <div class="hint" id="nak-hint"></div>
+        <div class="field"><label for="nak-note">Ne yapıldı / ne taşındı</label>
+          <textarea id="nak-note" placeholder="Örn: 2 kamyon tij ve muhafaza borusu indirildi"></textarea></div>
+        <button class="btn" id="btn-save-nak" type="button">Nakliye gününü kaydet</button>
+        <div id="nak-msg"></div>
+      </div>
+
+      <!-- TEK ALT ÇUBUK (79. dosya). Eskiden burada iki şey vardı:
+           "serit-alt" (toplam + son eşitleme) ve 5. adımın içindeki
+           kaydet düğmesi. Son eşitleme kuyruk listesine taşındı,
+           kaydet buraya geldi. Düğme HİÇBİR ZAMAN pasif olmuyor
+           (41. dosya); eksik varsa sarıya dönüyor ve basınca eksik
+           bandı açıp oraya kaydırıyor. -->
+      <div class="kaydet-cubuk" id="kaydet-cubuk">
+        <div class="kc-mesaj" id="step-msg"></div>
+        <div class="kc-mesaj" id="shift-msg"></div>
+        <div class="kc-sat">
+          <span class="kc-sayi" id="kc-sayi">0,00 m</span>
+          <button class="btn" id="btn-save-shift" type="button">Vardiyayı kaydet</button>
+        </div>
       </div>
 
       <div id="done-wrap" hidden style="margin-top:12px"></div>
@@ -1107,24 +1268,28 @@ td:first-child{text-align:start;color:var(--ink-2)}
     </section>
 
     <!-- BEKLEYEN -->
-    <section id="tab-kuyruk" hidden>
-      <div class="card">
-        <div class="arasi">
-          <span class="eyebrow">Bekleyen kayıtlar</span><span class="pill" id="q-count">0</span>
+    <!-- GÖNDERİLMEYEN KAYITLAR — eski "Bekleyen" sekmesi (79. dosya).
+         Artık sekme değil, kuyruk şeridine dokununca alttan açılan
+         sayfa. İçerik aynı: kartlar, sebep, iki aşamalı silme.
+         Hesap bilgisi ve çıkış buradan Ayarlar ekranına taşındı. -->
+    <div class="sayfa-ort" id="kuyruk-sayfa" hidden>
+      <div class="sayfa-kut" role="dialog" aria-modal="true" aria-label="Gönderilmeyen kayıtlar">
+        <div class="sayfa-bas">
+          <div>
+            <h2>Gönderilmeyen kayıtlar</h2>
+            <div class="hint"><span id="q-count">0</span> kayıt · <span id="q-sync">—</span></div>
+          </div>
+          <button class="kapa" type="button" id="kuyruk-kapa" aria-label="Kapat">×</button>
         </div>
-        <div id="q-list"></div>
-        <button class="btn ghost" id="btn-sync" type="button">Şimdi senkronize et</button>
-        <div id="sync-msg"></div>
+        <div class="sayfa-govde">
+          <div id="q-list"></div>
+          <div id="sync-msg"></div>
+        </div>
+        <div class="sayfa-dip">
+          <button class="btn ghost" id="btn-sync" type="button">Şimdi eşitle</button>
+        </div>
       </div>
-      <div class="card" style="margin-top:14px">
-        <span class="eyebrow">Hesap</span>
-        <div class="hint" id="acct-info"></div>
-        <!-- "Aylik raporu ac" baglantisi KALDIRILDI (38. dosya, 7. bulgu):
-             aylik rapor sefin yetkisinde degil ve prim tutarlarini iceriyor. -->
-        <button class="btn ghost" id="btn-refresh" type="button">Ana verileri yenile</button>
-        <button class="btn ghost" id="btn-logout" type="button">Çıkış yap</button>
-      </div>
-    </section>
+    </div>
 
     <!-- ÖZET -->
     <section id="tab-ozet" hidden>
@@ -1171,13 +1336,21 @@ td:first-child{text-align:start;color:var(--ink-2)}
   </main>
 
   <nav class="tabs" id="tabs" hidden>
-    <button type="button" data-tab="vardiya" aria-pressed="true">Vardiya</button>
-    <button type="button" data-tab="malzeme" aria-pressed="false">Malzeme</button>
-    <button type="button" data-tab="makine" aria-pressed="false">Makine</button>
-    <button type="button" data-tab="gider" aria-pressed="false">Gider</button>
-    <button type="button" data-tab="puantaj" aria-pressed="false">Puantaj</button>
-    <button type="button" data-tab="ozet" aria-pressed="false">Özet</button>
-    <button type="button" data-tab="kuyruk" aria-pressed="false">Bekleyen</button>
+    <!-- Altı sekme, 79. dosyadaki sıra. Renk soldan sağa koyudan
+         açığa. Bekleyen kalktı: yerini başlığın altındaki kuyruk
+         şeridi aldı. -->
+    <button type="button" data-tab="vardiya" data-renk="1" aria-pressed="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M7 7l5-4 5 4M5 21h14"/></svg><span>Vardiya</span></button>
+    <button type="button" data-tab="puantaj" data-renk="2" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg><span>Puantaj</span></button>
+    <button type="button" data-tab="gider" data-renk="3" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H5a2 2 0 0 1-2-2z"/><circle cx="17" cy="14" r="1.2"/></svg><span>Gider</span></button>
+    <button type="button" data-tab="makine" data-renk="4" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span>Makine</span></button>
+    <button type="button" data-tab="malzeme" data-renk="5" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></svg><span>Malzeme</span></button>
+    <button type="button" data-tab="ozet" data-renk="6" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18M7 16v-5M12 16V7M17 16v-8"/></svg><span>Özet</span></button>
   </nav>
 </div>
 
@@ -1299,6 +1472,10 @@ var sb = null, MASTER = null;
 function show(id){
   ["scr-setup","scr-login","scr-kapi","scr-app"].forEach(function(s){ $("#"+s).hidden = (s !== id); });
   $("#tabs").hidden = (id !== "scr-app");
+  /* Kuyruk şeridi yalnız uygulama ekranında (79. dosya). */
+  if(typeof seritCiz === "function") seritCiz();
+  /* Sekme çubuğu yeni görünür oldu: yüksekliği şimdi ölçülebilir. */
+  if(typeof seritHizala === "function") setTimeout(seritHizala, 0);
 }
 
 /* ---------------- rol kapisi ----------------
@@ -1364,7 +1541,8 @@ $("#btn-login").addEventListener("click", function(){
     msg($("#login-msg"), ""); start();
   });
 });
-$("#btn-logout").addEventListener("click", function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+/* Çıkış düğmesi Bekleyen sekmesindeydi; sekme kalktı, çıkış
+   Ayarlar ekranındaki "Çıkış" düğmesine taşındı (79. dosya). */
 $("#kapi-cikis").addEventListener("click", function(){
   /* Yanlis hesapla girildiyse onbellekteki ana veri de temizlenmeli,
      yoksa sonraki girisde eski rolle karar verilir. */
@@ -1468,11 +1646,56 @@ function fillSelects(){
   fillWells();
   sefSatiriCiz();
   markaListesiCiz();
-  $("#acct-info").textContent = (MASTER.tenant ? MASTER.tenant.name : "") + " · " +
-    (MASTER.profile ? MASTER.profile.full_name + " (" + MASTER.profile.role + ")" : "");
-  $("#who").textContent = MASTER.profile ? MASTER.profile.full_name.split(" ")[0] : "";
+  basligiCiz();
   refreshState();
 }
+/* ============================================================
+   ÜST BAŞLIK (75. ve 79. dosya)
+   ------------------------------------------------------------
+   Tayfun: "orada belirgin şekilde programı kullanan sondaj
+   firmasının veyahut maden firmasının adı yazacak" ve "ayardan
+   gelecek ekler kesilecek".
+
+   Kesilen ekler YALNIZ ŞİRKET TÜRÜ ekleri: Tic., San., Ltd.,
+   Şti., A.Ş., Sanayi, Ticaret, Limited, Anonim, Şirketi, Madencilik
+   DEĞİL — "Madencilik" firmanın ne iş yaptığını söylüyor, ek değil.
+   "Anatolia Sondaj Tic. San. Ltd. Şti." → "Anatolia Sondaj".
+   Kırpma sonunda hiçbir şey kalmazsa ad olduğu gibi kalıyor:
+   boş başlık, uzun başlıktan beterdir.
+   ============================================================ */
+var FIRMA_EK = /^(tic|san|ltd|şti|sti|a\.?ş|as|ins|inş|ith|ihr|ve|veya)\.?$/i;
+var FIRMA_EK_SOZ = /^(ticaret|sanayi|limited|anonim|şirketi|sirketi|şirket|sirket|dış|dis)$/i;
+function firmaKisa(ad){
+  if(!ad) return "";
+  var kelime = String(ad).replace(/[,]/g, " ").split(/\s+/).filter(Boolean);
+  var kalan = [];
+  for(var i = 0; i < kelime.length; i++){
+    var k = kelime[i];
+    if(FIRMA_EK.test(k) || FIRMA_EK_SOZ.test(k.replace(/\.$/, ""))) continue;
+    kalan.push(k);
+  }
+  return kalan.length ? kalan.join(" ") : String(ad).trim();
+}
+/* Baş harfler hesap düğmesinde: "Murat Bolatçı" → "MB". */
+function bashrf(ad){
+  var p = String(ad || "").trim().split(/\s+/).filter(Boolean);
+  if(!p.length) return "–";
+  return (p[0][0] + (p.length > 1 ? p[p.length-1][0] : "")).toLocaleUpperCase("tr");
+}
+function basligiCiz(){
+  var t = (MASTER && MASTER.tenant) ? MASTER.tenant.name : "";
+  var p = (MASTER && MASTER.profile) || null;
+  $("#bar-firma").textContent = firmaKisa(t) || "Collarlog";
+  /* Alt satır: rol · şantiye. Tek şantiyesi olanda şantiye adı da
+     yazıyor — şefin hangi sahaya girdiğini görmesi iyi; birden
+     fazlasında seçili olan yazıyor (73. dosya dersi). */
+  var pr = ((MASTER && MASTER.projects) || []);
+  var saha = projeAdi($("#f-project").value) || (pr.length === 1 ? (pr[0].site_name || pr[0].name) : "");
+  var rol = p ? (ROL_AD[p.role] || p.role) : "";
+  $("#bar-alt").textContent = [rol, saha].filter(Boolean).join(" · ");
+  $("#who").textContent = bashrf(p ? p.full_name : "");
+}
+
 /* ============================================================
    LİSTELER SEÇİLEN PROJEYE GÖRE KURULUR
    Tekrarlayan hata buydu: makine, araç ve kuyu listeleri GİRİŞ YAPAN
@@ -1695,10 +1918,9 @@ function vardiyaModu(){
   var nak = nakliyeMi(), pid = $("#f-project").value, slot = secilenSlot();
   $("#nak-wrap").hidden = !nak;
   $("#sondaj-alanlar").hidden = nak;
-  $(".steps").hidden = nak;
-  seritGoster(!nak);
+  nakliyeBantlari(nak);
   if(nak){
-    $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== "1"); });
+    bantAc(1);
     $("#nak-hint").textContent = ($("#f-shift").value === "nak-gun")
       ? "O günün bütün vardiyalarında sondaj yapılmıyor; malzeme indirme/bindirme işi yazılıyor. Metraj, mazot ve arıza girilmez."
       : "Yalnız o gecenin vardiyası sondaj dışı. Ertesi gün gündüz vardiyası normal devam eder.";
@@ -1853,6 +2075,7 @@ $("#f-project").addEventListener("change", function(){
   fillMachines(); fillWells(); fillYakitHedef(); fillVardiya();
   sefSatiriCiz();
   kilitBak();
+  basligiCiz();   /* başlığın alt satırındaki şantiye adı da değişiyor */
 });
 
 /* ============================================================
@@ -1869,35 +2092,28 @@ $("#f-project").addEventListener("change", function(){
    Yanlış "kilitli" demek, yanlış "açık" demekten daha kötü: şef o
    vardiyayı hiç girmez. Kuyruğa giren kayıt zaten sunucuda
    reddedilir ve kuyrukta hatasıyla durur.
+
+   ⚠ 79. dosya: uyarı artık 1. bandın İÇİNDE DEĞİL, başlığın
+   altındaki kuyruk şeridinde. Sebebi: bant kapanınca uyarı da
+   kayboluyordu ve şef beş adımı doldurup kaydederken öğreniyordu —
+   tam kaçınmak istediğimiz şey.
    ============================================================ */
 var AY_KILIT = null;        /* null: bilmiyoruz · "": açık · kapali/kesin */
 var KILIT_SORGU = "";
-function kilitMetni(k){
-  return k === "kesin"
-    ? "Bu ayın hakedişi kesildi. Bu tarihe kayıt girilemez, düzeltme de " +
-      "yapılamaz. Yöneticiye başvurun."
-    : "Bu ay <b>kapatıldı</b>. Bu tarihe kayıt girip düzeltme yapamazsınız — " +
-      "kayıtları görmeye devam edersiniz. Girilmesi gerekiyorsa yöneticiden " +
-      "ayı açmasını isteyin.";
-}
 function kilitBak(){
   var pid = $("#f-project").value, t = $("#f-date").value;
-  var el = $("#f-kilit");
-  if(!el) return;
-  if(!pid || !t){ AY_KILIT = null; el.innerHTML = ""; return; }
+  if(!pid || !t){ AY_KILIT = null; seritCiz(); return; }
   var anahtar = pid + "|" + t.slice(0, 7);
   if(anahtar === KILIT_SORGU) return;     /* aynı ay, tekrar sorma */
   KILIT_SORGU = anahtar;
-  AY_KILIT = null; el.innerHTML = "";
+  AY_KILIT = null; seritCiz();
   if(!navigator.onLine || !sb) return;
   sb.rpc("ay_kilidi", {p_project:pid, p_date:t}).then(function(r){
     if(anahtar !== KILIT_SORGU) return;   /* şef arada tarihi değiştirdi */
-    if(r.error){ AY_KILIT = null; return; }
+    if(r.error){ AY_KILIT = null; seritCiz(); return; }
     AY_KILIT = r.data || "";
-    el.innerHTML = AY_KILIT
-      ? '<div class="msg warn" style="margin-top:8px">' + kilitMetni(AY_KILIT) + '</div>'
-      : "";
-  }).catch(function(){ AY_KILIT = null; });
+    seritCiz();
+  }).catch(function(){ AY_KILIT = null; seritCiz(); });
 }
 $("#y-project").addEventListener("change", function(){ fillYakitHedef(); });
 $("#f-shift").addEventListener("change", function(){
@@ -2381,8 +2597,11 @@ function calismadiSeridiCiz(){
     el.id = "calismadi-serit";
     el.className = "bant uy";
     el.style.cssText = "border-radius:10px;margin:8px 0";
-    var h = $("#serit-ust");
-    if(h && h.parentNode) h.parentNode.insertBefore(el, h.nextSibling);
+    /* Eskiden yapışkan "serit-ust"un altına giriyordu; o şerit
+       79. dosyada kalktı. Artık bantların ÜSTÜNDE, vardiya
+       sekmesinin ilk çocuğu olarak duruyor. */
+    var h = $("#bantlar");
+    if(h && h.parentNode) h.parentNode.insertBefore(el, h);
   }
   el.hidden = !HIC_CALISMADI;
   if(HIC_CALISMADI){
@@ -2867,8 +3086,11 @@ function ilerlemeSeridiCiz(){
     el = document.createElement("div");
     el.id = "iy-serit"; el.className = "bant uy";
     el.style.cssText = "border-radius:10px;margin:8px 0";
-    var h = $("#serit-ust");
-    if(h && h.parentNode) h.parentNode.insertBefore(el, h.nextSibling);
+    /* Eskiden yapışkan "serit-ust"un altına giriyordu; o şerit
+       79. dosyada kalktı. Artık bantların ÜSTÜNDE, vardiya
+       sekmesinin ilk çocuğu olarak duruyor. */
+    var h = $("#bantlar");
+    if(h && h.parentNode) h.parentNode.insertBefore(el, h);
   }
   el.hidden = !ILERLEME_YOK;
   if(ILERLEME_YOK){
@@ -2970,19 +3192,25 @@ $("#btn-save-nak").addEventListener("click", function(){
   });
 });
 
-/* ---------------- adımlar arasında ilerle ---------------- */
+/* ---------------- Devam: bandı kapat, sıradakini aç ----------------
+   Eksik varken de çalışıyor (41. dosya). Bant turuncu "eksik"
+   etiketiyle kapanıyor; şef isterse geri dönüp doldurur, istemezse
+   kaydete basınca zaten karşısına çıkıyor. Eskiden burada
+   "eksik var" deyip adımı DEĞİŞTİRMEDEN bırakıyorduk; sahada bu
+   "bastım, bir şey olmadı" diye geri geliyordu. */
 $$(".ilerle").forEach(function(b){
   b.addEventListener("click", function(){
     var n = Number(b.dataset.next), simdi = n - 1;
-    var eks = stepProblems(simdi);
-    if(eks.length){
-      msg($("#step-msg"), simdi + ". adımda eksik var: " + eks.join(", ") + ".", "err");
-      adimaGit(simdi);
-      return;
-    }
+    BANT_GECILDI[simdi] = true;
+    BANT_ACIK[simdi] = false;
     msg($("#step-msg"), "");
-    adimaGit(n);
-    window.scrollTo(0, 0);
+    bantAc(n, false);
+    /* Kaydırma AÇILAN banda değil, YENİ KAPANAN banda yapılıyor:
+       Tayfun'un istediği "doldurulan kısımlar geçildikten sonra belli
+       olsun" ancak böyle oluyor — şef, az önce doldurduğu bandın
+       ✓ ve özetini sıradakinin hemen üstünde görüyor. Açılan banda
+       kaydırınca kapanan bant ekranın dışında kalıyordu. */
+    bantaKaydir(simdi);
   });
 });
 
@@ -3111,43 +3339,19 @@ function firstIncomplete(){
 }
 function refreshState(){
   var fi = firstIncomplete();
-  $$(".steps button").forEach(function(b){
-    var n = Number(b.dataset.step);
-    var ok = stepProblems(n).length === 0;
-    var locked = (fi !== 0 && n > fi);
-    b.dataset.state = ok ? "ok" : (locked ? "locked" : "open");
-    b.querySelector(".mark").textContent = ok ? "✓" : (locked ? "" : "•");
-  });
   $$("[data-req]").forEach(function(el){
     var n = Number(el.dataset.req);
     el.classList.toggle("missing", stepProblems(n).length > 0 && !el.value);
   });
-  /* Üst şeritte kuyu adının yanında tarih ve vardiya da yazıyor: şef hangi
-     güne hangi vardiyayı girdiğini tek bakışta görsün (Tayfun, 17 Ekim). */
-  var w = currentWell();
-  var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
-  var tarih = $("#f-date").value ? $("#f-date").value.split("-").reverse().slice(0,2).join(".") : "";
-  /* 1 Kasım: ŞANTİYE ADI şeride girdi. Birden fazla şantiye gören bir
-     hesapta (Tayfun, Osman) vardiyanın hangi sahaya yazıldığını
-     söyleyen tek yer burasıydı ve orada yazmıyordu — 1 Kasım'da bir
-     vardiya Amasya yerine DENEME şantiyesine yazıldı ve ancak puantaj
-     boş çıkınca farkedildi. Tek şantiyeli hesapta yazılmıyor: orada
-     yanlış şantiye diye bir şey yok, şerit de dar. */
-  var cokSaha = ((MASTER && MASTER.projects) || []).length > 1;
-  var saha = cokSaha ? projeAdi($("#f-project").value) : "";
-  $("#sum-well").textContent = (saha ? saha + " · " : "") +
-    (w ? w.code : "kuyu seçilmedi") +
-    (tarih ? " · " + tarih : "") + (vd ? " · " + vd.label : (nakliyeMi() ? " · Nakliye" : ""));
-  $("#sum-meters").textContent = tl(totalM()) + " m";
   arizaBaslikCiz();
-  /* Eksik şeridi yalnız eksik varken görünür; yer telefonda değerli. */
-  var todo = $("#sum-todo");
-  todo.hidden = (fi === 0);
-  if(fi !== 0) todo.textContent = "Adım " + fi + " eksik: " + stepProblems(fi).join(", ");
-  seritAltCiz();
+  /* Kuyu, tarih, vardiya ve şantiye artık 1. bandın özetinde yazıyor —
+     eskiden başlığın altına yapışan ayrı bir şerit vardı, kalktı
+     (79. dosya). Çalışan toplam alt çubukta. */
+  bantCiz();
+  kaydetCubukCiz();
   /* Kaydet düğmesi ARTIK PASİF YAPILMIYOR. Sahada tepkisiz düğme, şefe
      "program bozuk" dedirtiyor. Düğme hep basılabilir; eksik varsa
-     basınca eksiğin bulunduğu adıma atlıyor ve neyin eksik olduğunu yazıyor. */
+     basınca eksik bandı açıp oraya kaydırıyor ve neyin eksik olduğunu yazıyor. */
   $("#btn-save-shift").classList.toggle("eksikli", fi !== 0);
   updateRunButton();
 }
@@ -3201,12 +3405,26 @@ function tarihOner(vd){
   refreshState();
 }
 
-/* Üç şerit birlikte açılır kapanır: bağlam, eksik uyarısı, çalışan toplam. */
+/* Bantlar ve alt çubuk birlikte açılır kapanır: nakliye gününde ve
+   "kaydedildi" ekranında vardiya formunun tamamı çekiliyor. */
 function seritGoster(ac){
-  ["serit-ust","sum-todo","serit-alt"].forEach(function(id){
-    var e = document.getElementById(id); if(e) e.hidden = !ac;
-  });
+  var b = document.getElementById("bantlar");
+  var c = document.getElementById("kaydet-cubuk");
+  if(b) b.hidden = !ac;
+  if(c) c.hidden = !ac;
   if(ac) refreshState();
+}
+/* Nakliye gününde 1. bant açık kalıyor (tarih/vardiya oradan seçiliyor),
+   2–5 kapanıyor: o gün sondaj yok, metraj da mazot da yok. */
+function nakliyeBantlari(nak){
+  var b = document.getElementById("bantlar");
+  var c = document.getElementById("kaydet-cubuk");
+  if(b) b.hidden = false;
+  if(c) c.hidden = !!nak;
+  for(var n = 2; n <= 5; n++){
+    var e = bantEl(n); if(e) e.hidden = !!nak;
+  }
+  refreshState();
 }
 function esitlendi(){ try{ localStorage.setItem("sp_sync", String(Date.now())); }catch(e){} }
 function sonEsitleme(){
@@ -3236,8 +3454,11 @@ function durusSaati(){
   var bekleme = BEKLEMELER.reduce(function(t, x){ return t + Number(x.saat || 0); }, 0);
   return Math.min(bekleme, sure || bekleme);
 }
-function seritAltCiz(){
-  var el = $("#serit-alt"); if(!el) return;
+/* Alt çubuğun sol tarafı. Son eşitleme saati BURADAN KALKTI —
+   "Gönderilmeyen kayıtlar" sayfasının başlığına taşındı (79. dosya);
+   kuyruk şeridi zaten her sekmede "gitti mi" sorusunu cevaplıyor. */
+function kaydetCubukCiz(){
+  var el = $("#kc-sayi"); if(!el) return;
   var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
   var sa = slotSaat(vd);
   var yakit = $("#f-fuel") ? $("#f-fuel").value : "";
@@ -3255,8 +3476,7 @@ function seritAltCiz(){
     if(sa) parca.push('<span class="num">' + sureYaz(Math.max(sa - durus, 0)) + ' çalışma</span>');
   }
   if(yakit !== "") parca.push('<span class="num">' + yakit + ' lt</span>');
-  el.innerHTML = parca.join('<span style="color:var(--ink-3)">·</span>') +
-    '<span class="sn">' + sonEsitleme() + '</span>';
+  el.innerHTML = parca.join(' <span style="opacity:.5">·</span> ');
 }
 
 /* ============================================================
@@ -3295,8 +3515,13 @@ $$("[data-katla]").forEach(function(b){
 function seritHizala(){
   var bar = document.querySelector("header.bar"), tab = document.querySelector("nav.tabs");
   var r = document.documentElement;
-  if(bar) r.style.setProperty("--bar-h", bar.offsetHeight + "px");
-  if(tab) r.style.setProperty("--tab-h", tab.offsetHeight + "px");
+  /* ⚠ SIFIR ÖLÇÜM YAZILMIYOR. Sekme çubuğu giriş ekranında gizli;
+     gizli elemanın offsetHeight'i 0 ve bu 0'ı değişkene yazınca
+     `bottom:var(--tab-h,64px)` yedeğe DÜŞMÜYOR — değişken var, 0.
+     Alt çubuk sekmelerin altına kayıyor ve arkadaki bant tabanın
+     üstünden sızıyordu; 390 px ekran görüntüsünde yakalandı. */
+  if(bar && bar.offsetHeight) r.style.setProperty("--bar-h", bar.offsetHeight + "px");
+  if(tab && tab.offsetHeight) r.style.setProperty("--tab-h", tab.offsetHeight + "px");
 }
 window.addEventListener("resize", seritHizala);
 window.addEventListener("orientationchange", seritHizala);
@@ -3309,37 +3534,156 @@ if(window.ResizeObserver){
   });
 }
 
-(function seritAltKur(){
-  var sec = document.getElementById("tab-vardiya"); if(!sec) return;
-  var d = document.createElement("div");
-  d.className = "serit-alt"; d.id = "serit-alt";
-  sec.appendChild(d);
-})();
+/* Alt çubuk artık HTML'de duruyor (kaydet düğmesiyle birlikte);
+   JS ile sonradan eklemeye gerek kalmadı. */
 
-/* Bir adıma gitmek: hem adım düğmelerinin hem de kaydet uyarısının kullandığı yol. */
-function adimaGit(n){
-  var b = document.querySelector('.steps button[data-step="' + n + '"]');
-  if(!b) return;
-  $$(".steps button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
-  $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== String(n)); });
-  b.scrollIntoView({block:"nearest", inline:"center"});
+/* ============================================================
+   BANT MOTORU (79. dosya · 5 Kasım 2026)
+   ------------------------------------------------------------
+   Eski `adimaGit` bir adımı GÖSTERİP diğerlerini gizliyordu.
+   Artık hiçbir şey gizlenmiyor: bant açılıp kapanıyor, ekran
+   aşağı kayıyor.
+
+   İKİ KURAL, ikisi de bilerek:
+   · Bir bandı açmak BAŞKA BANDI KAPATMIYOR. "Aynı anda tek bant
+     açık" yapsaydık, tarihi düzeltmek için 1. bandı açınca
+     4. bant kapanır ve içerik parmağın altında zıplardı.
+   · "Devam" eksik varken de çalışıyor; bant turuncu "eksik"
+     etiketiyle kapanıyor. (41. dosya: hiçbir şey kilitlenmez,
+     eksik yalnız söylenir.)
+
+   BANT_GECILDI: şef o banda uğradı mı. Uğramadığı bant "sırada"
+   diye duruyor, "eksik" diye bağırmıyor — henüz sırası gelmedi.
+   ============================================================ */
+var BANT_ACIK    = {1:true, 2:false, 3:false, 4:false, 5:false};
+var BANT_GECILDI = {1:false,2:false, 3:false, 4:false, 5:false};
+var BANT_ADI = {1:"Vardiya", 2:"Ekip", 3:"Kontrol & Arıza", 4:"Delgi", 5:"Tüketim"};
+
+function bantEl(n){ return document.querySelector('.adim-bant[data-bant="' + n + '"]'); }
+
+/* Açılan bandın üstü ekranın tepesine gelsin: başlık ve kuyruk
+   şeridi yapışkan, onların altına kaydırıyoruz. */
+function bantaKaydir(n){
+  var b = bantEl(n); if(!b) return;
+  var bar = document.querySelector("header.bar");
+  var ser = document.getElementById("kuyruk-serit");
+  var ust = (bar ? bar.offsetHeight : 56) + (ser && !ser.hidden ? ser.offsetHeight : 0);
+  var y = b.getBoundingClientRect().top + window.pageYOffset - ust;
+  try{ window.scrollTo({top:Math.max(y,0), behavior:"smooth"}); }
+  catch(e){ window.scrollTo(0, Math.max(y,0)); }
 }
-$$(".steps button").forEach(function(b){
-  b.addEventListener("click", function(){
-    var n = Number(b.dataset.step), fi = firstIncomplete();
-    /* İleri adım eksik yüzünden kapalıysa kullanıcıyı yerinde bırakıp uyarı
-       yazmak sahada işe yaramıyor: şef uyarıyı görmeden "tıkladım, olmadı"
-       diyor. Onun yerine eksiğin bulunduğu adıma götürüyoruz. */
-    if(fi !== 0 && n > fi){
-      adimaGit(fi);
-      msg($("#step-msg"), n + ". adım için önce " + fi + ". adım gerekiyor. Eksik: " +
-          stepProblems(fi).join(", ") + ".", "err");
-      return;
+function bantAc(n, kaydir){
+  BANT_ACIK[n] = true; bantCiz();
+  if(kaydir) bantaKaydir(n);
+}
+function bantKapat(n){ BANT_ACIK[n] = false; bantCiz(); }
+
+/* Dışarıdaki on bir çağrı yeri bu adı kullanıyor; imza korunuyor.
+   Anlamı değişti: artık "oraya git" değil, "o bandı aç ve oraya
+   kaydır" — başka hiçbir bant kapanmıyor. */
+function adimaGit(n){ bantAc(n, true); }
+
+function bantCiz(){
+  for(var n = 1; n <= 5; n++){
+    var b = bantEl(n); if(!b) continue;
+    var ic   = b.querySelector(".adim-ic");
+    var bas  = b.querySelector(".adim-bas");
+    var ozet = b.querySelector(".adim-ozet");
+    var im   = b.querySelector(".adim-im");
+    var nk   = b.querySelector(".nk");
+    var acik = !!BANT_ACIK[n];
+    var eks  = stepProblems(n);
+    var gec  = !!BANT_GECILDI[n];
+    ic.hidden = !acik;
+    bas.setAttribute("aria-expanded", String(acik));
+    /* Bandın eksik olup olmadığı AÇIKKEN DE okunabilsin: hem sınama
+       düzeneği hem de ekran görüntüsü tek yerden baksın. */
+    b.setAttribute("data-eksik", eks.length ? "1" : "0");
+    b.classList.toggle("acik",  acik);
+    b.classList.toggle("ok",    !acik && gec && !eks.length);
+    b.classList.toggle("eksik", !acik && gec && eks.length > 0);
+    if(acik){
+      nk.textContent = String(n); ozet.textContent = ""; im.textContent = "";
+    } else if(gec && eks.length){
+      nk.textContent = String(n);
+      ozet.textContent = eks.join(", ");
+      im.textContent = "eksik";
+    } else if(gec){
+      nk.textContent = "✓";
+      ozet.textContent = bantOzet(n);
+      im.textContent = "Düzelt";
+    } else {
+      nk.textContent = String(n); ozet.textContent = ""; im.textContent = "";
     }
-    msg($("#step-msg"), "");
-    adimaGit(n);
+  }
+}
+$$("[data-bant-bas]").forEach(function(bas){
+  bas.addEventListener("click", function(){
+    var n = Number(bas.getAttribute("data-bant-bas"));
+    /* Kapalı bir banda dokunmak onu "uğranmış" sayar: şef oraya
+       bakıp kapattıysa artık eksiğini görmeyi hak ediyor. */
+    if(!BANT_ACIK[n]){ BANT_GECILDI[n] = true; bantAc(n, true); }
+    else bantKapat(n);
   });
 });
+
+/* ------------------------------------------------------------
+   BANT ÖZETLERİ — kapanan bandın tek satırlık karnesi.
+   Tayfun: "doldurulan kısımlar ilerledikten ve geçildikten sonra
+   belli olsun." Özet, bandı açmadan ne yazdığını söylüyor.
+   ------------------------------------------------------------ */
+function bantOzet(n){
+  var p = [];
+  if(n === 1){
+    /* Şantiye adı YALNIZ birden fazla şantiye görülüyorsa yazılıyor:
+       1 Kasım'da bir vardiya yanlış şantiyeye yazılmıştı (73. dosya),
+       tek şantiyeli hesapta ise yer kaplıyor. */
+    if(((MASTER && MASTER.projects) || []).length > 1){
+      var pa = projeAdi($("#f-project").value); if(pa) p.push(pa);
+    }
+    if($("#f-date").value) p.push(trd2($("#f-date").value));
+    var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
+    if(vd) p.push(vd.label); else if(nakliyeMi()) p.push("Nakliye");
+    /* Kuyu makineden ÖNCE: dar ekranda özet kırpılıyor ve şefin
+       kontrol ettiği ilk şey kuyu kodu. İlk çizimde makine öndeydi
+       ve ekran görüntüsünde kuyu kodu kırpılmış çıktı. */
+    var w = currentWell(); if(w) p.push(w.code);
+    var mk = ($("#f-machine").selectedOptions[0] || {}).textContent || "";
+    if(mk) p.push(mk);
+  }
+  if(n === 2){
+    var sondor = ($("#f-driller1").selectedOptions[0] || {}).textContent || "";
+    if(sondor) p.push("Sondör " + sondor);
+    var kac = ISCI.filter(Boolean).length;
+    if(kac) p.push(kac + " yardımcı");
+    if(!p.length) p.push("ekip girilmedi");
+  }
+  if(n === 3){
+    var c = checkedCount();
+    p.push(c + "/" + CHECKS.length + " kontrol");
+    var ar = $("#ar-kind").value;
+    p.push(ar ? "arıza: " + ar : "arıza yok");
+    if(BEKLEMELER.length) p.push(BEKLEMELER.length + " bekleme");
+    if(HIC_CALISMADI) p.push("hiç çalışmadı");
+  }
+  if(n === 4){
+    if(ILERLEME_YOK){
+      p.push("İlerleme yok");
+      if(IY_SEBEP) p.push(IY_AD[IY_SEBEP] || IY_SEBEP);
+    } else if(runs.length){
+      p.push(runs.length + " manevra");
+      p.push(tl(totalM()) + " m");
+    } else if(HIC_CALISMADI){ p.push("çalışılmadı"); }
+    else p.push("manevra girilmedi");
+  }
+  if(n === 5){
+    var y = $("#f-fuel").value;
+    p.push(y === "" ? "mazot girilmedi" : y + " lt mazot");
+    var mal = KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; }).length;
+    if(mal) p.push(mal + " kalem malzeme");
+  }
+  return p.join(" · ");
+}
 
 /* ============================================================
    VARDİYA DÜZELTME
@@ -3540,7 +3884,13 @@ function vardiyaDuzelt(sat, satirEl){
       duzeltSeridi();
       $("#done-wrap").hidden = true;
       $(".tabs button[data-tab=\"vardiya\"]").click();
-      adimaGit(1);
+      /* DÜZELTME KİPİ (79. dosya): bütün bantlar ✓ ve özetleriyle
+         KAPALI geliyor, hiçbiri kendiliğinden açılmıyor. Kayıt zaten
+         dolu; şef neyi düzeltmek istiyorsa ona dokunuyor. Birini
+         açmak, düzeltilecek yerin o olduğunu söylemek olurdu. */
+      for(var bi = 1; bi <= 5; bi++){ BANT_ACIK[bi] = false; BANT_GECILDI[bi] = true; }
+      seritGoster(true);
+      window.scrollTo(0, 0);
       refreshState(); syncDepth();
       dur("");
       /* Şefe NE geri geldiğini söylüyoruz. "Kayıt açıldı" yetmiyordu:
@@ -3583,15 +3933,8 @@ var SON_KUYU = null;  /* kaydedilen kuyu: liste yenilenince genişlesin */
 function takilanUyar(items){
   var takilan = (items || []).filter(function(x){ return !!x.hata; });
   var n = takilan.length;
-
-  /* Sekme başlığındaki sayı — hangi sekmede olursa olsun görünür */
-  var sek = $('[data-tab="kuyruk"]');
-  if(sek){
-    sek.textContent = n ? "Bekleyen (" + n + " takıldı)" : "Bekleyen";
-    sek.classList.toggle("takildi", n > 0);
-  }
-  var chip = $("#netchip");
-  if(chip) chip.setAttribute("data-takildi", String(n > 0));
+  /* Sekme rozeti ve bağlantı çipi kalktı: ikisinin işini de artık
+     başlığın altındaki kuyruk şeridi yapıyor (79. dosya). */
 
   /* Vardiya bitiş ekranı: "kaydedildi" diyen kutunun içine uyarı */
   var uy = $("#done-uyari");
@@ -3611,28 +3954,83 @@ function takilanUyar(items){
     "</div><div class='hint'>Kayıt telefonda duruyor, kaybolmadı.</div>";
   var g = document.createElement("button");
   g.type = "button"; g.className = "btn ghost sm"; g.style.marginTop = "8px";
-  g.textContent = "Bekleyen kayıtları aç";
-  g.addEventListener("click", function(){
-    var b = $('[data-tab="kuyruk"]'); if(b) b.click();
-  });
+  g.textContent = "Gönderilmeyen kayıtları aç";
+  g.addEventListener("click", kuyrukSayfaAc);
   k.appendChild(g);
   uy.appendChild(k);
 }
 
+/* ============================================================
+   KUYRUK ŞERİDİ (79. dosya)
+   ------------------------------------------------------------
+   Bekleyen sekmesi, sekme rozeti ve bağlantı çipinin yerine tek
+   bir şerit. Üç hâli var ve KUYRUK BOŞKEN DE GÖRÜNÜYOR: eski
+   koddaki not "sahada en çok sorulan soru 'gitti mi'" diyordu,
+   sessizlik o sorunun cevabı değil.
+   Ay kilidi uyarısı da burada çıkıyor ve kuyruğu eziyor — kapalı
+   aya kayıt girmek, gönderilmemiş kayıttan daha acil bir sorun.
+   ============================================================ */
+var KUYRUK_SAYI = 0, KUYRUK_TAKILAN = 0;
+function seritCiz(){
+  var el = $("#kuyruk-serit"); if(!el) return;
+  /* Giriş, kurulum ve rol kapısı ekranlarında şerit yok: orada
+     kuyruk diye bir şey yok ve başlığın altını kalabalıklaştırıyor. */
+  var app = document.getElementById("scr-app");
+  if(!app || app.hidden){ el.hidden = true; return; }
+  var ad, alt, durum;
+  if(AY_KILIT){
+    durum = "kilit";
+    ad = (AY_KILIT === "kesin") ? "Bu ayın hakedişi kesildi"
+                                : "Seçtiğiniz ay kapatıldı";
+    alt = (AY_KILIT === "kesin")
+      ? "Bu tarihe kayıt girilemez, düzeltme de yapılamaz. Yöneticiye başvurun."
+      : "Bu tarihe kayıt girip düzeltemezsiniz. Yöneticiden ayı açmasını isteyin.";
+  } else if(KUYRUK_TAKILAN){
+    durum = "takildi";
+    ad = KUYRUK_TAKILAN + " kayıt takıldı";
+    alt = "Sebebini görmek için dokunun.";
+  } else if(KUYRUK_SAYI){
+    durum = "bekliyor";
+    ad = KUYRUK_SAYI + " kayıt gönderilmedi";
+    alt = navigator.onLine ? "Gönderiliyor…" : "İnternet gelince kendiliğinden gidecek.";
+  } else {
+    durum = "bos";
+    ad = "Hepsi gönderildi";
+    alt = sonEsitleme();
+  }
+  el.setAttribute("data-durum", durum);
+  el.hidden = false;
+  el.innerHTML = '<span class="ks-ad">' + esc(ad) + '</span>' +
+                 '<span class="ks-alt">' + esc(alt) + '</span>';
+}
+function kuyrukSayfaAc(){
+  refreshQueue();
+  $("#q-sync").textContent = sonEsitleme();
+  $("#kuyruk-sayfa").hidden = false;
+}
+function kuyrukSayfaKapa(){ $("#kuyruk-sayfa").hidden = true; }
+$("#kuyruk-serit").addEventListener("click", function(){
+  /* Kilit uyarısında kuyruk sayfası açmak anlamsız: açılacak bir şey
+     yok. Şefin yapacağı tek şey tarihi değiştirmek. */
+  if(AY_KILIT && !KUYRUK_SAYI) return;
+  kuyrukSayfaAc();
+});
+$("#kuyruk-kapa").addEventListener("click", kuyrukSayfaKapa);
+$("#kuyruk-sayfa").addEventListener("click", function(e){
+  if(e.target === this) kuyrukSayfaKapa();
+});
+
 function refreshQueue(){
   return obAll().then(function(items){
     queue = items;
+    KUYRUK_SAYI = items.length;
+    KUYRUK_TAKILAN = items.filter(function(x){ return !!x.hata; }).length;
     $("#q-count").textContent = items.length;
-    /* Dar ekranda "Çevrimiçi" kelimesi yer kaplıyor ve başlığı kırpıyor; nokta
-       zaten yeşil. "Çevrimdışı" ise her zaman yazılır — şefin görmesi gerek. */
-    var net = $("#netchip");
-    net.classList.toggle("dar", navigator.onLine);
-    $("#nettext").setAttribute("data-sayi", String(items.length));
-    $("#nettext").textContent = (navigator.onLine ? "Çevrimiçi" : "Çevrimdışı") + " · " + items.length;
-    $("#netchip").setAttribute("data-off", String(!navigator.onLine));
+    $("#q-sync").textContent = sonEsitleme();
+    seritCiz();
     takilanUyar(items);
     var box = $("#q-list"); box.innerHTML = "";
-    if(!items.length){ box.innerHTML = '<div class="hint">Bekleyen kayıt yok.</div>'; return; }
+    if(!items.length){ box.innerHTML = '<div class="hint">Gönderilmemiş kayıt yok.</div>'; return; }
     items.sort(function(a,b){ return a.created - b.created; }).forEach(function(it){
       var d = document.createElement("div");
       d.className = it.hata ? "q-satir takildi" : "q-satir";
@@ -3706,10 +4104,13 @@ function sayiSorunlari(){
 $("#btn-save-shift").addEventListener("click", function(){
   var fi = firstIncomplete();
   if(fi !== 0){
+    /* Kaydete basmak BÜTÜN bantları "uğranmış" sayıyor: eksik olan
+       her bant aynı anda turuncu yansın, şef hepsini bir bakışta
+       görsün. Tek tek keşfettirmek sahada vakit kaybı. */
+    for(var i = 1; i <= 5; i++) BANT_GECILDI[i] = true;
     msg($("#shift-msg"), "Kaydedilmedi — " + fi + ". adımda eksik var: " +
         stepProblems(fi).join(", ") + ". Sizi oraya götürdüm.", "err");
     adimaGit(fi);
-    msg($("#step-msg"), "Eksik: " + stepProblems(fi).join(", ") + ".", "err");
     return;
   }
   /* Eksik kalmadı: önceki kırmızı uyarılar MUTLAKA silinmeli. Yoksa kayıt
@@ -3847,9 +4248,9 @@ function showDone(wellCode, metraj, fuel, date, slot){
   var vd = slotBilgi($("#f-project").value, slot);
   var shift = vd ? vd.label : "";
   SON_KUYU = $("#f-well").value || null;
-  $$("[data-pane]").forEach(function(p){ p.hidden = true; });
+  /* "Kaydedildi" ekranı açıkken bantlar ve alt çubuk çekiliyor:
+     ekranda tek bir şey kalsın. */
   seritGoster(false);
-  $(".steps").hidden = true;
   var wrap = $("#done-wrap"); wrap.hidden = false;
   wrap.innerHTML = "";
   var c = document.createElement("div");
@@ -3901,9 +4302,12 @@ function resetForm(){
   msg($("#cap-msg"), ""); $("#cap-dus-wrap").hidden = true;
   $$("#checks .chip").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
   countChecks();
-  $("#done-wrap").hidden = true; seritGoster(true); $(".steps").hidden = false;
-  $$(".steps button").forEach(function(o){ o.setAttribute("aria-pressed", String(o.dataset.step === "1")); });
-  $$("[data-pane]").forEach(function(p){ p.hidden = (p.dataset.pane !== "1"); });
+  $("#done-wrap").hidden = true;
+  /* Yeni vardiya 1. bant açık başlıyor; tarih, makine ve kuyu
+     bugünkü gibi korunuyor (gece vardiyası peşinden giriliyor). */
+  BANT_ACIK    = {1:true, 2:false, 3:false, 4:false, 5:false};
+  BANT_GECILDI = {1:false,2:false, 3:false, 4:false, 5:false};
+  seritGoster(true);
   msg($("#shift-msg"), ""); msg($("#step-msg"), "");
   loadMaster(true).then(function(){ renderRuns(); });
 }
@@ -4738,8 +5142,10 @@ function sendItem(it, tenant){
   return obDel(it.id);
 }
 $("#btn-sync").addEventListener("click", function(){ msg($("#sync-msg"), "Gönderiliyor…"); syncAll(); });
-$("#btn-refresh").addEventListener("click", function(){ loadMaster(true).then(function(){ msg($("#sync-msg"), "Ana veriler yenilendi.", "ok"); }); });
-$("#netchip").addEventListener("click", function(){ refreshQueue().then(function(){ if(navigator.onLine) syncAll(); }); });
+/* "Ana verileri yenile" de Ayarlar ekranına taşındı (79. dosya). */
+/* Bağlantı çipi kalktı; "şimdi dene" işini kuyruk sayfasındaki
+   "Şimdi eşitle" düğmesi görüyor. Çevrimdışı/çevrimiçi değişimi
+   şeridi tazeliyor. */
 window.addEventListener("online", function(){ refreshQueue().then(syncAll); });
 window.addEventListener("offline", refreshQueue);
 
@@ -6027,10 +6433,12 @@ $("#btn-tanim").addEventListener("click", function(){
 
 /* ---------------- sekmeler ---------------- */
 /* Gider sekmesinin açık bölümü. Şerit bunu değiştiriyor (41. dosya, 3).
-   Kiralama bölümü kodlanınca listeye eklenecek. */
+   51. pakette dört bant olacak; şimdilik şerit duruyor. */
 var GIDER_BOLUM = "yakit";
+/* "kuyruk" listeden çıktı: Bekleyen artık sekme değil, kuyruk
+   şeridine dokununca açılan sayfa (79. dosya). */
 var TUM_BOLUM = ["vardiya","malzeme","makine","gserit","yakit","nakit","kira","avans",
-                 "puantaj","ozet","kuyruk"];
+                 "puantaj","ozet"];
 
 function giderCiz(){
   $$('.segment[data-seg="gider"] button').forEach(function(o){
@@ -6051,10 +6459,9 @@ $$("#tabs button").forEach(function(b){
     $$("#tabs button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
     var map = {vardiya:["vardiya"], malzeme:["malzeme"], makine:["makine"],
                gider:["gserit"],
-               puantaj:["puantaj"], ozet:["ozet"], kuyruk:["kuyruk"]};
+               puantaj:["puantaj"], ozet:["ozet"]};
     var acik = map[b.dataset.tab] || [];
     TUM_BOLUM.forEach(function(t){ $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
-    if(b.dataset.tab === "kuyruk") refreshQueue();
     if(b.dataset.tab === "puantaj"){ attCiz(); attLoad(true); }
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
     if(b.dataset.tab === "makine"){ bakimYukle(); acikArizaYukle(); aracBelgeYukle(); }
@@ -6069,7 +6476,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "49";
+var SURUM = "50";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
@@ -6120,16 +6527,23 @@ function ayarlarAc(){
           '<div class="hint">Sahada güneşte ve eldivenle okumak zorsa yazıyı büyütün.</div>' +
         '</div>' +
 
+        /* Hesap bilgisi ve "Ana verileri yenile" eskiden Bekleyen
+           sekmesindeydi; sekme kalkınca buraya taşındı. İkinci bir
+           hesap ekranı açılmıyor — hepsi tek yerde (79. dosya). */
         '<div class="card">' +
           '<span class="eyebrow">Hesap</span>' +
+          '<div class="ayar-sat"><span class="k">Firma</span>' +
+            '<span class="v">' + esc((MASTER && MASTER.tenant ? MASTER.tenant.name : "") || "—") + '</span></div>' +
           '<div class="ayar-sat"><span class="k">Kullanıcı</span>' +
-            '<span class="v">' + (p.full_name || p.email || "—") + '</span></div>' +
+            '<span class="v">' + esc(p.full_name || p.email || "—") + '</span></div>' +
           '<div class="ayar-sat"><span class="k">Rol</span>' +
             '<span class="v"><span class="pill">' + rolAdi(p) + '</span></span></div>' +
           '<div class="ayar-sat"><span class="k">Şantiye</span>' +
             '<span class="v" id="ay-santiye">—</span></div>' +
           '<button class="btn ghost sm" type="button" id="ay-sifre" ' +
             'style="margin-top:10px">Şifre değiştir</button>' +
+          '<button class="btn ghost sm" type="button" id="ay-yenile" ' +
+            'style="margin-top:8px">Ana verileri yenile</button>' +
           '<div id="ay-sifre-msg"></div>' +
         '</div>' +
 
@@ -6168,6 +6582,18 @@ function ayarlarAc(){
   document.getElementById("ay-santiye").textContent = pad || "—";
   document.getElementById("ay-bekleyen").textContent = (queue || []).length;
   document.getElementById("ay-sync").textContent = sonEsitleme().replace("son eşitleme ", "");
+  document.getElementById("ay-yenile").addEventListener("click", function(){
+    var b = document.getElementById("ay-yenile");
+    b.disabled = true; b.textContent = "Yenileniyor…";
+    loadMaster(true).then(function(){
+      b.disabled = false; b.textContent = "Ana verileri yenile";
+      msg(document.getElementById("ay-sifre-msg"), "Ana veriler yenilendi.", "ok");
+    }).catch(function(e){
+      b.disabled = false; b.textContent = "Ana verileri yenile";
+      msg(document.getElementById("ay-sifre-msg"),
+          "Yenilenemedi: " + (e && e.message ? e.message : e), "err");
+    });
+  });
 
   $$(".segment", d).forEach(function(seg){
     seg.addEventListener("click", function(ev){
