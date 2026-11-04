@@ -1,7 +1,7 @@
 /* Collarlog — çevrimdışı uygulama kabuğu
    Sayfalar: önce ağ, olmazsa önbellek (güncellemeler hemen görünür).
    Diğer dosyalar: önce önbellek. */
-var CACHE = "collarlog-v48";
+var CACHE = "collarlog-v49";
 /* 57. dosya: yonetim.html ("Ana veri ve projeler") listede HİÇ yoktu —
    bağlantı zayıfken o sayfa doğrudan şefin ekranına düşüyordu.
    Yeni sayfa eklendiğinde (aykilidi.html, hakedis.html) buraya da
@@ -9,7 +9,7 @@ var CACHE = "collarlog-v48";
 var SHELL = [
   "./", "./index.html", "./panel.html", "./rapor.html", "./santiyeler.html",
   "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
-  "./yonetim.html",
+  "./yonetim.html", "./aykilidi.html",
   "./app.css", "./app-shell.js", "./kart.js",
   "./manifest.webmanifest", "./icon.svg", "./logo.png", "./logo-mark.png",
   /* Ürün logosu da önbellekte: sahada bağlantı yokken marka yerine

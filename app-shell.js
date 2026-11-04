@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "48";
+var SURUM = "49";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -124,7 +124,10 @@ var SAYFALAR = [
      kesilmiş hakedişlerin listesi Finansta (59. dosya).
      Ekranı olmayan satır gösterilmiyor: şefin sessizce çalışmayan
      "kaydet" düğmesiyle aynı hata (32. dosya kuralı). */
-  {k:"aykilidi", d:"aykilidi.html",  ad:"Ay kilidi",          i:"kilit",  g:"Ay sonu", yok:1},
+  /* 4 Kasım · ekran yazıldı, `yok:1` kalktı. 23 Ekim'den beri satır
+     duruyordu ama gizliydi; kilit fonksiyonları 30. adımdan beri
+     tabloda duruyordu ama hiçbir ekran onları çağırmıyordu. */
+  {k:"aykilidi", d:"aykilidi.html",  ad:"Ay kilidi",          i:"kilit",  g:"Ay sonu"},
   {k:"rapor",    d:"rapor.html",     ad:"Aylık rapor",        i:"rapor",  g:"Ay sonu"},
   {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş hazırla",    i:"matkap", g:"Ay sonu", yok:1},
 

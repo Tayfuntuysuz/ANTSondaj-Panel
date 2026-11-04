@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<script>/* tema: sayfa boyanmadan once uygulanir, yoksa koyu temada beyaz parlama olur */
+try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
+if(_t)document.documentElement.setAttribute("data-tema",_t);
+if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collarlog · Ay Kilidi</title>
+<link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="logo/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#16212A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+/* Denetim ayrıntısı: uzun olabilir, kendi içinde kayıyor. */
+.liste{margin:6px 0 0;padding-inline-start:18px;font-size:12.5px;color:var(--ink-2);
+  max-height:220px;overflow-y:auto}
+.liste li{margin:2px 0}
+</style>
+</head>
+<body>
+
+<div id="sp-icerik">
+  <div id="scr-main">
+
+    <div class="card">
+      <h3>Ay kilidi</h3>
+      <div class="note">
+        Bir şantiyenin bir ayı kapatıldığında şantiye şefi o aya ait vardiya,
+        metraj, yakıt ve gider kaydını <b>değiştiremez</b> — ama görmeye devam
+        eder. Yönetici kapalı ayda hâlâ düzeltme yapabilir.
+        Kapatmadan önce ekranın altındaki denetime bakın.
+      </div>
+      <div class="row">
+        <div class="field" id="alan-proje"><label for="f-project">Şantiye</label><select id="f-project"></select></div>
+        <button class="btn ghost" id="btn-reload" type="button">Yenile</button>
+      </div>
+      <div id="msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Son on iki ay</h3>
+      <div class="scroll" id="tablo"></div>
+      <div class="note" style="margin-top:10px">
+        <b>Kesin</b> kilit hakediş kesildiğinde konuyor; bu ekrandan
+        konulmuyor, yalnız görünüyor. Kesin kilitli ayda yönetici de
+        düzeltme yapamaz.
+      </div>
+    </div>
+
+    <div class="card" id="kart-denetim" hidden>
+      <h3 id="denetim-bas">Gözden geçirme</h3>
+      <div class="note">
+        Hiçbiri kapatmayı engellemez — eksik olabilecek yerleri gösterir.
+        Ekip ve yakıt denetimi yalnız sahadan girilen vardiyaları sayar;
+        aktarımdan gelen eski aylarda bu kayıtlar hiç yok.
+      </div>
+      <div id="denetim"></div>
+      <div id="eylem"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
+function msg(el,t,k){ el.innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
+
+var AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
+             "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+function ayAdi(iso){
+  if(!iso) return "—";
+  var p = String(iso).slice(0,10).split("-");
+  return AYLAR[Number(p[1]) - 1] + " " + p[0];
+}
+function zaman(t){
+  if(!t) return "—";
+  var d = new Date(t);
+  return d.toLocaleDateString("tr-TR") + " " + d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+}
+
+var sb=null, SATIR=[], YAZABILIR=false, SECILI="";
+
+SP.boot({sayfa:"aykilidi", baslik:"Ay kilidi", hazir:function(){
+  sb = SP.sb;
+  YAZABILIR = SP.girebilir();
+  boot();
+}});
+
+function boot(){
+  sb.rpc("bootstrap_data").then(function(r){
+    if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
+    var pr = (r.data && r.data.projects) || [];
+    var sel = $("#f-project");
+    pr.forEach(function(p){
+      var o=document.createElement("option");
+      o.value=p.id; o.textContent=(p.site_name||p.name); sel.appendChild(o);
+    });
+    /* 57. dosya kararı: tek şantiyesi olan kullanıcıya seçici
+       gösterilmiyor, şantiye kendiliğinden geliyor. */
+    if(pr.length === 1){ sel.value = pr[0].id; $("#alan-proje").hidden = true; }
+    else if(pr.length){ sel.value = pr[0].id; }
+    if(!pr.length){ msg($("#msg"), "Görebileceğiniz şantiye yok.", "warn"); return; }
+    listele();
+  });
+}
+
+$("#f-project").addEventListener("change", function(){
+  $("#kart-denetim").hidden = true; listele();
+});
+$("#btn-reload").addEventListener("click", function(){
+  $("#kart-denetim").hidden = true; listele();
+});
+
+function listele(){
+  var pid = $("#f-project").value;
+  if(!pid) return;
+  $("#tablo").innerHTML = '<div class="note">Yükleniyor…</div>';
+  sb.rpc("ay_kilit_listesi", {p_project:pid, p_ay_sayisi:12}).then(function(r){
+    if(r.error){ $("#tablo").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    SATIR = r.data || [];
+    ciz();
+  });
+}
+
+function durumEtiket(k){
+  if(k === "kesin")  return '<span class="pill bad">Kesin</span>';
+  if(k === "kapali") return '<span class="pill warn">Kapalı</span>';
+  return '<span class="pill">Açık</span>';
+}
+
+function ciz(){
+  if(!SATIR.length){ $("#tablo").innerHTML = '<div class="note">Kayıt yok.</div>'; return; }
+  var html = '<table><thead><tr><th>Ay</th><th>Vardiya</th><th>Durum</th>' +
+             '<th>Kim · ne zaman</th><th>Sebep</th><th></th></tr></thead><tbody>';
+  SATIR.forEach(function(s, i){
+    var acik = !s.kilit;
+    var dugme = "";
+    if(YAZABILIR){
+      if(acik && s.gecmis_ay)
+        dugme = '<button class="btn gh sm" type="button" data-kapat="'+i+'">Gözden geçir ve kapat</button>';
+      else if(acik)
+        /* Süren ayı kapatmak hemen hemen her zaman yanlış: şef hâlâ
+           giriyor. Düğme duruyor ama "bu ay sürüyor" diye yazıyor. */
+        dugme = '<button class="btn gh sm" type="button" data-kapat="'+i+'">Gözden geçir</button>';
+      else
+        dugme = '<button class="btn gh sm" type="button" data-ac="'+i+'">Ayı aç</button>';
+    } else if(acik && s.gecmis_ay){
+      dugme = '<button class="btn gh sm" type="button" data-kapat="'+i+'">Gözden geçir</button>';
+    }
+    html += '<tr>' +
+      '<td><b>'+esc(ayAdi(s.ay))+'</b>'+(s.gecmis_ay ? '' : ' <span class="hist">(sürüyor)</span>')+'</td>' +
+      '<td class="num">'+(s.vardiya || 0)+'</td>' +
+      '<td>'+durumEtiket(s.kilit)+'</td>' +
+      '<td class="hist">'+(s.kilit ? esc(s.kilitleyen || "—") + '<br>' + esc(zaman(s.kilitlendi)) : "—")+'</td>' +
+      '<td class="hist">'+esc(s.sebep || "—")+'</td>' +
+      '<td>'+dugme+'</td></tr>';
+  });
+  $("#tablo").innerHTML = html + '</tbody></table>';
+  Array.prototype.slice.call(document.querySelectorAll("[data-kapat]")).forEach(function(b){
+    b.addEventListener("click", function(){ denetimAc(SATIR[Number(b.dataset.kapat)]); });
+  });
+  Array.prototype.slice.call(document.querySelectorAll("[data-ac]")).forEach(function(b){
+    b.addEventListener("click", function(){ acmaAc(SATIR[Number(b.dataset.ac)]); });
+  });
+}
+
+/* ---------------- gözden geçirme ---------------- */
+var BASLIK_IPUCU = {
+  ekipsiz_vardiya:  "Vardiya var, ekibi girilmemiş. Puantaj ekipten türediği için " +
+                    "bu doğrudan eksik yevmiye demek.",
+  vardiyasiz_gun:   "O gün hiç vardiya girilmemiş. Çalışılmadıysa sorun yok.",
+  yakitsiz_vardiya: "Vardiya var, o makineye o gün yakıt kaydı yok.",
+  acik_ariza:       "Ay kapanıyor, arıza hâlâ açık görünüyor.",
+  kapanmamis_kuyu:  "Program derinliğine gelmiş, hâlâ “deliniyor” durumunda.",
+  evraksiz_vardiya: "Kâğıt form numarası boş."
+};
+
+function satirYaz(d){
+  var a = d.ayrinti || [];
+  if(!a.length) return "";
+  var html = '<ul class="liste">';
+  a.slice(0, 20).forEach(function(x){
+    var t = [];
+    if(x.tarih) t.push(x.tarih.split("-").reverse().join("."));
+    if(x.vardiya) t.push(x.vardiya + ". vardiya");
+    if(x.kuyu) t.push(x.kuyu);
+    if(x.makine) t.push(x.makine);
+    if(x.tur) t.push(x.tur);
+    if(x.baslangic) t.push(zaman(x.baslangic));
+    if(x.program != null) t.push("program " + x.program + " m");
+    if(x.derinlik != null) t.push("derinlik " + x.derinlik + " m");
+    html += '<li>'+esc(t.join(" · "))+'</li>';
+  });
+  if(a.length > 20) html += '<li class="hist">… ve ' + (a.length - 20) + ' tane daha</li>';
+  return html + '</ul>';
+}
+
+function denetimAc(s){
+  SECILI = s.ay;
+  $("#kart-denetim").hidden = false;
+  $("#denetim-bas").textContent = ayAdi(s.ay) + " · gözden geçirme";
+  $("#denetim").innerHTML = '<div class="note">Yükleniyor…</div>';
+  $("#eylem").innerHTML = "";
+  $("#kart-denetim").scrollIntoView({behavior:"smooth", block:"nearest"});
+  sb.rpc("ay_gozden_gecir", {p_project:$("#f-project").value, p_period:s.ay}).then(function(r){
+    if(r.error){ $("#denetim").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    var d = r.data || [];
+    /* Uyarıyı BAŞLIK sayısıyla anlatıyoruz, satır sayısıyla değil.
+       Hiç çalışılmamış bir ayda "31 uyarı" yazıyordu; aslında tek bir
+       şey söylüyor: o ay vardiya girilmemiş. */
+    var dolu = d.filter(function(x){ return Number(x.adet) > 0; });
+    var toplam = dolu.length;
+    var html = '<div class="tiles">' + d.map(function(x){
+      return '<div class="tile"><div class="k">'+esc(x.baslik)+'</div>' +
+             '<div class="v num">'+(x.adet || 0)+'</div></div>';
+    }).join("") + '</div>';
+    dolu.forEach(function(x){
+      html += '<div style="margin-top:14px"><b>'+esc(x.baslik)+'</b> — ' + (x.adet) + '<br>' +
+              '<span class="hist">'+esc(BASLIK_IPUCU[x.kod] || "")+'</span>' +
+              satirYaz(x) + '</div>';
+    });
+    if(!toplam) html += '<div class="msg ok" style="margin-top:12px">Denetim temiz — eksik görünen bir şey yok.</div>';
+    $("#denetim").innerHTML = html;
+    if(YAZABILIR && !s.kilit) kapatmaFormu(s, dolu);
+  });
+}
+
+function kapatmaFormu(s, dolu){
+  var adlar = dolu.map(function(x){ return x.baslik.toLocaleLowerCase("tr"); }).join(", ");
+  $("#eylem").innerHTML =
+    '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px">' +
+      (s.gecmis_ay ? "" :
+        '<div class="msg warn">Bu ay <b>sürüyor</b>. Kapatırsanız şef bugünün ' +
+        'vardiyasını da giremez.</div>') +
+      (dolu.length ? '<div class="msg warn">Denetim şunları işaretledi: ' + esc(adlar) +
+        '. Kapatmanızı engellemez — ama kapandıktan sonra düzeltmeyi yalnız siz ' +
+        'yapabilirsiniz.</div>' : "") +
+      '<div class="row">' +
+        '<div class="field" style="flex:1;min-width:220px">' +
+          '<label for="k-sebep">Neden kapatıyorsunuz (iz kaydına yazılır)</label>' +
+          '<input id="k-sebep" placeholder="Ay sonu kapanışı"></div>' +
+        '<button class="btn" id="btn-kapat" type="button">' + ayAdi(s.ay) + ' ayını kapat</button>' +
+      '</div>' +
+      '<div id="eylem-msg"></div>' +
+    '</div>';
+  $("#btn-kapat").addEventListener("click", function(){
+    var sebep = $("#k-sebep").value.trim() || "Ay sonu kapanışı";
+    $("#btn-kapat").disabled = true;
+    msg($("#eylem-msg"), "Kapatılıyor…");
+    sb.rpc("ay_kilitle", {p_project:$("#f-project").value, p_period:s.ay,
+                          p_kind:"kapali", p_reason:sebep}).then(function(r){
+      $("#btn-kapat").disabled = false;
+      if(r.error){ msg($("#eylem-msg"), esc(r.error.message), "err"); return; }
+      msg($("#msg"), ayAdi(s.ay) + " kapatıldı. Şef artık bu ayı değiştiremez.", "ok");
+      $("#kart-denetim").hidden = true;
+      listele();
+    });
+  });
+}
+
+function acmaAc(s){
+  $("#kart-denetim").hidden = false;
+  $("#denetim-bas").textContent = ayAdi(s.ay) + " · ayı aç";
+  $("#denetim").innerHTML =
+    '<div class="note">' + ayAdi(s.ay) + ' ' +
+    (s.kilit === "kesin" ? 'ayı <b>kesin</b> kilitli (hakediş kesilmiş). '
+                         : 'ayı kapalı. ') +
+    'Açtığınızda şantiye şefi bu aya tekrar kayıt girip düzeltebilir. ' +
+    'Açma işlemi iz kaydına yazılır.</div>' +
+    '<div class="hist" style="margin-top:8px">Kapatan: ' + esc(s.kilitleyen || "—") +
+    ' · ' + esc(zaman(s.kilitlendi)) + (s.sebep ? ' · ' + esc(s.sebep) : '') + '</div>';
+  $("#eylem").innerHTML =
+    '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px">' +
+      '<div class="row">' +
+        '<div class="field" style="flex:1;min-width:220px">' +
+          '<label for="a-sebep">Neden açıyorsunuz (iz kaydına yazılır)</label>' +
+          '<input id="a-sebep" placeholder="Şefin eksik vardiyası girilecek"></div>' +
+        '<button class="btn" id="btn-ac" type="button">' + ayAdi(s.ay) + ' ayını aç</button>' +
+      '</div><div id="eylem-msg"></div></div>';
+  $("#kart-denetim").scrollIntoView({behavior:"smooth", block:"nearest"});
+  $("#btn-ac").addEventListener("click", function(){
+    var sebep = $("#a-sebep").value.trim();
+    if(!sebep){ msg($("#eylem-msg"), "Açma sebebini yazın — ay kilidi iz bırakıyor.", "err"); return; }
+    $("#btn-ac").disabled = true;
+    msg($("#eylem-msg"), "Açılıyor…");
+    sb.rpc("ay_ac", {p_project:$("#f-project").value, p_period:s.ay, p_reason:sebep}).then(function(r){
+      $("#btn-ac").disabled = false;
+      if(r.error){ msg($("#eylem-msg"), esc(r.error.message), "err"); return; }
+      msg($("#msg"), ayAdi(s.ay) + " açıldı. Şef bu aya yeniden kayıt girebilir.", "ok");
+      $("#kart-denetim").hidden = true;
+      listele();
+    });
+  });
+}
+})();
+</script>
+</body>
+</html>

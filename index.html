@@ -420,6 +420,9 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <div class="hint" id="f-shift-hint"></div>
         <div class="hint" id="f-date-not" style="color:var(--warn)"></div>
+        <!-- Ay kilidi uyarısı: tarih seçilir seçilmez, 5 adım doldurulmadan
+             önce görünüyor (57. dosya). -->
+        <div id="f-kilit"></div>
         <div id="sondaj-alanlar">
           <div class="field"><label for="f-machine">Makine <span class="req">*</span></label><select id="f-machine" data-req="1"></select>
             <div class="hint" id="f-makine-kaynak"></div></div>
@@ -1849,7 +1852,53 @@ $("#f-project").addEventListener("change", function(){
      yama yapmak bu hatanın her sekmede tekrar çıkmasına yol açıyordu. */
   fillMachines(); fillWells(); fillYakitHedef(); fillVardiya();
   sefSatiriCiz();
+  kilitBak();
 });
+
+/* ============================================================
+   AY KİLİDİ · ŞEFE UYARI (57. dosya · 4 Kasım 2026)
+   ============================================================
+   Tayfun: "görebilsin değiştiremesin."
+   Kilit 30. adımdan beri sunucuda duruyor ve yazma tetikleyicisi
+   `duzeltilebilir()` üzerinden gerçekten engelliyor. Ama şef bunu
+   ancak BEŞ ADIMI doldurup kaydete bastıktan sonra öğreniyordu —
+   hem de sunucudan gelen ham hata metniyle. Artık tarihi seçtiği
+   anda yazıyor.
+
+   Çevrimdışıyken sorgu başarısız olur; o zaman hiçbir şey yazmıyoruz.
+   Yanlış "kilitli" demek, yanlış "açık" demekten daha kötü: şef o
+   vardiyayı hiç girmez. Kuyruğa giren kayıt zaten sunucuda
+   reddedilir ve kuyrukta hatasıyla durur.
+   ============================================================ */
+var AY_KILIT = null;        /* null: bilmiyoruz · "": açık · kapali/kesin */
+var KILIT_SORGU = "";
+function kilitMetni(k){
+  return k === "kesin"
+    ? "Bu ayın hakedişi kesildi. Bu tarihe kayıt girilemez, düzeltme de " +
+      "yapılamaz. Yöneticiye başvurun."
+    : "Bu ay <b>kapatıldı</b>. Bu tarihe kayıt girip düzeltme yapamazsınız — " +
+      "kayıtları görmeye devam edersiniz. Girilmesi gerekiyorsa yöneticiden " +
+      "ayı açmasını isteyin.";
+}
+function kilitBak(){
+  var pid = $("#f-project").value, t = $("#f-date").value;
+  var el = $("#f-kilit");
+  if(!el) return;
+  if(!pid || !t){ AY_KILIT = null; el.innerHTML = ""; return; }
+  var anahtar = pid + "|" + t.slice(0, 7);
+  if(anahtar === KILIT_SORGU) return;     /* aynı ay, tekrar sorma */
+  KILIT_SORGU = anahtar;
+  AY_KILIT = null; el.innerHTML = "";
+  if(!navigator.onLine || !sb) return;
+  sb.rpc("ay_kilidi", {p_project:pid, p_date:t}).then(function(r){
+    if(anahtar !== KILIT_SORGU) return;   /* şef arada tarihi değiştirdi */
+    if(r.error){ AY_KILIT = null; return; }
+    AY_KILIT = r.data || "";
+    el.innerHTML = AY_KILIT
+      ? '<div class="msg warn" style="margin-top:8px">' + kilitMetni(AY_KILIT) + '</div>'
+      : "";
+  }).catch(function(){ AY_KILIT = null; });
+}
 $("#y-project").addEventListener("change", function(){ fillYakitHedef(); });
 $("#f-shift").addEventListener("change", function(){
   vardiyaModu(); ekipOneriYukle();
@@ -1857,7 +1906,7 @@ $("#f-shift").addEventListener("change", function(){
      liste de değişmek zorunda. */
   saatSecicilerKur();
 });
-$("#f-date").addEventListener("change", function(){ saatSecicilerKur(); });
+$("#f-date").addEventListener("change", function(){ saatSecicilerKur(); kilitBak(); });
 $("#f-machine").addEventListener("change", function(){ devamArizaCiz(); });
 /* Kuyu seçilince: makine listesi daralır ve takıldığı metre kuyunun
    bulunduğu derinlikle dolar. Şef sıfırdan yazarsa 960 yerine 96 yazıyor. */
@@ -6020,7 +6069,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "48";
+var SURUM = "49";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
