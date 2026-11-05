@@ -3648,6 +3648,50 @@ document.addEventListener("wheel", function(e){
   if(el && el.type === "number" && (el === e.target || el.contains(e.target))) el.blur();
 }, {passive:true});
 
+/* ============================================================
+   ⚠ ONDALIK VİRGÜLÜ — ÜÇÜNCÜ SESSİZ VERİ BOZULMASI (86. dosya)
+   ------------------------------------------------------------
+   84. dosyadaki sayaç alanını yazarken buldum, sonra ölçtüm:
+   `input[type=number]` virgülü KABUL ETMİYOR, atıyor.
+
+       şef yazar:  128,5
+       kutuda:     1285        ← on kat
+       validity:   valid       ← hiçbir yerde kırmızı yanmıyor
+
+   Tarayıcı dilinin Türkçe olması bir şey değiştirmiyor; ikisinde de
+   aynı. Telefon klavyesinde ondalık tuşu VİRGÜL olduğu için şefin
+   doğru tuşa basıp yanlış sayı yazması işten değil.
+
+   Aynı kaza "Vardiya bitiş metresi"nde olursa metraj on katına
+   çıkar ve metraj hakedişin faturalanan tek kalemi. Tekerlek ve ok
+   kazalarıyla aynı aile: ekranda hiçbir iz bırakmayan kayıp.
+
+   Çözüm yazılan harfi YAKALAMAK: virgül gelince yerine nokta
+   konuyor. `beforeinput` tarayıcı harfi atmadan ÖNCE çalışıyor.
+   `insertText` ile yazıldığı için geri al (Ctrl+Z) de çalışmaya
+   devam ediyor. Tek tek alan yamanmıyor — sayfadaki bütün sayı
+   kutuları, sonradan eklenenler dahil (dinleyici belgede).
+   ============================================================ */
+function virgulYakala(e){
+  var el = e.target;
+  if(!el || el.tagName !== "INPUT" || el.type !== "number") return;
+  if(typeof e.data !== "string" || e.data.indexOf(",") < 0) return;
+  e.preventDefault();
+  var yeni = e.data.replace(/,/g, ".");
+  /* Boş kutuya tek başına nokta yazdırmıyoruz: ".5" geçerli değil ve
+     kutu boş görünüp "valid" kalıyor — düzelttiğimiz hatanın aynısı. */
+  if(!el.value && yeni === ".") return;
+  /* `insertText` kendi `input` olayını atıyor — ikinci kez atmıyoruz,
+     yoksa refreshState ve özet çizimi her harfte iki kez koşar.
+     Yedek yolda olay elle atılıyor, yoksa bant özeti güncellenmez. */
+  try{ document.execCommand("insertText", false, yeni); }
+  catch(err){
+    el.value = el.value + yeni;
+    el.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+}
+document.addEventListener("beforeinput", virgulYakala, true);
+
 var TARIH_ELLE = false;
 $("#f-date").addEventListener("input", function(){ TARIH_ELLE = true; });
 function gunEkle(gun, n){

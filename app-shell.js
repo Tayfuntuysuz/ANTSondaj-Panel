@@ -636,8 +636,33 @@ function baglan(){
   });
 }
 
+/* ============================================================
+   ⚠ ONDALIK VİRGÜLÜ (86. dosya) — saha panelindekinin aynısı
+   ------------------------------------------------------------
+   `input[type=number]` virgülü atıyor: "128,5" → "1285", on kat, ve
+   `validity.valid` true kalıyor — hiçbir yerde uyarı çıkmıyor.
+   Ofis sayfalarında da 18 sayı kutusu var (muhasebe tutarları, maaş,
+   yönetim). Tutar alanında aynı kaza parayı on katına çıkarır.
+   Yazılan harfi `beforeinput`ta yakalayıp noktaya çeviriyoruz; dinleyici
+   belgede olduğu için sonradan çizilen kutular da kapsanıyor.
+   ============================================================ */
+function virgulYakala(e){
+  var el = e.target;
+  if(!el || el.tagName !== "INPUT" || el.type !== "number") return;
+  if(typeof e.data !== "string" || e.data.indexOf(",") < 0) return;
+  e.preventDefault();
+  var yeni = e.data.replace(/,/g, ".");
+  if(!el.value && yeni === ".") return;
+  try{ document.execCommand("insertText", false, yeni); }
+  catch(err){
+    el.value = el.value + yeni;
+    el.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+}
+
 function boot(ayar){
   AYAR = ayar || {};
+  document.addEventListener("beforeinput", virgulYakala, true);
   window.addEventListener("error", function(ev){
     if($("#sp-fatal")) return;
     var d = document.createElement("div"); d.id = "sp-fatal"; d.className = "sp-icerik";
