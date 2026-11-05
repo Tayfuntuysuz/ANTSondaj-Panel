@@ -31,6 +31,26 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          Proje seçicinin ÜSTÜNDE ve ondan bağımsız: bütün şantiyeler
          bir arada. Kayıt girmeyen şantiye de burada — asıl bilgi
          metraj değil sessizlik. -->
+    <!-- ============================================================
+         SAHADAN BİLDİRİLENLER (79. dosya · 6 · 59. adım)
+         ------------------------------------------------------------
+         Kapalı aya düşen kaydı şef çözemiyor; ayı yönetici açıyor.
+         Şef kuyrukta takılan kaydın kartından "Yöneticiye bildir"e
+         basıyor, satır buraya düşüyor.
+
+         ⚠ NEDEN AYRI KART. Bildirim "Sahalardan ne geldi?" tablosuna
+         satır olarak giremez: o tablo şantiye başına TEK satır (son
+         kayıt, dünkü metraj, ay toplamı, durum). Bildirim farklı
+         cins bir kayıt — olaya bağlı, açılıp kapanan.
+         ⚠ BOŞKEN GÖRÜNMÜYOR. Zamanın neredeyse tamamında boş olacak;
+         boş bir kart her gün yer kaplar ve dolduğunda fark edilmez
+         (84. dosyanın kuyruk şeridi dersi). -->
+    <div id="bildirim-kart" hidden>
+      <div class="sechead" style="margin-top:0"><h2>Sahadan bildirilenler</h2>
+        <span id="bildirim-sayi"></span></div>
+      <div class="card"><div id="bildirimler"></div></div>
+    </div>
+
     <div class="sechead" style="margin-top:0"><h2>Sahalardan ne geldi?</h2>
       <span id="gelen-gun">Dün ve bu ay · bütün şantiyeler</span></div>
     <div class="card"><div class="scroll" id="gelenler">Yükleniyor…</div></div>
@@ -221,6 +241,7 @@ function boot(){
     kuyuListesi();
     /* Sahalardan gelenler proje seçiminden bağımsız: bir kere, açılışta. */
     gelenlerYukle();
+    bildirimleriYukle();
     load();          /* seçim boş olduğu için tek cümleyle açılıyor */
   });
 }
@@ -519,6 +540,68 @@ function gunYaz(n){
   if(n === 1) return "dün";
   return n + " gün önce";
 }
+/* ============================================================
+   SAHADAN BİLDİRİLENLER (79. dosya · 6 · 59. adım)
+   ------------------------------------------------------------
+   Şef kuyruktaki takılı kaydın kartından "Yöneticiye bildir"e
+   basıyor; satır buraya düşüyor. Yönetici "Ayı aç" ile ay kilidi
+   ekranına gidiyor, ay açılıp kayıt gidince satır kendiliğinden
+   kalkıyor (sahanın eşitleme turu kapatıyor).
+
+   ⚠ KART BOŞKEN GÖRÜNMÜYOR. Zamanın neredeyse tamamında boş
+   olacak; her gün duran boş bir kart, dolduğu gün fark edilmez.
+   Aynı ders 84. dosyada kuyruk şeridinde alınmıştı.
+   ============================================================ */
+function bildirimleriYukle(){
+  var kart = $("#bildirim-kart"), el = $("#bildirimler");
+  if(!kart || !el) return;
+  sb.rpc("sahadan_bildirilenler").then(function(r){
+    /* Eski merkezde 59. adım kurulu değilse kart sessizce görünmez:
+       yöneticinin ekranında anlamadığı bir hata durmasın. */
+    if(r.error){ kart.hidden = true; return; }
+    var d = r.data || [];
+    if(!d.length){ kart.hidden = true; el.innerHTML = ""; return; }
+    kart.hidden = false;
+    $("#bildirim-sayi").textContent = d.length + (d.length === 1 ? " bildirim" : " bildirim");
+    el.innerHTML = d.map(function(x){
+      /* Ay gerçekten kapalı mı: yönetici "Ayı aç"a basmadan önce
+         görsün. Ay zaten açıksa şefin yeniden denemesi yetiyor. */
+      var kapali = (x.kilit === "kapali" || x.kilit === "kesin");
+      var durum = kapali
+        ? '<span class="pill bad">' + (x.kilit === "kesin" ? "Ay kesin kapalı" : "Bu ay kapalı") + '</span>'
+        : '<span class="pill good">Ay açık — şef yeniden denesin</span>';
+      return '<div class="q-satir" data-bid="' + esc(x.id) + '">' +
+        '<div class="ist-ust">' +
+          '<span><b>' + esc(x.santiye) + '</b> · ' + esc(x.title) +
+            (x.detail ? '<br><span class="note">' + esc(x.detail) + '</span>' : '') +
+          '</span>' + durum +
+        '</div>' +
+        (x.reason ? '<div class="note" style="margin-top:6px">Sebep: ' + esc(x.reason) + '</div>' : '') +
+        '<div class="note" style="margin-top:4px">' +
+          (x.bildiren ? esc(x.bildiren) + ' · ' : '') + zamanKisa(x.created_at) +
+          (x.work_date ? ' · kayıt günü ' + trd(x.work_date) : '') + '</div>' +
+        '<div class="dizi" style="margin-top:8px">' +
+          (kapali ? '<a class="btn sm" href="aykilidi.html?proje=' + encodeURIComponent(x.project_id) +
+                    '" style="text-decoration:none">Ayı aç</a>' : '') +
+          '<button class="btn ghost sm bildirim-kapat" type="button" data-bid="' + esc(x.id) +
+            '">Kapat</button>' +
+        '</div></div>';
+    }).join("");
+    $$(".bildirim-kapat").forEach(function(b){
+      b.addEventListener("click", function(){
+        b.disabled = true;
+        sb.rpc("bildirim_kapat", {p_id:b.dataset.bid}).then(function(){ bildirimleriYukle(); });
+      });
+    });
+  }, function(){ kart.hidden = true; });
+}
+function zamanKisa(t){
+  if(!t) return "—";
+  var d = new Date(t);
+  return d.toLocaleDateString("tr-TR") + " " +
+         d.toLocaleTimeString("tr-TR", {hour:"2-digit", minute:"2-digit"});
+}
+
 function gelenlerYukle(){
   var el = $("#gelenler"); if(!el) return;
   sb.rpc("sahalardan_gelenler", {p_gun:null}).then(function(r){

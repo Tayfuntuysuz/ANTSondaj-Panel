@@ -17,7 +17,7 @@ try{localStorage.removeItem("sp_tema");localStorage.removeItem("sp_yazi");}catch
 <link rel="icon" href="logo/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#16212A">
+<meta name="theme-color" content="#0D151C">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- 81. dosya: örnek arayüzün tamamı TEK yazı tipi kullanıyor — Barlow.
@@ -62,18 +62,42 @@ body{background:var(--bg)}
 @media (min-width:560px){
   .app{border-inline:1px solid var(--line);min-height:100dvh}
 }
-header.bar{background:#0E161D;color:#fff;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30}
-/* Solda KULLANICININ firma adı — ürün adı değil (75. dosya). Ekleri
-   kırpılmış kısa ad; altında rol ve şantiye. Collarlog sağda, simge
-   olarak (74. dosya: koyu zeminde beyaz sürüm). */
-header.bar .firma{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
-header.bar .firma b{font-size:19px;font-weight:700;letter-spacing:.2px;
+/* ============================================================
+   BAŞLIK — ÜÇ KAT (88. dosya · 2 · Tayfun)
+   ------------------------------------------------------------
+   "Üst satırda logo ve Collarlog, sağda ayarlar sekmesi olacaktı,
+   hemen altında da firma ismi ve kullanıcı adı yazacaktı."
+   İki şerit aynı renkte (--kabuk) ve aralarında ince çizgi; altında
+   ana panel BİR TON AÇIK başlıyor. Ayrımı çizgi yapıyor, renk
+   sıçraması değil.
+   ⚠ Ayarlar artık DİŞLİDEN açılıyor, logodan değil: logo ürünün
+   adı, bir düğme değil. (84. dosyada logo düğme yapılmıştı; o
+   karar burada geri alınıyor.)
+   ============================================================ */
+header.bar{background:var(--kabuk);color:#fff;position:sticky;top:0;z-index:30;
+  padding-top:env(safe-area-inset-top,0px);display:block}
+header.bar .bar-ust{display:flex;align-items:center;gap:9px;padding:10px 14px 9px;
+  border-bottom:1px solid var(--ayirac)}
+header.bar .bar-alt{display:flex;flex-direction:column;gap:0;padding:8px 14px 10px}
+/* ⚠ ÜRÜN ADI SİMGEYİ AŞMIYOR (Tayfun): "program ismi daha büyük
+   olmalı ama logoyu da aşmamalı." `line-height:1` ile yazının kutusu
+   tam punto kadar — 18 px < 26 px simge. Sınaması var. */
+header.bar .bar-mark{flex:none;height:26px;width:auto;display:block}
+header.bar .bar-ad{flex:1 1 auto;min-width:0;font-size:18px;font-weight:600;
+  line-height:1;letter-spacing:.2px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+header.bar .bar-ayar{flex:none;background:none;border:0;color:#B8C6D1;
+  min-width:44px;min-height:44px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;padding:0;margin:-9px -6px -9px 0}
+header.bar .bar-ayar svg{width:22px;height:22px}
+/* Firma adı KULLANICININ firması — ürün adı değil (75. dosya). */
+header.bar .bar-alt b{font-size:14.5px;font-weight:600;letter-spacing:.1px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-header.bar .firma .alt{font-size:13px;color:#B8C6D1;white-space:nowrap;
+header.bar .bar-alt .alt{font-size:13.5px;color:#90A6B5;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-header.bar .marka{flex:none}
-@media (max-width:430px){ header.bar .firma b{font-size:17.5px} }
-main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+/* Ana panel: kabuktan bir ton açık, bütün sekmelerde aynı. */
+main{flex:1;padding:14px;display:flex;flex-direction:column;gap:12px}
+main#scr-app{background:var(--yuzey)}
 /* ============================================================
    BANTLARIN ALTINDAKİ BOŞLUK (86. dosya · Tayfun)
    ------------------------------------------------------------
@@ -85,12 +109,22 @@ main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
    zemine göre çizili; koyu zemine koyarsak beyaz kartlar boşlukta
    yüzer. Onlar 53. pakette ortak arayüze geçecek (86. dosya, 7).
    Sekme `main`e öznitelik yazıyor; `:has()`e güvenmiyoruz. */
-main[data-sekme="vardiya"]{background:var(--bant-6)}
-main[data-sekme="vardiya"] > #tab-vardiya{flex:1 1 auto}
-/* ALT SEKMELER — petrol yeşili, soldan sağa koyudan açığa (79. dosya).
-   Yedi sekme 390 px'e sığmıyordu, sonuncusu ekrandan taşıyordu;
-   Bekleyen kalkınca altıya indi. */
-nav.tabs{display:flex;position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+/* Açık sekme panelin kalanını doldursun: altta beyaz boşluk kalmasın.
+   ⚠ Eskiden yalnız Vardiya böyleydi ve yalnız Vardiya koyu zeminliydi;
+   artık altı sekmenin hepsi aynı zemine oturuyor (88. dosya · 3). */
+main#scr-app > section:not([hidden]){flex:1 1 auto}
+/* ============================================================
+   ALT SEKMELER — TEK RENK (88. dosya · 5)
+   ------------------------------------------------------------
+   Altı petrol yeşili basamak (soldan sağa koyudan açığa, 79. dosya)
+   KALKTI. Tayfun: "alt kısımdaki renk farklılığını, vardiya puantaj
+   vs bölümünü de resimdeki gibi tek renk yapacağız."
+   Çubuk başlıkla aynı renkte: ikisi de SABİT, değişen tek şey
+   aradaki panel. Seçili sekmeyi renk değil TURUNCU gösteriyor.
+   İkonlar değişmedi.
+   ============================================================ */
+nav.tabs{display:flex;position:sticky;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20;
+  border-top:1px solid var(--ayirac)}
 nav.tabs button{position:relative;flex:1 1 0;min-width:0;border:0;color:#fff;font:inherit;
   font-size:11.5px;padding:9px 2px;min-height:64px;cursor:pointer;
   border-top:4px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -98,23 +132,48 @@ nav.tabs button{position:relative;flex:1 1 0;min-width:0;border:0;color:#fff;fon
 /* ⚠ SÖNÜKLÜK `opacity` İLE DEĞİL, YAZI RENGİYLE. opacity bütün elemanı
    yarı saydam yapıyor — ZEMİNİ DE. Arkadaki bant yazıları sekme
    çubuğunun içinden sızıyordu; 390 px ekran görüntüsünde yakalandı. */
-nav.tabs button:not([aria-pressed="true"]){color:rgba(255,255,255,.82);font-weight:500}
+nav.tabs button:not([aria-pressed="true"]){color:var(--kutu-ink-2);font-weight:500}
 nav.tabs button svg{width:20px;height:20px;flex:none}
-nav.tabs button[data-renk="1"]{background:#0E2E2D}
-nav.tabs button[data-renk="2"]{background:#113B3A}
-nav.tabs button[data-renk="3"]{background:#154846}
-nav.tabs button[data-renk="4"]{background:#195553}
-nav.tabs button[data-renk="5"]{background:#1D6260}
-nav.tabs button[data-renk="6"]{background:#22706D}
-nav.tabs button[aria-pressed="true"]{border-top-color:var(--turuncu);font-weight:700}
+nav.tabs button{background:none}
+nav.tabs button[aria-pressed="true"]{border-top-color:var(--turuncu);
+  color:var(--turuncu);font-weight:700}
 /* Güvenlik alanı (iPhone çene boşluğu) da koyu kalsın. */
-nav.tabs{background:#22706D}
+nav.tabs{background:var(--kabuk)}
 .field{display:flex;flex-direction:column;gap:5px}
-label{font-size:12.5px;color:var(--ink-2);font-weight:500}
+/* ============================================================
+   ALAN TİPOGRAFİSİ (88. dosya · 6 · Tayfun)
+   ------------------------------------------------------------
+   "Bu kart açıldığında doldurulacak kısımlarda çıkan yazılar
+   (yakıt) veya seçimlerdeki yazı fontu çok sırıtıyor, çirkin
+   gözüküyor. Onları ana program fontlarına daha benzer hale
+   getir."
+   Sırıtmanın sebebi punto değil AĞIRLIK ve RENK: etiket 12,5 px
+   soluk griydi, alanın içindeki yazı 400 ağırlıkta tarayıcı
+   mürekkebiyle çiziliyordu — ikisi de arayüzün geri kalanından
+   daha cılız duruyordu. Etiket büyüyor, alan yazısı 500'e çıkıyor
+   ve arayüz mürekkebini alıyor.
+   ============================================================ */
+label{font-size:13.5px;color:var(--ink-2);font-weight:500}
 /* Yıldız da alarm rengi değil: soluk arayüz mürekkebi. */
 label .req{color:var(--ink-3);font-weight:700}
 input,select,textarea,button{font:inherit;color:inherit}
-input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;min-height:48px;font-size:var(--yazi-alan)}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px;min-height:48px;
+  /* ⚠ 16 px'İN ALTINA İNMEZ. iOS Safari, odaklanılan alanın yazısı
+     16 px'den küçükse sayfayı zoomluyor ve şef parmağıyla geri
+     açmak zorunda kalıyor. Bu yüzden `--yazi-alan` 16 px. */
+  font-size:var(--yazi-alan);font-weight:500;color:var(--ink)}
+/* Seçim kutusunun oku BİZİM: platformun oku her telefonda başka
+   yerde ve başka biçimde çiziliyordu, aynı satırdaki iki alan
+   birbirine benzemiyordu. Kendi okumuz tek biçim.
+   `appearance:none` ile birlikte metnin sağına ok kadar yer
+   bırakıyoruz (padding-inline-end). */
+select{-webkit-appearance:none;-moz-appearance:none;appearance:none;
+  padding-inline-end:36px;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a6575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;background-size:17px 17px}
+/* Çok satırlı seçim (`size`/`multiple`) okla çizilmez. */
+select[multiple],select[size]:not([size="1"]){background-image:none;padding-inline-end:11px}
+html[dir="rtl"] select{background-position:left 11px center}
 /* ⚠ BOŞ ALAN BİR HATA DEĞİL (81. dosya). Burada eskiden boş zorunlu
    alanı kırmızıya boyayan bir kural vardı; form hiç doldurulmadan
    ekran dört kırmızı kutuyla açılıyordu. Eksik bilgisi bandın "eksik"
@@ -143,12 +202,34 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
    sutun kuculmeyi reddedip yandakinin ustune biniyor. min-width:0 bunu acar.
    Her iki sutunlu izgara icin gecerli (.grid2 ve .ikili). */
 .grid2 > *,.ikili > *{min-width:0}
+/* ============================================================
+   TARİH + YANINDAKİ ALAN: TELEFONDA ALT ALTA (88. dosya · 11)
+   ------------------------------------------------------------
+   Tayfun, ekran görüntüsüyle: "Vardiya kısmında üst üste binme var,
+   düzeltelim."
+   `min-width:0` taşmayı açtı ama yetmedi: iOS Safari'de
+   `input[type=date]` içindeki gg.aa.yyyy metni kutuyla birlikte
+   küçülmüyor, 390 px'de iki alan birbirine değiyor. Dar ekranda
+   iki sütun ısrar etmenin değeri yok — alt alta.
+   ⚠ `:has()` kullanmıyoruz (79. dosyanın kuralı); tarih taşıyan
+   ızgaralar sınıfla işaretli.
+   ============================================================ */
+@media (max-width:430px){ .grid2.kir-alt{grid-template-columns:1fr} }
 input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max-width:100%}
 .btn{border:1px solid var(--accent);background:var(--accent);color:var(--dolu-yazi);border-radius:10px;padding:13px 14px;font-weight:600;cursor:pointer;width:100%}
 .btn.ghost{background:none;color:var(--accent-ink);border-color:var(--line)}
 .btn.sm{padding:11px 14px;min-height:44px;font-size:13px;width:auto}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card-2);display:flex;flex-direction:column;gap:12px}
+/* ------------------------------------------------------------
+   KART İÇİNDE BÖLÜM (88. dosya · 7)
+   Beş sekme kart diline geçerken eski `.card` kutuları bölüm
+   oldu: kartın kendisi zaten bir kutu, içinde ikinci bir çerçeve
+   göze "iki ayrı şey" diyor. Bölümleri çizgi ayırıyor.
+   ------------------------------------------------------------ */
+.boluk{display:flex;flex-direction:column;gap:12px;
+  border-top:1px solid var(--line);margin-top:2px;padding-top:14px}
+.boluk:first-child{border-top:0;margin-top:0;padding-top:0}
 .eyebrow{font-family:Barlow,sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
 .pill.good{background:var(--good-soft);color:var(--good)}
@@ -179,12 +260,11 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .pua-kisi{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);
   border-radius:999px;padding:4px 6px 4px 11px;font-size:13.5px}
 .pua-kisi .sil{min-height:0;padding:0 4px;font-size:16px;line-height:1}
-/* Marka DÜĞME oldu (84. dosya · 3. madde): dokunma alanı 44 px,
-   aksi halde eldivenle ıskalanıyor. */
-.bar .marka{display:flex;align-items:center;justify-content:center;line-height:0;
-  background:none;border:0;padding:0 2px;min-width:44px;min-height:44px;
-  cursor:pointer;color:#fff}
-.bar .marka img{height:28px;width:auto;display:block}
+/* `.bar .marka` KALKTI (88. dosya · 2): logo artık düğme değil, ürün
+   adının yanındaki simge. Kuralı silmeden önce kullanıcısı SAYILDI —
+   tek kullanıcısı başlıktaki o düğmeydi, o da `.bar-mark` oldu.
+   (86. dosyanın `.segment` dersi: "tek kullanıcısı şu" demek
+   yetmiyor, saymak gerek.) */
 .ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
 .ara-sonuc button{display:block;width:100%;text-align:start;border:0;background:none;padding:11px 12px;
   border-bottom:1px solid var(--line-soft);font:inherit;color:inherit;cursor:pointer;min-height:44px}
@@ -259,59 +339,98 @@ td:first-child{text-align:start;color:var(--ink-2)}
    kuralı — bant sayısı değişirse ilk ve son renk sabit kalır,
    aradakiler eşit aralıkla bölünür. */
 /* ============================================================
-   RENK MERDİVENİ — AÇIKTAN KOYUYA (86. dosya · Tayfun)
+   ÜÇ KATMAN — SABİT OLAN KOYU, DEĞİŞEN AÇIK (88. dosya · 3)
    ------------------------------------------------------------
-   "Yukarıdan açık renkten koyuya doğru gitsin. Vardiya en açığı
-   olsun, Vardiya Özeti en koyusu."
-   Yön 79. dosyada tersiydi (1 en koyu). Renkler aynı altı basamak,
-   yalnız sıraları ters. Akış yukarıdan aşağı dolduruluyor ve
-   koyulaşarak bitiyor; 6. bant alttaki sekme çubuğuna bağlanıyor.
+   Renk merdiveni (altı bant koyudan açığa ya da tersi) KALKTI.
+   Gerekçesi görünüm değil: merdiven altı kartı birbirinden renkle
+   ayırıyordu ve bu, "hangi adımdayım" sorusunu renk hafızasına
+   bağlıyordu. Tayfun'un gönderdiği örnekte ayrım katmanla
+   yapılıyor — kabuk, panel, kart — ve kartların hepsi aynı ton.
+   Sıra: KABUK en koyu (başlık + sekme çubuğu, hiç değişmez),
+   PANEL orta (iş akışı zemini), KART en açık (dokunulan şey).
    ============================================================ */
 :root{
-  --bant-1:#D6E0E7;--bant-2:#9BAEBC;--bant-3:#5A6E80;--bant-4:#36485A;
-  --bant-5:#223344;--bant-6:#16212A;
-  --bant-ink-1:#16212A;--bant-ink-2:#16212A;--bant-ink-3:#fff;
-  --bant-ink-4:#fff;--bant-ink-5:#fff;--bant-ink-6:#fff;
-  --turuncu:#E8731A;--bant-cerceve:#B9C6D0;
-  /* ⚠ KART İÇİ ARTIK BANDA GÖRE (84. dosya · 4. maddenin devamı).
-     Kuralın amacı "kart bandın üstünde ayrışsın", belirli bir renk
-     kodu değil. Merdiven ters çevrilince tek sabit ton yetmiyor:
-     açık bantta #EDF2F6 banda yapışıyor, koyu bantta zaten ayrışıyor.
-     Açık bantlarda kart beyaza, koyu bantlarda soluk tona gidiyor. */
-  --kart-ic-acik:#F1F5F8;   /* 1–2. bant: banttan da, beyaz alandan da ayrı */
-  --kart-ic-koyu:#EDF2F6;   /* 3–6. bant: koyu zeminin üstünde */
+  --kabuk:#0D151C;      /* başlık + alt sekme çubuğu */
+  --yuzey:#16212B;      /* ana panel */
+  --kutu:#223040;       /* kart */
+  --kutu-cizgi:#2E3F4F; /* kart çerçevesi */
+  --kutu-ust:#2C3C4C;   /* ikon kabı */
+  --ayirac:rgba(255,255,255,.08);
+  --kutu-ink:#EAF2F6;--kutu-ink-2:#90A6B5;--kutu-ink-3:#63798A;
+  --turuncu:#E8731A;    /* YALNIZ dikkat: açık kart, eksik, seçili sekme */
+  --bitti:#4CBB8C;      /* tamamlanan adımın ikonu */
+  --bant-cerceve:#B9C6D0;
+  /* Açılan kartın FORM paneli açık zeminde kalıyor: doldurulan yer
+     aydınlık, çevresi koyu. (87. dosya · Tayfun: "içine girince açık
+     renk doldurma formu çıkar, gene bizdekinin aynısı.") */
+  --kart-ic-acik:#F1F5F8;
 }
-/* Bantlar ekranı boydan boya kaplıyor, aralarında boşluk yok. */
-.adimlar{margin:-16px -16px 0;display:flex;flex-direction:column}
-.adim-bant{background:var(--bant);color:var(--bant-ink)}
-.adim-bant[data-renk="1"]{--bant:var(--bant-1);--bant-ink:var(--bant-ink-1)}
-.adim-bant[data-renk="2"]{--bant:var(--bant-2);--bant-ink:var(--bant-ink-2)}
-.adim-bant[data-renk="3"]{--bant:var(--bant-3);--bant-ink:var(--bant-ink-3)}
-.adim-bant[data-renk="4"]{--bant:var(--bant-4);--bant-ink:var(--bant-ink-4)}
-.adim-bant[data-renk="5"]{--bant:var(--bant-5);--bant-ink:var(--bant-ink-5)}
-.adim-bant[data-renk="6"]{--bant:var(--bant-6);--bant-ink:var(--bant-ink-6)}
-/* Örnek arayüzden birebir (81. dosya): başlık ve özet ALT ALTA,
-   rakam dairesi 30px, dolgu 14–16px / 20px. */
-.adim-bas{width:100%;display:flex;align-items:center;gap:14px;background:none;border:0;
-  color:inherit;font:inherit;text-align:start;cursor:pointer;padding:14px 20px;min-height:58px}
-.adim-bant.acik > .adim-bas{padding:16px 20px 14px}
-.adim-bas .nk{flex:none;width:30px;height:30px;border-radius:50%;
-  border:2px solid currentColor;box-sizing:border-box;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:14px;font-weight:700;line-height:1}
-.adim-bant.ok .nk{background:#fff;border-color:#fff;color:var(--bant)}
-.adim-bant.acik .nk{background:var(--turuncu);border-color:var(--turuncu);
-  color:#16212A;font-size:15px}
+/* Kartlar ayrı ayrı duruyor: aralarında boşluk, köşeleri yuvarlak.
+   Eskiden boydan boya tek blok hâlindeydi (merdiven için). */
+.adimlar{margin:0;display:flex;flex-direction:column;gap:10px}
+.adim-bant{background:var(--kutu);color:var(--kutu-ink);
+  border:1px solid var(--kutu-cizgi);border-radius:14px}
+/* AÇIK KART: turuncu çerçeve. Rakam değişmiyor, ikon kabı turuncuya
+   dönüyor (aşağıda). */
+.adim-bant.acik{border-color:var(--turuncu)}
+.adim-bas{width:100%;display:flex;align-items:center;gap:12px;background:none;border:0;
+  color:inherit;font:inherit;text-align:start;cursor:pointer;padding:14px 14px;min-height:64px}
+/* ⚠ RAKAM SESSİZ. Eskiden 30 px'lik daire içinde, bandın durumunu
+   gösteren şeydi; şef hangi adımda olduğunu rakamın rengiyle
+   okuyordu. Artık yalnız SIRA gösteriyor — durumu ikon söylüyor.
+   Durumu iki yere birden yazmak, birini değiştirince ötekini
+   unutmak demekti. */
+.adim-bas .nk{flex:none;font-size:12.5px;font-weight:600;line-height:1;
+  color:var(--kutu-ink-3);font-variant-numeric:tabular-nums;min-width:16px}
+/* İKON KABI — kartın durumunu taşıyan tek yer. */
+.adim-bas .kik{flex:none;width:40px;height:40px;border-radius:11px;
+  background:var(--kutu-ust);display:inline-flex;align-items:center;
+  justify-content:center;color:var(--kutu-ink);transition:background .12s}
+.adim-bas .kik svg{width:21px;height:21px}
+.adim-bant.acik .kik{background:var(--turuncu);color:#0D151C}
+.adim-bant.ok   .kik{background:var(--bitti);color:#0D151C}
 .adim-yazi{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
-.adim-ad{font-size:16px;font-weight:600;letter-spacing:0}
-.adim-bant.acik .adim-ad{font-size:17px;font-weight:700}
-.adim-ozet{font-size:13px;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adim-ad{font-size:16px;font-weight:600;letter-spacing:0;color:var(--kutu-ink)}
+.adim-ozet{font-size:12.5px;color:var(--kutu-ink-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .adim-ozet:empty{display:none}
-.adim-im{flex:none;font-size:13px;opacity:.78;white-space:nowrap;text-decoration:underline}
+.adim-im{flex:none;font-size:12.5px;color:var(--kutu-ink-2);white-space:nowrap}
+/* Sağdaki ok: kartın açılır olduğunu söyleyen tek işaret. Açıkken
+   aşağı dönüyor. */
+.adim-ok{flex:none;font-size:19px;line-height:1;color:var(--kutu-ink-3);
+  transform:rotate(0deg);transition:transform .12s}
+.adim-bant.acik .adim-ok{transform:rotate(90deg);color:var(--turuncu)}
 /* "eksik" bir hata değil, bir durum: marka turuncusu, alarm kırmızısı
    değil (81. dosya). */
-.adim-bant.eksik .adim-im{color:var(--turuncu);opacity:1;font-weight:600;text-decoration:none}
-.adim-ic{padding:0 20px 18px}
+.adim-bant.eksik .adim-im{color:var(--turuncu);font-weight:600}
+.adim-bant.eksik .kik{box-shadow:inset 0 0 0 1.5px var(--turuncu)}
+.adim-ic{padding:0 14px 14px}
+/* ------------------------------------------------------------
+   SEKME BAŞLIĞI — panelin kendi adı, kartların üstünde.
+   Sayaç YALNIZ Vardiya'da dolu (88. dosya · 1c): ötekilerde
+   kartların sırası anlamlı değil, "3/5 tamam" diye bir şey yok.
+   ------------------------------------------------------------ */
+.sekme-bas{display:flex;align-items:baseline;gap:8px;padding:2px 2px 10px}
+.sekme-bas .sb-ad{font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:600;color:var(--kutu-ink-2)}
+.sekme-bas .sb-sayac{margin-inline-start:auto;font-size:12px;
+  color:var(--kutu-ink-3);font-variant-numeric:tabular-nums}
+.sekme-bas .sb-sayac:empty{display:none}
+/* Kartların DIŞINDAKİ düğme kutusu: "Puantajı kaydet" dört kartın
+   birden sonucu, hiçbirine ait değil. Koyu zeminde durduğu için
+   kendi kabı var. */
+.dip-kutu{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.dip-kutu .msg{background:var(--kart-ic-acik)}
+/* Kart içindeki uzun listeyi katlayan yerli açılır (88. dosya · 7:
+   "02'deki uzun Çalışmadı listesi katlanır yapılıyor"). `<details>`
+   kullanıyoruz: JS gerekmiyor, klavye ve ekran okuyucu kendiliğinden
+   çalışıyor. */
+details.acilir > summary{cursor:pointer;list-style:none;display:flex;
+  align-items:baseline;gap:7px;min-height:34px;padding:5px 0}
+details.acilir > summary::-webkit-details-marker{display:none}
+details.acilir > summary::after{content:"+";margin-inline-start:auto;
+  font-size:17px;line-height:1;color:var(--accent-ink)}
+details.acilir[open] > summary::after{content:"\2212"}
 /* ============================================================
    84. dosya · 4. madde · KART ZEMİNİ ve ALAN ZEMİNİ AYRI
    ------------------------------------------------------------
@@ -323,18 +442,22 @@ td:first-child{text-align:start;color:var(--ink-2)}
    nerede bittiği yalnız 1,5 px çerçeveden anlaşılıyordu ve
    telefonda güneşte o çerçeve görünmüyordu.
    ============================================================ */
-.adim-ic > .card{background:var(--kart-ic-koyu);border:1.5px solid var(--bant-cerceve);
-  border-radius:14px;color:var(--ink);padding:16px;gap:12px}
-/* Açık bantlarda (1–2) kart beyaza yaklaşıyor, yoksa banda yapışıyor. */
-.adim-bant[data-renk="1"] .adim-ic > .card,
-.adim-bant[data-renk="2"] .adim-ic > .card{background:var(--kart-ic-acik)}
+.adim-ic > .card{background:var(--kart-ic-acik);border:1px solid var(--bant-cerceve);
+  border-radius:12px;color:var(--ink);padding:14px;gap:12px}
+/* Kartın içindeki her şey açık zemin mürekkebine dönüyor: koyu kabuk
+   dışarıda kalıyor. Yoksa `.hint` ve `.eyebrow` koyu zemin için
+   seçilmiş renklerle açık zemine düşüyordu. */
+.adim-ic > .card,.adim-ic > .card *{border-color:inherit}
 /* Alanlar kartın içinde BEYAZ: ton farkı dokunulacak yeri gösteriyor. */
 .adim-ic > .card input,
 .adim-ic > .card select,
-.adim-ic > .card textarea{background:var(--card)}
-/* Son bandın altında sekme çubuğu kadar boşluk: son alan çubuğun
+.adim-ic > .card textarea{background:var(--card);border-color:var(--line)}
+/* Kart dışındaki ikinci kartlar (iç içe .card) da aynı zemini alıyor:
+   öteki sekmelerin içeriği hâlâ çok yerde .card kullanıyor. */
+.adim-ic .card{background:var(--kart-ic-acik);color:var(--ink)}
+/* Son kartın altında sekme çubuğu kadar boşluk: son alan çubuğun
    arkasında kalmasın (81. dosya, 6a). */
-.adimlar::after{content:"";display:block;height:14px}
+.adimlar::after{content:"";display:block;height:6px}
 /* Özet kartındaki mesaj satırları — boşken yer kaplamıyor. */
 .kc-mesaj:empty{display:none}
 
@@ -370,6 +493,12 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .li .foto-ekle{flex:0 0 auto;padding:5px 10px;font-size:12px}
 .li:last-child{border-bottom:0}
 .hint{font-size:12px;color:var(--ink-3)}
+/* ⚠ BOŞ İPUCU YER KAPLAMASIN. Kart dilinde alanlar `gap` ile
+   diziliyor; içi boş bir `.hint` görünmez ama 12 px boşluk
+   bırakıyor ve formda sebepsiz delikler açıyordu (53. paketin
+   ilk ekran görüntüsünde Vardiya ile Makine arasında yakalandı).
+   `.msg:empty` için aynı kural yukarıda zaten var. */
+.hint:empty{display:none}
 .bars{display:flex;flex-direction:column;gap:8px}
 .bar{display:grid;grid-template-columns:96px 1fr auto;gap:8px;align-items:center;font-size:12.5px}
 .track{background:var(--line-soft);border-radius:4px;height:13px;overflow:hidden}
@@ -454,13 +583,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
   font-weight:600;letter-spacing:.02em;background:var(--accent-soft);
   color:var(--accent-ink);border:1px solid var(--line)}
 
-/* --- katlanır başlık --- */
-.katla{width:100%;display:flex;align-items:center;gap:8px;background:var(--line-soft);
-  border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;color:inherit;
-  font-size:13.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-  text-align:start;min-height:48px}
-.katla .im{margin-inline-start:auto;color:var(--accent-ink);font-size:20px;line-height:1;flex:none}
-.katla .ek{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3);font-size:12.5px}
+/* `.katla` KALKTI (88. dosya · 8). Kullanıcı sayısı silmeden önce
+   SAYILDI: üç katlanır başlık vardı (Takılı matkaplar, Sahadaki stok,
+   Kuyular) ve üçü de kartın İÇİNDEydi — kart zaten açılıp kapanıyor.
+   Üçü de söküldü, geriye kullanan kalmadı. `.katla .im`/`.ek` yardımcı
+   sınıfları da onlarla gitti. */
 
 /* --- durum şeridi --- */
 .akis{display:flex;flex-direction:column;gap:12px}
@@ -475,24 +602,18 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .akis .adim.bekl .ad{color:var(--ink-3)}
 
 /* ============================================================
-   ⚠ `.segment` SİLİNMEYE ÇALIŞILDI, GERİ KONDU (86. dosya)
+   ⚠ `.segment` ARTIK GERÇEKTEN KALKTI (88. dosya · 7)
    ------------------------------------------------------------
-   84. dosyada Ayarlar'dan tema ve yazı boyutu seçimlerini
-   kaldırırken "`.segment`in tek kullanıcısı bunlardı" diye bu
-   kuralı da sildim. YANLIŞTI: Gider sekmesinin alt şeridi
-   (Yakıt · Harcama · Kiralama · Avans) da `.segment` kullanıyor
-   (`[data-seg="gider"]`). Silinince o şerit biçimsiz dört düğmeye
-   düşüyordu — 52. sürüm zip'ine böyle girdi ve Tayfun diğer
-   sekmelere bakarken yakalandı.
-   Dersi: bir CSS kuralını silmeden önce kullanıcılarını SAYMAK
-   gerek; "tek kullanıcısı şu" demek yetmiyor. Artık sınaması var
-   (gercek-bant.mjs, N2 bölümü): Gider alt şeridinin düğmeleri
-   gerçekten biçimli mi, seçili olan vurgulu mu.
+   84. dosyada bu kuralı "tek kullanıcısı Ayarlar'daki tema ve yazı
+   boyutu seçimleriydi" diye silmiştim. YANLIŞTI: Gider sekmesinin
+   alt şeridi (Yakıt · Harcama · Kiralama · Avans) de kullanıyordu
+   ve silinince biçimsiz dört düğmeye düşüyordu — 52. sürüm zip'ine
+   böyle girdi (86. dosya).
+   Şimdi kalkıyor ÇÜNKÜ ŞERİDİN KENDİSİ KALKTI: Gider'in dört bölümü
+   artık dört kart. Bu kez kullanıcı sayıldı, sıfır çıktı.
+   Dersi duruyor: bir CSS kuralını silmeden önce kullanıcılarını
+   SAYMAK gerek; "tek kullanıcısı şu" demek yetmiyor.
    ============================================================ */
-.segment{display:flex;gap:6px}
-.segment button{flex:1 1 0;border:1px solid var(--line);background:none;color:var(--ink-2);
-  border-radius:10px;min-height:46px;font-size:13.5px;cursor:pointer;font-weight:500;width:auto}
-.segment button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
 
 /* Tek kartın içinde bölüm ayıracı (84. dosya · 3. madde): dört kart
    yerine tek kart, bölümler çizgiyle ayrılıyor. */
@@ -558,6 +679,45 @@ td:first-child{text-align:start;color:var(--ink-2)}
 </head>
 <body>
 
+<!-- ============================================================
+     KART İKONLARI (88. dosya · 4)
+     ------------------------------------------------------------
+     27 kartın her birinde bir ikon var. Hepsini kartın içine
+     yazmak dosyaya yaklaşık 1500 satır eklerdi ve aynı ikon
+     dört yerde ayrı ayrı durur, biri düzeltilince ötekiler
+     geride kalırdı. Tek yerde tanımlanıyor, `<use>` ile
+     çağrılıyor.
+     Çizgi kalınlığı 1.7 — alt sekme ikonlarıyla aynı; iki ikon
+     seti aynı ekranda yan yana duruyor, farklı kalınlık hemen
+     göze çarpıyor.
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<g id="ik-g" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></g>
+<symbol id="ik-vardiya" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><circle cx="12" cy="15.5" r="2.6"/><path d="M12 14.2v1.3l1 .8"/></symbol>
+<symbol id="ik-ekip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16.5 11.2A3 3 0 0 0 16.5 5.4M18 19.6c0-2.2-.8-3.9-2.2-5"/></symbol>
+<symbol id="ik-kontrol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v2.5H9z"/><path d="M15 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="m8.5 13 2 2 4-4"/></symbol>
+<symbol id="ik-delgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9"/><path d="m8.5 8.5 3.5 3.5 3.5-3.5"/><path d="M7 15.5h10M5.5 19h13"/></symbol>
+<symbol id="ik-tuketim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5s5.5 5.8 5.5 9.5A5.5 5.5 0 0 1 6.5 13C6.5 9.3 12 3.5 12 3.5z"/><path d="M9.8 13.8a2.4 2.4 0 0 0 2.4 2.4"/></symbol>
+<symbol id="ik-ozet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><path d="m3 5.5 1.3 1.3L6.5 4.5M3 11.5l1.3 1.3L6.5 10.5M3 17.5l1.3 1.3L6.5 16.5"/></symbol>
+<symbol id="ik-takvim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M7.5 14h3v3h-3z"/></symbol>
+<symbol id="ik-saat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="ik-istisna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.2"/><path d="M4 20c0-3.3 2.7-5.5 6-5.5 1 0 2 .2 2.8.6"/><path d="m16 15.5 4 4M20 15.5l-4 4"/></symbol>
+<symbol id="ik-yakit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v16"/><path d="M4 21h11M5 11h9"/><path d="M14 8h3a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0v-5l-2-3"/></symbol>
+<symbol id="ik-nakit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 10v4M18 10v4"/></symbol>
+<symbol id="ik-kira" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 16V7h10v9"/><path d="M12.5 10h4l3 3.5V16"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/><path d="M8.3 17.5h6.4"/></symbol>
+<symbol id="ik-avans" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h11A2.5 2.5 0 0 1 19 7.5v9A2.5 2.5 0 0 1 16.5 19h-11A2.5 2.5 0 0 1 3 16.5z"/><path d="M15 12h6M19 9.5h2.5v5H19a2.5 2.5 0 0 1 0-5z"/></symbol>
+<symbol id="ik-bakim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15.3 5.3a4.5 4.5 0 0 0 5.9 5.9L10.6 21.8a2.4 2.4 0 0 1-3.4-3.4z"/><path d="m4 4 4 4M4 8l4-4"/></symbol>
+<symbol id="ik-ariza" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 2.6 17.5A1.9 1.9 0 0 0 4.3 20.4h15.4a1.9 1.9 0 0 0 1.7-2.9L13.7 3.9a1.9 1.9 0 0 0-3.4 0z"/><path d="M12 9v4.5M12 17h.01"/></symbol>
+<symbol id="ik-belge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+<symbol id="ik-cikar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8.5 7.5 3.5-3.5 3.5 3.5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+<symbol id="ik-tak" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m8.5 11.5 3.5 3.5 3.5-3.5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+<symbol id="ik-stok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+<symbol id="ik-hareket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M14 5l3 3-3 3"/><path d="M20 16H7M10 13l-3 3 3 3"/></symbol>
+<symbol id="ik-kuyu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="2.6"/><path d="M5 6v11c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6"/><path d="M5 11.5c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6"/></symbol>
+<symbol id="ik-grafik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5M12 16V7M17 16v-8"/></symbol>
+<symbol id="ik-tanim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M4 12h7M4 17h10"/><circle cx="18" cy="7" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="18" cy="17" r="2"/></symbol>
+</defs></svg>
+
 <div class="app">
   <!-- ÜST BAŞLIK (79. dosya · 5 Kasım 2026)
        Solda KULLANICININ firma adı, kısaltılmış (75. dosya: "orada
@@ -565,23 +725,30 @@ td:first-child{text-align:start;color:var(--ink-2)}
        Sağda Collarlog SİMGE olarak ve hesap düğmesi. Bağlantı rozeti
        kalktı: işini artık başlığın altındaki kuyruk şeridi yapıyor. -->
   <header class="bar">
-    <div class="firma">
+    <!-- ÜST ŞERİT: ürünün kimliği. Solda simge + ad, sağda dişli.
+         ⚠ BEYAZ SİMGE SÜRÜMÜ. `collarlog-ikon.svg` koyu lacivert
+         halkalı; koyu başlıkta kaybolur. Turuncu yalnız halkanın
+         içindeki nokta — paketin kendi kuralı. -->
+    <div class="bar-ust">
+      <img class="bar-mark" src="logo/collarlog-ikon-beyaz.svg" alt=""
+           onerror="this.onerror=null;this.src='logo/collarlog-logo-beyaz.svg'">
+      <b class="bar-ad">Collarlog</b>
+      <!-- 88. dosya · 2: ayarlar DİŞLİDEN açılıyor. 84. dosyada logo
+           düğme yapılmıştı ("logoya basınca ayarlar gelsin"); o karar
+           geri alındı — logonun basılabilir olduğunu gösteren hiçbir
+           şey yoktu ve ayarları bulan tek kişi onu yazan oldu. -->
+      <button class="bar-ayar" id="who" type="button" aria-label="Hesap ve ayarlar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+    <!-- ALT ŞERİT: kimin kullandığı. Firma adı kısaltılmış (75. dosya:
+         "orada belirgin şekilde programı kullanan firmanın adı
+         yazacak"), altında rol ve şantiye. -->
+    <div class="bar-alt">
       <b id="bar-firma">—</b>
       <span class="alt" id="bar-alt"></span>
     </div>
-    <!-- 84. dosya · 3. madde · Tayfun: "Sağ üstte sadece logomuzun
-         ikonu olsun. Üstüne basıldığında kullanıcı bilgisi ve ayarlar
-         gelsin." İki düğme vardı (marka + kişi simgesi); marka ana
-         sayfaya gidiyor, kişi simgesi ayarları açıyordu. Artık TEK
-         düğme ve işi ayarları açmak — ana sayfaya gitmek sekmelerin işi.
-
-         ⚠ BEYAZ SÜRÜM. `collarlog-ikon.svg` koyu lacivert halkalı;
-         koyu başlıkta kaybolur. Aynı hatayı 2 Kasım'da yan barda
-         yapmıştım, ekran görüntüsü yakalamıştı. Turuncu yalnız
-         halkanın içindeki nokta — paketin kendi kuralı. -->
-    <button class="marka" id="who" type="button"
-            aria-label="Hesap ve ayarlar"><img src="logo/collarlog-ikon-beyaz.svg"
-      alt="Collarlog" onerror="this.onerror=null;this.src='logo/collarlog-logo-beyaz.svg'"></button>
   </header>
 
   <!-- KUYRUK ŞERİDİ — Bekleyen sekmesinin yerine (79. dosya).
@@ -629,19 +796,27 @@ td:first-child{text-align:start;color:var(--ink-2)}
 
     <!-- VARDİYA -->
     <section id="tab-vardiya">
+      <!-- Sayaç YALNIZ burada dolu (88. dosya · 1c): Vardiya'da altı
+           kartın sırası anlamlı ve beşi doldurulmak zorunda. Öteki
+           sekmelerde "3/5 tamam" diye bir şey yok — oradaki kartlar
+           sıra değil konum gösteriyor. -->
+      <div class="sekme-bas"><span class="sb-ad">İş akışı</span>
+        <span class="sb-sayac" id="vardiya-sayac"></span></div>
       <div class="adimlar" id="bantlar">
-        <section class="adim-bant" data-bant="1" data-renk="1">
+        <section class="adim-bant" data-bant="1">
           <button class="adim-bas" type="button" data-bant-bas="1"
-                  aria-expanded="true" aria-controls="bant-ic-1">
-            <span class="nk">1</span>
+                  aria-expanded="false" aria-controls="bant-ic-1">
+            <span class="nk">01</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-vardiya"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Vardiya</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
           </button>
-          <div class="adim-ic" id="bant-ic-1">
+          <div class="adim-ic" id="bant-ic-1" hidden>
       <div class="card" data-pane="1" style="margin-top:0">
         <div class="field"><label for="f-project">Proje <span class="req">*</span></label><select id="f-project" data-req="1"></select></div>
-        <div class="grid2">
+        <div class="grid2 kir-alt">
           <div class="field"><label for="f-date">Tarih <span class="req">*</span></label><input type="date" id="f-date" data-req="1"></div>
           <div class="field"><label for="f-shift">Vardiya <span class="req">*</span></label><select id="f-shift" data-req="1"></select></div>
         </div>
@@ -665,13 +840,15 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </div>
         </section>
 
-        <section class="adim-bant" data-bant="2" data-renk="2">
+        <section class="adim-bant" data-bant="2">
           <button class="adim-bas" type="button" data-bant-bas="2"
                   aria-expanded="false" aria-controls="bant-ic-2">
-            <span class="nk">2</span>
+            <span class="nk">02</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-ekip"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Ekip</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
           </button>
           <div class="adim-ic" id="bant-ic-2" hidden>
       <div class="card" data-pane="2" style="margin-top:0">
@@ -698,20 +875,22 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <input id="f-sayac" type="number" step="0.1" min="0" inputmode="decimal"
                  placeholder="örn. 1240.5" data-req="2">
           <div class="hint" id="sayac-not">Vardiya başında makinenin saat sayacından okunan değer.</div>
-          <div class="msg" id="sayac-uyari"></div>
+          <div id="sayac-uyari"></div>
         </div>
         <button class="btn ilerle" type="button" data-next="3">İlerle →</button>
       </div>
           </div>
         </section>
 
-        <section class="adim-bant" data-bant="3" data-renk="3">
+        <section class="adim-bant" data-bant="3">
           <button class="adim-bas" type="button" data-bant-bas="3"
                   aria-expanded="false" aria-controls="bant-ic-3">
-            <span class="nk">3</span>
+            <span class="nk">03</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-kontrol"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Kontrol &amp; Arıza</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
           </button>
           <div class="adim-ic" id="bant-ic-3" hidden>
       <div class="card" data-pane="3" style="margin-top:0">
@@ -821,13 +1000,15 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </div>
         </section>
 
-        <section class="adim-bant" data-bant="4" data-renk="4">
+        <section class="adim-bant" data-bant="4">
           <button class="adim-bas" type="button" data-bant-bas="4"
                   aria-expanded="false" aria-controls="bant-ic-4">
-            <span class="nk">4</span>
+            <span class="nk">04</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-delgi"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Delgi</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
           </button>
           <div class="adim-ic" id="bant-ic-4" hidden>
       <div class="card" data-pane="4" style="margin-top:0">
@@ -950,13 +1131,15 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </div>
         </section>
 
-        <section class="adim-bant" data-bant="5" data-renk="5">
+        <section class="adim-bant" data-bant="5">
           <button class="adim-bas" type="button" data-bant-bas="5"
                   aria-expanded="false" aria-controls="bant-ic-5">
-            <span class="nk">5</span>
+            <span class="nk">05</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-tuketim"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Tüketim</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
           </button>
           <div class="adim-ic" id="bant-ic-5" hidden>
       <div class="card" data-pane="5" style="margin-top:0">
@@ -986,10 +1169,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
              özetten geçiyor. Düğme yine pasif olmuyor (41. dosya):
              basılır, eksik varsa söyler ve eksik bandı açar.
              ============================================================ -->
-        <section class="adim-bant" data-bant="6" data-renk="6">
+        <section class="adim-bant" data-bant="6">
           <button class="adim-bas" type="button" data-bant-bas="6"
                   aria-expanded="false" aria-controls="bant-ic-6">
-            <span class="nk">6</span>
+            <span class="nk">06</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-ozet"></use></svg></span>
             <!-- 84. dosya · 9. madde: "Özet" → "Vardiya Özeti". Tek
                  başına "Özet" neyin özeti olduğunu söylemiyordu; alt
                  sekmede de "Özet" yazıyor ve ikisi karışıyordu. Sekme
@@ -997,6 +1181,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
             <span class="adim-yazi"><span class="adim-ad">Vardiya Özeti</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
           </button>
           <div class="adim-ic" id="bant-ic-6" hidden>
             <div class="card" data-pane="6" style="margin-top:0">
@@ -1031,24 +1216,36 @@ td:first-child{text-align:start;color:var(--ink-2)}
 
     </section>
 
-    <!-- GİDER BÖLÜM ŞERİDİ (41. dosya, 3)
-         Gider sekmesi dört kart taşıyacak; hepsi alt alta durunca şef
-         kaydırmadan bulamıyordu. Şerit tek seferde tek bölüm gösteriyor.
-         Kiralama bölümü 34. adımla (20 Ekim) eklendi. -->
-    <section id="tab-gserit" hidden>
-      <div class="segment" data-seg="gider" style="margin-bottom:12px">
-        <button type="button" data-v="yakit" aria-pressed="true">Yakıt</button>
-        <button type="button" data-v="nakit" aria-pressed="false">Harcama</button>
-        <button type="button" data-v="kira" aria-pressed="false">Kiralama</button>
-        <button type="button" data-v="avans" aria-pressed="false">Avans</button>
-      </div>
-    </section>
-
-    <!-- YAKIT -->
-    <section id="tab-yakit" hidden>
+    <!-- ============================================================
+         GİDER — DÖRT KART (88. dosya · 7)
+         ------------------------------------------------------------
+         ⚠ YATAY ŞERİT KALKTI. 41. dosyada Gider'in dört bölümü yan
+         yana bir şeride (`.segment`) konmuştu: "hepsi alt alta
+         durunca şef kaydırmadan bulamıyordu." 79. dosyada Vardiya
+         dikey kartlara geçti ama bu şerit kaldı — Tayfun'un "yatay
+         geçiş" diye şikâyet ettiği son yer burasıydı.
+         Artık dört kart, ötekilerle aynı dilde. Kart sırası konum
+         gösteriyor, sıra değil: 03'ü 01'den önce açmak serbest.
+         ============================================================ -->
+    <section id="tab-gider" hidden>
+      <div class="sekme-bas"><span class="sb-ad">Gider</span>
+        <span class="sb-sayac"></span></div>
+      <div class="adimlar">
+        <section class="adim-bant" data-kart="gider-1">
+          <button class="adim-bas" type="button" data-kart-bas="gider-1"
+                  aria-expanded="false" aria-controls="kart-ic-gider-1">
+            <span class="nk">01</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-yakit"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Yakıt</span>
+              <span class="adim-ozet">Gelen ve verilen mazot</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-gider-1" hidden>
+            <div class="card">
 
       <!-- Saha yakıt bakiyesi: gelen − verilen -->
-      <div class="card">
+      <div class="boluk">
         <div class="arasi">
           <span class="eyebrow">Sahadaki mazot</span>
           <button class="btn ghost sm" id="btn-yakit-yenile" type="button">Yenile</button>
@@ -1057,12 +1254,12 @@ td:first-child{text-align:start;color:var(--ink-2)}
       </div>
 
       <!-- GİRİŞ: sahaya gelen tanker / alım -->
-      <div class="card" style="margin-top:14px">
+      <div class="boluk">
         <span class="eyebrow">Sahaya gelen akaryakıt</span>
         <div class="hint">Tankerle gelen ya da satın alınan yakıt. Ekipmana verilen yakıt
           aşağıdaki karta yazılır.</div>
         <div class="field"><label for="y-project">Proje <span class="req">*</span></label><select id="y-project"></select></div>
-        <div class="grid2">
+        <div class="grid2 kir-alt">
           <div class="field"><label for="yg-date">Tarih <span class="req">*</span></label><input id="yg-date" type="date"></div>
           <div class="field"><label for="yg-type">Cins <span class="req">*</span></label><select id="yg-type" data-yakit-cins></select></div>
         </div>
@@ -1078,11 +1275,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
       </div>
 
       <!-- ÇIKIŞ: ekipmana verilen -->
-      <div class="card" style="margin-top:14px">
+      <div class="boluk">
         <span class="eyebrow">Ekipmana verilen yakıt</span>
         <div class="hint">Kuleye, traktöre, su pompasına ya da araca verilen yakıt.
           Her verişi ayrı yazın — sahadaki bakiye bundan düşer.</div>
-        <div class="grid2">
+        <div class="grid2 kir-alt">
           <div class="field"><label for="y-date">Tarih <span class="req">*</span></label><input id="y-date" type="date"></div>
           <div class="field"><label for="y-type">Cins <span class="req">*</span></label><select id="y-type" data-yakit-cins></select></div>
         </div>
@@ -1104,14 +1301,26 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <button class="btn" id="btn-save-fuel" type="button">Kaydet</button>
         <div id="fuel-msg"></div>
       </div>
-    </section>
+            </div>
+          </div>
+        </section>
 
-    <!-- NAKİT -->
-    <section id="tab-nakit" hidden>
-      <div class="card">
+        <section class="adim-bant" data-kart="gider-2">
+          <button class="adim-bas" type="button" data-kart-bas="gider-2"
+                  aria-expanded="false" aria-controls="kart-ic-gider-2">
+            <span class="nk">02</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-nakit"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Harcama</span>
+              <span class="adim-ozet">Nakit harcama ve son harcamalar</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-gider-2" hidden>
+            <div class="card">
+      <div class="boluk">
         <span class="eyebrow">Nakit harcama</span>
         <div class="field"><label for="e-project">Proje <span class="req">*</span></label><select id="e-project"></select></div>
-        <div class="grid2">
+        <div class="grid2 kir-alt">
           <div class="field"><label for="e-date">Tarih <span class="req">*</span></label><input id="e-date" type="date"></div>
           <div class="field"><label for="e-amount">Tutar (<span class="para-sim">₺</span>) <span class="req">*</span></label><input id="e-amount" type="number" min="0" inputmode="decimal"></div>
         </div>
@@ -1124,7 +1333,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
       </div>
 
       <!-- Yanlış girilen harcamayı şef kendisi düzeltir (ay kapanana kadar) -->
-      <div class="card" style="margin-top:12px">
+      <div class="boluk">
         <div class="arasi">
           <span class="eyebrow">Son harcamalar</span>
           <button class="btn ghost sm" id="btn-harcama-yenile" type="button">Yenile</button>
@@ -1132,13 +1341,23 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div id="harcama-liste"><div class="hint">Yenile'ye basın.</div></div>
         <div id="harcama-msg"></div>
       </div>
-    </section>
+            </div>
+          </div>
+        </section>
 
-    <!-- KİRALAMA — iş makinası ve araç (34. dosya + Tayfun'un 20 Ekim cevapları)
-         Ücret biçimi üç türlü: saatlikte vardiya başına saat, günlükte
-         çalıştı/çalışmadı, götürüde sabit tutar. Tutarlar KDV DAHİL. -->
-    <section id="tab-kira" hidden>
-      <div class="card">
+        <section class="adim-bant" data-kart="gider-3">
+          <button class="adim-bas" type="button" data-kart-bas="gider-3"
+                  aria-expanded="false" aria-controls="kart-ic-gider-3">
+            <span class="nk">03</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-kira"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Kiralama</span>
+              <span class="adim-ozet">Kiralık iş makinası ve araç</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-gider-3" hidden>
+            <div class="card">
+      <div class="boluk">
         <div class="arasi">
           <span class="eyebrow">Kiralık makine ve araç</span>
           <button class="metin-dugme" id="btn-kira-yeni" type="button">+ Yeni kiralama</button>
@@ -1148,15 +1367,25 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div id="kira-liste" style="margin-top:10px"><div class="hint">Yükleniyor…</div></div>
         <div id="kira-msg"></div>
       </div>
-    </section>
+            </div>
+          </div>
+        </section>
 
-    <!-- AVANS — SALT OKUNUR (41. dosya, 3; Tayfun 20 Ekim)
-         Avans girişi puantajda kalıyor. Burada yalnız gösteriliyor ki
-         aynı avans iki yerden girilmesin. -->
-    <section id="tab-avans" hidden>
-      <div class="card">
+        <section class="adim-bant" data-kart="gider-4">
+          <button class="adim-bas" type="button" data-kart-bas="gider-4"
+                  aria-expanded="false" aria-controls="kart-ic-gider-4">
+            <span class="nk">04</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-avans"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Avans</span>
+              <span class="adim-ozet">Puantajdan girilen avanslar</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-gider-4" hidden>
+            <div class="card">
+      <div class="boluk">
         <div class="arasi">
-          <span class="eyebrow">Avans</span>
+          <span></span>
           <button class="btn ghost sm" id="btn-avans-yenile" type="button">Yenile</button>
         </div>
         <div class="grid2" style="margin-top:8px">
@@ -1169,22 +1398,130 @@ td:first-child{text-align:start;color:var(--ink-2)}
         </div>
         <div id="avans-msg"></div>
       </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </section>
 
     <!-- MALZEME & MATKAP -->
+        <!-- ============================================================
+         MALZEME & MATKAP — BEŞ KART (88. dosya · 7, 9d)
+         ------------------------------------------------------------
+         ⚠ SIRA DEĞİŞTİ: 02 ÇIKAR, 03 TAK. Tayfun: "Matkap bölümünde
+         önce çıkarma sonra takma gelsin sırasıyla. Alttakini üste al."
+         Sahadaki gerçek sıra bu — matkap önce çıkar, sonra yenisi
+         takılır. Eskiden tak üstteydi ve şef her gün listeyi aşağı
+         kaydırıp çıkarmayı buluyordu.
+         01 "Takılı matkaplar" bir LİSTE, form değil: yerinde kaldı.
+         ============================================================ -->
     <section id="tab-malzeme" hidden>
-      <div class="card">
-        <button class="katla" type="button" data-katla="bit-govde" aria-expanded="false">
-          Takılı matkaplar <span class="ek" id="bit-sayi"></span><span class="im">+</span></button>
-        <div id="bit-govde" hidden>
-          <div id="bit-list"><div class="hint">Yükleniyor…</div></div>
-          <button class="btn ghost sm" id="btn-bits-refresh" type="button"
-            style="margin-top:8px">Listeyi yenile</button>
-        </div>
-      </div>
+      <div class="sekme-bas"><span class="sb-ad">Malzeme</span>
+        <span class="sb-sayac"></span></div>
+      <div class="adimlar">
+        <section class="adim-bant" data-kart="malzeme-1">
+          <button class="adim-bas" type="button" data-kart-bas="malzeme-1"
+                  aria-expanded="false" aria-controls="kart-ic-malzeme-1">
+            <span class="nk">01</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-delgi"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Takılı matkaplar</span>
+              <span class="adim-ozet">Kulelerde takılı matkaplar</span></span>
+            <span class="adim-im" id="bit-sayi"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <!-- İçerideki "TAKILI MATKAPLAR (0) +" katlaması SÖKÜLDÜ
+               (88. dosya · 8): kart zaten açılıp kapanıyor, sayı da
+               kartın sağ üstünde yazıyor. -->
+          <div class="adim-ic" id="kart-ic-malzeme-1" hidden>
+            <div class="card">
+              <div id="bit-list"><div class="hint">Yükleniyor…</div></div>
+              <div class="saga">
+                <button class="btn ghost sm" id="btn-bits-refresh" type="button">Listeyi yenile</button>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <div class="card" style="margin-top:12px">
-        <span class="eyebrow">Yeni matkap tak</span>
+        <section class="adim-bant" data-kart="malzeme-2">
+          <button class="adim-bas" type="button" data-kart-bas="malzeme-2"
+                  aria-expanded="false" aria-controls="kart-ic-malzeme-2">
+            <span class="nk">02</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-cikar"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Matkap çıkar</span>
+              <span class="adim-ozet">Çıktığı metre, durum, formasyon</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-malzeme-2" hidden>
+            <div class="card">
+        <!-- 9e (88. dosya) · Tayfun: "Çıkan matkap kısmında takılı matkabı
+             seçerken daha önce en son takılmış matkap markası ve seri
+             numarası otomatik gelsin." → "İkisi birden."
+             Liste en son takılanla AÇILIYOR ve seçilenin markası + seri
+             numarası altında yazıyor. Çoğu gün çıkarılan zaten en son
+             takılandır; şef hiçbir şey seçmeden doğru kaydı görüyor.
+             Yanlış matkabı çıkarma riskine karşı marka ve seri gözünün
+             önünde — hazır değer sessiz olmasın. -->
+        <div class="field"><label for="b-open">Takılı matkap <span class="req">*</span></label><select id="b-open"></select>
+          <div class="hint" id="b-open-not"></div></div>
+        <div class="grid2">
+          <div class="field"><label for="b-to">Çıktığı metre <span class="req">*</span></label><input id="b-to" type="number" min="0" inputmode="decimal"></div>
+          <div class="field"><label for="b-status">Durum <span class="req">*</span></label>
+            <!-- 64. dosya: Murat'ın tablosunda iki durum daha vardı —
+                 ÇAP DÜŞÜLDÜ ve KUYUDA KALDI. İkincisi önemli: kuyuda
+                 kalan matkap hem para hem balıkçılık işi; "bitti" diye
+                 yazılırsa kayboluyor. -->
+            <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option><option value="cap_dusuldu">Çap düşüldü</option><option value="kuyuda_kaldi">Kuyuda kaldı</option></select>
+          </div>
+        </div>
+        <!-- ⚠ AÇIKLAMA IZGARANIN DIŞINA ALINDI (53. paket). Dar
+             sütunun içindeyken altı satırlık metin on iki satıra
+             sarıyor ve ekranın yarısını kaplıyordu; 390 px ekran
+             görüntüsünde yakalandı. İçerik aynı, yeri değişti.
+             Tayfun, 22 Ekim: "Bitti ve matris döktü arasındaki fark
+             nedir?" — durumlar kâğıt aylık rapordan geliyor ama
+             ekranda açıklaması yoktu; şef de aynı soruyu soracak. -->
+        <div class="hint" id="b-status-hint">
+          <b>Bitti:</b> ömrünü tamamladı, matris aşındı, ilerleme düştü.<br>
+          <b>Matris döktü:</b> erken bitti — gövde aşınarak değil kopup dökülerek gitti.<br>
+          <b>Kullanılır:</b> ömrü var, başka sebeple çıkarıldı.<br>
+          <b>Çap düşüldü:</b> kuyu bir alt çapa geçti, matkap o yüzden çıktı — stoğa döner.<br>
+          <b>Kuyuda kaldı:</b> matkap kuyuda kaldı, <b>kayıp</b> — stoğa dönmez.<br>
+          Ayrı tutuluyor: "şu marka şu formasyonda döküyor" ile "şu kulede döküyor"
+          farklı iki sorun — biri matkap seçimi, diğeri çalışma koşulu.
+        </div>
+        <div class="field"><label for="b-formasyon">Formasyon</label>
+          <select id="b-formasyon">
+            <option value="">— seçin —</option>
+            <option>Yeşil-siyah şist</option><option>Şist</option><option>Gnays</option>
+            <option>Kireçtaşı</option><option>Mermer</option><option>Kumtaşı</option>
+            <option>Granit</option><option>Andezit</option><option>Bazalt</option>
+            <option>Serpantinit</option><option>Skarn</option><option>Cevherli zon</option>
+            <option>Silisli zon</option><option>Alterasyon zonu</option><option>Kil</option>
+            <option>Breş</option><option value="__diger">Diğer…</option>
+          </select></div>
+        <div class="field" id="b-formasyon-diger-wrap" hidden>
+          <label for="b-formasyon-diger">Formasyon adı</label>
+          <input id="b-formasyon-diger" placeholder="örn. kloritli şist"></div>
+        <div class="hint">Formasyon, hangi taşta hangi matkabın kaç metre verdiğini görmek için.</div>
+        <button class="btn" id="btn-bit-remove" type="button">Matkabı çıkar</button>
+        <div id="bit-msg2"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="malzeme-3">
+          <button class="adim-bas" type="button" data-kart-bas="malzeme-3"
+                  aria-expanded="false" aria-controls="kart-ic-malzeme-3">
+            <span class="nk">03</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-tak"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Matkap tak</span>
+              <span class="adim-ozet">Kuyu, makine, çap, marka</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-malzeme-3" hidden>
+            <div class="card">
         <!-- Kuyu önce sorulur: makine listesi ve takıldığı metre ona göre kurulur. -->
         <div class="field"><label for="b-well">Kuyu <span class="req">*</span></label><select id="b-well"></select></div>
         <div class="grid2">
@@ -1214,78 +1551,76 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </div>
           <div class="hint" id="b-yeni-msg">Eklenen marka listede kalır, bir daha yazmanız gerekmez.</div>
         </div>
-        <div class="grid2">
-          <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label>
-            <input id="b-from" type="number" min="0" inputmode="decimal">
-            <div class="hint" id="b-from-hint">Kuyu seçilince kuyunun bulunduğu metre kendiliğinden yazılır. Farklıysa değiştirin.</div></div>
-          <!-- ÇIKMA (ikinci el): Murat'ın tablosunda "ÇIKMA" marka
-               hanesine yazılıyordu; marka değil işaret (Tayfun, 24 Ekim). -->
-          <div class="field"><label for="b-onceki">Önceki yaptığı metre</label>
-            <input id="b-onceki" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0">
-            <div class="hint">Çıkma matkapsa daha önce kaç metre yaptığı.</div></div>
-        </div>
+        <!-- ============================================================
+             9a (88. dosya) · TAKILDIĞI METRE BOŞ AÇILIYOR
+             ------------------------------------------------------------
+             Tayfun: "Yeni matkap ucu ekle dediğimizde metraja son
+             kayıtlı metraj geliyor ama boş gelsin."
+             Kuyu seçilince `current_depth` kendiliğinden yazılıyordu.
+             Gerekçesi iyiydi ("şef sıfırdan yazarsa 960 yerine 96
+             yazıyor") ama sonucu kötüydü: hazır değer şefi bakmadan
+             geçmeye itiyor ve matkap yanlış metreden takılmış
+             görünüyordu. Kuyunun metresi ARTIK BİLGİ SATIRINDA —
+             okunuyor ama kendiliğinden girilmiyor.
+             ============================================================ -->
+        <div class="field"><label for="b-from">Takıldığı metre <span class="req">*</span></label>
+          <input id="b-from" type="number" min="0" inputmode="decimal">
+          <div class="hint" id="b-from-hint">Kuyu seçin — kuyunun bulunduğu metre burada yazar.</div>
+          <div id="b-from-uyari"></div></div>
+        <!-- ⚠ "ÖNCEKİ YAPTIĞI METRE" ALANI KALKTI (9c · Tayfun):
+             "Çıkma matkabın önceki ömrünü bulup yazmak çok zor. Şef
+             orada doğru veriyi yazamaz."
+             O veri hiçbir zaman güvenilir değildi — şef çıkma bir
+             matkabın daha önce kaç metre yaptığını bilemez, yazdığı
+             sayı tahmindir. Alan kalkınca analiz bozulmuyor; uydurma
+             sayı üretmeyi bırakıyoruz. Çıkma matkaplarda artık "bizim
+             sahada yaptığı metre" raporlanacak.
+             Veri yapısı (`p_prev_meters`) yerinde: yalnız ekran tarafı
+             kalktı, ileride lazım olursa geri koymak tek satır.
+             ÇIKMA İŞARETİ KALIYOR — o sayının sıfır matkapla aynı
+             kefeye konmadan okunabilmesi buna bağlı. -->
         <label class="dizi" style="margin-top:4px">
           <input type="checkbox" id="b-cikma" style="width:auto;min-height:0">
           <span>Çıkma (ikinci el) matkap</span></label>
         <button class="btn" id="btn-bit-install" type="button">Matkabı tak</button>
         <div id="bit-msg"></div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <span class="eyebrow">Matkap çıkar</span>
-        <div class="field"><label for="b-open">Takılı matkap <span class="req">*</span></label><select id="b-open"></select></div>
-        <div class="grid2">
-          <div class="field"><label for="b-to">Çıktığı metre <span class="req">*</span></label><input id="b-to" type="number" min="0" inputmode="decimal"></div>
-          <div class="field"><label for="b-status">Durum <span class="req">*</span></label>
-            <!-- 64. dosya: Murat'ın tablosunda iki durum daha vardı —
-                 ÇAP DÜŞÜLDÜ ve KUYUDA KALDI. İkincisi önemli: kuyuda
-                 kalan matkap hem para hem balıkçılık işi; "bitti" diye
-                 yazılırsa kayboluyor. -->
-            <select id="b-status"><option value="bitti">Bitti</option><option value="matris_doktu">Matris döktü</option><option value="kullanilir">Kullanılır</option><option value="cap_dusuldu">Çap düşüldü</option><option value="kuyuda_kaldi">Kuyuda kaldı</option></select>
-              <!-- Tayfun, 22 Ekim: "Bitti ve matris döktü arasındaki fark nedir?"
-                   Durumlar kâğıt aylık rapordan geliyor ama ekranda açıklaması
-                   yoktu. Şef de aynı soruyu soracak. -->
-              <div class="hint" id="b-status-hint">
-                <b>Bitti:</b> ömrünü tamamladı, matris aşındı, ilerleme düştü.<br>
-                <b>Matris döktü:</b> erken bitti — gövde aşınarak değil kopup dökülerek gitti.<br>
-                <b>Kullanılır:</b> ömrü var, başka sebeple çıkarıldı.<br>
-                <b>Çap düşüldü:</b> kuyu bir alt çapa geçti, matkap o yüzden çıktı — stoğa döner.<br>
-                <b>Kuyuda kaldı:</b> matkap kuyuda kaldı, <b>kayıp</b> — stoğa dönmez.<br>
-                Ayrı tutuluyor: "şu marka şu formasyonda döküyor" ile "şu kulede döküyor"
-                farklı iki sorun — biri matkap seçimi, diğeri çalışma koşulu.
-              </div></div>
-        </div>
-        <div class="field"><label for="b-formasyon">Formasyon</label>
-          <select id="b-formasyon">
-            <option value="">— seçin —</option>
-            <option>Yeşil-siyah şist</option><option>Şist</option><option>Gnays</option>
-            <option>Kireçtaşı</option><option>Mermer</option><option>Kumtaşı</option>
-            <option>Granit</option><option>Andezit</option><option>Bazalt</option>
-            <option>Serpantinit</option><option>Skarn</option><option>Cevherli zon</option>
-            <option>Silisli zon</option><option>Alterasyon zonu</option><option>Kil</option>
-            <option>Breş</option><option value="__diger">Diğer…</option>
-          </select></div>
-        <div class="field" id="b-formasyon-diger-wrap" hidden>
-          <label for="b-formasyon-diger">Formasyon adı</label>
-          <input id="b-formasyon-diger" placeholder="örn. kloritli şist"></div>
-        <div class="hint">Formasyon, hangi taşta hangi matkabın kaç metre verdiğini görmek için.</div>
-        <button class="btn" id="btn-bit-remove" type="button">Matkabı çıkar</button>
-        <div id="bit-msg2"></div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <button class="katla" type="button" data-katla="stok-govde" aria-expanded="false">
-          Sahadaki stok <span class="ek" id="stok-sayi"></span><span class="im">+</span></button>
-        <div id="stok-govde" hidden>
-          <div class="saga" style="margin-bottom:8px">
-            <button class="btn ghost sm" id="btn-stok-yenile" type="button">Yenile</button>
+            </div>
           </div>
-          <div id="stok-liste"><div class="hint">Yenile'ye basın.</div></div>
-        </div>
-      </div>
+        </section>
 
-      <div class="card" style="margin-top:12px">
-        <span class="eyebrow">Stok hareketi</span>
+        <section class="adim-bant" data-kart="malzeme-4">
+          <button class="adim-bas" type="button" data-kart-bas="malzeme-4"
+                  aria-expanded="false" aria-controls="kart-ic-malzeme-4">
+            <span class="nk">04</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-stok"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Sahadaki stok</span>
+              <span class="adim-ozet">Sahadaki malzeme bakiyesi</span></span>
+            <span class="adim-im" id="stok-sayi"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <!-- İçerideki "SAHADAKİ STOK +" katlaması SÖKÜLDÜ (88. dosya · 8). -->
+          <div class="adim-ic" id="kart-ic-malzeme-4" hidden>
+            <div class="card">
+              <div id="stok-liste"><div class="hint">Yükleniyor…</div></div>
+              <div class="saga">
+                <button class="btn ghost sm" id="btn-stok-yenile" type="button">Yenile</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="malzeme-5">
+          <button class="adim-bas" type="button" data-kart-bas="malzeme-5"
+                  aria-expanded="false" aria-controls="kart-ic-malzeme-5">
+            <span class="nk">05</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-hareket"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Stok hareketi</span>
+              <span class="adim-ozet">Giriş, kullanım ve iade</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-malzeme-5" hidden>
+            <div class="card">
         <div class="field"><label for="st-material">Malzeme <span class="req">*</span></label><select id="st-material"></select></div>
         <div class="grid2">
           <div class="field"><label for="st-dir">Hareket <span class="req">*</span></label>
@@ -1295,32 +1630,61 @@ td:first-child{text-align:start;color:var(--ink-2)}
         <div class="field"><label for="st-note">Not</label><input id="st-note" placeholder="isteğe bağlı"></div>
         <button class="btn" id="btn-stock" type="button">Stok hareketini kaydet</button>
         <div id="stock-msg"></div>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
 
     <!-- MAKİNE: bakım ve arıza takibi -->
+        <!-- MAKİNE — ÜÇ KART (88. dosya · 7): bakım ve arıza takibi -->
     <section id="tab-makine" hidden>
-      <div class="card">
+      <div class="sekme-bas"><span class="sb-ad">Makine</span>
+        <span class="sb-sayac"></span></div>
+      <div class="adimlar">
+        <section class="adim-bant" data-kart="makine-1">
+          <button class="adim-bas" type="button" data-kart-bas="makine-1"
+                  aria-expanded="false" aria-controls="kart-ic-makine-1">
+            <span class="nk">01</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-bakim"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Bakım durumu</span>
+              <span class="adim-ozet">10 günde ya da 250 saatte bir</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-makine-1" hidden>
+            <div class="card">
         <div class="arasi">
-          <span class="eyebrow">Bakım durumu</span>
+          <span></span>
           <button class="btn ghost sm" id="btn-bakim-yenile" type="button">Yenile</button>
         </div>
         <div class="hint">Bakım 10 günde bir ya da 250 motor saatinde bir yapılır — hangisi önce
           dolarsa. Motor saati vardiya formundaki motor başlangıç/bitiş saatlerinden toplanır.</div>
         <div id="bakim-liste"><div class="hint">Yenile'ye basın.</div></div>
         <div id="bakim-msg"></div>
-      </div>
+            </div>
+          </div>
+        </section>
 
-      <div class="card" style="margin-top:12px">
+        <section class="adim-bant" data-kart="makine-2">
+          <button class="adim-bas" type="button" data-kart-bas="makine-2"
+                  aria-expanded="false" aria-controls="kart-ic-makine-2">
+            <span class="nk">02</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-ariza"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Açık arızalar</span>
+              <span class="adim-ozet">Kapanmamış arıza kayıtları</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-makine-2" hidden>
+            <div class="card">
         <div class="arasi">
-          <span class="eyebrow">Açık arızalar</span>
+          <span></span>
           <button class="btn ghost sm" id="btn-ariza-yenile" type="button">Yenile</button>
         </div>
         <div class="hint">Yeni arıza girişi Vardiya sekmesinin 3. adımında. Makine fabrikaya
           gönderildiyse burada işaretleyin; arıza kapanana kadar takip sürer.</div>
         <div id="mak-ariza"><div class="hint">Yenile'ye basın.</div></div>
-      </div>
-
       <!-- ============================================================
            ARAÇ BELGELERİ — şefin kendi şantiyesi ve kendi zimmeti
            ============================================================
@@ -1330,84 +1694,170 @@ td:first-child{text-align:start;color:var(--ink-2)}
            Şef belge GİRMİYOR, yalnız görüyor. Tarihleri muhasebe giriyor
            ("muhasebenin girmesi gereken veriler").
            ============================================================ -->
-      <div class="card" style="margin-top:12px">
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="makine-3">
+          <button class="adim-bas" type="button" data-kart-bas="makine-3"
+                  aria-expanded="false" aria-controls="kart-ic-makine-3">
+            <span class="nk">03</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-belge"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Araç belgeleri</span>
+              <span class="adim-ozet">Muayene, sigorta, kasko</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-makine-3" hidden>
+            <div class="card">
         <div class="arasi">
-          <span class="eyebrow">Araç belgeleri</span>
+          <span></span>
           <button class="btn ghost sm" id="btn-arac-yenile" type="button">Yenile</button>
         </div>
         <div class="hint">Şantiyenizdeki ve size zimmetli araçların muayene, sigorta ve kasko
           tarihleri. Süresi dolana yakın burada uyarı çıkar; tarihleri muhasebe girer.</div>
         <div id="arac-belge"><div class="hint">Yenile'ye basın.</div></div>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
 
-    <!-- PUANTAJ -->
+    <!-- ============================================================
+         PUANTAJ — DÖRT KART (88. dosya · 7)
+         ------------------------------------------------------------
+         Eskiden tek büyük kart vardı: gün seçimi, günün özeti, istisna
+         girişi ve açıklama metni hep iç içeydi; telefonda kartın
+         tamamı ekrana sığmıyordu. Dört işi dört karta ayırdık.
+         "Puantajı kaydet" kartların DIŞINDA, en altta: bir karta ait
+         değil, hepsinin sonucu.
+         ============================================================ -->
     <section id="tab-puantaj" hidden>
-      <div class="card">
-        <span class="eyebrow">Puantaj</span>
-        <div class="grid2">
-          <div class="field"><label for="p-project">Proje <span class="req">*</span></label><select id="p-project"></select></div>
-          <div class="field"><label for="p-date">Tarih <span class="req">*</span></label><input id="p-date" type="date"></div>
-        </div>
-        <div id="att-ozet" class="ozet-kutu">Yükleniyor…</div>
-        <!-- 65. dosya · Tayfun: "Bu yazı gece ekibinin kartında yazıyor,
-             kafa karıştırıyor. Onu karttan çıkar, bir alta ayrı yaz."
-             Uyarı eskiden att-ozet gövdesinin sonuna ekleniyordu ve son
-             bölümün — yani GECE'nin — parçası gibi okunuyordu. Oysa
-             cümle iki vardiya için birden geçerli. -->
-        <div id="att-beklenen-not" class="hint" hidden style="margin:6px 2px 0"></div>
-        <div id="att-msg"></div>
-        <button class="btn ghost" id="btn-att-exc" type="button">+ Kişi durumu değiştir</button>
-        <div id="att-sec" hidden>
-          <label for="att-ara" id="att-ara-et" style="margin-top:10px;display:block">Ekipte ara</label>
-          <div class="ara-kutu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                 stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-            <input id="att-ara" placeholder="Ekipteki kişiyi arayın…" autocomplete="off">
-          </div>
-          <div id="att-sonuc" class="ara-sonuc"></div>
-        </div>
-        <!-- Tayfun, 22 Ekim: "İstisna ekle" yazısı, vardiya ekibi de ekranda
-             görününce anlamını kaybediyor. Düğme kısaldı, ne yaptığını alt
-             yazı anlatıyor.
+      <div class="sekme-bas"><span class="sb-ad">Puantaj</span>
+        <span class="sb-sayac"></span></div>
+      <div class="adimlar">
 
-             1 Kasım · 71. dosya: "Yazmadığınız herkes çalıştı sayılır"
-             kuralı KALKTI. Puantaj artık vardiyadan türetiliyor; kuleye
-             çıkmayan sondör o gün çalışmamış sayılıyor. Yazı buna göre
-             değişti. -->
-        <div class="hint">Puantaj <b>vardiyadan</b> geliyor: kuleye çıkan çalıştı
-          sayılır, çıkmayan sayılmaz. Şef, şoför ve aşçı vardiyaya girmeden
-          çalıştı sayılır. İzinli, raporlu ya da avans alan kişileri buradan ekleyin.</div>
+        <section class="adim-bant" data-kart="puantaj-1">
+          <button class="adim-bas" type="button" data-kart-bas="puantaj-1"
+                  aria-expanded="false" aria-controls="kart-ic-puantaj-1">
+            <span class="nk">01</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-takvim"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Gün seçimi</span>
+              <span class="adim-ozet">Hangi şantiye, hangi gün</span></span>
+            <span class="adim-im" id="pua-gun"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-puantaj-1" hidden>
+            <div class="card">
+              <div class="grid2">
+                <div class="field"><label for="p-project">Proje <span class="req">*</span></label><select id="p-project"></select></div>
+                <div class="field"><label for="p-date">Tarih <span class="req">*</span></label><input id="p-date" type="date"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="puantaj-2">
+          <button class="adim-bas" type="button" data-kart-bas="puantaj-2"
+                  aria-expanded="false" aria-controls="kart-ic-puantaj-2">
+            <span class="nk">02</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-saat"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Vardiya özeti</span>
+              <span class="adim-ozet">O gün kuleye kim çıktı</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-puantaj-2" hidden>
+            <div class="card">
+              <div id="att-ozet" class="ozet-kutu">Yükleniyor…</div>
+              <!-- 65. dosya · Tayfun: "Bu yazı gece ekibinin kartında yazıyor,
+                   kafa karıştırıyor. Onu karttan çıkar, bir alta ayrı yaz."
+                   Uyarı eskiden att-ozet gövdesinin sonuna ekleniyordu ve son
+                   bölümün — yani GECE'nin — parçası gibi okunuyordu. Oysa
+                   cümle iki vardiya için birden geçerli. -->
+              <div id="att-beklenen-not" class="hint" hidden style="margin:6px 2px 0"></div>
+              <div id="att-msg"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="puantaj-3">
+          <button class="adim-bas" type="button" data-kart-bas="puantaj-3"
+                  aria-expanded="false" aria-controls="kart-ic-puantaj-3">
+            <span class="nk">03</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-istisna"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">İstisnalar</span>
+              <span class="adim-ozet">İzin, rapor, avans</span></span>
+            <span class="adim-im" id="pua-ist"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-puantaj-3" hidden>
+            <div class="card">
+              <!-- Tayfun, 22 Ekim: "İstisna ekle" yazısı, vardiya ekibi de
+                   ekranda görününce anlamını kaybediyor. Düğme kısaldı, ne
+                   yaptığını alt yazı anlatıyor.
+
+                   1 Kasım · 71. dosya: "Yazmadığınız herkes çalıştı sayılır"
+                   kuralı KALKTI. Puantaj artık vardiyadan türetiliyor; kuleye
+                   çıkmayan sondör o gün çalışmamış sayılıyor. -->
+              <div class="hint">Puantaj <b>vardiyadan</b> geliyor: kuleye çıkan çalıştı
+                sayılır, çıkmayan sayılmaz. Şef, şoför ve aşçı vardiyaya girmeden
+                çalıştı sayılır. İzinli, raporlu ya da avans alan kişileri buradan ekleyin.</div>
+              <button class="btn ghost" id="btn-att-exc" type="button">+ Kişi durumu değiştir</button>
+              <div id="att-sec" hidden>
+                <label for="att-ara" id="att-ara-et" style="margin-top:10px;display:block">Ekipte ara</label>
+                <div class="ara-kutu">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                  <input id="att-ara" placeholder="Ekipteki kişiyi arayın…" autocomplete="off">
+                </div>
+                <div id="att-sonuc" class="ara-sonuc"></div>
+              </div>
+              <div id="att-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="puantaj-4">
+          <button class="adim-bas" type="button" data-kart-bas="puantaj-4"
+                  aria-expanded="false" aria-controls="kart-ic-puantaj-4">
+            <span class="nk">04</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-ekip"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Saha ekibi</span>
+              <span class="adim-ozet">Bu şantiyede görevli kişiler</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-puantaj-4" hidden>
+            <div class="card">
+              <div class="arasi">
+                <span id="ekip-ozet" class="hint">—</span>
+                <button class="btn ghost sm" id="btn-ekip-ac" type="button">Düzenle</button>
+              </div>
+              <div id="ekip-kutu" hidden>
+                <div id="ekip-liste"></div>
+                <button class="btn ghost sm" id="btn-ekip-ekle" type="button" style="margin-top:10px">+ Kişi ekle</button>
+                <div id="ekip-sec" hidden>
+                  <div class="ara-kutu" style="margin-top:10px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                    <input id="ekip-ara" placeholder="Şirket listesinde arayın…" autocomplete="off">
+                  </div>
+                  <div id="ekip-sonuc" class="ara-sonuc"></div>
+                </div>
+                <div class="hint">Çıkarmak kaydı silmez — kişinin bu sahadaki görevini bugün kapatır.
+                  Geçmiş puantaj, vardiya ve prim kayıtları yerinde kalır.</div>
+                <div id="ekip-msg"></div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <div id="att-list" style="margin-top:12px"></div>
-
-      <div class="card" style="margin-top:12px">
+      <!-- Kartların dışında: dördünün birden sonucu. -->
+      <div class="dip-kutu">
         <button class="btn" id="btn-att-save" type="button">Puantajı kaydet</button>
         <div id="att-msg2"></div>
-      </div>
-
-      <div class="card" style="margin-top:14px">
-        <div class="arasi">
-          <span class="eyebrow">Saha ekibi</span>
-          <button class="btn ghost sm" id="btn-ekip-ac" type="button">Düzenle</button>
-        </div>
-        <div id="ekip-ozet" class="hint">—</div>
-        <div id="ekip-kutu" hidden>
-          <div id="ekip-liste"></div>
-          <button class="btn ghost sm" id="btn-ekip-ekle" type="button" style="margin-top:10px">+ Kişi ekle</button>
-          <div id="ekip-sec" hidden>
-            <div class="ara-kutu" style="margin-top:10px">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                   stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-              <input id="ekip-ara" placeholder="Şirket listesinde arayın…" autocomplete="off">
-            </div>
-            <div id="ekip-sonuc" class="ara-sonuc"></div>
-          </div>
-          <div class="hint">Çıkarmak kaydı silmez — kişinin bu sahadaki görevini bugün kapatır.
-            Geçmiş puantaj, vardiya ve prim kayıtları yerinde kalır.</div>
-          <div id="ekip-msg"></div>
-        </div>
       </div>
     </section>
 
@@ -1436,61 +1886,127 @@ td:first-child{text-align:start;color:var(--ink-2)}
     </div>
 
     <!-- ÖZET -->
+        <!-- ÖZET — BEŞ KART (88. dosya · 7) -->
     <section id="tab-ozet" hidden>
-      <!-- KUYULAR — 82. dosyada vardiya sekmesinin altından buraya
-           taşındı. "Girilmiş olanlara bak" işi; vardiya DOLDURMA
-           akışının parçası değil. Düzeltme yolu da buradan geçiyor:
-           Kuyular → kuyu → vardiya kartı → Düzelt. -->
-      <div class="card">
-        <button class="katla" type="button" data-katla="recent-govde" aria-expanded="false">
-          Kuyular <span class="ek" id="recent-sayi"></span><span class="im">+</span></button>
-        <div id="recent-govde" hidden>
-          <div class="saga" style="margin-bottom:8px">
-            <button class="btn ghost sm" id="btn-recent" type="button">Yenile</button>
+      <div class="sekme-bas"><span class="sb-ad">Özet</span>
+        <span class="sb-sayac"></span></div>
+      <div class="adimlar">
+        <section class="adim-bant" data-kart="ozet-1">
+          <button class="adim-bas" type="button" data-kart-bas="ozet-1"
+                  aria-expanded="false" aria-controls="kart-ic-ozet-1">
+            <span class="nk">01</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-kuyu"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Kuyular</span>
+              <span class="adim-ozet">Girilen vardiyalar, düzeltme</span></span>
+            <span class="adim-im" id="recent-sayi"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <!-- KUYULAR — 82. dosyada vardiya sekmesinin altından buraya
+               taşındı. "Girilmiş olanlara bak" işi; vardiya DOLDURMA
+               akışının parçası değil. Düzeltme yolu da buradan geçiyor:
+               Kuyular → kuyu → vardiya kartı → Düzelt.
+               İçerideki "KUYULAR (2) +" katlaması SÖKÜLDÜ (88. dosya · 8). -->
+          <div class="adim-ic" id="kart-ic-ozet-1" hidden>
+            <div class="card">
+              <div id="recent-list"><div class="hint">Yükleniyor…</div></div>
+              <div class="saga">
+                <button class="btn ghost sm" id="btn-recent" type="button">Yenile</button>
+              </div>
+              <div id="recent-msg"></div>
+            </div>
           </div>
-          <div id="recent-list"><div class="hint">Yenile'ye basın.</div></div>
-          <div id="recent-msg"></div>
-        </div>
-      </div>
+        </section>
 
-      <div class="card">
+        <section class="adim-bant" data-kart="ozet-2">
+          <button class="adim-bas" type="button" data-kart-bas="ozet-2"
+                  aria-expanded="false" aria-controls="kart-ic-ozet-2">
+            <span class="nk">02</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-grafik"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Aylık özet</span>
+              <span class="adim-ozet">Metraj, saat, duruş ve maliyet</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-ozet-2" hidden>
+            <div class="card">
         <div class="field"><label for="s-project">Proje</label><select id="s-project"></select></div>
         <div class="field"><label for="s-month">Ay</label><input id="s-month" type="month"></div>
         <button class="btn ghost" id="btn-summary" type="button">Özeti getir</button>
         <div id="sum-msg"></div>
-      </div>
       <div id="sum-out" style="margin-top:14px;display:flex;flex-direction:column;gap:14px"></div>
+            </div>
+          </div>
+        </section>
 
-
-      <div class="card" style="margin-top:14px">
+        <section class="adim-bant" data-kart="ozet-3">
+          <button class="adim-bas" type="button" data-kart-bas="ozet-3"
+                  aria-expanded="false" aria-controls="kart-ic-ozet-3">
+            <span class="nk">03</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-takvim"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Aylık puantaj özeti</span>
+              <span class="adim-ozet">Kişi başına çalışılan gün</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-ozet-3" hidden>
+            <div class="card">
         <div class="arasi">
-          <span class="eyebrow">Aylık puantaj özeti</span>
+          <span></span>
           <button class="btn ghost sm" id="btn-att-summary" type="button">Getir</button>
         </div>
         <div id="att-summary"></div>
-      </div>
-
       <!-- Yakıt dökümü: beyan (vardiya formu) ile defter (kuleye verilen) yan yana -->
-      <div class="card" style="margin-top:14px">
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="ozet-4">
+          <button class="adim-bas" type="button" data-kart-bas="ozet-4"
+                  aria-expanded="false" aria-controls="kart-ic-ozet-4">
+            <span class="nk">04</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-tuketim"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Yakıt dökümü</span>
+              <span class="adim-ozet">Beyan ile defter karşılaştırması</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-ozet-4" hidden>
+            <div class="card">
         <div class="arasi">
-          <span class="eyebrow">Yakıt dökümü</span>
+          <span></span>
           <button class="btn ghost sm" id="btn-yakit-rapor" type="button">Getir</button>
         </div>
         <div class="hint">Vardiya formunda yazılan mazot (beyan) ile o vardiyada kuleye
           verilen yakıt (defter) karşılaştırılır. Araç yakıtı sondaj performansına girmez.</div>
         <div id="yakit-rapor"></div>
-      </div>
-
       <!-- Yöneticinin tanımladıkları. Şef GÖRÜR, değiştiremez. -->
-      <div class="card" style="margin-top:14px">
+            </div>
+          </div>
+        </section>
+
+        <section class="adim-bant" data-kart="ozet-5">
+          <button class="adim-bas" type="button" data-kart-bas="ozet-5"
+                  aria-expanded="false" aria-controls="kart-ic-ozet-5">
+            <span class="nk">05</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-tanim"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Tanımlamalar</span>
+              <span class="adim-ozet">Yöneticinin tanımladıkları</span></span>
+            <span class="adim-im"></span>
+            <span class="adim-ok" aria-hidden="true">›</span>
+          </button>
+          <div class="adim-ic" id="kart-ic-ozet-5" hidden>
+            <div class="card">
         <div class="arasi">
-          <span class="eyebrow">Tanımlamalar</span>
+          <span></span>
           <button class="btn ghost sm" id="btn-tanim" type="button">Getir</button>
         </div>
         <div class="hint">Müşteri, proje, vardiya düzeni, makineler, kuyular, ekip ve araçlar.
           Bunları yönetici tanımlar. <b>Hata görürseniz yöneticiye bildirin</b> — panelden
           değiştirilemez.</div>
         <div id="tanim-out"></div>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
   </main>
@@ -1499,17 +2015,17 @@ td:first-child{text-align:start;color:var(--ink-2)}
     <!-- Altı sekme, 79. dosyadaki sıra. Renk soldan sağa koyudan
          açığa. Bekleyen kalktı: yerini başlığın altındaki kuyruk
          şeridi aldı. -->
-    <button type="button" data-tab="vardiya" data-renk="1" aria-pressed="true">
+    <button type="button" data-tab="vardiya" aria-pressed="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M7 7l5-4 5 4M5 21h14"/></svg><span>Vardiya</span></button>
-    <button type="button" data-tab="puantaj" data-renk="2" aria-pressed="false">
+    <button type="button" data-tab="puantaj" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg><span>Puantaj</span></button>
-    <button type="button" data-tab="gider" data-renk="3" aria-pressed="false">
+    <button type="button" data-tab="gider" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H5a2 2 0 0 1-2-2z"/><circle cx="17" cy="14" r="1.2"/></svg><span>Gider</span></button>
-    <button type="button" data-tab="makine" data-renk="4" aria-pressed="false">
+    <button type="button" data-tab="makine" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span>Makine</span></button>
-    <button type="button" data-tab="malzeme" data-renk="5" aria-pressed="false">
+    <button type="button" data-tab="malzeme" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></svg><span>Malzeme</span></button>
-    <button type="button" data-tab="ozet" data-renk="6" aria-pressed="false">
+    <button type="button" data-tab="ozet" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18M7 16v-5M12 16V7M17 16v-8"/></svg><span>Özet</span></button>
   </nav>
 </div>
@@ -2424,17 +2940,71 @@ $("#f-machine").addEventListener("change", function(){
 });
 $("#f-sayac").addEventListener("input", sayacDenetle);
 $("#f-sayac").addEventListener("change", sayacDenetle);
-/* Kuyu seçilince: makine listesi daralır ve takıldığı metre kuyunun
-   bulunduğu derinlikle dolar. Şef sıfırdan yazarsa 960 yerine 96 yazıyor. */
-$("#b-well").addEventListener("change", function(){
-  var w = (MASTER && MASTER.wells || []).filter(function(x){ return x.id === $("#b-well").value; })[0];
-  if(w && w.current_depth != null) $("#b-from").value = Number(w.current_depth);
+/* ============================================================
+   KUYU SEÇİLDİ — METRE YAZILMIYOR, SÖYLENİYOR (9a · 88. dosya)
+   ------------------------------------------------------------
+   Eski davranış: `$("#b-from").value = w.current_depth`. Şefin
+   bakmadan geçmesine yol açıyordu. Artık alan boş kalıyor, kuyunun
+   metresi bilgi satırında yazıyor.
+   ============================================================ */
+function bitKuyuNotu(){
+  var w = bitSeciliKuyu();
   $("#b-from-hint").textContent = w
-    ? "Kuyu şu an " + tl(w.current_depth) + " m'de. Matkap başka metreden takıldıysa değiştirin."
-    : "Kuyu seçilince kuyunun bulunduğu metre kendiliğinden yazılır.";
+    ? "Kuyu " + tl(w.current_depth) + " m'de. Matkabın takıldığı metreyi yazın."
+    : "Kuyu seçin — kuyunun bulunduğu metre burada yazar.";
+}
+function bitSeciliKuyu(){
+  return (MASTER && MASTER.wells || []).filter(function(x){
+    return x.id === $("#b-well").value; })[0] || null;
+}
+/* ------------------------------------------------------------
+   SAPMA UYARISI — İKİ YÖNDE, KAYIT ENGELLENMEZ (9b · 88. dosya)
+   ------------------------------------------------------------
+   Tayfun'un ilk cevabı "kesin engelle"ydi, hemen düzeltti:
+   "O zaman şefi kilitlemesin, uyarı versin. Yukarıda da aşağıda
+   da uyarı versin, 2.'de kaydetsin."
+   İyi ki düzeltti: sahada tepkisiz bir düğme şefi kilitler ve o
+   gün kayıt hiç girilmez. "Kaydet düğmesi kilitlenmez" kuralının
+   istisnası yok.
+
+   ⚠ Bugünkü davranıştan tek farkı EŞİK:
+   · AŞAĞI (kuyunun bulunduğu metreden geri) — her sapma uyarıyor.
+     Matkap kuyunun gerisinden takılmaz; 2 m'lik fark bile ya yanlış
+     kuyu ya yanlış rakamdır.
+   · YUKARI — eski eşik duruyor (10 m ya da derinliğin %10'u, hangisi
+     büyükse). Kuyu derinleşirken birkaç metre ileri yazmak olağan;
+     her seferinde uyarmak uyarıyı değersizleştirir.
+   ------------------------------------------------------------ */
+function bitSapma(from){
+  var w = bitSeciliKuyu();
+  if(!w || from === null || !isFinite(from)) return null;
+  var derin = Number(w.current_depth || 0);
+  if(derin <= 0) return null;                 /* yeni kuyu: karşılaştıracak şey yok */
+  if(from < derin - 0.001) return {yon:"asagi", derin:derin, kod:w.code};
+  if(from > derin + Math.max(10, derin * 0.1)) return {yon:"yukari", derin:derin, kod:w.code};
+  return null;
+}
+function bitSapmaMetni(s, from){
+  return "Kuyu " + s.kod + " " + tl(s.derin) + " m'de, siz " + tl(from) + " m yazdınız" +
+    (s.yon === "asagi" ? " — kuyunun gerisinde" : " — kuyunun ilerisinde") +
+    ". Doğruysa <b>Matkabı tak</b>'a bir daha basın; yanlışsa metreyi düzeltin.";
+}
+/* Uyarı YAZARKEN de görünüyor: şef kaydet'e basana kadar beklemek,
+   yanlış rakamı bir kez daha onaylatmak demek. */
+function bitSapmaCiz(){
+  var from = $("#b-from").value === "" ? null : Number($("#b-from").value);
+  var s = bitSapma(from);
+  if(!s){ msg($("#b-from-uyari"), ""); return; }
+  msg($("#b-from-uyari"), bitSapmaMetni(s, from), "warn");
+}
+$("#b-well").addEventListener("change", function(){
+  bitKuyuNotu();
   BITONAY = null;
+  bitSapmaCiz();
   bitKuyuMakineYukle();
 });
+$("#b-from").addEventListener("input", function(){ BITONAY = null; bitSapmaCiz(); });
+$("#b-from").addEventListener("change", bitSapmaCiz);
 $("#f-well").addEventListener("change", function(){
   runs = []; renderRuns(); refreshState(); ekipOneriYukle(); capDusHazirla();
   /* Saat seçicileri vardiya aralığına göre kuruluyor: vardiya ya da tarih
@@ -2559,7 +3129,14 @@ function arizaSaati(gun, saat){
 /* Arıza kartının başlığı ve tarih açıklaması — seçimden otomatik dolar. */
 function arizaBaslikCiz(){
   var b = $("#ar-baslik"); if(!b) return;
-  var mk = ($("#f-machine").selectedOptions[0] || {}).textContent || "";
+  /* ⚠ ETİKETE DEĞİL DEĞERE BAKIYORUZ (86. dosya · Tayfun'un ekran
+     görüntüsü: "— seçin — · 05.11.2026").
+     Eskiden `selectedOptions[0].textContent` okunuyordu; makine
+     seçilmemişken bu "— seçin —" döndürüyor ve BOŞ DEĞİL sayılıyordu.
+     Başlık da "— seçin — · 05.11.2026" diye yazıyordu: ekranda bir
+     seçim varmış gibi duruyor, oysa hiçbir şey seçilmemiş. */
+  var mk = $("#f-machine").value
+    ? (($("#f-machine").selectedOptions[0] || {}).textContent || "") : "";
   var w  = currentWell();
   var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
   var t  = $("#f-date").value;
@@ -3844,29 +4421,102 @@ function durusSaati(){
    Başlığın tamamı dokunulabilir; küçük bir işarete nişan almak gerekmiyor.
    Sayı başlıkta yazar ki içeride bir şey olduğu belli olsun.
    ============================================================ */
-function katlaAc(id, ac){
-  var b = document.querySelector('[data-katla="' + id + '"]');
-  var g = document.getElementById(id);
-  if(!b || !g) return;
-  if(ac === undefined) ac = (b.getAttribute("aria-expanded") !== "true");
-  b.setAttribute("aria-expanded", String(ac));
-  g.hidden = !ac;
-  var im = b.querySelector(".im"); if(im) im.textContent = ac ? "−" : "+";
-}
-function katlaSayi(id, n){
+/* ============================================================
+   ÇİFT KATLAMA SÖKÜLDÜ (88. dosya · 8)
+   ------------------------------------------------------------
+   Üç yerde kartın İÇİNDE bir katlama daha vardı: Malzeme'de
+   "TAKILI MATKAPLAR (0) +" ve "SAHADAKİ STOK +", Özet'te
+   "KUYULAR (2) +". Kart zaten açılıp kapanıyor; içinde ikinci
+   bir açılır başlık olunca şef iki dokunuşla içeriğe varıyordu
+   ve ilk dokunuş hiçbir şey göstermiyordu.
+   `.katla` düğmeleri kalktı; sayıyı artık kartın açıklama satırı
+   gösteriyor. `katlaSayi` yerine `kartSayi` geldi: aynı iş, ama
+   sayının yanına NEYİN sayısı olduğu da yazılıyor. Kartın sağ
+   üstünde çıplak bir "3" gören şefin onu okuması mümkün değildi.
+   ============================================================ */
+function kartSayi(id, n, ad){
   var e = document.getElementById(id);
-  if(e) e.textContent = (n || n === 0) ? "(" + n + ")" : "";
+  if(e) e.textContent = (n || n === 0) ? (n + (ad ? " " + ad : "")) : "";
 }
-$$("[data-katla]").forEach(function(b){
-  b.addEventListener("click", function(){
-    var id = b.getAttribute("data-katla");
-    katlaAc(id);
-    /* Açılınca kendiliğinden yüklensin: iki dokunuş istemek gereksiz. */
-    if(b.getAttribute("aria-expanded") === "true"){
-      if(id === "recent-govde" && !$("#recent-list").querySelector(".kuyu-kart")) loadRecent();
-      if(id === "stok-govde"   && !$("#stok-liste").querySelector(".li, .kayit, table")) loadStok();
-      if(id === "bit-govde") renderBits();
-    }
+/* ============================================================
+   KART MOTORU — BÜTÜN PANEL (88. dosya · 1b)
+   ------------------------------------------------------------
+   Tayfun: "Aynı anda birden fazla kart açılmasın. Alttaki butona
+   tıklayıp başka kart açtığında otomatik kapansın her zaman
+   diğeri. Bütün panelde bu uygulansın."
+
+   ⚠ BU, 79. DOSYANIN KARARINI TERSİNE ÇEVİRİYOR. Orada "bir bandı
+   açmak başka bandı kapatmıyor" yazıyordu; gerekçe "tarihi
+   düzeltmek için 1. bandı açınca 4. bant kapanır ve içerik
+   parmağın altında zıplar"dı. Altı ay değil altı gün dayandı:
+   iki kart birden açıkken telefon ekranında hiçbir kartın tamamı
+   görünmüyor, şef sürekli kaydırıyor. Zıplama sorununun çözümü
+   kartı açınca ÜSTÜNE KAYDIRMAK (kartaKaydir) — ikinci kartı
+   açık bırakmak değil.
+
+   ⚠ VERİ KAYBI YOK: kapanan kartın içi `hidden` oluyor, DOM'dan
+   silinmiyor. Alanlar dolu kalıyor. Bu kuralın en riskli tarafı
+   bu olduğu için ayrı sınaması var (gercek-bant.mjs, D bölümü).
+   ============================================================ */
+function kartEl(k){ return document.querySelector('[data-kart="' + k + '"]'); }
+function kartAcikMi(k){ var s = kartEl(k); return !!s && s.classList.contains("acik"); }
+function kartKapatEl(s){
+  if(!s || !s.classList.contains("acik")) return;
+  s.classList.remove("acik");
+  var b = s.querySelector(".adim-bas"); if(b) b.setAttribute("aria-expanded", "false");
+  var i = s.querySelector(".adim-ic");  if(i) i.hidden = true;
+}
+/* `haric` dışındaki HER kartı kapatıyor — vardiya bantları dâhil.
+   Kabuk tek: iki ayrı kapatma listesi tutsaydık, vardiyadan Özet'e
+   geçen şefin ardında açık bir kart kalırdı. */
+function tumKartlariKapat(haric){
+  var i;
+  for(i = 1; i <= BANT_SON; i++){ if(haric !== "b" + i) BANT_ACIK[i] = false; }
+  $$("[data-kart]").forEach(function(s){
+    if(s.getAttribute("data-kart") !== haric) kartKapatEl(s);
+  });
+}
+function kartaKaydir(s){
+  if(!s) return;
+  var bar = document.querySelector("header.bar");
+  var ser = document.getElementById("kuyruk-serit");
+  var ust = (bar ? bar.offsetHeight : 56) + (ser && !ser.hidden ? ser.offsetHeight : 0);
+  var y = s.getBoundingClientRect().top + window.pageYOffset - ust - 8;
+  try{ window.scrollTo({top:Math.max(y,0), behavior:"smooth"}); }
+  catch(e){ window.scrollTo(0, Math.max(y,0)); }
+}
+function kartAc(k, kaydir){
+  var s = kartEl(k); if(!s) return;
+  tumKartlariKapat(k);
+  bantCiz();
+  s.classList.add("acik");
+  var b = s.querySelector(".adim-bas"); if(b) b.setAttribute("aria-expanded", "true");
+  var i = s.querySelector(".adim-ic");  if(i) i.hidden = false;
+  kartYuklendi(k);
+  if(kaydir) kartaKaydir(s);
+}
+function kartKapat(k){ kartKapatEl(kartEl(k)); }
+/* Açılınca kendiliğinden yüklensin: iki dokunuş istemek gereksiz.
+   Eskiden bu üç yükleme `[data-katla]` dinleyicisindeydi; o
+   katlamalar 88. dosyanın 8. maddesiyle söküldü. */
+function kartYuklendi(k){
+  if(k === "ozet-1"    && !$("#recent-list").querySelector(".kuyu-kart")) loadRecent();
+  if(k === "malzeme-4" && !$("#stok-liste").querySelector(".li, .kayit, table")) loadStok();
+  if(k === "malzeme-1") renderBits();
+  /* Gider'in dört bölümü eskiden yatay şeritle açılıyordu ve şerit
+     her geçişte veri çekiyordu (`giderCiz`). Artık kartı açan çekiyor. */
+  if(k === "gider-1") loadYakit();
+  if(k === "gider-2") loadHarcama();
+  if(k === "gider-3") kiraYukle();
+  if(k === "gider-4") avansYukle();
+  if(k === "makine-1") bakimYukle();
+  if(k === "makine-2") acikArizaYukle();
+  if(k === "makine-3") aracBelgeYukle();
+}
+$$("[data-kart-bas]").forEach(function(bas){
+  bas.addEventListener("click", function(){
+    var k = bas.getAttribute("data-kart-bas");
+    if(kartAcikMi(k)) kartKapat(k); else kartAc(k, true);
   });
 });
 
@@ -3943,6 +4593,9 @@ function bantaKaydir(n){
   catch(e){ window.scrollTo(0, Math.max(y,0)); }
 }
 function bantAc(n, kaydir){
+  /* Tek kart açık kuralı (88. dosya · 1b): bu bandı açmak öteki
+     bantları VE diğer sekmelerin kartlarını kapatıyor. */
+  tumKartlariKapat("b" + n);
   BANT_ACIK[n] = true; bantCiz();
   if(kaydir) bantaKaydir(n);
 }
@@ -3972,27 +4625,39 @@ function bantCiz(){
     b.classList.toggle("acik",  acik);
     b.classList.toggle("ok",    !acik && gec && !eks.length);
     b.classList.toggle("eksik", !acik && gec && eks.length > 0);
+    /* ⚠ RAKAM HİÇ DEĞİŞMİYOR (88. dosya · 4 · Tayfun: "biten adım:
+       ikon yeşil, rakam DEĞİŞMİYOR"). Eskiden tamamlanan bandın
+       rakamı "✓" oluyordu; o zaman kart sırasını kaybediyordu ve
+       "3. adıma dön" demek anlamsızlaşıyordu. Durumu artık yalnız
+       ikon kabının rengi söylüyor: turuncu açık, yeşil tamam. */
+    nk.textContent = (n < 10 ? "0" : "") + n;
     if(acik){
-      nk.textContent = String(n); ozet.textContent = ""; im.textContent = "";
+      ozet.textContent = ""; im.textContent = "";
       /* Özet bandı açıldığında kart tazeleniyor: 4. adımda bir rakam
          değişip geri dönülmüş olabilir. */
       if(n === BANT_SON) ozetKartCiz();
     } else if(gec && eks.length){
-      nk.textContent = String(n);
       ozet.textContent = eks.join(", ");
       im.textContent = "eksik";
     } else if(gec){
-      nk.textContent = "✓";
       ozet.textContent = bantOzet(n);
       im.textContent = "Düzelt";
     } else {
-      nk.textContent = String(n);
       /* Özet bandı uğranmamışken bile ne durumda olduğunu söylüyor:
-         şef merdivenin en altına bakıp kaydedebilir mi görsün. */
+         şef listenin en altına bakıp kaydedebilir mi görsün. */
       ozet.textContent = (n === BANT_SON) ? bantOzet(n) : "";
       im.textContent = "";
     }
   }
+  vardiyaSayacCiz();
+}
+/* Sağ üstteki sayaç: beş doldurulabilir adımdan kaçı tamam.
+   6. adım (Özet) sayılmıyor — doldurulan bir şey değil, okunan. */
+function vardiyaSayacCiz(){
+  var e = document.getElementById("vardiya-sayac"); if(!e) return;
+  var t = 0;
+  for(var i = 1; i <= 5; i++){ if(!stepProblems(i).length) t++; }
+  e.textContent = t + " / 5 adım tamam";
 }
 $$("[data-bant-bas]").forEach(function(bas){
   bas.addEventListener("click", function(){
@@ -4603,16 +5268,89 @@ function refreshQueue(){
             setTimeout(function(){ sil.dataset.emin = ""; sil.textContent = "Bu kaydı sil"; }, 4000);
             return;
           }
-          obDel(it.id).then(refreshQueue)
+          /* Bildirilmiş bir kayıt siliniyorsa bildirimi de kapanıyor:
+             yöneticinin bakacağı bir şey kalmadı (59. adım). */
+          var pid = (it.payload && it.payload.project_id) || "";
+          obDel(it.id)
+            .then(function(){
+              if(it.bildirildi && pid && sb)
+                return sb.rpc("saha_bildirim_kapat", {p_project:pid, p_ref:it.id})
+                  .then(function(){}, function(){});
+            })
+            .then(refreshQueue)
             .then(function(){ msg($("#sync-msg"), "Kayıt silindi: " + it.title, "ok"); });
         });
         d.appendChild(sil);
+        /* ============================================================
+           YÖNETİCİYE BİLDİR (79. dosya · 6 · 59. adım)
+           ------------------------------------------------------------
+           Kapalı aya düşen kaydı şef çözemiyor — ayı yönetici açıyor.
+           Bugüne kadar tek yol telefon etmekti.
+
+           ⚠ ÇEVRİMDIŞIYKEN DE BASILABİLİYOR: bildirim kuyruğa giriyor,
+           bağlantı gelince gidiyor. Düğmeyi pasif yapmak, tam
+           bağlantının olmadığı anda — yani sorunun en çok yaşandığı
+           anda — işe yaramaz hâle getirirdi.
+           ⚠ AYNI KAYIT İÇİN İKİNCİ KEZ BASILIRSA yeni satır açılmıyor
+           (sunucu tarafı `saha_bildir` bakıyor). Düğme yine de
+           basılabilir kalıyor: şef "gitti mi" diye merak edip bir daha
+           basarsa bir şey bozulmuyor.
+           ============================================================ */
+        var bil = document.createElement("button");
+        bil.type = "button"; bil.className = "btn ghost sm";
+        bil.style.cssText = "margin-top:8px;margin-inline-start:8px";
+        bil.textContent = it.bildirildi ? "Yöneticiye bildirildi" : "Yöneticiye bildir";
+        bil.disabled = !!it.bildirildi;
+        bil.addEventListener("click", function(){
+          bil.disabled = true; bil.textContent = "Yöneticiye bildirildi";
+          yoneticiyeBildir(it);
+        });
+        d.appendChild(bil);
       }
       box.appendChild(d);
     });
   });
 }
 function enqueue(item){ return obAdd(item).then(refreshQueue).then(function(){ if(navigator.onLine) return syncAll(); }); }
+
+/* ------------------------------------------------------------
+   YÖNETİCİYE BİLDİR — kuyruğa giren bir çağrı (59. adım)
+   ------------------------------------------------------------
+   Bildirimin kendisi de kuyruk kaydı: çevrimdışı basılırsa bekliyor,
+   bağlantı gelince gidiyor. Takılan kaydın üstüne `bildirildi`
+   işareti konuyor ki ekran yeniden çizilince düğme "bildirildi"
+   kalsın — yoksa her tazelemede şef basmamış gibi görünüyordu.
+   ------------------------------------------------------------ */
+function yoneticiyeBildir(it){
+  var pid = (it.payload && (it.payload.project_id || it.payload.proje_id)) ||
+            ($("#f-project") ? $("#f-project").value : "") || "";
+  if(!pid){
+    msg($("#sync-msg"), "Bildirim gönderilemedi: kaydın şantiyesi bulunamadı.", "err");
+    return;
+  }
+  return enqueue({ id:uuid(), kind:"bildirim", created:Date.now(),
+    title:"Yöneticiye bildirildi", sub: it.title,
+    payload:{ project_id:pid, ref:it.id, baslik:it.title,
+              detay:it.sub || null, sebep:it.hata || null,
+              tarih:(it.payload && it.payload.work_date) || null } })
+    .then(function(){ return obIsaretle(it.id, {bildirildi:true}); })
+    .then(refreshQueue)
+    .then(function(){ msg($("#sync-msg"),
+      "Yöneticiye bildirildi. Ay açılınca kayıt kendiliğinden gidecek.", "ok"); });
+}
+/* Kuyruk kaydının üstüne alan yazar (silmeden). `obHata` zaten aynı
+   işi hata metni için yapıyor; bu genel hâli. */
+function obIsaretle(id, alanlar){
+  return tx("readwrite").then(function(s){ return new Promise(function(res){
+    var g = s.get(id);
+    g.onsuccess = function(){
+      var v = g.result; if(!v){ res(); return; }
+      Object.keys(alanlar).forEach(function(k){ v[k] = alanlar[k]; });
+      var p = s.put(v); p.onsuccess = function(){ res(); }; p.onerror = function(){ res(); };
+    };
+    g.onerror = function(){ res(); };
+  }); });
+}
 
 /* ---------------- kaydetme ---------------- */
 function filesOf(input){ var out=[]; for(var i=0;i<input.files.length;i++) out.push(input.files[i]); return out; }
@@ -5439,7 +6177,17 @@ function syncAll(){
      vardiya girip üçüncüsü takılsa kalan yedisi sonsuza kadar bekliyordu.
      Artık takılan kenara ayrılır, sebebi üstüne yazılır, gerisi gider. */
   var takilan = 0;
+  /* 59. adım · "Ay açılıp kayıt gidince satır kendiliğinden kalkar."
+     Bildirilen kayıtların listesini önden alıyoruz; turun sonunda
+     kuyrukta kalmayanlar GİTMİŞ demektir, bildirimleri kapanıyor.
+     Kapatmayı tetikleyiciye bırakamıyoruz: takılan kaydın merkezde
+     karşılığı yok, hangi satırın hangi bildirime ait olduğunu
+     yalnız kuyruk biliyor. */
+  var bildirilenler = [];
   return obAll().then(function(items){
+    bildirilenler = items.filter(function(x){ return x.bildirildi; })
+      .map(function(x){ return {ref:x.id,
+        pid:(x.payload && x.payload.project_id) || ""}; });
     items.sort(function(a,b){ return a.created - b.created; });
     return items.reduce(function(ch, it){
       return ch.then(function(){
@@ -5456,6 +6204,8 @@ function syncAll(){
       });
     }, Promise.resolve());
   }).then(function(){
+    return bildirimleriKapat(bildirilenler);
+  }).then(function(){
     syncing = false;
     esitlendi();
     msg($("#sync-msg"), takilan
@@ -5466,6 +6216,23 @@ function syncAll(){
     syncing = false; msg($("#sync-msg"), "Gönderilemedi: " + hataTr(e && e.message ? e.message : e), "err"); return refreshQueue();
   });
 }
+/* Kuyruktan düşen bildirilmiş kayıtların bildirimini kapatır (59. adım).
+   Hata yutuluyor: bildirim kapanmazsa yönetici karttan elle kapatabilir,
+   ama eşitlemeyi bu yüzden kırmak kayıt göndermeyi engellerdi. */
+function bildirimleriKapat(liste){
+  if(!liste || !liste.length || !sb) return Promise.resolve();
+  return obAll().then(function(kalan){
+    var hala = {}; kalan.forEach(function(x){ hala[x.id] = true; });
+    var gidenler = liste.filter(function(x){ return !hala[x.ref] && x.pid; });
+    return gidenler.reduce(function(ch, x){
+      return ch.then(function(){
+        return sb.rpc("saha_bildirim_kapat", {p_project:x.pid, p_ref:x.ref})
+          .then(function(){}, function(){});
+      });
+    }, Promise.resolve());
+  }, function(){});
+}
+
 /* yerel kuyu kimliklerini gerçek kimliklerle eşleştirme */
 function wellMap(){ try { return JSON.parse(localStorage.getItem("sp_wellmap") || "{}"); } catch(e){ return {}; } }
 function wellMapSet(localId, realId){
@@ -5692,6 +6459,15 @@ function sendItem(it, tenant){
     return uploadPhotos(it.photos, tenant, it.payload.project_id, "shift", it.payload.shift_id)
       .then(function(){ return obDel(it.id); });
   }
+  /* 59. adım · sahadan merkeze takıldı bildirimi. Sunucu aynı
+     `ref` için ikinci satır açmıyor, bu yüzden yeniden denemek
+     güvenli. */
+  if(it.kind === "bildirim"){
+    return sb.rpc("saha_bildir", {p_project:it.payload.project_id, p_ref:it.payload.ref,
+                                  p_title:it.payload.baslik, p_detail:it.payload.detay,
+                                  p_reason:it.payload.sebep, p_date:it.payload.tarih})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
   if(it.kind === "expense"){
     return sb.from("expenses").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .select("id").single().then(function(r){ if(r.error) throw r.error;
@@ -5742,7 +6518,7 @@ function loadRecent(){
     });
     var durumAd = {planned:"planlandı", drilling:"devam ediyor",
                    completed:"sonlandı", cancelled:"iptal"};
-    katlaSayi("recent-sayi", kuyular.length);
+    kartSayi("recent-sayi", kuyular.length, "kuyu");
     $("#recent-list").innerHTML = kuyular.map(function(w){
       var bitti = (w.status === "completed" || w.status === "cancelled");
       /* Bir satırda tek dokunma hedefi: satırın kendisi açıyor, ayrı
@@ -5775,7 +6551,7 @@ function loadRecent(){
     /* Vardiya kaydedildikten sonra liste kendiliğinden açılır ve yeni
        yazılan kuyu genişlemiş gelir: şef yazdığının düştüğünü görsün. */
     if(SON_KUYU){
-      katlaAc("recent-govde", true);
+      kartAc("ozet-1");
       var hd = document.querySelector('.kuyu-ac[data-well="' + SON_KUYU + '"]');
       if(hd) kuyuVardiyalari(hd);
       SON_KUYU = null;
@@ -5924,7 +6700,7 @@ function bitOmru(b){
 }
 function renderBits(){
   var box = $("#bit-list");
-  katlaSayi("bit-sayi", OPENBITS.length);
+  kartSayi("bit-sayi", OPENBITS.length, "matkap");
   if(!OPENBITS.length){ box.innerHTML = '<div class="hint">Takılı matkap yok.</div>'; }
   else {
     box.innerHTML = OPENBITS.map(function(b){
@@ -5958,8 +6734,43 @@ function renderBits(){
       " (" + tl(b.from_m) + " m'den" + (om === null ? "" : ", şu ana kadar " + tl(om) + " m") + ")";
     sel.appendChild(o);
   });
-  if(cur) sel.value = cur;
+  /* ============================================================
+     9e (88. dosya) · LİSTE EN SON TAKILANLA AÇILIYOR
+     ------------------------------------------------------------
+     Şefin seçimi varsa ona dokunulmuyor. Yoksa "— seçin —" yerine
+     en son takılan matkap seçili geliyor: çoğu gün çıkarılan zaten
+     odur. Sessiz hazır değer olmasın diye marka ve seri numarası
+     altındaki satırda yazıyor — 9a'da hazır değerin tehlikesini
+     gördük, aynı hatayı burada yapmıyoruz.
+     ============================================================ */
+  if(cur && OPENBITS.some(function(b){ return b.bit_id === cur; })) sel.value = cur;
+  else {
+    var son = enSonTakilan();
+    sel.value = son ? son.bit_id : "";
+  }
+  bitAcikNotCiz();
 }
+/* Kuyruktaki (pending) kayıt her zaman en yenisidir — bu dakika
+   takıldı. Yoksa takılma gününe bakıyoruz; aynı gün birkaç matkap
+   takıldıysa listedeki son satır kazanıyor. */
+function enSonTakilan(){
+  var bek = OPENBITS.filter(function(b){ return b.pending; });
+  if(bek.length) return bek[bek.length - 1];
+  var en = null;
+  OPENBITS.forEach(function(b){
+    if(!en || String(b.installed_at || "") >= String(en.installed_at || "")) en = b;
+  });
+  return en;
+}
+function bitAcikNotCiz(){
+  var e = document.getElementById("b-open-not"); if(!e) return;
+  var b = OPENBITS.filter(function(x){ return x.bit_id === $("#b-open").value; })[0];
+  if(!b){ e.textContent = ""; return; }
+  e.innerHTML = "<b>" + esc(b.brand || "—") + "</b> · seri no " +
+    (b.serial ? esc(b.serial) : "yazılmamış") +
+    (b.installed_at ? " · " + trd2(b.installed_at) + " tarihinde takıldı" : "");
+}
+$("#b-open").addEventListener("change", bitAcikNotCiz);
 function loadBits(){
   renderBits();
   if(!navigator.onLine || !sb) return;
@@ -6056,7 +6867,7 @@ function loadStok(){
       : "";
     if(!rows.length){ $("#stok-liste").innerHTML =
       '<div class="hint">Bu şantiyede henüz stok hareketi girilmemiş.</div>' + hicSatir; return; }
-    katlaSayi("stok-sayi", rows.length);
+    kartSayi("stok-sayi", rows.length, "kalem");
     $("#stok-liste").innerHTML = rows.map(function(x){
       var kalan = Number(x.kalan||0);
       var renk = kalan <= 0 ? "stok-bitti" : (kalan < 5 ? "stok-az" : "");
@@ -6138,25 +6949,27 @@ $("#btn-bit-install").addEventListener("click", function(){
   if(brand === "__diger") brand = $("#b-yeni").value.trim();
   var from = $("#b-from").value === "" ? null : Number($("#b-from").value);
   if(!mach || !dia || !brand || from === null){ msg($("#bit-msg"), "Makine, çap, marka ve takıldığı metre zorunlu.", "err"); return; }
-  var kuyu = (MASTER && MASTER.wells || []).filter(function(x){ return x.id === $("#b-well").value; })[0];
+  var kuyu = bitSeciliKuyu();
   if(!kuyu){ msg($("#bit-msg"), "Kuyu seçin — makine listesi ve takıldığı metre kuyuya göre kuruluyor.", "err"); return; }
-  var derin = Number(kuyu.current_depth || 0);
-  var sapma = Math.abs(derin - from);
-  /* Kuyudan derine takmak ya da belirgin sapma: bir kere sor. */
-  if(BITONAY !== from && (from > derin + 0.5 || (derin > 0 && sapma > Math.max(10, derin * 0.1)))){
+  /* ⚠ İKİ YÖNDE UYARI, İKİNCİ BASIŞTA KAYIT (9b · 88. dosya).
+     Düğme pasif olmuyor, kayıt engellenmiyor — yalnız bir kez
+     soruluyor. "Kaydet düğmesi kilitlenmez" kuralı bozulmuyor. */
+  var sap = bitSapma(from);
+  if(sap && BITONAY !== from){
     BITONAY = from;
-    msg($("#bit-msg"), "<b>Emin misiniz?</b> " + kuyu.code + " kuyusu " + tl(derin) +
-      " m'de, siz " + tl(from) + " m yazdınız" +
-      (from > derin ? " — kuyunun derinliğinden fazla" : "") +
-      ". Doğruysa <b>Matkabı tak</b>'a bir daha basın; yanlışsa metreyi düzeltin.", "err");
+    msg($("#bit-msg"), "<b>Emin misiniz?</b> " + bitSapmaMetni(sap, from), "warn");
     return;
   }
   BITONAY = null;
   var localId = "localbit:" + uuid();
   var machName = ($("#b-machine").selectedOptions[0]||{textContent:""}).textContent;
   var wellName = $("#b-well").value ? ($("#b-well").selectedOptions[0].textContent.split(" ·")[0]) : null;
+  /* `serial` yerel kopyaya da yazılıyor: çıkar kartındaki marka+seri
+     bilgi satırı çevrimdışı da dolsun (9e). Eskiden yalnız kuyruk
+     yüküne giriyordu ve bağlantı gelene kadar seri no görünmüyordu. */
   OPENBITS.push({bit_id:localId, brand:brand, diameter:dia, machine:machName, well:wellName,
-                 from_m:from, installed_at:todayStr(), pending:true});
+                 serial:$("#b-serial").value || "", from_m:from,
+                 installed_at:todayStr(), pending:true});
   cacheBits(OPENBITS);
   enqueue({ id:uuid(), kind:"bit_install", created:Date.now(),
     title:"Matkap takıldı · " + brand, sub: machName + " · " + tl(from) + " m",
@@ -6164,10 +6977,15 @@ $("#btn-bit-install").addEventListener("click", function(){
               hardness:null, diameter:dia, serial:$("#b-serial").value || "", from_m:from,
               date:todayStr(),
               second_hand: $("#b-cikma").checked,
-              prev_meters: $("#b-onceki").value === "" ? 0 : Number($("#b-onceki").value) } })
+              /* ⚠ 9c: ekran alanı kalktı, veri alanı DURUYOR. Çıkma
+                 matkabın "önceki ömrü" artık sorulmuyor çünkü şef onu
+                 bilemez; sunucu sözleşmesi değişmiyor. */
+              prev_meters: 0 } })
   .then(function(){ $("#b-serial").value="";
-    $("#b-cikma").checked = false; $("#b-onceki").value = "";
-    $("#b-from").value = (kuyu && kuyu.current_depth != null) ? Number(kuyu.current_depth) : "";
+    $("#b-cikma").checked = false;
+    /* Takıldığı metre BOŞ kalıyor (9a): bir sonraki matkap için de
+       hazır değer verilmiyor. */
+    $("#b-from").value = ""; msg($("#b-from-uyari"), "");
     msg($("#bit-msg"), "Matkap kaydedildi. Yanlışsa yukarıdaki listeden " +
         "<b>İptal</b> ile geri alabilirsiniz — metraj işlemeye başlamadan.", "ok"); });
 });
@@ -6264,9 +7082,19 @@ function beklenenNot(metin){
   el.hidden = !metin;
   el.textContent = metin || "";
 }
+/* Kartlar kapalıyken de ne seçili olduğu okunsun: 01'in sağında gün,
+   03'ün sağında istisna sayısı. Kartı açmadan görülmezse şef her
+   seferinde açıp kapatıyor. */
+function puaBasliklar(){
+  var g = document.getElementById("pua-gun");
+  if(g) g.textContent = $("#p-date").value ? trd2($("#p-date").value) : "";
+  var k = Object.keys(ATT_IST).length;
+  kartSayi("pua-ist", k ? k : null, "istisna");
+}
 function attOzet(){
   var n = ekip().length, k = Object.keys(ATT_IST).length;
   var kutu = $("#att-ozet");
+  puaBasliklar();
   beklenenNot("");                  /* her çizimde sıfırla */
   if(!n){
     kutu.innerHTML = "Bu şantiyede bu tarihte görevli kimse yok. " +
@@ -6337,12 +7165,18 @@ function attOzet(){
   /* ---- ÇALIŞMADI: eskiden bu kişiler sessizce "çalıştı" sayılıyordu ---- */
   var cm = PUANTAJ_GUN.calismadi || [];
   if(cm.length){
-    h += '<div class="ayrac-ust"><b>ÇALIŞMADI</b> ' +
+    /* ⚠ KATLANIR (88. dosya · 7 · Tayfun). Amasya'da sahaya atanmış
+       13 işçi var ve bir güne 3-4'ü çıkıyor; kalan 9-10 isim bu
+       listeye düşüyor ve kartın yarısını kaplıyordu. Şefin her gün
+       okuduğu şey değil — bir şey ters gidince bakılan şey. */
+    h += '<div class="ayrac-ust"><details class="acilir">' +
+         '<summary><b>ÇALIŞMADI</b> ' +
          '<span class="hint">' + cm.length + ' kişi · hiçbir vardiyada yok</span>' +
+         '</summary>' +
          '<div class="hint" style="margin-top:3px;opacity:.75">' +
          cm.map(function(x){ return esc(x.ad); }).join(" · ") + "</div>" +
          '<div class="hint" style="margin-top:3px">Biri çalıştıysa yukarıdan ' +
-         'o vardiyaya <b>+ Kişi</b> ile ekleyin.</div></div>';
+         'o vardiyaya <b>+ Kişi</b> ile ekleyin.</div></details></div>';
   }
 
   h += '<div style="margin-top:10px"><b>' + (PUANTAJ_GUN.calisan_sayisi || 0) +
@@ -6991,42 +7825,29 @@ $("#btn-tanim").addEventListener("click", function(){
 });
 
 /* ---------------- sekmeler ---------------- */
-/* Gider sekmesinin açık bölümü. Şerit bunu değiştiriyor (41. dosya, 3).
-   51. pakette dört bant olacak; şimdilik şerit duruyor. */
-var GIDER_BOLUM = "yakit";
-/* "kuyruk" listeden çıktı: Bekleyen artık sekme değil, kuyruk
+/* ⚠ `GIDER_BOLUM` ve `giderCiz` KALKTI (88. dosya · 7). Gider'in
+   dört bölümü yatay şeritle değiştiriliyordu; şerit kalktı, dört
+   bölüm artık dört kart. Yüklemeleri `kartYuklendi` yapıyor:
+   şef kartı açmadan veri çekmenin anlamı yok, sahada her istek
+   gecikme demek.
+   "kuyruk" da listede değil: Bekleyen artık sekme değil, kuyruk
    şeridine dokununca açılan sayfa (79. dosya). */
-var TUM_BOLUM = ["vardiya","malzeme","makine","gserit","yakit","nakit","kira","avans",
-                 "puantaj","ozet"];
-
-function giderCiz(){
-  $$('.segment[data-seg="gider"] button').forEach(function(o){
-    o.setAttribute("aria-pressed", String(o.dataset.v === GIDER_BOLUM)); });
-  ["yakit","nakit","kira","avans"].forEach(function(t){
-    $("#tab-"+t).hidden = (t !== GIDER_BOLUM); });
-  if(GIDER_BOLUM === "yakit") loadYakit();
-  if(GIDER_BOLUM === "nakit") loadHarcama();
-  if(GIDER_BOLUM === "kira")  kiraYukle();
-  if(GIDER_BOLUM === "avans") avansYukle();
-}
-$$('.segment[data-seg="gider"] button').forEach(function(b){
-  b.addEventListener("click", function(){ GIDER_BOLUM = b.dataset.v; giderCiz(); });
-});
+var TUM_BOLUM = ["vardiya","gider","malzeme","makine","puantaj","ozet"];
 
 $$("#tabs button").forEach(function(b){
   b.addEventListener("click", function(){
     $$("#tabs button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
-    var map = {vardiya:["vardiya"], malzeme:["malzeme"], makine:["makine"],
-               gider:["gserit"],
-               puantaj:["puantaj"], ozet:["ozet"]};
-    var acik = map[b.dataset.tab] || [];
-    TUM_BOLUM.forEach(function(t){ $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
-    /* Boşluğun koyu zemini yalnız Vardiya'da (86. dosya). */
-    sekmeIsaretle(b.dataset.tab);
-    if(b.dataset.tab === "puantaj"){ attCiz(); attLoad(true); }
-    if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
-    if(b.dataset.tab === "makine"){ bakimYukle(); acikArizaYukle(); aracBelgeYukle(); }
-    if(b.dataset.tab === "gider") giderCiz();
+    var ad = b.dataset.tab;
+    TUM_BOLUM.forEach(function(t){ $("#tab-"+t).hidden = (t !== ad); });
+    sekmeIsaretle(ad);
+    /* ⚠ SEKME DEĞİŞİNCE AÇIK KART KALMIYOR (88. dosya · 1b). Yoksa
+       şef Gider'den Vardiya'ya dönüp geri geldiğinde kartı açık
+       buluyor ve "ben bunu kapatmıştım" diyor. Alanlar DOLU
+       kalıyor — yalnız kapanıyor. */
+    tumKartlariKapat(null);
+    bantCiz();
+    if(ad === "puantaj"){ attCiz(); attLoad(true); }
+    if(ad === "malzeme"){ loadBits(); }
     window.scrollTo(0,0);
   });
 });
@@ -7037,7 +7858,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "52";
+var SURUM = "53";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

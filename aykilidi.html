@@ -111,6 +111,16 @@ function boot(){
        gösterilmiyor, şantiye kendiliğinden geliyor. */
     if(pr.length === 1){ sel.value = pr[0].id; $("#alan-proje").hidden = true; }
     else if(pr.length){ sel.value = pr[0].id; }
+    /* Genel bakış'taki "Sahadan bildirilenler" kartından "Ayı aç" ile
+       gelindiğinde hangi şantiye olduğu adreste yazıyor (59. adım).
+       Yönetici buraya varıp bir de listeden şantiye aramasın — hangi
+       sahayı açacağını zaten bildirim söylüyor.
+       ⚠ Adresten gelen kimlik DOĞRULANIYOR: listede yoksa yok sayılıyor,
+       körlemesine `sel.value` yazmak seçiciyi boşa düşürürdü. */
+    try{
+      var istek = new URLSearchParams(location.search).get("proje");
+      if(istek && pr.some(function(p){ return p.id === istek; })) sel.value = istek;
+    }catch(e){}
     if(!pr.length){ msg($("#msg"), "Görebileceğiniz şantiye yok.", "warn"); return; }
     listele();
   });
