@@ -445,8 +445,25 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .akis .adim.simdi .ad{color:var(--warn);font-weight:600}
 .akis .adim.bekl .ad{color:var(--ink-3)}
 
-/* `.segment` 84. dosyada silindi: tek kullanıcısı Ayarlar'daki tema
-   ve yazı boyutu seçimleriydi, ikisi de kalktı. */
+/* ============================================================
+   ⚠ `.segment` SİLİNMEYE ÇALIŞILDI, GERİ KONDU (86. dosya)
+   ------------------------------------------------------------
+   84. dosyada Ayarlar'dan tema ve yazı boyutu seçimlerini
+   kaldırırken "`.segment`in tek kullanıcısı bunlardı" diye bu
+   kuralı da sildim. YANLIŞTI: Gider sekmesinin alt şeridi
+   (Yakıt · Harcama · Kiralama · Avans) da `.segment` kullanıyor
+   (`[data-seg="gider"]`). Silinince o şerit biçimsiz dört düğmeye
+   düşüyordu — 52. sürüm zip'ine böyle girdi ve Tayfun diğer
+   sekmelere bakarken yakalandı.
+   Dersi: bir CSS kuralını silmeden önce kullanıcılarını SAYMAK
+   gerek; "tek kullanıcısı şu" demek yetmiyor. Artık sınaması var
+   (gercek-bant.mjs, N2 bölümü): Gider alt şeridinin düğmeleri
+   gerçekten biçimli mi, seçili olan vurgulu mu.
+   ============================================================ */
+.segment{display:flex;gap:6px}
+.segment button{flex:1 1 0;border:1px solid var(--line);background:none;color:var(--ink-2);
+  border-radius:10px;min-height:46px;font-size:13.5px;cursor:pointer;font-weight:500;width:auto}
+.segment button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
 
 /* Tek kartın içinde bölüm ayıracı (84. dosya · 3. madde): dört kart
    yerine tek kart, bölümler çizgiyle ayrılıyor. */
