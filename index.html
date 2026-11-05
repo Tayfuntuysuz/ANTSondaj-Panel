@@ -37,9 +37,6 @@ try{localStorage.removeItem("sp_tema");localStorage.removeItem("sp_yazi");}catch
   --pq:#0f2537;--hq:#12708f;--nq:#4bb3d6;--pw:#7cc9e3;--kaya:#a8815a;--kaya-2:#c6a988;
   --good:#1f7a55;--good-soft:#e3f3ec;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae6e3;
   --yazi:15px;--yazi-alan:16px;
-  /* 84. dosya · 4. madde: bant kartının içi beyaz DEĞİL; alanlar
-     beyaz. İki tonun arası, güneşte de görülecek kadar açık. */
-  --kart-ic:#EDF2F6;
   color-scheme:light;
 }
 /* Koyu tema yok (84. dosya). `color-scheme:light` yukarıda duruyor:
@@ -77,6 +74,19 @@ header.bar .firma .alt{font-size:13px;color:#B8C6D1;white-space:nowrap;
 header.bar .marka{flex:none}
 @media (max-width:430px){ header.bar .firma b{font-size:17.5px} }
 main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+/* ============================================================
+   BANTLARIN ALTINDAKİ BOŞLUK (86. dosya · Tayfun)
+   ------------------------------------------------------------
+   "6. Vardiya Özeti'nin alt kısmı olduğu gibi bembeyaz boş duruyor,
+   buranın da beyaz ekran olmaması gerekiyor."
+   Boşluk 6. bandın koyusunu alıyor: merdiven dibe kadar iniyor ve
+   sekme çubuğunun koyu yeşiline bağlanıyor.
+   ⚠ YALNIZ VARDİYA SEKMESİNDE. Öteki sekmelerin kartları hâlâ açık
+   zemine göre çizili; koyu zemine koyarsak beyaz kartlar boşlukta
+   yüzer. Onlar 53. pakette ortak arayüze geçecek (86. dosya, 7).
+   Sekme `main`e öznitelik yazıyor; `:has()`e güvenmiyoruz. */
+main[data-sekme="vardiya"]{background:var(--bant-6)}
+main[data-sekme="vardiya"] > #tab-vardiya{flex:1 1 auto}
 /* ALT SEKMELER — petrol yeşili, soldan sağa koyudan açığa (79. dosya).
    Yedi sekme 390 px'e sığmıyordu, sonuncusu ekrandan taşıyordu;
    Bekleyen kalkınca altıya indi. */
@@ -248,12 +258,28 @@ td:first-child{text-align:start;color:var(--ink-2)}
 /* ALTI BASAMAK (82. dosya): 6. bant "Özet" eklendi. 79. dosyanın
    kuralı — bant sayısı değişirse ilk ve son renk sabit kalır,
    aradakiler eşit aralıkla bölünür. */
+/* ============================================================
+   RENK MERDİVENİ — AÇIKTAN KOYUYA (86. dosya · Tayfun)
+   ------------------------------------------------------------
+   "Yukarıdan açık renkten koyuya doğru gitsin. Vardiya en açığı
+   olsun, Vardiya Özeti en koyusu."
+   Yön 79. dosyada tersiydi (1 en koyu). Renkler aynı altı basamak,
+   yalnız sıraları ters. Akış yukarıdan aşağı dolduruluyor ve
+   koyulaşarak bitiyor; 6. bant alttaki sekme çubuğuna bağlanıyor.
+   ============================================================ */
 :root{
-  --bant-1:#16212A;--bant-2:#223344;--bant-3:#36485A;--bant-4:#5A6E80;
-  --bant-5:#9BAEBC;--bant-6:#D6E0E7;
-  --bant-ink-1:#fff;--bant-ink-2:#fff;--bant-ink-3:#fff;--bant-ink-4:#fff;
-  --bant-ink-5:#16212A;--bant-ink-6:#16212A;
+  --bant-1:#D6E0E7;--bant-2:#9BAEBC;--bant-3:#5A6E80;--bant-4:#36485A;
+  --bant-5:#223344;--bant-6:#16212A;
+  --bant-ink-1:#16212A;--bant-ink-2:#16212A;--bant-ink-3:#fff;
+  --bant-ink-4:#fff;--bant-ink-5:#fff;--bant-ink-6:#fff;
   --turuncu:#E8731A;--bant-cerceve:#B9C6D0;
+  /* ⚠ KART İÇİ ARTIK BANDA GÖRE (84. dosya · 4. maddenin devamı).
+     Kuralın amacı "kart bandın üstünde ayrışsın", belirli bir renk
+     kodu değil. Merdiven ters çevrilince tek sabit ton yetmiyor:
+     açık bantta #EDF2F6 banda yapışıyor, koyu bantta zaten ayrışıyor.
+     Açık bantlarda kart beyaza, koyu bantlarda soluk tona gidiyor. */
+  --kart-ic-acik:#F1F5F8;   /* 1–2. bant: banttan da, beyaz alandan da ayrı */
+  --kart-ic-koyu:#EDF2F6;   /* 3–6. bant: koyu zeminin üstünde */
 }
 /* Bantlar ekranı boydan boya kaplıyor, aralarında boşluk yok. */
 .adimlar{margin:-16px -16px 0;display:flex;flex-direction:column}
@@ -297,8 +323,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
    nerede bittiği yalnız 1,5 px çerçeveden anlaşılıyordu ve
    telefonda güneşte o çerçeve görünmüyordu.
    ============================================================ */
-.adim-ic > .card{background:var(--kart-ic);border:1.5px solid var(--bant-cerceve);
+.adim-ic > .card{background:var(--kart-ic-koyu);border:1.5px solid var(--bant-cerceve);
   border-radius:14px;color:var(--ink);padding:16px;gap:12px}
+/* Açık bantlarda (1–2) kart beyaza yaklaşıyor, yoksa banda yapışıyor. */
+.adim-bant[data-renk="1"] .adim-ic > .card,
+.adim-bant[data-renk="2"] .adim-ic > .card{background:var(--kart-ic-acik)}
 /* Alanlar kartın içinde BEYAZ: ton farkı dokunulacak yeri gösteriyor. */
 .adim-ic > .card input,
 .adim-ic > .card select,
@@ -1600,9 +1629,24 @@ try{
 var cfg = { url: localStorage.getItem("sp_url") || "", key: localStorage.getItem("sp_key") || "" };
 var sb = null, MASTER = null;
 
+/* Hangi sekmedeyiz — `main`e yazılıyor. Bantların altındaki koyu
+   boşluk buna bağlı (86. dosya): öteki sekmelerin kartları hâlâ açık
+   zemine göre çizili, onların altı koyu olmamalı. */
+function sekmeIsaretle(ad){
+  /* ⚠ `main` ile `#scr-app` AYNI eleman — ayrı sanıp `#scr-app main`
+     aramıştım, hiçbir şey bulmuyordu. */
+  var m = document.getElementById("scr-app");
+  if(m) m.setAttribute("data-sekme", ad || "vardiya");
+}
 function show(id){
   ["scr-setup","scr-login","scr-kapi","scr-app"].forEach(function(s){ $("#"+s).hidden = (s !== id); });
   $("#tabs").hidden = (id !== "scr-app");
+  /* Açılış sekmesi Vardiya; öznitelik ilk çizimde de yazılmalı,
+     yoksa boşluk kullanıcı sekmeye dokunana kadar beyaz kalıyor. */
+  if(id === "scr-app"){
+    var b = document.querySelector('#tabs button[aria-pressed="true"]');
+    sekmeIsaretle(b ? b.dataset.tab : "vardiya");
+  }
   /* Kuyruk şeridi yalnız uygulama ekranında (79. dosya). */
   if(typeof seritCiz === "function") seritCiz();
   /* Sekme çubuğu yeni görünür oldu: yüksekliği şimdi ölçülebilir. */
@@ -6977,6 +7021,8 @@ $$("#tabs button").forEach(function(b){
                puantaj:["puantaj"], ozet:["ozet"]};
     var acik = map[b.dataset.tab] || [];
     TUM_BOLUM.forEach(function(t){ $("#tab-"+t).hidden = (acik.indexOf(t) === -1); });
+    /* Boşluğun koyu zemini yalnız Vardiya'da (86. dosya). */
+    sekmeIsaretle(b.dataset.tab);
     if(b.dataset.tab === "puantaj"){ attCiz(); attLoad(true); }
     if(b.dataset.tab === "malzeme"){ loadBits(); loadStok(); }
     if(b.dataset.tab === "makine"){ bakimYukle(); acikArizaYukle(); aracBelgeYukle(); }
