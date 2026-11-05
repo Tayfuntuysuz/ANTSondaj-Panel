@@ -2,10 +2,15 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<script>/* tema: sayfa boyanmadan once uygulanir, yoksa koyu temada beyaz parlama olur */
-try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
-if(_t)document.documentElement.setAttribute("data-tema",_t);
-if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
+<script>/* 84. dosya · Tayfun: "Her zaman açık tema."
+   KOYU TEMA TAMAMEN SÖKÜLDÜ. Sebebi görünüm tercihi değil: bant renk
+   merdiveni (koyudan açığa altı basamak) açık zemin üzerine kurulu;
+   koyu temada basamaklar birbirine yaklaşıyor ve şef hangi adımda
+   olduğunu renkten okuyamıyordu. İki merdiveni ayrı ayrı doğru tutmak
+   da her değişiklikte iki kat iş demekti.
+   Eski kurulumlarda kalmış seçim siliniyor, yoksa `data-tema="koyu"`
+   özniteliği duruyor ve artık karşılığı olmayan bir seçici bırakıyor. */
+try{localStorage.removeItem("sp_tema");localStorage.removeItem("sp_yazi");}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Collarlog</title>
 <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
@@ -32,24 +37,14 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
   --pq:#0f2537;--hq:#12708f;--nq:#4bb3d6;--pw:#7cc9e3;--kaya:#a8815a;--kaya-2:#c6a988;
   --good:#1f7a55;--good-soft:#e3f3ec;--warn:#9a6413;--warn-soft:#fbeed6;--bad:#a93a2f;--bad-soft:#fae6e3;
   --yazi:15px;--yazi-alan:16px;
+  /* 84. dosya · 4. madde: bant kartının içi beyaz DEĞİL; alanlar
+     beyaz. İki tonun arası, güneşte de görülecek kadar açık. */
+  --kart-ic:#EDF2F6;
   color-scheme:light;
 }
-/* Koyu tema — üç durum:
-   data-tema yok → cihazı takip eder · "acik" → hep açık · "koyu" → hep koyu.
-   Seçim <head> içindeki küçük betikle, sayfa boyanmadan önce uygulanır. */
-@media (prefers-color-scheme:dark){:root:not([data-tema="acik"]){
-  --bg:#0b161d;--card:#112430;--card-2:#16303d;--line:#25404e;--line-soft:#1c3340;
-  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
-  --accent:#4bb3d6;--accent-2:#7cc9e3;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#081720;
-  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
-  color-scheme:dark;}}
-:root[data-tema="koyu"]{
-  --bg:#0b161d;--card:#112430;--card-2:#16303d;--line:#25404e;--line-soft:#1c3340;
-  --ink:#e6eef2;--ink-2:#a3bcc8;--ink-3:#7d99a6;
-  --accent:#4bb3d6;--accent-2:#7cc9e3;--accent-soft:#12303d;--accent-ink:#8fd3ea;--navy:#081720;
-  --good:#4cbb8c;--good-soft:#123328;--warn:#d8a44b;--warn-soft:#332715;--bad:#e2776a;--bad-soft:#35191a;
-  color-scheme:dark;}
-:root[data-yazi="buyuk"]{--yazi:17px;--yazi-alan:18px}
+/* Koyu tema yok (84. dosya). `color-scheme:light` yukarıda duruyor:
+   cihazı koyu olan telefonda tarayıcı form alanlarını kendiliğinden
+   koyuya boyamasın. */
 *{box-sizing:border-box}
 /* overflow-x:hidden html/body'yi kaydırma kabı yapıyor ve position:sticky'yi
    bozuyordu. clip aynı işi yapıyor ama kaydırma kabı oluşturmuyor. */
@@ -79,15 +74,8 @@ header.bar .firma b{font-size:19px;font-weight:700;letter-spacing:.2px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 header.bar .firma .alt{font-size:13px;color:#B8C6D1;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-header.bar .marka,header.bar .hesapbtn{flex:none}
+header.bar .marka{flex:none}
 @media (max-width:430px){ header.bar .firma b{font-size:17.5px} }
-/* Hesap düğmesi: mevcut Ayarlar ekranını açıyor. İkinci bir hesap
-   ekranı yok — Bekleyen'den gelen hesap bilgisi ve çıkış da oraya
-   taşındı (79. dosya). */
-.hesapbtn{width:40px;height:40px;border-radius:50%;border:1.5px solid #5B6E7D;
-  background:none;color:#fff;cursor:pointer;padding:0;
-  display:flex;align-items:center;justify-content:center}
-.hesapbtn svg{width:20px;height:20px}
 main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
 /* ALT SEKMELER — petrol yeşili, soldan sağa koyudan açığa (79. dosya).
    Yedi sekme 390 px'e sığmıyordu, sonuncusu ekrandan taşıyordu;
@@ -160,6 +148,12 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
    Sınıf adı duruyor ama hiçbir şey yapmıyor — JS'teki toggle'lar
    temizlendi, geriye kalan bir çağrı olursa görünüm bozulmasın. */
 .btn.eksikli{}
+/* 84. dosya · 4. madde · Tayfun: "İlerle düğmesi daha koyu olsun."
+   Ghost düğme olarak kart zemininden ayrışmıyordu; artık DOLU ve koyu.
+   Adımı kapatan düğme bu — şefin bakacağı tek yer. "Vardiyayı kaydet"
+   ana vurgu rengiyle kalıyor, ikisi karışmasın. */
+.btn.ilerle{background:var(--accent-ink);border-color:var(--accent-ink);
+  color:var(--dolu-yazi);font-weight:600}
 /* Örnekteki "ikincil" düğme: kesikli çerçeve, nötr zemin (81. dosya). */
 .btn.kesikli{background:var(--line-soft);color:var(--ink-2);
   border:1.5px dashed var(--bant-cerceve);font-weight:600}
@@ -175,7 +169,11 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .pua-kisi{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);
   border-radius:999px;padding:4px 6px 4px 11px;font-size:13.5px}
 .pua-kisi .sil{min-height:0;padding:0 4px;font-size:16px;line-height:1}
-.bar .marka{display:flex;align-items:center;line-height:0}
+/* Marka DÜĞME oldu (84. dosya · 3. madde): dokunma alanı 44 px,
+   aksi halde eldivenle ıskalanıyor. */
+.bar .marka{display:flex;align-items:center;justify-content:center;line-height:0;
+  background:none;border:0;padding:0 2px;min-width:44px;min-height:44px;
+  cursor:pointer;color:#fff}
 .bar .marka img{height:28px;width:auto;display:block}
 .ara-sonuc{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
 .ara-sonuc button{display:block;width:100%;text-align:start;border:0;background:none;padding:11px 12px;
@@ -257,14 +255,6 @@ td:first-child{text-align:start;color:var(--ink-2)}
   --bant-ink-5:#16212A;--bant-ink-6:#16212A;
   --turuncu:#E8731A;--bant-cerceve:#B9C6D0;
 }
-@media (prefers-color-scheme:dark){:root:not([data-tema="acik"]){
-  --bant-1:#0B1116;--bant-2:#131D26;--bant-3:#1B2832;--bant-4:#24343F;
-  --bant-5:#30424F;--bant-6:#3C4E5C;
-  --bant-ink-5:#fff;--bant-ink-6:#fff;--bant-cerceve:#2b4150;}}
-:root[data-tema="koyu"]{
-  --bant-1:#0B1116;--bant-2:#131D26;--bant-3:#1B2832;--bant-4:#24343F;
-  --bant-5:#30424F;--bant-6:#3C4E5C;
-  --bant-ink-5:#fff;--bant-ink-6:#fff;--bant-cerceve:#2b4150;}
 /* Bantlar ekranı boydan boya kaplıyor, aralarında boşluk yok. */
 .adimlar{margin:-16px -16px 0;display:flex;flex-direction:column}
 .adim-bant{background:var(--bant);color:var(--bant-ink)}
@@ -296,9 +286,23 @@ td:first-child{text-align:start;color:var(--ink-2)}
    değil (81. dosya). */
 .adim-bant.eksik .adim-im{color:var(--turuncu);opacity:1;font-weight:600;text-decoration:none}
 .adim-ic{padding:0 20px 18px}
-/* Bandın içindeki form kartı — örnekten: beyaz, köşe 14px, dolgu 16px. */
-.adim-ic > .card{background:var(--card);border:1.5px solid var(--bant-cerceve);
+/* ============================================================
+   84. dosya · 4. madde · KART ZEMİNİ ve ALAN ZEMİNİ AYRI
+   ------------------------------------------------------------
+   Tayfun (işaretli ekran görüntüsüyle): "Kart içleri tam beyaz
+   olmasın. Mavi ve kırmızı işaretli alanlar birbirinden farklı
+   olmalı. Seçim alanları ille, onun dışında kalan beyaz alanlar."
+   Yani: DOLDURULAN ALAN beyaz kalıyor, alanı ÇEVRELEYEN kart
+   zemini soluk bir ton alıyor. Önceden ikisi de #fff idi; kartın
+   nerede bittiği yalnız 1,5 px çerçeveden anlaşılıyordu ve
+   telefonda güneşte o çerçeve görünmüyordu.
+   ============================================================ */
+.adim-ic > .card{background:var(--kart-ic);border:1.5px solid var(--bant-cerceve);
   border-radius:14px;color:var(--ink);padding:16px;gap:12px}
+/* Alanlar kartın içinde BEYAZ: ton farkı dokunulacak yeri gösteriyor. */
+.adim-ic > .card input,
+.adim-ic > .card select,
+.adim-ic > .card textarea{background:var(--card)}
 /* Son bandın altında sekme çubuğu kadar boşluk: son alan çubuğun
    arkasında kalmasın (81. dosya, 6a). */
 .adimlar::after{content:"";display:block;height:14px}
@@ -325,6 +329,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
   align-items:flex-start;gap:2px}
 .oz-eksik .metin-dugme{text-align:start;white-space:normal}
 .msg{font-size:13px;padding:10px 12px;border-radius:10px;border-inline-start:3px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+/* ⚠ BOŞ MESAJ KUTUSU YER KAPLAMASIN. `msg(el,"")` elemanı siliyor ama
+   DOM'da bırakıyor; dolgusu ve zemini olduğu için ekranda ince bir
+   soluk şerit kalıyordu — 390 px ekran görüntüsünde sayaç alanının
+   altında yakalandı (84. dosya). */
+.msg:empty{display:none;padding:0;border:0}
 .msg.err{border-inline-start-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
 .msg.ok{border-inline-start-color:var(--good);background:var(--good-soft);color:var(--good)}
 .msg.warn{border-inline-start-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
@@ -436,37 +445,32 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .akis .adim.simdi .ad{color:var(--warn);font-weight:600}
 .akis .adim.bekl .ad{color:var(--ink-3)}
 
-/* --- seçim düğmeleri --- */
-.segment{display:flex;gap:6px}
-.segment button{flex:1 1 0;border:1px solid var(--line);background:none;color:var(--ink-2);
-  border-radius:10px;min-height:46px;font-size:13.5px;cursor:pointer;font-weight:500;width:auto}
-.segment button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--dolu-yazi);font-weight:600}
+/* `.segment` 84. dosyada silindi: tek kullanıcısı Ayarlar'daki tema
+   ve yazı boyutu seçimleriydi, ikisi de kalktı. */
+
+/* Tek kartın içinde bölüm ayıracı (84. dosya · 3. madde): dört kart
+   yerine tek kart, bölümler çizgiyle ayrılıyor. */
+.ayar-ayirac{height:1px;background:var(--line);margin:14px -16px}
 
 /* ============================================================
    KUYRUK ŞERİDİ (79. dosya)
    ------------------------------------------------------------
    Bekleyen sekmesinin yerine geçiyor. Başlığın hemen altında,
-   HER SEKMEDE görünür. Kuyruk boşken de kaybolmuyor: koddaki
-   eski not "sahada en çok sorulan soru 'gitti mi'" diyor,
-   sessizlik o sorunun cevabı değil. Boşken ince yeşil satır.
+   HER SEKMEDE görünür — ama YALNIZ SORUN VARKEN (84. dosya · 1.
+   madde). Boşken yeşil "hepsi gönderildi" satırı duruyordu; zamanın
+   neredeyse tamamında yeşil olan bir uyarı uyarı değildir, yalnız
+   yer kaplar. Bekleyen kayıt ve son eşitleme hesap panelinde yazıyor.
    Ay kilidi uyarısı da bu şeritte çıkıyor — eskiden 1. adımın
    içindeydi ve bant kapanınca kayboluyordu.
    ============================================================ */
 .kserit{position:sticky;top:var(--bar-h,56px);z-index:21;display:block;width:100%;
   border:0;border-bottom:1px solid var(--line);text-align:start;cursor:pointer;
-  font:inherit;padding:7px 16px;min-height:40px;
-  background:var(--good-soft);color:var(--good)}
+  font:inherit;padding:7px 16px;min-height:40px}
 .kserit .ks-ad{font-size:12.5px;font-weight:600;display:block}
 .kserit .ks-alt{font-size:11.5px;opacity:.85;display:block}
 .kserit[data-durum="bekliyor"]{background:#FFF3E3;color:#7A3F06}
 .kserit[data-durum="takildi"]{background:#FDE8E6;color:#9B1C14}
 .kserit[data-durum="kilit"]{background:#FDE8E6;color:#9B1C14}
-:root[data-tema="koyu"] .kserit[data-durum="bekliyor"]{background:#332715;color:#f0c27a}
-:root[data-tema="koyu"] .kserit[data-durum="takildi"],
-:root[data-tema="koyu"] .kserit[data-durum="kilit"]{background:#35191a;color:#f0a79c}
-@media (prefers-color-scheme:dark){:root:not([data-tema="acik"]) .kserit[data-durum="bekliyor"]{background:#332715;color:#f0c27a}
-  :root:not([data-tema="acik"]) .kserit[data-durum="takildi"],
-  :root:not([data-tema="acik"]) .kserit[data-durum="kilit"]{background:#35191a;color:#f0a79c}}
 
 /* --- alttan açılan sayfa: Gönderilmeyen kayıtlar --- */
 .sayfa-ort{position:fixed;inset:0;z-index:55;background:var(--perde);
@@ -519,22 +523,19 @@ td:first-child{text-align:start;color:var(--ink-2)}
       <b id="bar-firma">—</b>
       <span class="alt" id="bar-alt"></span>
     </div>
-    <!-- ⚠ BEYAZ SÜRÜM. `collarlog-ikon.svg` koyu lacivert halkalı;
+    <!-- 84. dosya · 3. madde · Tayfun: "Sağ üstte sadece logomuzun
+         ikonu olsun. Üstüne basıldığında kullanıcı bilgisi ve ayarlar
+         gelsin." İki düğme vardı (marka + kişi simgesi); marka ana
+         sayfaya gidiyor, kişi simgesi ayarları açıyordu. Artık TEK
+         düğme ve işi ayarları açmak — ana sayfaya gitmek sekmelerin işi.
+
+         ⚠ BEYAZ SÜRÜM. `collarlog-ikon.svg` koyu lacivert halkalı;
          koyu başlıkta kaybolur. Aynı hatayı 2 Kasım'da yan barda
          yapmıştım, ekran görüntüsü yakalamıştı. Turuncu yalnız
          halkanın içindeki nokta — paketin kendi kuralı. -->
-    <a class="marka" href="." aria-label="Collarlog"><img src="logo/collarlog-ikon-beyaz.svg"
-      alt="Collarlog" onerror="this.onerror=null;this.src='logo/collarlog-logo-beyaz.svg'"></a>
-    <!-- Hesap ve ayarlar. Tek ekran: tema, yazı boyutu, dil, şifre,
-         eşitleme + hesap bilgisi + çıkış. -->
-    <!-- Baş harf değil KİŞİ SİMGESİ (81. dosya): örnekte öyle, ve
-         baş harf hesabın kime ait olduğunu söylemiyor — adı zaten
-         Ayarlar'ın içinde yazıyor. -->
-    <button id="who" class="hesapbtn" type="button" aria-label="Hesap ve ayarlar">
-      <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="7" r="3.3" fill="none"
-        stroke="currentColor" stroke-width="1.8"/><path d="M3.5 17c1-3.3 3.6-5 6.5-5s5.5 1.7 6.5 5"
-        fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
+    <button class="marka" id="who" type="button"
+            aria-label="Hesap ve ayarlar"><img src="logo/collarlog-ikon-beyaz.svg"
+      alt="Collarlog" onerror="this.onerror=null;this.src='logo/collarlog-logo-beyaz.svg'"></button>
   </header>
 
   <!-- KUYRUK ŞERİDİ — Bekleyen sekmesinin yerine (79. dosya).
@@ -613,7 +614,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </div>
           <div class="field" style="margin-top:10px"><label for="f-paper">Kâğıt form no</label><input id="f-paper" inputmode="numeric" placeholder="001369"></div>
         </div>
-        <button class="btn ghost ilerle" type="button" data-next="2">İlerle →</button>
+        <button class="btn ilerle" type="button" data-next="2">İlerle →</button>
       </div>
           </div>
         </section>
@@ -628,24 +629,32 @@ td:first-child{text-align:start;color:var(--ink-2)}
           </button>
           <div class="adim-ic" id="bant-ic-2" hidden>
       <div class="card" data-pane="2" style="margin-top:0">
-        <!-- ŞANTİYE ŞEFİ (54. dosya): vardiyaya değil projeye bağlı sabit
-             personel. Seçilemez, her gün kendiliğinden. Yönetici
-             tanımlamadıysa satır HİÇ çıkmıyor — boş alan yer kaplamasın. -->
-        <div class="field" id="sef-satir" hidden>
-          <label>Şantiye şefi</label>
-          <div class="bant" id="sef-ad" style="border-radius:10px">—</div>
-        </div>
+        <!-- 84. dosya · 6. madde · Tayfun: "Ekip kısmında otomatik gelen
+             şantiye şefini kaldır." Şef projeye bağlı sabit personel,
+             vardiyanın ekibi değil; satırı her gün tekrar okumak işe
+             yaramıyordu. Yönetici panelinde duruyor. -->
         <div class="field"><label for="f-driller1">Sondör <span class="req">*</span></label><select id="f-driller1" data-req="2"></select></div>
         <div class="field"><label>İşçi / yardımcı</label>
           <div id="f-helpers"></div>
           <button class="btn ghost sm" id="btn-helper-add" type="button" style="margin-top:6px">İşçi ekle</button>
         </div>
+        <div class="hint" id="ekip-not" hidden></div>
         <div class="hint" id="ekip-kaynak"></div>
-        <div class="grid2">
-          <div class="field"><label for="f-eng1">Motor başlangıç <span class="req">*</span></label><input id="f-eng1" type="time" value="08:00" data-req="2"></div>
-          <div class="field"><label for="f-eng2">Motor bitiş <span class="req">*</span></label><input id="f-eng2" type="time" value="20:00" data-req="2"></div>
+        <!-- 84. dosya · 7. madde: motor başlangıç/bitiş SAATİ yerine
+             makinenin SAAT SAYACI. Vardiyanın motor saati bu okuma ile
+             bir önceki okumanın farkı (58. adım, makine_sayac_akisi). -->
+        <div class="field"><label for="f-sayac">Makine saat sayacı <span class="req">*</span></label>
+          <!-- ⚠ ONDALIK AYIRACI NOKTA. `input[type=number]` virgülü kabul
+               etmiyor: "1240,5" yazan şef "12405" yazmış oluyor ve bu
+               sayaç farkını on katına çıkarıyor — bakım takibini sessizce
+               bozar. Örnek nokta ile veriliyor, altındaki uyarı da
+               mantıksız farkı yakalıyor (aşağıdaki sayacDenetle). -->
+          <input id="f-sayac" type="number" step="0.1" min="0" inputmode="decimal"
+                 placeholder="örn. 1240.5" data-req="2">
+          <div class="hint" id="sayac-not">Vardiya başında makinenin saat sayacından okunan değer.</div>
+          <div class="msg" id="sayac-uyari"></div>
         </div>
-        <button class="btn ghost ilerle" type="button" data-next="3">İlerle →</button>
+        <button class="btn ilerle" type="button" data-next="3">İlerle →</button>
       </div>
           </div>
         </section>
@@ -761,7 +770,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <div id="ar-msg"></div>
           <div id="acik-ariza" style="margin-top:10px"></div>
         </div>
-        <button class="btn ghost ilerle" type="button" data-next="4" style="margin-top:12px">İlerle →</button>
+        <button class="btn ilerle" type="button" data-next="4" style="margin-top:12px">İlerle →</button>
       </div>
           </div>
         </section>
@@ -890,7 +899,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <button class="btn ghost sm" id="btn-olcum-add" type="button"
             style="align-self:flex-start">Ölçüm ekle</button>
         </div>
-        <button class="btn ghost ilerle" type="button" data-next="5" style="margin-top:12px">İlerle →</button>
+        <button class="btn ilerle" type="button" data-next="5" style="margin-top:12px">İlerle →</button>
       </div>
           </div>
         </section>
@@ -914,7 +923,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
           style="align-self:flex-start">Malzeme ekle</button>
         <div class="field" style="margin-top:12px"><label for="f-note">Kullanılan malzemeler açıklaması</label>
           <textarea id="f-note" placeholder="Örn: 2 adet matkap ucu, bentonit takviyesi"></textarea></div>
-        <button class="btn ghost ilerle" type="button" data-next="6" style="margin-top:12px">İlerle →</button>
+        <button class="btn ilerle" type="button" data-next="6" style="margin-top:12px">İlerle →</button>
       </div>
           </div>
         </section>
@@ -935,7 +944,11 @@ td:first-child{text-align:start;color:var(--ink-2)}
           <button class="adim-bas" type="button" data-bant-bas="6"
                   aria-expanded="false" aria-controls="bant-ic-6">
             <span class="nk">6</span>
-            <span class="adim-yazi"><span class="adim-ad">Özet</span>
+            <!-- 84. dosya · 9. madde: "Özet" → "Vardiya Özeti". Tek
+                 başına "Özet" neyin özeti olduğunu söylemiyordu; alt
+                 sekmede de "Özet" yazıyor ve ikisi karışıyordu. Sekme
+                 adı kısa kalıyor, orada altı sekme 390 px'e sığacak. -->
+            <span class="adim-yazi"><span class="adim-ad">Vardiya Özeti</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
           </button>
@@ -945,7 +958,7 @@ td:first-child{text-align:start;color:var(--ink-2)}
               <div class="kc-mesaj" id="step-msg"></div>
               <div class="kc-mesaj" id="shift-msg"></div>
               <button class="btn" id="btn-save-shift" type="button">Vardiyayı kaydet</button>
-              <button class="btn" id="btn-save-nak" type="button" hidden>Nakliye gününü kaydet</button>
+              <button class="btn" id="btn-save-nak" type="button" hidden>Nakliye vardiyasını kaydet</button>
               <div id="nak-msg"></div>
             </div>
           </div>
@@ -1746,7 +1759,7 @@ function fillSelects(){
   isciCiz();
   if(pr.length === 1) $("#f-project").value = pr[0].id;
   fillWells();
-  sefSatiriCiz();
+  ekipNotuCiz();
   markaListesiCiz();
   basligiCiz();
   refreshState();
@@ -1792,8 +1805,13 @@ function basligiCiz(){
   var saha = projeAdi($("#f-project").value) ||
              (pr.length === 1 ? (pr[0].site_name || pr[0].name) : "") ||
              projeAdi(sonSaha());
-  var rol = p ? (ROL_AD[p.role] || p.role) : "";
-  $("#bar-alt").textContent = [rol, saha].filter(Boolean).join(" · ");
+  /* 84. dosya · 2. madde · Tayfun: "Firma adının altında rol yerine
+     kullanıcının adı yazsın." Rol şefin kendi ekranında her gün aynı
+     yazıyordu — hangi hesapla girdiğini söylemiyordu. Rol Ayarlar'ın
+     içinde duruyor. Ad yoksa e-posta, o da yoksa role düşülüyor:
+     alt satır boş kalırsa şantiye adı da kaybolur. */
+  var kim = p ? (p.full_name || p.email || ROL_AD[p.role] || p.role) : "";
+  $("#bar-alt").textContent = [kim, saha].filter(Boolean).join(" · ");
 }
 /* Son seçilen şantiye telefonda saklanıyor: uygulama açılır açılmaz
    başlık boş kalmasın. */
@@ -2012,7 +2030,14 @@ function fillVardiya(){
     o.textContent = d.label + " · " + saatKisa(d.starts) + "–" + saatKisa(d.ends);
     el.appendChild(o);
   });
-  [["nak-gun","Nakliye günü"],["nak-gece","Nakliye gece"]].forEach(function(p){
+  /* 84. dosya · 5. madde · Tayfun: "Gündüz Nakliye / Gece Nakliye."
+     Eski adlar "Nakliye günü" ve "Nakliye gece" idi: ilki bütün günü,
+     ikincisi tek vardiyayı anlatıyordu ama listede yan yana duran iki
+     ad bunu söylemiyordu. Vardiya listesindeki öbür satırlar
+     "Gündüz 08:00–20:00" diye başlıyor; nakliye de aynı kalıba girdi.
+     ⚠ DEĞERLER DEĞİŞMEDİ (nak-gun / nak-gece): kayıtlı vardiyalar ve
+     bütün dallanmalar bu dizgilere bakıyor. */
+  [["nak-gun","Gündüz Nakliye"],["nak-gece","Gece Nakliye"]].forEach(function(p){
     var o = document.createElement("option"); o.value = p[0]; o.textContent = p[1]; el.appendChild(o);
   });
   if(cur) el.value = cur;
@@ -2038,16 +2063,12 @@ function vardiyaModu(){
          (d.next_day ? " · gece yarısını geçer" : "") +
          " · seçtiğiniz günün raporuna yazılır")
       : "";
-    /* Motor saatleri vardiyanın saatiyle açılır; şef gerekirse değiştirir. */
-    if(d && !MOTOR_ELLE){ $("#f-eng1").value = saatKisa(d.starts); $("#f-eng2").value = saatKisa(d.ends); }
+    /* 84. dosya · 7. madde: vardiyanın saatinden motor saati TÜRETİLMİYOR
+       artık. Sayaç elle okunuyor; buraya hiçbir şey yazılmıyor. */
     tarihOner(d);
   }
   refreshState();
 }
-var MOTOR_ELLE = false;
-["#f-eng1","#f-eng2"].forEach(function(s){
-  $(s).addEventListener("input", function(){ MOTOR_ELLE = true; });
-});
 
 /* ---------------- ekip: tek sondör + çoklu işçi ---------------- */
 var ISCI = [];          /* seçili işçi/yardımcı personel kimlikleri */
@@ -2055,23 +2076,126 @@ var ISCI = [];          /* seçili işçi/yardımcı personel kimlikleri */
    Şef hem işçi hem sondör listesinden düşüyor. Süzgeç GÖREVE göre —
    projeye atanmış şefi süzmekten sağlam: şef alanı henüz doldurulmamış
    bir şantiyede de doğru çalışıyor. */
-function ekipAdayi(p){ return p && p.kind !== "santiye_sefi"; }
+/* 84. dosya · 10. madde · Tayfun: "O şantiyeye tanımlanmış personel
+   listesi gelmesi lazım, tüm şirket personeli değil."
+   33. dosyadaki kural makine, araç ve kuyuda uygulanmıştı; personelde
+   atlanmıştı. Bütün sahaları gören bir hesapta sondör listesi şirketin
+   tamamını veriyordu (93 etkin personel), Amasya ekibi ise 20 kişi.
+   58. adım `bootstrap_data`ya `santiye_ekip` eşlemesini ekledi:
+   şantiye kimliği → o şantiyeye atanmış etkin personel kimlikleri.
+
+   ⚠ SÜZGEÇ BOŞSA SÜZMÜYORUZ. Şantiyeye hiç personel atanmamışsa
+   (yeni açılan saha) boş bir liste şefin vardiyayı hiç girememesine
+   yol açar. O durumda eski davranışa düşüyor ve bunu EKRANDA
+   yazıyoruz — sessizce bütün şirketi göstermek, sorunun kendisiydi. */
+function sahaEkipHaritasi(){
+  return (MASTER && MASTER.santiye_ekip) || null;
+}
+function sahaEkipListesi(){
+  var h = sahaEkipHaritasi(); if(!h) return null;
+  var pid = $("#f-project") ? $("#f-project").value : "";
+  if(!pid) return null;
+  var l = h[pid];
+  return (l && l.length) ? l : null;
+}
+/* Seçili şantiyenin personeli mi? Eşleme yoksa ya da boşsa herkes. */
+function sahadaMi(p){
+  var l = sahaEkipListesi(); if(!l) return true;
+  return l.indexOf(p.id) >= 0;
+}
+/* Ekip süzgeci eksik mi çalışıyor? Bant altındaki not için. */
+function sahaEkibiEksik(){
+  return !!(MASTER && MASTER.santiye_ekip) && !sahaEkipListesi() &&
+         !!($("#f-project") && $("#f-project").value);
+}
+function ekipAdayi(p){ return p && p.kind !== "santiye_sefi" && sahadaMi(p); }
 function yardimcilar(){
   return ((MASTER && MASTER.personnel) || [])
     .filter(function(p){ return p.kind !== "sondor" && ekipAdayi(p); });
 }
-/* Projenin şefi — bootstrap_data projects satırında geliyor. */
+function sondorler(){
+  return ((MASTER && MASTER.personnel) || [])
+    .filter(function(p){ return p.kind === "sondor" && ekipAdayi(p); });
+}
+/* Ekip bandının altındaki açıklama satırı. */
+function ekipNotuCiz(){
+  var el = $("#ekip-not"); if(!el) return;
+  if(sahaEkibiEksik()){
+    el.hidden = false;
+    el.textContent = "Bu şantiyeye personel atanmamış, bütün şirket " +
+      "listesi gösteriliyor. Ofisten şantiye personelini tanımlayın.";
+  } else {
+    el.hidden = true; el.textContent = "";
+  }
+}
+/* 84. dosya · 6. madde: şantiye şefi satırı Ekip adımından kalktı.
+   `projeSefi()` DURUYOR — rapor altlığı ve yönetici kartı okuyor. */
 function projeSefi(){
   var pid = $("#f-project") ? $("#f-project").value : "";
   if(!pid) return null;
   var p = ((MASTER && MASTER.projects) || []).filter(function(x){ return x.id === pid; })[0];
   return (p && p.chief_name) ? {id:p.chief_personnel_id, ad:p.chief_name} : null;
 }
-function sefSatiriCiz(){
-  var el = $("#sef-satir"); if(!el) return;
-  var s = projeSefi();
-  el.hidden = !s;
-  if(s) $("#sef-ad").textContent = s.ad;
+
+/* ---------------- makine saat sayacı (84. dosya · 7. madde) ----------
+   Elle yazılan sayı yanlış olabilir ve yanlış sayaç sessizce yanlış
+   motor saati üretir. Alanın altına SON OKUMAYI yazıyoruz; şef yazdığı
+   sayıyı görerek karşılaştırıyor. Çevrimdışıyken sorgu yapılmıyor:
+   yanlış "son okuma yok" demek, hiç yazmamaktan kötü. */
+/* Düzeltmeye açılan kayıt sayaçtan ÖNCE girildiyse true: sayaç zorunlu
+   olmuyor ve alanın altında eski saatler yazıyor. */
+var DUZELT_ESKI_MOTOR = false;
+function sayacNotuCiz(kart){
+  var el = $("#sayac-not"); if(!el) return;
+  var temel = "Vardiya başında makinenin saat sayacından okunan değer.";
+  if(kart && DUZELT_ESKI_MOTOR){
+    el.textContent = "Bu kayıt sayaç alanından önce girilmiş (motor " +
+      saatKisa(kart.motor_bas) + "–" + saatKisa(kart.motor_bit) +
+      "). Sayaç zorunlu değil; boş bırakırsanız eski saatler korunuyor.";
+    return;
+  }
+  var mak = $("#f-machine") ? $("#f-machine").value : "";
+  SON_SAYAC = null; sayacDenetle();
+  if(!mak || !navigator.onLine || !sb){ el.textContent = temel; return; }
+  sb.rpc("son_sayac", {p_machine: mak}).then(function(r){
+    if(r.error || !r.data || !r.data.length){ el.textContent = temel; return; }
+    var s = r.data[0];
+    SON_SAYAC = s;
+    el.textContent = temel + " Son okuma: " + tl(s.sayac, 1) +
+      " · " + (s.okuma_gunu || "") + ".";
+    sayacDenetle();
+  }).catch(function(){ el.textContent = temel; });
+}
+/* ============================================================
+   SAYAÇ DENETİMİ — elle yazılan sayı sessizce yanlış olabilir
+   ------------------------------------------------------------
+   İki tuzak:
+   · ONDALIK VİRGÜLÜ: `input[type=number]` virgülü yutuyor, "1240,5"
+     → "12405". Fark on katına çıkıyor.
+   · BASAMAK HATASI: 1240 yerine 12400 yazmak. Sayaç geriye giderse
+     58. adım o vardiyayı 0 saat sayıyor (patlamıyor) ama İLERİ giden
+     saçma bir fark doğrudan bakım uyarısını tetikliyor.
+   Uyarı KAYDI ENGELLEMİYOR (sahada tepkisiz düğme kuralı): şefe ne
+   gördüğünü söylüyor, karar onun. 12 saatlik vardiyada motorun en
+   çok 14 saat çalışmış olabileceğini varsayıyoruz — aralık geniş
+   tutuldu, doğru kaydı uyarıyla boğmak uyarıyı değersizleştirir.
+   ============================================================ */
+var SON_SAYAC = null;
+function sayacDenetle(){
+  var u = $("#sayac-uyari"); if(!u) return;
+  var v = $("#f-sayac") ? $("#f-sayac").value : "";
+  if(v === "" || !SON_SAYAC){ msg(u, ""); return; }
+  var yeni = Number(v), eski = Number(SON_SAYAC.sayac);
+  if(!isFinite(yeni) || !isFinite(eski)){ msg(u, ""); return; }
+  if(yeni < eski){
+    msg(u, "Yazdığınız sayaç son okumadan (" + tl(eski,1) + ") KÜÇÜK. " +
+           "Sayaç geriye gitmez; rakamı kontrol edin. Böyle kaydederseniz " +
+           "bu vardiya 0 motor saati sayılır.", "warn");
+  } else if(yeni - eski > 14){
+    msg(u, "Son okumadan " + tl(yeni - eski, 1) + " saat fazla. " +
+           "Bir vardiyada bu kadar çalışılmaz — ondalık ayıracı NOKTA, " +
+           "virgül yazdıysanız rakam on katına çıkmış olabilir.", "warn");
+  } else { msg(u, ""); }
 }
 
 /* ============================================================
@@ -2105,9 +2229,7 @@ function kisiSecenek(liste, kendi){
 function sondorListesiCiz(){
   var sel = $("#f-driller1"); if(!sel) return;
   var kendi = sel.value;
-  var sondorler = ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return p.kind === "sondor" && ekipAdayi(p); });
-  sel.innerHTML = kisiSecenek(sondorler, kendi);
+  sel.innerHTML = kisiSecenek(sondorler(), kendi);
   sel.value = kendi || "";
 }
 function isciCiz(){
@@ -2177,7 +2299,15 @@ $("#f-project").addEventListener("change", function(){
   /* Proje değişti: makine, kuyu, araç listeleri BİRLİKTE yenilenir. Tek tek
      yama yapmak bu hatanın her sekmede tekrar çıkmasına yol açıyordu. */
   fillMachines(); fillWells(); fillYakitHedef(); fillVardiya();
-  sefSatiriCiz();
+  /* 84. dosya · 10. madde: şantiye değişti, ekip listeleri de değişiyor.
+     Önceki şantiyeden seçilmiş kişiler BIRAKILMIYOR — yeni şantiyenin
+     listesinde olmayan biri kayıtta kalırsa sessizce yanlış ekip
+     kaydedilir. Sıfırlanıyor ve listeler yeniden kuruluyor. */
+  if(!DUZELT_YUKLENIYOR){
+    $("#f-driller1").value = ""; ISCI = [];
+  }
+  sondorListesiCiz(); isciCiz(); ekipNotuCiz();
+  sayacNotuCiz(null);
   kilitBak();
   basligiCiz();   /* başlığın alt satırındaki şantiye adı da değişiyor */
 });
@@ -2227,7 +2357,12 @@ $("#f-shift").addEventListener("change", function(){
   saatSecicilerKur();
 });
 $("#f-date").addEventListener("change", function(){ saatSecicilerKur(); kilitBak(); });
-$("#f-machine").addEventListener("change", function(){ devamArizaCiz(); });
+$("#f-machine").addEventListener("change", function(){
+  devamArizaCiz();
+  sayacNotuCiz(null);   /* son okuma MAKİNEYE bağlı */
+});
+$("#f-sayac").addEventListener("input", sayacDenetle);
+$("#f-sayac").addEventListener("change", sayacDenetle);
 /* Kuyu seçilince: makine listesi daralır ve takıldığı metre kuyunun
    bulunduğu derinlikle dolar. Şef sıfırdan yazarsa 960 yerine 96 yazıyor. */
 $("#b-well").addEventListener("change", function(){
@@ -3289,7 +3424,7 @@ $("#btn-save-nak").addEventListener("click", function(){
       work_date:$("#f-date").value, kind:tur,
       note:$("#nak-note").value.trim() || null } }).then(function(){
     $("#nak-note").value = "";
-    msg($("#nak-msg"), "Nakliye günü kaydedildi. O " +
+    msg($("#nak-msg"), "Nakliye vardiyası kaydedildi. O " +
       (tur === "gun" ? "güne sondaj vardiyası girilemez" : "geceye sondaj vardiyası girilemez") +
       "; puantajda ekip çalıştı sayılır.", "ok");
     if(navigator.onLine) setTimeout(loadRecent, 1200);
@@ -3349,10 +3484,26 @@ function runFormReady(){
   var v = parseFloat(String($("#f-to").value).replace(",","."));
   return !!($("#f-dia").value && !isNaN(v));
 }
+/* ============================================================
+   84. dosya · 8. madde · UYARI ANCAK BİR ŞEY YAPILDIKTAN SONRA
+   ------------------------------------------------------------
+   Tayfun: "Eksik çap, vardiya bitiş metresi yazısı ekran açıldığında
+   gelmesin. Kaydet dediğimizde gelsin."
+   81. dosyada boş alanların KIRMIZI boyanmasını kaldırmıştım; aynı
+   hatanın yazıyla yapılan hâli duruyordu: `refreshState()` açılışta
+   `updateRunButton()`u çağırıyor, alanlar henüz boş, ekran "Eksik:
+   çap, vardiya bitiş metresi" diye açılıyordu. Henüz hiçbir şey
+   yapmamış şefe eksik listesi göstermek, 4. bandı daha bakmadan
+   bozuk göstermek demek.
+   Artık uyarı yalnız şef O ALANLARA DOKUNDUKTAN ya da bir düğmeye
+   bastıktan sonra çıkıyor. Bayrak `resetForm`da sıfırlanıyor.
+   ============================================================ */
+var MV_UYAR = false;
 function updateRunButton(){
   /* İlerleme yokken manevra alanları gizli — doldurulmayan alanı "eksik"
      diye göstermek çelişki oluyordu (58. dosya). */
   if(ILERLEME_YOK){ msg($("#run-msg"), ""); return; }
+  if(!MV_UYAR){ msg($("#run-msg"), ""); return; }
   /* Pasif düğme sahada "program bozuk" dedirtiyor — kaydet düğmesinde
      kaldırdık, burada da kalkıyor. Düğme hep basılabilir; eksik varsa
      basınca ne eksik olduğunu söyler. */
@@ -3362,12 +3513,13 @@ function updateRunButton(){
   msg($("#run-msg"), why.length ? "Eksik: " + why.join(", ") + "." : "", "warn");
 }
 ["#f-dia","#f-to"].forEach(function(s){
-  $(s).addEventListener("input", updateRunButton);
-  $(s).addEventListener("change", updateRunButton);
+  $(s).addEventListener("input", function(){ MV_UYAR = true; updateRunButton(); });
+  $(s).addEventListener("change", function(){ MV_UYAR = true; updateRunButton(); });
 });
 $("#btn-add-run").addEventListener("click", function(){
   var v = parseFloat(String($("#f-to").value).replace(",","."));
   if(ILERLEME_YOK) return;            /* alanlar gizliyken tetiklenmesin */
+  MV_UYAR = true;
   if(!runFormReady()) {
     updateRunButton();
     var eks = [];
@@ -3403,8 +3555,14 @@ function stepProblems(n){
   if(n === 2){
     if(!$("#f-driller1").value) p.push("sondör");
     if(ISCI.some(function(x){ return !x; })) p.push("boş işçi satırı");
-    if(!$("#f-eng1").value) p.push("motor başlangıç");
-    if(!$("#f-eng2").value) p.push("motor bitiş");
+    /* ⚠ ESKİ KAYIT DÜZELTİLİRKEN SAYAÇ ZORUNLU DEĞİL (84. dosya · 7).
+       Sayaç 52. sürümle geldi; ondan önceki vardiyalarda motor saati
+       başlangıç/bitiş SAATİNDEN hesaplanmıştı. O kaydı düzeltmeye
+       açan şefin, geçmişteki sayaç okumasını bilmesi mümkün değil.
+       Zorunlu tutmak düzeltmeyi tamamen engellerdi — yani veri kaybı
+       yerine veri DONMASI. Alanı boş bırakırsa eski saatler olduğu
+       gibi kalıyor (kayıt yolunda engine_start/stop'a dokunulmuyor). */
+    if(!$("#f-sayac").value && !DUZELT_ESKI_MOTOR) p.push("makine saat sayacı");
   }
   if(n === 3){
     var c = checkedCount();
@@ -3757,7 +3915,9 @@ function bantOzet(n){
     }
     if($("#f-date").value) p.push(trd2($("#f-date").value));
     var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
-    if(vd) p.push(vd.label); else if(nakliyeMi()) p.push("Nakliye");
+    if(vd) p.push(vd.label);
+    else if(nakliyeMi()) p.push($("#f-shift").value === "nak-gun"
+                                  ? "Gündüz Nakliye" : "Gece Nakliye");
     /* Kuyu makineden ÖNCE: dar ekranda özet kırpılıyor ve şefin
        kontrol ettiği ilk şey kuyu kodu. İlk çizimde makine öndeydi
        ve ekran görüntüsünde kuyu kodu kırpılmış çıktı. */
@@ -3770,6 +3930,7 @@ function bantOzet(n){
     if(sondor) p.push("Sondör " + sondor);
     var kac = ISCI.filter(Boolean).length;
     if(kac) p.push(kac + " yardımcı");
+    if($("#f-sayac").value !== "") p.push("sayaç " + tl($("#f-sayac").value, 1));
     if(!p.length) p.push("ekip girilmedi");
   }
   if(n === 3){
@@ -3858,7 +4019,7 @@ function ozetKartCiz(){
   h += ozetGrup(1, "Vardiya", [
     pr.length > 1 ? ozetSatir("Şantiye", saha) : "",
     ozetSatir("Tarih", $("#f-date").value ? trd2($("#f-date").value) : "—"),
-    ozetSatir("Vardiya", nak ? ($("#f-shift").value === "nak-gun" ? "Nakliye günü" : "Nakliye gece")
+    ozetSatir("Vardiya", nak ? ($("#f-shift").value === "nak-gun" ? "Gündüz Nakliye" : "Gece Nakliye")
                              : (vd ? vd.label : "—")),
     nak ? "" : ozetSatir("Makine", mk || "—"),
     nak ? "" : ozetSatir("Kuyu", w ? w.code : "—"),
@@ -3877,9 +4038,10 @@ function ozetKartCiz(){
   var sondor = secimAdi("#f-driller1");
   var yard = ISCI.filter(Boolean).map(personTam).filter(Boolean);
   h += ozetGrup(2, "Ekip", [
-    ozetSatir("Şantiye şefi", ($("#sef-ad") ? $("#sef-ad").textContent : "") || "—"),
     ozetSatir("Sondör", sondor || "—"),
-    ozetSatir("Yardımcı", yard.length ? yard.join(", ") : "—")
+    ozetSatir("Yardımcı", yard.length ? yard.join(", ") : "—"),
+    ozetSatir("Makine saat sayacı",
+      $("#f-sayac").value === "" ? "—" : tl($("#f-sayac").value, 1))
   ]);
 
   var ar = secimAdi("#ar-kind");
@@ -4052,9 +4214,6 @@ function vardiyaDuzelt(sat, satirEl){
       if(res[0].error) throw res[0].error;
       var kart = (res[2] && !res[2].error) ? (res[2].data || null) : null;
       var kartHata = (res[2] && res[2].error) ? res[2].error.message : null;
-      /* Motor saati kayıttan geliyor: vardiya düzeninin varsayılanı
-         üstüne yazmasın diye işaret ÖNCE kaldırılıyor. */
-      if(kart && (kart.motor_bas || kart.motor_bit)) MOTOR_ELLE = true;
       DUZELT_YUKLENIYOR = true;
       /* formu kayıtla doldur */
       $("#f-project").value = sat.project_id || "";
@@ -4082,11 +4241,16 @@ function vardiyaDuzelt(sat, satirEl){
                 to_m:Number(x.to_m), personnel_id:x.personnel_id}; });
       renderRuns();
 
-      /* ---- A1 · motor saati ---- */
-      if(kart && (kart.motor_bas || kart.motor_bit)){
-        $("#f-eng1").value = saatKisa(kart.motor_bas);
-        $("#f-eng2").value = saatKisa(kart.motor_bit);
-      }
+      /* ---- 84. dosya · 7. madde · makine saat sayacı ----
+         ⚠ ESKİ KAYIT: sayacı olmayan vardiyada alan BOŞ kalıyor, eski
+         motor saatleri (motor_bas/motor_bit) ekranda YAZIYOR. Şef
+         düzeltmeyi kaydederse sayacı okuyup yazmak zorunda; eski saat
+         alanları silinmiyor, sunucuda olduğu gibi duruyor. */
+      $("#f-sayac").value = (kart && kart.motor_sayac != null)
+                              ? kart.motor_sayac : "";
+      DUZELT_ESKI_MOTOR = !!(kart && kart.motor_sayac == null &&
+                             (kart.motor_bas || kart.motor_bit));
+      sayacNotuCiz(kart);
 
       /* ---- A1 · operasyon notu
          Not kaydedilirken iki alan birleştiriliyor:
@@ -4167,7 +4331,7 @@ function vardiyaDuzelt(sat, satirEl){
          şef motor saatinin kayıttan mı yoksa varsayılandan mı geldiğini
          bilemiyordu. */
       var geri = [];
-      if(kart && (kart.motor_bas || kart.motor_bit)) geri.push("motor saati");
+      if(kart && kart.motor_sayac != null) geri.push("makine saat sayacı");
       if(notMetni) geri.push("not");
       if(kt && Object.keys(kt).length) geri.push("kontrol listesi");
       if(kart && kart.ilerleme_yok) geri.push("vardiya açıklaması");
@@ -4264,9 +4428,19 @@ function seritCiz(){
     ad = KUYRUK_SAYI + " kayıt gönderilmedi";
     alt = navigator.onLine ? "Gönderiliyor…" : "İnternet gelince kendiliğinden gidecek.";
   } else {
-    durum = "bos";
-    ad = "Hepsi gönderildi";
-    alt = sonEsitleme();
+    /* 84. dosya · 1. madde · Tayfun: "En üstte yeşil renkli hepsi
+       gönderildi kısmını kaldıralım."
+       79. dosya bunu istemişti, ben "gitti mi gitmedi mi belli olsun"
+       diye üzerine yazmıştım. Tayfun geri çevirdi ve haklı: şerit
+       zamanın %95'inde yeşil duruyor, yani hiçbir şey söylemiyor ve
+       başlığın altında yer kaplıyor. Eşitleme bilgisi kaybolmuyor —
+       3. maddeyle hesap paneline taşındı (bekleyen kayıt + son
+       eşitleme). Şerit artık yalnız SORUN varken çıkıyor. */
+    el.hidden = true;
+    el.removeAttribute("data-durum");
+    el.innerHTML = "";
+    seritHizala();
+    return;
   }
   el.setAttribute("data-durum", durum);
   el.hidden = false;
@@ -4372,6 +4546,8 @@ function sayiSorunlari(){
 }
 
 $("#btn-save-shift").addEventListener("click", function(){
+  /* 84. dosya · 8. madde: eksik uyarıları ANCAK buradan sonra görünür. */
+  MV_UYAR = true; updateRunButton();
   var fi = firstIncomplete();
   if(fi !== 0){
     /* Kaydete basmak BÜTÜN bantları "uğranmış" sayıyor: eksik olan
@@ -4419,8 +4595,10 @@ $("#btn-save-shift").addEventListener("click", function(){
       shift_slot: secilenSlot(),
       shift: (slotBilgi($("#f-project").value, secilenSlot()) || {}).next_day ? "gece" : "gunduz",
       paper_no: $("#f-paper").value || null,
-      engine_start: $("#f-eng1").value || null,
-      engine_stop: $("#f-eng2").value || null,
+      /* 84. dosya · 7. madde: motor saati artık SAYAÇTAN. engine_start/
+         engine_stop kolonları duruyor (eski kayıtlar onlardan sayılıyor)
+         ama yeni kayıtta doldurulmuyor. */
+      motor_sayac: ($("#f-sayac").value === "" ? null : Number($("#f-sayac").value)),
       pre_checks: checksPayload(),
       operation_note: note || null,
       end_state: $("#f-end").value || null,
@@ -4549,7 +4727,12 @@ function resetForm(){
   $("#f-to").value = ""; $("#f-fuel").value = ""; $("#f-note").value = "";
   $("#f-paper").value = ""; $("#f-end").value = "";
   $("#f-check-note").value = "";
-  KULLANILAN = []; KALAN = []; OLCUM = []; ISCI = []; MOTOR_ELLE = false;
+  KULLANILAN = []; KALAN = []; OLCUM = []; ISCI = [];
+  /* 84. dosya · 7. madde: sayaç her vardiyada yeniden okunuyor —
+     taşınması yanlış motor saati demek. */
+  DUZELT_ESKI_MOTOR = false;
+  $("#f-sayac").value = ""; sayacNotuCiz(null);
+  MV_UYAR = false; msg($("#run-msg"), "");
   duzeltYanTemizle();
   kullanilanCiz(); kalanCiz(); olcumCiz(); kuyuSonuGoster(); isciCiz();
   $("#ekip-kaynak").textContent = "";
@@ -6747,7 +6930,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "51";
+var SURUM = "52";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
@@ -6765,21 +6948,8 @@ function gorevAdi(k){
   var s = k.replace(/_/g, " ");
   return s.charAt(0).toLocaleUpperCase("tr") + s.slice(1);
 }
-function temaOku(){ try{ return localStorage.getItem("sp_tema") || ""; }catch(e){ return ""; } }
-function yaziOku(){ try{ return localStorage.getItem("sp_yazi") || ""; }catch(e){ return ""; } }
-function ayarYaz(ad, v){
-  try{ if(v) localStorage.setItem("sp_" + ad, v); else localStorage.removeItem("sp_" + ad); }catch(e){}
-  if(v) document.documentElement.setAttribute("data-" + ad, v);
-  else document.documentElement.removeAttribute("data-" + ad);
-  seritHizala();
-}
-function segmentHtml(ad, secenekler, simdi, anahtar){
-  return '<div class="ayar-not">' + ad + '</div><div class="segment" data-seg="' + anahtar + '">' +
-    secenekler.map(function(o){
-      return '<button type="button" data-v="' + o[0] + '" aria-pressed="' +
-        (o[0] === simdi ? "true" : "false") + '">' + o[1] + '</button>';
-    }).join("") + '</div>';
-}
+/* `temaOku`/`yaziOku`/`ayarYaz`/`segmentHtml` 84. dosyada silindi:
+   tema ve yazı boyutu seçenekleri kalktı, kullanan kalmadı. */
 function ayarlarAc(){
   if(document.getElementById("ayar-ort")) return;
   var p = (MASTER && MASTER.profile) || {};
@@ -6791,18 +6961,15 @@ function ayarlarAc(){
         '<button class="kapa" type="button" id="ay-kapa" aria-label="Kapat">×</button></div>' +
       '<div class="ayar-govde">' +
 
+        /* 84. dosya · 3. madde · Tayfun: "Tema ve yazı boyutu seçenekleri
+           kalksın, hepsi tek kartta olsun."
+           · TEMA kalktı: panel artık her zaman açık tema (68. iş).
+           · YAZI BOYUTU kalktı: dört kart arasında gezinen beş ayrı
+             bölüm, telefonda ayarlar ekranını iki ekran boyu yapıyordu.
+           Kalanlar tek kartta: hesap, bekleyen kayıt/eşitleme, dil,
+           çıkış. Sıralama şefin sırası — kim olduğunu görmek, kaydın
+           gitip gitmediğini görmek, sonra gerisi. */
         '<div class="card">' +
-          '<span class="eyebrow">Görünüm</span>' +
-          segmentHtml("Tema", [["","Sistem"],["acik","Açık"],["koyu","Koyu"]], temaOku(), "tema") +
-          segmentHtml("Yazı boyutu", [["","Normal"],["buyuk","Büyük"]], yaziOku(), "yazi") +
-          '<div class="hint">Sahada güneşte ve eldivenle okumak zorsa yazıyı büyütün.</div>' +
-        '</div>' +
-
-        /* Hesap bilgisi ve "Ana verileri yenile" eskiden Bekleyen
-           sekmesindeydi; sekme kalkınca buraya taşındı. İkinci bir
-           hesap ekranı açılmıyor — hepsi tek yerde (79. dosya). */
-        '<div class="card">' +
-          '<span class="eyebrow">Hesap</span>' +
           '<div class="ayar-sat"><span class="k">Firma</span>' +
             '<span class="v">' + esc((MASTER && MASTER.tenant ? MASTER.tenant.name : "") || "—") + '</span></div>' +
           '<div class="ayar-sat"><span class="k">Kullanıcı</span>' +
@@ -6811,33 +6978,28 @@ function ayarlarAc(){
             '<span class="v"><span class="pill">' + rolAdi(p) + '</span></span></div>' +
           '<div class="ayar-sat"><span class="k">Şantiye</span>' +
             '<span class="v" id="ay-santiye">—</span></div>' +
-          '<button class="btn ghost sm" type="button" id="ay-sifre" ' +
-            'style="margin-top:10px">Şifre değiştir</button>' +
-          '<button class="btn ghost sm" type="button" id="ay-yenile" ' +
-            'style="margin-top:8px">Ana verileri yenile</button>' +
-          '<div id="ay-sifre-msg"></div>' +
-        '</div>' +
 
-        '<div class="card">' +
-          '<span class="eyebrow">Çevrimdışı</span>' +
+          '<div class="ayar-ayirac"></div>' +
           '<div class="ayar-sat"><span class="k">Bekleyen kayıt</span>' +
             '<span class="v"><span class="pill" id="ay-bekleyen">0</span></span></div>' +
           '<div class="ayar-sat"><span class="k">Son eşitleme</span>' +
             '<span class="v" id="ay-sync">—</span></div>' +
           '<button class="btn ghost sm" type="button" id="ay-sync-btn" ' +
             'style="margin-top:10px">Şimdi eşitle</button>' +
-        '</div>' +
 
-        '<div class="card">' +
-          '<span class="eyebrow">Dil ve bölge</span>' +
-          '<div class="field"><label for="ay-dil">Dil</label>' +
+          '<div class="ayar-ayirac"></div>' +
+          '<div class="field" style="margin-bottom:0"><label for="ay-dil">Dil</label>' +
             '<select id="ay-dil"><option value="tr-TR">Türkçe</option></select></div>' +
-        '</div>' +
 
-        '<div class="card">' +
+          '<div class="ayar-ayirac"></div>' +
+          '<button class="btn ghost sm" type="button" id="ay-sifre">Şifre değiştir</button>' +
+          '<button class="btn ghost sm" type="button" id="ay-yenile" ' +
+            'style="margin-top:8px">Ana verileri yenile</button>' +
+          '<div id="ay-sifre-msg"></div>' +
+
+          '<div class="ayar-ayirac"></div>' +
           '<div class="li" style="border:0;padding:0">' +
-            '<span><b>Sürüm ' + SURUM + '</b>' +
-              '<br><span class="hint">Collarlog · Sürüm ' + SURUM + '</span></span>' +
+            '<span class="hint">Collarlog · Sürüm ' + SURUM + '</span>' +
             '<button class="btn ghost sm teh" type="button" id="ay-cikis">Çıkış</button></div>' +
         '</div>' +
 
@@ -6863,15 +7025,6 @@ function ayarlarAc(){
       b.disabled = false; b.textContent = "Ana verileri yenile";
       msg(document.getElementById("ay-sifre-msg"),
           "Yenilenemedi: " + (e && e.message ? e.message : e), "err");
-    });
-  });
-
-  $$(".segment", d).forEach(function(seg){
-    seg.addEventListener("click", function(ev){
-      var b = ev.target.closest("button[data-v]"); if(!b) return;
-      ayarYaz(seg.getAttribute("data-seg"), b.getAttribute("data-v"));
-      $$("button", seg).forEach(function(x){
-        x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
     });
   });
 
