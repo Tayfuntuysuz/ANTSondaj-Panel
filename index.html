@@ -216,6 +216,49 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
    ============================================================ */
 @media (max-width:430px){ .grid2.kir-alt{grid-template-columns:1fr} }
 input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max-width:100%}
+/* ============================================================
+   TARİH / AY / SAAT ALANLARININ TAŞMASI (90. dosya · 6)
+   ------------------------------------------------------------
+   Tayfun, telefon ekran görüntüsüyle: "Seçim veya doldurulacak
+   kutularda taşma oluyor."
+   Tarih ve Ay kutuları öteki alanlardan geniş çıkıp ekranın
+   sağından sarkıyordu. İki sebep üst üsteydi:
+
+   1. iOS Safari `input[type=date|month|time]`e KENDİ ASGARİ
+      GENİŞLİĞİNİ veriyor ve `width:100%` onu küçültmüyor.
+      `min-width:0` (yukarıdaki satır) yetmedi; asgari genişliği
+      doğuran şey platformun kendi çiziminde. `appearance:none`
+      o çizimi kapatıyor ve kutu normal bir metin alanı gibi
+      daralabiliyor.
+   2. Metin ORTALI geliyordu (platform varsayılanı) — taşmasa bile
+      yanındaki alanla hizasız duruyordu.
+
+   ⚠ 53. pakette `.grid2.kir-alt` ile ikiliyi alt alta almıştık;
+   tek sütunda bile taşıyordu. Doğru teşhis ızgara değil alanın
+   kendisiymiş.
+   ⚠ PUNTO KÜÇÜLTÜLEREK ÇÖZÜLMEZ: 16 px'in altında iOS sayfayı
+   zoomluyor (88. dosya · 6).
+   ============================================================ */
+input[type="date"],input[type="time"],input[type="month"],
+input[type="datetime-local"]{
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  text-align:start;
+  /* Takvim simgesi kutunun içinde kalsın: `appearance:none` onu
+     akıştan çıkarıyor, kendi yerini veriyoruz. */
+  position:relative}
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value{text-align:start}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator{margin-inline-start:auto}
+/* ⚠ DİKEY FLEX'TE ÇOCUKLAR DARALAMIYOR. `.card` ve `.field`
+   `flex-direction:column`; çocuklarının varsayılan `min-width`i
+   `auto`, yani İÇERİĞİN asgari genişliğinden dar olamıyorlar ve
+   kabı içeriden genişletiyorlar. Taşmanın ikinci yarısı buydu:
+   bir alan ne kadar daralsa da kartı şişiriyordu. */
+.card > *,.field > *,.adim-ic > *,.boluk > *{min-width:0}
+.card,.field,.boluk{min-width:0}
 .btn{border:1px solid var(--accent);background:var(--accent);color:var(--dolu-yazi);border-radius:10px;padding:13px 14px;font-weight:600;cursor:pointer;width:100%}
 .btn.ghost{background:none;color:var(--accent-ink);border-color:var(--line)}
 .btn.sm{padding:11px 14px;min-height:44px;font-size:13px;width:auto}
@@ -230,6 +273,23 @@ input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max
 .boluk{display:flex;flex-direction:column;gap:12px;
   border-top:1px solid var(--line);margin-top:2px;padding-top:14px}
 .boluk:first-child{border-top:0;margin-top:0;padding-top:0}
+/* ============================================================
+   KART İÇİNDEKİ SARMALAYICILAR DA DİKEY AKIŞ (90. dosya · 4)
+   ------------------------------------------------------------
+   Tayfun: "Delgi kısmında manevra ekle butonu, kesik çizgilerle
+   olan üst çizgi kesişiyor."
+   `.card` `flex` + `gap:12px` veriyor ama bu boşluk yalnız
+   DOĞRUDAN çocuklara uygulanıyor. `#mv-alanlar` gibi bir
+   sarmalayıcı `div`in içindekiler boşluksuz kalıyordu: "Manevra
+   ekle"nin kesikli çerçevesi üstündeki ızgaraya değiyordu.
+
+   Düzeltme tek alana değil SARMALAYICI SINIFINA: aynı kalıp beş
+   yerde var (`#sondaj-alanlar`, `#mv-alanlar`, `#durus-giris`,
+   `#durus-ariza`, `#durus-bekleme`). Birini düzeltip ötekileri
+   bırakmak, aynı şikâyetin başka ekrandan gelmesi demekti.
+   ============================================================ */
+.kat{display:flex;flex-direction:column;gap:12px;min-width:0}
+.kat > *{min-width:0}
 .eyebrow{font-family:Barlow,sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink)}
 .pill.good{background:var(--good-soft);color:var(--good)}
@@ -650,6 +710,39 @@ details.acilir[open] > summary::after{content:"\2212"}
 .sayfa-bas .kapa{border:0;background:none;color:var(--ink-3);font-size:24px;line-height:1;
   cursor:pointer;min-width:44px;min-height:44px;width:auto;margin-inline-start:auto}
 .sayfa-govde{padding:14px 16px;overflow-y:auto;flex:1}
+/* ============================================================
+   KİŞİ ARAMA SAYFASI (90. dosya · 5)
+   ------------------------------------------------------------
+   ⚠ `dvh` KLAVYEYİ HESABA KATMIYOR. iOS Safari'de klavye açılınca
+   `100dvh` değişmiyor; sayfa görünür alandan taşıyor ve liste
+   klavyenin altında kalıyor. Tam olarak Tayfun'un gördüğü şey
+   buydu: "klavye çıkıyor, liste çok az gözüküyor."
+   Gerçek görünür yükseklik `visualViewport.height` — onu
+   `--gor-h` değişkenine yazıyoruz (JS tarafı).
+   Yedek `88dvh`: `visualViewport` yoksa eski davranış.
+   ============================================================ */
+.ara-kut{height:calc(var(--gor-h, 88dvh) - 10px);max-height:none}
+/* Arama kutusu gövdenin DIŞINDA: liste kayarken kutu yerinde
+   kalıyor. İçinde olsaydı şef aşağı indiğinde ne yazdığını
+   göremezdi. */
+/* ⚠ BAŞLIK NE KADAR İNCEYSE LİSTE O KADAR UZUN. Klavye açıkken
+   geriye ~380 px kalıyor; başlığın her 48 px'i bir isim demek.
+   Ölçüldü: bu dolgularla klavye açıkken 6 isim tam görünüyor
+   (sınaması var). */
+.ara-sabit{padding:calc(8px + env(safe-area-inset-top,0px)) 14px 6px;
+  border-bottom:1px solid var(--line);background:var(--bg);flex:none}
+.ara-sabit .ara-ust{display:flex;align-items:center;gap:6px}
+.ara-sabit .ara-kutu{flex:1 1 auto;min-width:0}
+.ara-sabit .kapa{flex:none;border:0;background:none;color:var(--ink-3);
+  font-size:24px;line-height:1;cursor:pointer;min-width:44px;min-height:44px}
+.ara-alt{display:flex;gap:6px;padding:4px 2px 0;line-height:1.2}
+.ara-alt #ara-alt:not(:empty)::before{content:"· "}
+.ara-govde{padding-top:0}
+/* Liste kabının kendi çerçevesi ve yükseklik sınırı YOK: sayfanın
+   gövdesi zaten kaydırılabilir kap. `.ara-sonuc`un 230 px'lik
+   `max-height`i burada listeyi ikinci kez kısaltıyordu. */
+.ara-govde .ara-sonuc{max-height:none;overflow:visible;border:0;margin-top:0}
+.ara-govde .ara-sonuc button{border-bottom:1px solid var(--line-soft);min-height:46px;padding:10px 12px}
 .sayfa-dip{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
   border-top:1px solid var(--line)}
 
@@ -825,15 +918,16 @@ details.acilir[open] > summary::after{content:"\2212"}
         <!-- Ay kilidi uyarısı buradan KALKTI (79. dosya): bant
              kapanınca kayboluyordu. Artık başlığın altındaki kuyruk
              şeridinde, her sekmede görünüyor. -->
-        <div id="sondaj-alanlar">
+        <div class="kat" id="sondaj-alanlar">
           <div class="field"><label for="f-machine">Makine <span class="req">*</span></label><select id="f-machine" data-req="1"></select>
             <div class="hint" id="f-makine-kaynak"></div></div>
-          <div class="field" id="alan-kuyu" style="margin-top:10px">
+          <div class="field" id="alan-kuyu">
             <div class="arasi"><label for="f-well">Kuyu <span class="req">*</span></label>
               <button class="metin-dugme" id="btn-new-well" type="button">+ Yeni kuyu ekle</button></div>
             <select id="f-well" data-req="1"></select>
+            <div class="hint" id="f-kuyu-not"></div>
           </div>
-          <div class="field" style="margin-top:10px"><label for="f-paper">Kâğıt form no</label><input id="f-paper" inputmode="numeric" placeholder="001369"></div>
+          <div class="field"><label for="f-paper">Kâğıt form no</label><input id="f-paper" inputmode="numeric" placeholder="001369"></div>
         </div>
         <button class="btn ilerle" type="button" data-next="2">İlerle →</button>
       </div>
@@ -927,7 +1021,7 @@ details.acilir[open] > summary::after{content:"\2212"}
                şef ikinci kayıt açarsa aynı duruş iki kere sayılır (30c). -->
           <div id="devam-ariza"></div>
 
-          <div id="durus-giris">
+          <div class="kat" id="durus-giris">
             <div class="field">
               <label>Duruş türü</label>
               <div class="secim" id="durus-tur">
@@ -938,7 +1032,7 @@ details.acilir[open] > summary::after{content:"\2212"}
             </div>
 
             <!-- ---------- ARIZA ---------- -->
-            <div id="durus-ariza" hidden>
+            <div class="kat" id="durus-ariza" hidden>
               <div class="grid2">
                 <div class="field"><label for="ar-kind">Arıza tipi</label>
                   <select id="ar-kind"><option value="">— seçin —</option><option value="hidrolik">Hidrolik</option>
@@ -970,7 +1064,7 @@ details.acilir[open] > summary::after{content:"\2212"}
             </div>
 
             <!-- ---------- BEKLEME ---------- -->
-            <div id="durus-bekleme" hidden>
+            <div class="kat" id="durus-bekleme" hidden>
               <div class="grid2">
                 <div class="field"><label for="bk-sebep">Bekleme sebebi</label>
                   <select id="bk-sebep"><option value="">— seçin —</option>
@@ -1020,7 +1114,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <!-- Manevra alanları tek kutuda: "ilerleme olmadı" işaretlenince
              hepsi birden GİZLENİYOR. Pasifleştirme değil gizleme — pasif
              düğme sahada "program bozuk" dedirtiyor (58. dosya). -->
-        <div id="mv-alanlar">
+        <div class="kat" id="mv-alanlar">
           <div class="grid2">
             <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>PW</option><option>PQ</option><option>HQ</option><option>NQ</option></select></div>
             <div class="field"><label for="f-to">Vardiya bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
@@ -1803,16 +1897,13 @@ details.acilir[open] > summary::after{content:"\2212"}
               <div class="hint">Puantaj <b>vardiyadan</b> geliyor: kuleye çıkan çalıştı
                 sayılır, çıkmayan sayılmaz. Şef, şoför ve aşçı vardiyaya girmeden
                 çalıştı sayılır. İzinli, raporlu ya da avans alan kişileri buradan ekleyin.</div>
+              <!-- ⚠ ARAMA KART İÇİNDEN ÇIKTI (90. dosya · 5). Tayfun:
+                   "İstisna ekleyince oluşan ekran görüntüsü çok kötü,
+                   klavye çıkıyor liste çok az gözüküyor."
+                   Kutu kartın içindeyken klavye ekranın yarısını alıyor
+                   ve geriye 2-3 isim kalıyordu. Artık alttan açılan tam
+                   ekran sayfa — "Gönderilmeyen kayıtlar" ile aynı düzen. -->
               <button class="btn ghost" id="btn-att-exc" type="button">+ Kişi durumu değiştir</button>
-              <div id="att-sec" hidden>
-                <label for="att-ara" id="att-ara-et" style="margin-top:10px;display:block">Ekipte ara</label>
-                <div class="ara-kutu">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                       stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-                  <input id="att-ara" placeholder="Ekipteki kişiyi arayın…" autocomplete="off">
-                </div>
-                <div id="att-sonuc" class="ara-sonuc"></div>
-              </div>
               <div id="att-list"></div>
             </div>
           </div>
@@ -1837,14 +1928,6 @@ details.acilir[open] > summary::after{content:"\2212"}
               <div id="ekip-kutu" hidden>
                 <div id="ekip-liste"></div>
                 <button class="btn ghost sm" id="btn-ekip-ekle" type="button" style="margin-top:10px">+ Kişi ekle</button>
-                <div id="ekip-sec" hidden>
-                  <div class="ara-kutu" style="margin-top:10px">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-                    <input id="ekip-ara" placeholder="Şirket listesinde arayın…" autocomplete="off">
-                  </div>
-                  <div id="ekip-sonuc" class="ara-sonuc"></div>
-                </div>
                 <div class="hint">Çıkarmak kaydı silmez — kişinin bu sahadaki görevini bugün kapatır.
                   Geçmiş puantaj, vardiya ve prim kayıtları yerinde kalır.</div>
                 <div id="ekip-msg"></div>
@@ -1881,6 +1964,49 @@ details.acilir[open] > summary::after{content:"\2212"}
         </div>
         <div class="sayfa-dip">
           <button class="btn ghost" id="btn-sync" type="button">Şimdi eşitle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         KİŞİ ARAMA SAYFASI (90. dosya · 5)
+         ------------------------------------------------------------
+         İki yer kullanıyor: Puantaj → "Kişi durumu değiştir" ve
+         Saha ekibi → "+ Kişi ekle". İkisi de aynı sorunu yaşıyordu
+         (klavye açılınca liste kayboluyor) ve ikisini ayrı tutmanın
+         bir kazancı yoktu.
+
+         ⚠ ARAMA KUTUSU GÖVDENİN DIŞINDA: gövde kayıyor, kutu
+         kaymıyor. Kutu listeyle birlikte kaysaydı şef aşağı
+         indiğinde yazdığı metni göremezdi.
+         ⚠ Yükseklik `--gor-h` ile klavyeye göre daralıyor
+         (visualViewport); `dvh` klavyeyi hesaba katmıyor.
+         ============================================================ -->
+    <div class="sayfa-ort" id="ara-sayfa" hidden>
+      <div class="sayfa-kut ara-kut" role="dialog" aria-modal="true"
+           aria-labelledby="ara-baslik">
+        <!-- ⚠ ARAMA KUTUSU BAŞLIK SATIRINDA. Ayrı bir başlık ("Ekipte
+             ara") + ayrı bir arama kutusu ("Ekipteki kişiyi arayın…")
+             aynı şeyi iki kere söylüyor ve klavye açıkken en değerli
+             şeyi, yani listeyi 70 px kısaltıyordu. Sayfanın adı
+             kutunun içinde yazıyor; ekran okuyucu için `aria-label`
+             de orada. -->
+        <div class="ara-sabit">
+          <div class="ara-ust">
+            <div class="ara-kutu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              <input id="ara-giris" placeholder="İsim yazın…" autocomplete="off"
+                     aria-labelledby="ara-baslik">
+            </div>
+            <button class="kapa" type="button" id="ara-kapa" aria-label="Kapat">×</button>
+          </div>
+          <div class="hint ara-alt"><span id="ara-baslik">Kişi ara</span>
+            <span id="ara-alt"></span></div>
+        </div>
+        <div class="sayfa-govde ara-govde">
+          <div id="ara-sonuc" class="ara-sonuc"></div>
+          <div id="ara-msg"></div>
         </div>
       </div>
     </div>
@@ -2372,16 +2498,28 @@ function basligiCiz(){
   var t = (MASTER && MASTER.tenant) ? MASTER.tenant.name : "";
   var p = (MASTER && MASTER.profile) || null;
   $("#bar-firma").textContent = firmaKisa(t) || "Collarlog";
-  /* Alt satır: rol · şantiye. Tek şantiyesi olanda şantiye adı da
-     yazıyor — şefin hangi sahaya girdiğini görmesi iyi; birden
-     fazlasında seçili olan yazıyor (73. dosya dersi).
-     81. dosya 6c: proje henüz seçilmemişken de SON SEÇİLEN şantiye
-     yazıyor. Canlıda "Şantiye şefi" tek başına duruyordu ve hangi
-     sahada olduğu hiçbir yerde yazmıyordu. */
-  var pr = ((MASTER && MASTER.projects) || []);
-  var saha = projeAdi($("#f-project").value) ||
-             (pr.length === 1 ? (pr[0].site_name || pr[0].name) : "") ||
-             projeAdi(sonSaha());
+  /* ============================================================
+     ⚠ BAŞLIKTAKİ ŞANTİYE SEÇİLİ PROJEDEN GELİR (90. dosya · 2)
+     ------------------------------------------------------------
+     Burada eskiden üçüncü bir yedek vardı: `projeAdi(sonSaha())` —
+     proje seçilmemişken telefonda HATIRLANAN şantiyeyi yazıyordu
+     (81/83. dosya). O karar TEK ŞANTİYELİ şef düşünülerek
+     alınmıştı; orada proje zaten kendiliğinden seçili olduğu için
+     yedeğin hiçbir kazanımı yoktu.
+
+     Çok şantiyeli hesapta ise YALAN SÖYLÜYORDU: başlık "DENEME
+     ŞANTİYESİ" yazarken seçici "— seçin —" duruyordu ve program
+     hemen ardından "önce proje seçin" diyordu. Tayfun'un telefon
+     ekran görüntüsünde yakalandı.
+
+     Yeni kural tek cümle: başlık, SEÇİLİ olanı söyler. Seçili bir
+     şantiye yoksa şantiye adı da yazmaz.
+     Tek şantiyeli hesapta (Murat) hiçbir şey değişmiyor — orada
+     `fillSelects` projeyi kendiliğinden seçiyor (57. dosya).
+     ⚠ Bu, 73. dosyanın kapısını kapalı tutuyor: hatırlanan şantiye
+     artık hiçbir yerde "seçilmiş" gibi davranmıyor.
+     ============================================================ */
+  var saha = projeAdi($("#f-project").value);
   /* 84. dosya · 2. madde · Tayfun: "Firma adının altında rol yerine
      kullanıcının adı yazsın." Rol şefin kendi ekranında her gün aynı
      yazıyordu — hangi hesapla girdiğini söylemiyordu. Rol Ayarlar'ın
@@ -2390,8 +2528,15 @@ function basligiCiz(){
   var kim = p ? (p.full_name || p.email || ROL_AD[p.role] || p.role) : "";
   $("#bar-alt").textContent = [kim, saha].filter(Boolean).join(" · ");
 }
-/* Son seçilen şantiye telefonda saklanıyor: uygulama açılır açılmaz
-   başlık boş kalmasın. */
+/* ⚠ `sonSaha()` ARTIK OKUNMUYOR (90. dosya · 2). Son seçilen
+   şantiye hâlâ yazılıyor ama hiçbir yer onu "seçilmiş" saymıyor:
+   ne başlık, ne seçici. Yazmayı bırakmıyoruz — ileride "kaldığın
+   yerden devam et" gibi bir iş çıkarsa veri orada duruyor, ve
+   silmek localStorage'da artık bırakmaktan iyi değil.
+   Okuyan kalmadığı için `sonSaha` şu an ÖLÜ KOD; silmek yerine
+   neden durduğu yazılıyor — 86. dosyanın dersi tersten: silmeden
+   önce kullanıcıları saymak gerektiği gibi, bırakırken de neden
+   bırakıldığını yazmak gerekiyor. */
 function sonSaha(){ try{ return localStorage.getItem("sp_saha") || ""; }catch(e){ return ""; } }
 function sonSahaYaz(id){ try{ if(id) localStorage.setItem("sp_saha", id); }catch(e){} }
 
@@ -2406,9 +2551,23 @@ function projeAdi(id){
   var p = (MASTER && MASTER.projects || []).filter(function(x){ return x.id === id; })[0];
   return p ? (p.site_name || p.name) : "";
 }
+/* ============================================================
+   ⚠ PROJE SEÇİLMEDEN MAKİNE LİSTESİ GELMEZ (90. dosya · 1)
+   ------------------------------------------------------------
+   Tayfun, telefon ekran görüntüsüyle: "Proje seçilmeden makina
+   seçimi olmaması gerekiyor."
+   Burada eskiden `if(!pid) return ma;` yazıyordu — yani proje
+   seçilmemişken ŞİRKETİN BÜTÜN KULELERİ listeleniyordu: ANT-2500 ·
+   Ardeşen, ANT-2500 · Yenice, ANT-2500/1 · Amasya… yedi şantiye
+   bir arada. Aynı kod adı olan kuleler yan yana duruyor ve
+   hangisinin hangi sahada olduğu yalnız sondaki ekten anlaşılıyor.
+   73. dosyada bir vardiya tam böyle yanlış şantiyeye yazıldı.
+   Boş liste "veri yok" demek değil, "önce şantiyeyi söyle" demek —
+   ekranda da öyle yazıyor.
+   ============================================================ */
 function projeMakineleri(pid){
   var ma = (MASTER && MASTER.machines) || [];
-  if(!pid) return ma;
+  if(!pid) return [];
   return ma.filter(function(m){ return m.project_id === pid; });
 }
 /* Proje seçilmemişken aynı kod birkaç şantiyede geçiyor (ANT-2500 üçe kadar).
@@ -2583,9 +2742,18 @@ function currentWell(){ return (MASTER && MASTER.wells || []).filter(function(w)
    ============================================================ */
 function saatKisa(t){ return String(t || "").slice(0,5); }
 function vardiyaDuzeni(pid){
+  /* ⚠ PROJE YOKSA VARDİYA DÜZENİ DE YOK (90. dosya · 1 · Tayfun:
+     "Proje seçilmeden vardiya seçimi yapılamaz.")
+     Aşağıdaki yedek — merkezde düzen tanımlı değilse Gündüz/Gece —
+     proje seçilmemişken de devreye giriyordu ve boş ekranda
+     "Gündüz · 08:00–20:00" listesi çıkıyordu. Vardiya düzeni
+     şantiyeye ait; şantiye yokken bir düzen uydurulamaz. */
+  if(!pid) return [];
   var ds = (MASTER && MASTER.shift_patterns || []).filter(function(x){ return x.project_id === pid; });
   ds.sort(function(a,b){ return Number(a.slot) - Number(b.slot); });
-  /* Merkezde vardiya düzeni yoksa eski iki vardiyaya düşülür. */
+  /* Merkezde vardiya düzeni yoksa eski iki vardiyaya düşülür.
+     Bu yedek PROJE SEÇİLİYKEN geçerli: şantiye var ama düzeni
+     tanımlanmamış. */
   if(!ds.length) ds = [{slot:1, label:"Gündüz", starts:"08:00", ends:"20:00", next_day:false},
                        {slot:2, label:"Gece",   starts:"20:00", ends:"08:00", next_day:true}];
   return ds;
@@ -2601,6 +2769,9 @@ function nakliyeMi(){ return ($("#f-shift").value || "").indexOf("nak-") === 0; 
 function fillVardiya(){
   var pid = $("#f-project").value, el = $("#f-shift"), cur = el.value;
   el.innerHTML = '<option value="">— seçin —</option>';
+  /* Proje yoksa nakliye seçenekleri de yok: onlar da bir şantiyeye
+     yazılıyor (90. dosya · 1). */
+  if(!pid){ el.value = ""; seciciNotlari(); vardiyaModu(); return; }
   vardiyaDuzeni(pid).forEach(function(d){
     var o = document.createElement("option");
     o.value = "s" + d.slot;
@@ -2618,7 +2789,27 @@ function fillVardiya(){
     var o = document.createElement("option"); o.value = p[0]; o.textContent = p[1]; el.appendChild(o);
   });
   if(cur) el.value = cur;
+  seciciNotlari();
   vardiyaModu();
+}
+/* ============================================================
+   "ÖNCE PROJE SEÇİN" — boş listeyi açıklayan satır (90. dosya · 1)
+   ------------------------------------------------------------
+   Tayfun'un kararı: alanlar PASİF OLMAYACAK. Tepkisiz bir kutu
+   sahada "program bozuk" dedirtiyor (41. dosya). Kutu açılıyor,
+   yalnız "— seçin —" görünüyor ve altında NEDEN boş olduğu
+   yazıyor. Avans kartında bu dil zaten vardı.
+   ============================================================ */
+function seciciNotlari(){
+  var yok = !$("#f-project").value;
+  [["#f-makine-kaynak", "Önce proje seçin — makine listesi şantiyeye göre kurulur."],
+   ["#f-shift-hint",    "Önce proje seçin — vardiya düzeni şantiyeye göre kurulur."],
+   ["#f-kuyu-not",      "Önce proje seçin — kuyular şantiyeye göre listelenir."]
+  ].forEach(function(p){
+    var e = document.querySelector(p[0]); if(!e) return;
+    if(yok){ e.textContent = p[1]; e.dataset.projeNotu = "1"; }
+    else if(e.dataset.projeNotu === "1"){ e.textContent = ""; e.dataset.projeNotu = ""; }
+  });
 }
 function vardiyaModu(){
   var nak = nakliyeMi(), pid = $("#f-project").value, slot = secilenSlot();
@@ -2685,7 +2876,15 @@ function sahaEkibiEksik(){
   return !!(MASTER && MASTER.santiye_ekip) && !sahaEkipListesi() &&
          !!($("#f-project") && $("#f-project").value);
 }
-function ekipAdayi(p){ return p && p.kind !== "santiye_sefi" && sahadaMi(p); }
+/* ⚠ PROJE YOKSA EKİP ADAYI DA YOK (90. dosya · 1). `sahadaMi`
+   liste bulamayınca `true` dönüyor — o doğru, çünkü "bu şantiyeye
+   ekip tanımlanmamış" ile "şantiye seçilmemiş" aynı şey değil.
+   Birincisinde süzmemek gerekiyor, ikincisinde hiç liste
+   vermemek. Ayrımı burada yapıyoruz. */
+function ekipAdayi(p){
+  if(!$("#f-project") || !$("#f-project").value) return false;
+  return p && p.kind !== "santiye_sefi" && sahadaMi(p);
+}
 function yardimcilar(){
   return ((MASTER && MASTER.personnel) || [])
     .filter(function(p){ return p.kind !== "sondor" && ekipAdayi(p); });
@@ -3140,10 +3339,25 @@ function arizaBaslikCiz(){
   var w  = currentWell();
   var vd = secilenSlot() ? slotBilgi($("#f-project").value, secilenSlot()) : null;
   var t  = $("#f-date").value;
+  /* ============================================================
+     ⚠ "ÖNCE 1. ADIMDA MAKİNEYİ SEÇİN" KALKTI (90. dosya · 3)
+     ------------------------------------------------------------
+     Tayfun: "Bakım arızada çıkan 'önce 1. adımda makinayı seçin'
+     yazmasına gerek yok. Seçimsiz ise ilerleye basıldığında makina
+     seçili değil diye uyarı versin."
+     Şerit boşken sarı bir uyarı olarak duruyordu ve şefin henüz
+     gelmediği bir adımı hatırlatıyordu — 3. adıma inen şef zaten
+     1. adımdan geçmiş olur; geçmediyse 1. adım kendi "eksik"
+     etiketini taşıyor. İki yerde söylemenin kazancı yok.
+
+     Şerit BOŞKEN GİZLENİYOR; makine seçiliyken bağlam satırı
+     duruyor (19. dosya: kart neye yazdığını başlığında gösterir).
+     Uyarı artık İlerle ve duruş kaydet düğmelerinde.
+     ============================================================ */
   if(!mk){
-    b.className = "bant uy"; b.style.borderRadius = "10px";
-    b.textContent = "Önce 1. adımda makineyi seçin";
+    b.hidden = true; b.textContent = "";
   } else {
+    b.hidden = false;
     b.className = "bant"; b.style.borderRadius = "10px";
     b.textContent = [mk, (w ? w.code : null), (t ? trd2(t) : null),
                      (vd ? vd.label + " vardiyası" : null)]
@@ -3297,11 +3511,17 @@ function beklemeSureCiz(){
    ARIZA KAYDET
    ============================================================ */
 $("#btn-ariza-kaydet").addEventListener("click", function(){
+  /* ⚠ MAKİNE KONTROLÜ EN BAŞTA (90. dosya · 3). Eskiden arıza tipi
+     ve saat kontrollerinden SONRA geliyordu: şef tipi ve saati
+     seçiyor, sonra "önce makineyi seçin" cevabını alıyordu. İki
+     alan boşuna dolduruluyordu. Eksik olan şey ilk sorulmalı. */
+  if(!$("#f-machine").value){
+    msg($("#ar-msg"), "Makine seçili değil — 1. adıma dönün. " +
+        "Arıza makineye yazılıyor.", "err"); return; }
   var tip = $("#ar-kind").value;
   if(!tip){ msg($("#ar-msg"), "Arıza tipi seçilmedi.", "err"); return; }
   var bas = secilenAn("#ar-bas");
   if(!bas){ msg($("#ar-msg"), "Arızanın başlangıç saati zorunlu.", "err"); return; }
-  if(!$("#f-machine").value){ msg($("#ar-msg"), "Önce 1. adımda makineyi seçin — arıza makineye yazılıyor.", "err"); return; }
   if(!AR_SON){
     msg($("#ar-msg"), "Vardiya biterken arızanın ne olduğunu seçin: giderildi, hâlâ duruyor ya da fabrikaya gönderildi.", "err");
     return;
@@ -3342,6 +3562,10 @@ $("#btn-ariza-kaydet").addEventListener("click", function(){
    ============================================================ */
 var BEKLEMELER = [];
 $("#btn-bekleme-kaydet").addEventListener("click", function(){
+  /* Bekleme de vardiyanın duruşu; vardiya makineye yazılıyor
+     (90. dosya · 3 · Tayfun: "ikisinde birden"). */
+  if(!$("#f-machine").value){
+    msg($("#ar-msg"), "Makine seçili değil — 1. adıma dönün.", "err"); return; }
   var sebep = $("#bk-sebep").value;
   if(!sebep){ msg($("#ar-msg"), "Bekleme sebebi seçilmedi.", "err"); return; }
   var b = secilenAn("#bk-bas"), t = secilenAn("#bk-bit");
@@ -4078,6 +4302,16 @@ $("#btn-save-nak").addEventListener("click", function(){
 $$(".ilerle").forEach(function(b){
   b.addEventListener("click", function(){
     var n = Number(b.dataset.next), simdi = n - 1;
+    /* ⚠ 3. ADIMDAN ÇIKARKEN MAKİNE UYARISI (90. dosya · 3).
+       Duruş kaydı makineye yazılıyor; makine 1. adımda seçiliyor.
+       Eskiden bunu Duruş'un üstündeki sarı şerit söylüyordu, o
+       kalktı. Uyarı KAYDI ENGELLEMİYOR — bant yine açılıyor, şef
+       yine ilerliyor; yalnız neyin eksik olduğunu söylüyor
+       (41. dosya: hiçbir şey kilitlenmez, eksik yalnız söylenir). */
+    if(simdi === 3 && !$("#f-machine").value)
+      msg($("#ar-msg"), "Makine seçili değil — 1. adıma dönün. " +
+          "Duruş kaydı makineye yazılıyor.", "warn");
+    else if(simdi === 3) msg($("#ar-msg"), "");
     BANT_GECILDI[simdi] = true;
     BANT_ACIK[simdi] = false;
     msg($("#step-msg"), "");
@@ -4242,6 +4476,9 @@ function refreshState(){
     el.classList.toggle("missing", stepProblems(n).length > 0 && !el.value);
   });
   arizaBaslikCiz();
+  /* Proje boşsa makine/vardiya/kuyu listeleri de boş; sebebini
+     yazan satırlar her çizimde tazeleniyor (90. dosya · 1). */
+  seciciNotlari();
   /* Kuyu, tarih, vardiya ve şantiye artık 1. bandın özetinde yazıyor —
      eskiden başlığın altına yapışan ayrı bir şerit vardı, kalktı
      (79. dosya). Çalışan toplam alt çubukta. */
@@ -5233,6 +5470,65 @@ $("#kuyruk-kapa").addEventListener("click", kuyrukSayfaKapa);
 $("#kuyruk-sayfa").addEventListener("click", function(e){
   if(e.target === this) kuyrukSayfaKapa();
 });
+
+/* ============================================================
+   KİŞİ ARAMA SAYFASI (90. dosya · 5)
+   ------------------------------------------------------------
+   Tayfun: "Puantaj ekranında istisna ekleyince oluşan ekran
+   görüntüsü çok kötü, klavye çıkıyor liste çok az gözüküyor."
+
+   Arama kart içindeyken klavye ekranın yarısını alıyordu ve
+   geriye 2-3 isim kalıyordu. Artık alttan açılan tam ekran sayfa:
+   arama kutusu üstte sabit, liste altında.
+
+   TEK BİLEŞEN, İKİ ÇAĞRI YERİ: Puantaj istisnası ve Saha ekibi
+   "+ Kişi ekle". İkisi de aynı sorunu yaşıyordu; ayrı tutmanın
+   kazancı yoktu. Çağıran taraf başlığı, listeyi ve seçim
+   davranışını veriyor.
+   ============================================================ */
+var ARA_AYAR = null;
+function kisiAraAc(ayar){
+  ARA_AYAR = ayar;
+  $("#ara-baslik").textContent = ayar.baslik || "Kişi ara";
+  $("#ara-giris").placeholder = ayar.ipucu || "İsim yazın…";
+  $("#ara-giris").value = "";
+  msg($("#ara-msg"), "");
+  $("#ara-sayfa").hidden = false;
+  araYukseklik();
+  kisiAraCiz();
+  /* Odak sayfa görünür olduktan SONRA: gizli bir alana odaklanmak
+     iOS'ta klavyeyi açmıyor. */
+  setTimeout(function(){ $("#ara-giris").focus(); }, 60);
+}
+function kisiAraKapa(){ $("#ara-sayfa").hidden = true; ARA_AYAR = null; }
+function kisiAraCiz(){
+  if(!ARA_AYAR) return;
+  var liste = ARA_AYAR.liste() || [];
+  var alt = $("#ara-alt");
+  if(alt) alt.textContent = liste.length + " kişi";
+  araCiz($("#ara-sonuc"), suz(liste, $("#ara-giris").value),
+         function(p){ ARA_AYAR.secildi(p); }, ARA_AYAR.bos);
+}
+$("#ara-giris").addEventListener("input", kisiAraCiz);
+$("#ara-kapa").addEventListener("click", kisiAraKapa);
+$("#ara-sayfa").addEventListener("click", function(e){
+  if(e.target === this) kisiAraKapa();
+});
+/* ⚠ GÖRÜNÜR YÜKSEKLİK. `dvh` klavyeyi hesaba katmıyor: iOS'ta
+   klavye açılınca `100dvh` değişmiyor ve sayfanın alt yarısı
+   klavyenin arkasında kalıyor. `visualViewport.height` gerçek
+   görünür yüksekliği veriyor; CSS onu `--gor-h` ile okuyor. */
+function araYukseklik(){
+  var vv = window.visualViewport;
+  var h = vv ? vv.height : window.innerHeight;
+  if(h) document.documentElement.style.setProperty("--gor-h", Math.round(h) + "px");
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize", araYukseklik);
+  window.visualViewport.addEventListener("scroll", araYukseklik);
+}
+window.addEventListener("resize", araYukseklik);
+araYukseklik();
 
 function refreshQueue(){
   return obAll().then(function(items){
@@ -7037,7 +7333,24 @@ function attAnahtar(){ return $("#p-project").value + "|" + $("#p-date").value; 
    Çevrimdışıyken son bilinen listeye düşülür. */
 var EKIP = null;           /* crew_of(proje, tarih) sonucu */
 var EKIP_ANAHTAR = null;
-function ekip(){ return EKIP || (MASTER && MASTER.personnel) || []; }
+/* ============================================================
+   ⚠ PROJE YOKSA EKİP LİSTESİ DE YOK (90. dosya · 1)
+   ------------------------------------------------------------
+   Burada eskiden `EKIP || MASTER.personnel` yazıyordu. Proje
+   seçilmemişken `crew_of` hiç çağrılmıyor, `EKIP` boş kalıyor ve
+   liste ŞİRKET KÜTÜĞÜNE düşüyordu: istisna ekranında "Ekipte ara
+   (122 kişi)" yazıyordu — 122 kişi Amasya'nın ekibi değil şirketin
+   tamamı. Yani başka şantiyenin işçisine buradan izin
+   yazılabiliyordu.
+   58. adımda vardiya ekibi seçicileri şantiyeye göre süzülmüştü;
+   bu yol atlanmış. Yedek liste artık YALNIZ proje seçiliyken
+   geçerli — o zaman da `crew_of` gelene kadarki kısa an için.
+   ============================================================ */
+function ekip(){
+  if(EKIP) return EKIP;
+  if(!$("#p-project") || !$("#p-project").value) return [];
+  return (MASTER && MASTER.personnel) || [];
+}
 function ekipYukle(){
   var pr = $("#p-project").value, tr = $("#p-date").value || todayStr();
   if(!pr) { EKIP = null; EKIP_ANAHTAR = null; return Promise.resolve(); }
@@ -7330,25 +7643,29 @@ function suz(liste, q){
   return liste.filter(function(p){ return p.full_name.toLocaleLowerCase("tr").indexOf(q) > -1; });
 }
 $("#btn-att-exc").addEventListener("click", function(){
-  var ac = $("#att-sec").hidden;
-  $("#att-sec").hidden = !ac;
-  $("#btn-att-exc").textContent = ac ? "Kapat" : "+ Kişi durumu değiştir";
-  if(ac){ $("#att-ara").value = ""; attAraCiz(); $("#att-ara").focus(); }
+  /* 90. dosya · 5: kart içinde açılıp kapanan kutu yerine tam ekran
+     arama sayfası. Düğme artık "Kapat"a dönmüyor — sayfanın kendi
+     kapatma düğmesi var. */
+  if(!$("#p-project").value){
+    msg($("#att-msg"), "Önce 1. karttan proje seçin.", "err"); return; }
+  kisiAraAc({
+    baslik: "Ekipte ara",
+    ipucu: "Ekipteki kişiyi arayın…",
+    /* Bu kutu YENİ KİŞİ AÇMIYOR, yalnızca sahadaki ekibi süzüyor.
+       Başlık ve boş sonuç metni bunu açıkça söylüyor
+       (38. dosya, 3. bulgu). */
+    liste: function(){
+      return ekip().filter(function(p){ return !ATT_IST[p.id]; });
+    },
+    bos: "Bu isimde kimse yok. Yeni kişi yöneticiden eklenir.",
+    secildi: function(p){
+      ATT_IST[p.id] = {status:"izin", advance_amount:null, single_shift:false};
+      kisiAraKapa();
+      attCiz();
+      msg($("#att-msg"), p.full_name + " eklendi — durumunu aşağıdan seçin.", "ok");
+    }
+  });
 });
-function attAraCiz(){
-  var kalan = ekip().filter(function(p){ return !ATT_IST[p.id]; });
-  /* Bu kutu YENI KISI ACMIYOR, yalnizca sahadaki ekibi suzuyor.
-     Etiket ve bos sonuc metni bunu acikca soyluyor (38. dosya, 3. bulgu). */
-  var et = $("#att-ara-et");
-  if(et) et.textContent = "Ekipte ara (" + kalan.length + " kişi)";
-  araCiz($("#att-sonuc"), suz(kalan, $("#att-ara").value), function(p){
-    ATT_IST[p.id] = {status:"izin", advance_amount:null, single_shift:false};
-    $("#att-sec").hidden = true; $("#btn-att-exc").textContent = "+ Kişi durumu değiştir";
-    attCiz();
-    msg($("#att-msg"), p.full_name + " eklendi — durumunu aşağıdan seçin.", "ok");
-  }, "Bu isimde kimse yok. Yeni kişi yöneticiden eklenir.");
-}
-$("#att-ara").addEventListener("input", attAraCiz);
 
 /* ---- günü getirme ---- */
 function attLoad(sessiz){
@@ -7516,12 +7833,20 @@ function ekipCikar(p){
   });
 }
 $("#btn-ekip-ekle").addEventListener("click", function(){
-  var ac = $("#ekip-sec").hidden;
-  $("#ekip-sec").hidden = !ac;
-  $("#btn-ekip-ekle").textContent = ac ? "Kapat" : "+ Kişi ekle";
-  if(ac){ $("#ekip-ara").value = ""; $("#ekip-sonuc").innerHTML =
-    '<div class="hint" style="padding:11px 12px">Yükleniyor…</div>';
-    havuzYukle().then(function(){ ekipAraCiz(); $("#ekip-ara").focus(); }); }
+  /* 90. dosya · 5: aynı tam ekran sayfa. Havuz yüklenene kadar sayfa
+     açık ve "Yükleniyor…" diyor — düğmeye basıp hiçbir şey
+     olmamasından iyi. */
+  if(!$("#p-project").value){
+    msg($("#ekip-msg"), "Önce 1. karttan proje seçin.", "err"); return; }
+  kisiAraAc({
+    baslik: "Şirket listesinde ara",
+    ipucu: "Şirket listesinde arayın…",
+    liste: ekipHavuzListesi,
+    bos: "Şirket listesinde bu isimde kimse yok. Yeni personel yöneticiden eklenir.",
+    secildi: ekibeAl
+  });
+  $("#ara-sonuc").innerHTML = '<div class="hint" style="padding:11px 12px">Yükleniyor…</div>';
+  havuzYukle().then(kisiAraCiz);
 });
 var HAVUZ = [];
 function havuzYukle(){
@@ -7530,33 +7855,33 @@ function havuzYukle(){
   return sb.rpc("crew_pool", {p_project:pr, p_date:tr}).then(function(r){
     HAVUZ = r.error ? [] : (r.data || []); });
 }
-function ekipAraCiz(){
-  /* Havuzda kişinin o gün hangi sahada olduğu da yazar: şef birini alırken
-     transfer ettiğini görür. */
-  var liste = suz(HAVUZ, $("#ekip-ara").value).map(function(p){
+/* Havuzda kişinin o gün hangi sahada olduğu da yazar: şef birini
+   alırken transfer ettiğini görür. */
+function ekipHavuzListesi(){
+  return (HAVUZ || []).map(function(p){
     return Object.assign({}, p, {
       kind: gorevAdi(p.kind) + (p.nerede ? " · şu an " + p.nerede : " · boşta") });
   });
-  araCiz($("#ekip-sonuc"), liste, function(p){
-    if(!navigator.onLine || !sb){ msg($("#ekip-msg"), "Ekip değişikliği için bağlantı gerekiyor.", "err"); return; }
-    var tr = $("#p-date").value || todayStr();
-    msg($("#ekip-msg"), p.full_name + " alınıyor…");
-    sb.rpc("assign_personnel", {p_project:$("#p-project").value, p_personnel:p.id, p_date:tr})
-     .then(function(r){
-      if(r.error){ msg($("#ekip-msg"), r.error.message, "err"); return; }
-      $("#ekip-sec").hidden = true; $("#btn-ekip-ekle").textContent = "+ Kişi ekle";
-      var d = r.data || {};
-      return Promise.all([ekipYukle(), havuzYukle()]).then(function(){
-        ekipCiz(); attCiz();
-        msg($("#ekip-msg"), d.durum === "transfer"
-          ? p.full_name + " · " + tr + " itibarıyla " + (d.onceki_saha || "önceki şantiye") +
-            " görevinden alınıp bu şantiyeye yazıldı."
-          : p.full_name + " · " + tr + " itibarıyla ekibe alındı.", "ok");
-      });
-    });
-  }, "Şirket listesinde bu isimde kimse yok. Yeni personel yöneticiden eklenir.");
 }
-$("#ekip-ara").addEventListener("input", ekipAraCiz);
+function ekibeAl(p){
+  if(!navigator.onLine || !sb){
+    msg($("#ara-msg"), "Ekip değişikliği için bağlantı gerekiyor.", "err"); return; }
+  var tr = $("#p-date").value || todayStr();
+  msg($("#ara-msg"), p.full_name + " alınıyor…");
+  sb.rpc("assign_personnel", {p_project:$("#p-project").value, p_personnel:p.id, p_date:tr})
+   .then(function(r){
+    if(r.error){ msg($("#ara-msg"), r.error.message, "err"); return; }
+    kisiAraKapa();
+    var d = r.data || {};
+    return Promise.all([ekipYukle(), havuzYukle()]).then(function(){
+      ekipCiz(); attCiz();
+      msg($("#ekip-msg"), d.durum === "transfer"
+        ? p.full_name + " · " + tr + " itibarıyla " + (d.onceki_saha || "önceki şantiye") +
+          " görevinden alınıp bu şantiyeye yazıldı."
+        : p.full_name + " · " + tr + " itibarıyla ekibe alındı.", "ok");
+    });
+  });
+}
 
 /* Prim bölümü bu uygulamadan KALDIRILDI.
    Prim, şefin kendi kazancını ilgilendiren bir yönetim konusu: baraj ve
@@ -7858,7 +8183,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "53";
+var SURUM = "54";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
