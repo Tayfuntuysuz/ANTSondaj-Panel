@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "54";
+var SURUM = "55";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -166,7 +166,7 @@ var SAYFALAR = [
   {k:"ayarlar",  d:"#ayarlar",       ad:"Ayarlar",            i:"ayar",   g:"Ayarlar",
                  eylem:"ayarlar", herkes:1},
 
-  {k:"isveren",  d:"isveren.html",   ad:"Raporlarım",         i:"kalkan", g:"Raporlarım"}
+  {k:"isveren",  d:"isveren.html",   ad:"İşveren Paneli",     i:"kalkan", g:"İşveren Paneli"}
 ];
 var GRUP_SIRA = ["Günlük","Ay sonu","Finans","Teklifler","Analizler",
                  "Proje yönetimi ve Tanımlamalar","Ayarlar","Raporlarım"];
