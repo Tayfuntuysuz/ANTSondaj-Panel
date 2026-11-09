@@ -24,7 +24,7 @@ try{localStorage.removeItem("sp_tema");localStorage.removeItem("sp_yazi");}catch
      Eskiden iki tip vardı (başlıklarda Barlow Condensed, gövdede IBM Plex
      Sans) ve bantlardaki sıkıştırılmış BÜYÜK HARF başlık örnekle
      uyuşmuyordu. -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght400;500;600;700&display=swap">
 <style>
 :root{
   /* Lacivert ust cubuk her temada lacivert kalir; uzerindeki yazi rengi de
@@ -59,7 +59,7 @@ body{background:var(--bg)}
    Eskiden bütün sütun bembeyazdı ve bantların bittiği yer, boş alan
    ile aynı renkteydi. */
 .app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
-@media (min-width:560px){
+media (min-width:560px){
   .app{border-inline:1px solid var(--line);min-height:100dvh}
 }
 /* ============================================================
@@ -214,7 +214,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
    ⚠ `:has()` kullanmıyoruz (79. dosyanın kuralı); tarih taşıyan
    ızgaralar sınıfla işaretli.
    ============================================================ */
-@media (max-width:430px){ .grid2.kir-alt{grid-template-columns:1fr} }
+media (max-width:430px){ .grid2.kir-alt{grid-template-columns:1fr} }
 input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max-width:100%}
 /* ============================================================
    TARİH / AY / SAAT ALANLARININ TAŞMASI (90. dosya · 6)
@@ -454,6 +454,15 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .adim-ozet{font-size:12.5px;color:var(--kutu-ink-2);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .adim-ozet:empty{display:none}
+/* 98. dosya · Operasyon adımındaki okuma kutuları. Üçlü kutu 390 px'de
+   sığsın diye yazı biraz küçülüyor; `iki-alan` içinde input var, o
+   yüzden yazı boyu 16 px'in altına İNMİYOR (iOS odakta sayfayı
+   zumluyor — 90. dosya). */
+.readout.uc{grid-template-columns:repeat(3,1fr)}
+.readout.uc .v{font-size:19px}
+.readout.uc .k{font-size:10.5px;letter-spacing:.03em}
+.readout.iki-alan{grid-template-columns:repeat(2,1fr)}
+.readout.iki-alan input{width:100%;min-width:0;font-size:16px;margin-top:4px}
 .adim-im{flex:none;font-size:12.5px;color:var(--kutu-ink-2);white-space:nowrap}
 /* Sağdaki ok: kartın açılır olduğunu söyleyen tek işaret. Açıkken
    aşağı dönüyor. */
@@ -901,7 +910,7 @@ details.acilir[open] > summary::after{content:"\2212"}
                   aria-expanded="false" aria-controls="bant-ic-1">
             <span class="nk">01</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-vardiya"></use></svg></span>
-            <span class="adim-yazi"><span class="adim-ad">Vardiya</span>
+            <span class="adim-yazi"><span class="adim-ad">Proje</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
             <span class="adim-ok" aria-hidden="true">›</span>
@@ -927,7 +936,12 @@ details.acilir[open] > summary::after{content:"\2212"}
             <select id="f-well" data-req="1"></select>
             <div class="hint" id="f-kuyu-not"></div>
           </div>
-          <div class="field"><label for="f-paper">Kâğıt form no</label><input id="f-paper" inputmode="numeric" placeholder="001369"></div>
+          <!-- 98. dosya · Tayfun: "Kağıt no kalsın, ekranda gözükmesin, arka
+             planda yazılsın, excel çıktı alınınca orda da çıkabilir."
+             Alan gizli duruyor; şef artık yazmıyor, kayıtta kendiliğinden
+             üretiliyor (kagitNoUret). Gizli INPUT olarak bırakıldı ki
+             alanı okuyan onca yer (özet, düzeltme, kuyruk) değişmesin. -->
+        <input id="f-paper" type="hidden">
         </div>
         <button class="btn ilerle" type="button" data-next="2">İlerle →</button>
       </div>
@@ -950,45 +964,94 @@ details.acilir[open] > summary::after{content:"\2212"}
              şantiye şefini kaldır." Şef projeye bağlı sabit personel,
              vardiyanın ekibi değil; satırı her gün tekrar okumak işe
              yaramıyordu. Yönetici panelinde duruyor. -->
-        <div class="field"><label for="f-driller1">Sondör <span class="req">*</span></label><select id="f-driller1" data-req="2"></select></div>
-        <div class="field"><label>İşçi / yardımcı</label>
+        <!-- 98. dosya · Ekip sırası: Formen → Sondör → Yardımcı personel → Şoför.
+             Tayfun: "Formen ayrı bi görevli… her şantiyede olmaz. Opsiyonel
+             olacak. 2. sondör de opsiyonel olacak. varsa seçilirler, yoksa yok."
+
+             ⚠ `#f-driller1` DURUYOR: 1. sondör hâlâ bu alandan seçiliyor.
+             Alanı okuyan on iki yer var (manevra satırı, özet, düzeltme,
+             doğrulama) ve hepsini çoklu listeye çevirmek bu pakette
+             gereksiz risk. Ek sondörler ayrı satırlarda; ekip yükünde
+             hepsi birlikte gidiyor. -->
+        <div class="field"><label for="f-formen">Formen</label>
+          <select id="f-formen"></select>
+          <div class="hint">Her şantiyede olmaz — varsa seçin.</div></div>
+        <div class="field"><label for="f-driller1">1. sondör <span class="req">*</span></label><select id="f-driller1" data-req="2"></select></div>
+        <div class="field"><label>Diğer sondörler</label>
+          <div id="f-sondor-ek"></div>
+          <button class="btn ghost sm" id="btn-sondor-add" type="button" style="margin-top:6px">Sondör ekle</button>
+          <div class="hint">Aynı kuyuda birden fazla sondör çalıştıysa metraj aralarında eşit bölünür.</div>
+        </div>
+        <div class="field"><label>Yardımcı personel</label>
           <div id="f-helpers"></div>
-          <button class="btn ghost sm" id="btn-helper-add" type="button" style="margin-top:6px">İşçi ekle</button>
+          <button class="btn ghost sm" id="btn-helper-add" type="button" style="margin-top:6px">Yardımcı personel ekle</button>
+        </div>
+        <div class="field"><label>Şoför</label>
+          <div id="f-soforler"></div>
+          <button class="btn ghost sm" id="btn-sofor-add" type="button" style="margin-top:6px">Şoför ekle</button>
         </div>
         <div class="hint" id="ekip-not" hidden></div>
         <div class="hint" id="ekip-kaynak"></div>
-        <!-- 84. dosya · 7. madde: motor başlangıç/bitiş SAATİ yerine
-             makinenin SAAT SAYACI. Vardiyanın motor saati bu okuma ile
-             bir önceki okumanın farkı (58. adım, makine_sayac_akisi). -->
-        <div class="field"><label for="f-sayac">Makine saat sayacı <span class="req">*</span></label>
-          <!-- ⚠ ONDALIK AYIRACI NOKTA. `input[type=number]` virgülü kabul
-               etmiyor: "1240,5" yazan şef "12405" yazmış oluyor ve bu
-               sayaç farkını on katına çıkarıyor — bakım takibini sessizce
-               bozar. Örnek nokta ile veriliyor, altındaki uyarı da
-               mantıksız farkı yakalıyor (aşağıdaki sayacDenetle). -->
-          <input id="f-sayac" type="number" step="0.1" min="0" inputmode="decimal"
-                 placeholder="örn. 1240.5" data-req="2">
-          <div class="hint" id="sayac-not">Vardiya başında makinenin saat sayacından okunan değer.</div>
-          <div id="sayac-uyari"></div>
-        </div>
+        <!-- 98. dosya · 8. madde: makine saat sayacı Ekip'ten OPERASYON
+             adımına taşındı. Oradaki iki kutu (vardiya başı / vardiya sonu)
+             bu alanın yerini aldı. -->
         <button class="btn ilerle" type="button" data-next="3">İlerle →</button>
       </div>
           </div>
         </section>
 
+        <!-- ============================================================
+             3. BANT KALKTI — "Kontrol & Arıza" (98. dosya)
+             ============================================================
+             Kontroller Operasyon adımının başına, arıza ve bekleme ise
+             Operasyon listesinin birer türü olarak taşındı. Akış altı
+             adımdan beşe indi:
+               01 Proje · 02 Ekip · 03 Operasyon · 04 Malzeme · 05 Özet
+             ============================================================ -->
         <section class="adim-bant" data-bant="3">
           <button class="adim-bas" type="button" data-bant-bas="3"
                   aria-expanded="false" aria-controls="bant-ic-3">
             <span class="nk">03</span>
-            <span class="kik"><svg aria-hidden="true"><use href="#ik-kontrol"></use></svg></span>
-            <span class="adim-yazi"><span class="adim-ad">Kontrol &amp; Arıza</span>
+            <span class="kik"><svg aria-hidden="true"><use href="#ik-delgi"></use></svg></span>
+            <span class="adim-yazi"><span class="adim-ad">Operasyon</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
             <span class="adim-ok" aria-hidden="true">›</span>
           </button>
           <div class="adim-ic" id="bant-ic-3" hidden>
       <div class="card" data-pane="3" style="margin-top:0">
-        <div class="arasi">
+        <!-- 98. dosya · Kutu ikiden ÜÇE çıktı. Tayfun: "Vardiya Başı kuyu
+             tabanı (solda), Mevcut Kuyu tabanı (ortada), vardiya metrajı
+             (sağda)". Sağdaki ikisinin farkı — formülden, elle değil. -->
+        <div class="readout uc">
+          <div><div class="k">Vardiya başı kuyu tabanı</div><div class="v num" id="ro-bas">0,00 m</div></div>
+          <div><div class="k">Mevcut kuyu tabanı</div><div class="v num" id="ro-d">0,00 m</div></div>
+          <div><div class="k">Vardiya metrajı</div><div class="v num" id="ro-m">0,00 m</div></div>
+        </div>
+
+        <!-- MOTOR SAATİ — Ekip adımından buraya taşındı (98. dosya · 8).
+             Tayfun: "şef elle yazsın". Vardiya başına son okuma öneri
+             olarak altında yazıyor; makine değişince ya da ilk vardiyada
+             geçmiş okuma olmuyor, o yüzden otomatik doldurulmuyor. -->
+        <div class="readout iki-alan">
+          <div><div class="k">Vardiya başı motor saati</div>
+            <input id="f-sayac-bas" type="number" step="0.1" min="0" inputmode="decimal"
+                   placeholder="örn. 1240.5"></div>
+          <div><div class="k">Vardiya sonu motor saati</div>
+            <!-- ⚠ ONDALIK AYIRACI NOKTA (84. dosya): `input[type=number]`
+                 virgülü yutuyor, "1240,5" → "12405" oluyor ve sayaç farkını
+                 on katına çıkarıyor. Altındaki uyarı mantıksız farkı tutuyor. -->
+            <input id="f-sayac" type="number" step="0.1" min="0" inputmode="decimal"
+                   placeholder="örn. 1252.0" data-req="3"></div>
+        </div>
+        <div class="hint" id="sayac-not">Vardiya sonunda makinenin saat sayacından okunan değer.</div>
+        <div id="sayac-uyari"></div>
+
+        <!-- ÇALIŞMA ÖNCESİ KONTROLLER — 3. adımdan buraya taşındı.
+             Tayfun: "Eski şekilde kontrolleri biraz daha sadeleştirerek
+             en başa koyalım. işe başlamadan önce yapılan kontroller
+             sonuçta." 21 madde → 9 (bkz. CHECKS). -->
+        <div class="arasi" style="margin-top:14px">
           <span class="eyebrow">Çalışma öncesi kontroller</span>
           <button class="btn ghost sm" id="btn-check-all" type="button">Tümü uygun</button>
         </div>
@@ -1000,123 +1063,75 @@ details.acilir[open] > summary::after{content:"\2212"}
         </div>
 
         <!-- ============================================================
-             DURUŞ — iki tür: arıza (makine bozuk) ve bekleme (makine sağlam)
+             OPERASYON LİSTESİ — sıralı, sınırsız, tür tekrarlanabilir
              ============================================================
-             Kartın adı 20 Ekim'e kadar "Arıza"ydı. Bekleme de saat yiyor
-             (su, müşteri, malzeme, hava, yol) ama girilecek yeri yoktu.
-             Tayfun, 18 Ekim: "Evet şimdi gelsin."
+             Tayfun: "delgi ile başlayıp 2 saat sonra bekleme 1 saat sonra
+             tekrar delgi 2 saat sonra arıza girebilmesi lazım. O yüzden
+             alt kısımda hep bir operasyon değiş kutucuğu olması gerekiyor."
 
-             Şef SAAT GİRMİYOR, yalnız başlangıç–bitiş anını söylüyor.
-             Kayıp saati program vardiya penceresiyle kesiştirip yazıyor
-             (30d). Şef yazarsa yanlış yazar.
+             Delgide SAAT YOK: geri kalan süre delgiye sayılıyor. Öteki
+             türlerin hepsi başlangıç–bitiş saati istiyor.
              ============================================================ -->
-        <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">
-          <span class="eyebrow">Duruş</span>
-          <!-- Kart neye yazdığını başlığında gösterir: hangi makine, hangi
-               kuyu, hangi gün, hangi vardiya. Şef 1. adımda ne seçtiğini
-               hatırlamak zorunda kalmasın. (19. dosya, 2b) -->
-          <div class="bant" id="ar-baslik" style="border-radius:10px;margin:2px 0 4px">—</div>
-
-          <!-- Devam eden arıza varsa yeni arıza kartı yerine BU çıkıyor:
-               şef ikinci kayıt açarsa aynı duruş iki kere sayılır (30c). -->
-          <div id="devam-ariza"></div>
-
-          <div class="kat" id="durus-giris">
-            <div class="field">
-              <label>Duruş türü</label>
-              <div class="secim" id="durus-tur">
-                <button type="button" class="chip" data-durus="ariza" aria-pressed="false">Arıza</button>
-                <button type="button" class="chip" data-durus="bekleme" aria-pressed="false">Bekleme</button>
-              </div>
-              <div class="hint">Arıza: makine bozuk. Bekleme: makine sağlam, iş yok.</div>
-            </div>
-
-            <!-- ---------- ARIZA ---------- -->
-            <div class="kat" id="durus-ariza" hidden>
-              <div class="grid2">
-                <div class="field"><label for="ar-kind">Arıza tipi</label>
-                  <select id="ar-kind"><option value="">— seçin —</option><option value="hidrolik">Hidrolik</option>
-                  <option value="rotasyon">Rotasyon</option><option value="mekanik">Mekanik</option>
-                  <option value="elektrik">Elektrik</option><option value="diger">Diğer</option></select></div>
-                <!-- Saat seçici kendi listemiz: tarayıcının type="time" alanı
-                     gece yarısını aşan aralıkta (min 20:00 > max 08:00)
-                     min/max kuralını telefonlarda tutarsız uyguluyor. -->
-                <div class="field"><label for="ar-bas">Başlangıç saati</label>
-                  <select id="ar-bas"></select></div>
-              </div>
-              <div class="field">
-                <label>Vardiya biterken</label>
-                <div class="secim" id="ar-son">
-                  <button type="button" class="chip" data-son="giderildi" aria-pressed="false">Giderildi, makine çalıştı</button>
-                  <button type="button" class="chip" data-son="devam" aria-pressed="false">Hâlâ duruyor</button>
-                  <button type="button" class="chip" data-son="fabrika" aria-pressed="false">Fabrikaya gönderildi</button>
-                </div>
-              </div>
-              <div class="field" id="ar-bit-wrap" hidden>
-                <label for="ar-bit">Makinenin çalıştığı saat</label>
-                <select id="ar-bit"></select>
-              </div>
-              <!-- Program tarihi kendisi hesaplıyor ama SESSİZ KALMIYOR:
-                   hangi güne yazdığını buraya yazıyor. (19. dosya, 2a) -->
-              <div class="hint" id="ar-tarih-not" style="color:var(--warn)"></div>
-              <div class="field"><label for="ar-note">Açıklama</label><input id="ar-note" placeholder="Ne oldu, ne yapıldı"></div>
-              <button class="btn ghost sm" id="btn-ariza-kaydet" type="button">Arızayı kaydet</button>
-            </div>
-
-            <!-- ---------- BEKLEME ---------- -->
-            <div class="kat" id="durus-bekleme" hidden>
-              <div class="grid2">
-                <div class="field"><label for="bk-sebep">Bekleme sebebi</label>
-                  <select id="bk-sebep"><option value="">— seçin —</option>
-                  <option value="su">Su</option><option value="musteri">Müşteri</option>
-                  <option value="malzeme">Malzeme / parça</option><option value="hava">Hava</option>
-                  <option value="yol">Yol / erişim</option><option value="diger">Diğer</option></select></div>
-                <div class="field"><label for="bk-bas">Başlangıç saati</label>
-                  <select id="bk-bas"></select></div>
-              </div>
-              <div class="grid2">
-                <div class="field"><label for="bk-bit">Bitiş saati</label>
-                  <select id="bk-bit"></select></div>
-                <div class="field"><label>Süre</label>
-                  <div class="bant" id="bk-sure" style="border-radius:10px">—</div></div>
-              </div>
-              <div class="field"><label for="bk-note">Açıklama</label><input id="bk-note" placeholder="Neyi beklediniz"></div>
-              <button class="btn ghost sm" id="btn-bekleme-kaydet" type="button">Beklemeyi kaydet</button>
-              <div id="bk-liste" style="margin-top:8px"></div>
+        <div class="arasi" style="margin-top:16px">
+          <span class="eyebrow">Operasyonlar</span>
+          <span class="hint" id="op-sure"></span>
+        </div>
+        <div id="op-liste"></div>
+        <div class="kat" id="op-giris">
+          <div class="field">
+            <label>Operasyon türü</label>
+            <div class="secim" id="op-tur"></div>
+          </div>
+          <div class="grid2" id="op-saat-wrap" hidden>
+            <div class="field"><label for="op-bas">Başlangıç saati</label><select id="op-bas"></select></div>
+            <div class="field"><label for="op-bit">Bitiş saati</label><select id="op-bit"></select></div>
+          </div>
+          <div class="grid2" id="op-muhafaza-wrap" hidden>
+            <div class="field"><label for="op-from">Başlangıç metre</label>
+              <input id="op-from" type="number" min="0" step="0.01" inputmode="decimal"></div>
+            <div class="field"><label for="op-to">Bitiş metre</label>
+              <input id="op-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
+          </div>
+          <div class="field" id="op-cap-wrap" hidden><label for="op-cap">Muhafaza çapı</label>
+            <select id="op-cap"><option value="">— seçin —</option>
+              <option>PW</option><option>HW</option><option>NW</option></select></div>
+          <div class="field" id="op-bekleme-wrap" hidden><label>Bekleme türü</label>
+            <div class="secim" id="op-bekleme-tur">
+              <button type="button" class="chip" data-bk="operasyonel" aria-pressed="false">Operasyonel</button>
+              <button type="button" class="chip" data-bk="operasyonel_degil" aria-pressed="false">Operasyonel olmayan</button>
             </div>
           </div>
-
-          <div id="ar-msg"></div>
-          <div id="acik-ariza" style="margin-top:10px"></div>
+          <div class="field" id="op-kuyu-wrap" hidden><label for="op-kuyu-durum">Kuyu durumu</label>
+            <select id="op-kuyu-durum">
+              <option value="kuyu_sonu">Kuyu sonu</option>
+              <option value="kuyu_iptali">Kuyu iptali</option></select>
+            <div class="hint" id="op-kuyu-not"></div></div>
+          <div class="field" id="op-not-wrap" hidden><label for="op-not" id="op-not-label">Açıklama</label>
+            <input id="op-not" placeholder="Ne oldu, ne yapıldı"></div>
+          <button class="btn ghost kesikli" id="btn-op-ekle" type="button">Operasyonu ekle</button>
+          <div id="op-msg"></div>
         </div>
-        <button class="btn ilerle" type="button" data-next="4" style="margin-top:12px">İlerle →</button>
-      </div>
-          </div>
-        </section>
 
-        <section class="adim-bant" data-bant="4">
-          <button class="adim-bas" type="button" data-bant-bas="4"
-                  aria-expanded="false" aria-controls="bant-ic-4">
-            <span class="nk">04</span>
-            <span class="kik"><svg aria-hidden="true"><use href="#ik-delgi"></use></svg></span>
-            <span class="adim-yazi"><span class="adim-ad">Delgi</span>
-              <span class="adim-ozet"></span></span>
-            <span class="adim-im"></span>
-            <span class="adim-ok" aria-hidden="true">›</span>
-          </button>
-          <div class="adim-ic" id="bant-ic-4" hidden>
-      <div class="card" data-pane="4" style="margin-top:0">
-        <div class="readout">
-          <div><div class="k">Vardiya metrajı</div><div class="v num" id="ro-m">0,00 m</div></div>
-          <div><div class="k">Kuyu derinliği</div><div class="v num" id="ro-d">0,00 m</div></div>
+        <!-- 98. dosya · Tayfun: "Vardiyada sondörlerin tuttuğu kağıt raporun
+             fotosu gerekiyor. onu whatsapptan birbirlerine gönderiyorlar.
+             Şantiye şefi onun fotosunu operasyon kısmına ekleyebilsin."
+             Vardiya başına, birden fazla. -->
+        <div class="field" style="margin-top:14px">
+          <label for="f-vfoto">Sondörün kâğıt raporu (fotoğraf)</label>
+          <input id="f-vfoto" type="file" accept="image/*" multiple>
+          <div class="hint">Birden fazla seçebilirsiniz. Bağlantı gelince gönderilir.</div>
         </div>
-        <div class="field"><label for="f-end">Kuyu durumu</label><select id="f-end"><option value="">Devam ediyor</option><option value="kuyu_sonu">Kuyu sonu</option><option value="kuyu_iptali">Kuyu iptali</option></select></div>
+
+        <!-- Kuyu durumu operasyon listesine taşındı ("Kuyu bitimi" türü)
+             ama alan GİZLİ duruyor: kuyu sonu akışının tamamı (kalan
+             muhafaza, ölçümler, kuyu_sonu_kaydet) buradan okuyor. -->
+        <input id="f-end" type="hidden" value="">
         <!-- Manevra alanları tek kutuda: "ilerleme olmadı" işaretlenince
              hepsi birden GİZLENİYOR. Pasifleştirme değil gizleme — pasif
              düğme sahada "program bozuk" dedirtiyor (58. dosya). -->
         <div class="kat" id="mv-alanlar">
           <div class="grid2">
-            <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>PW</option><option>PQ</option><option>HQ</option><option>NQ</option></select></div>
+            <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
             <div class="field"><label for="f-to">Vardiya bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
           </div>
           <button class="btn ghost kesikli" id="btn-add-run" type="button">Manevra ekle</button>
@@ -1220,24 +1235,24 @@ details.acilir[open] > summary::after{content:"\2212"}
           <button class="btn ghost sm" id="btn-olcum-add" type="button"
             style="align-self:flex-start">Ölçüm ekle</button>
         </div>
-        <button class="btn ilerle" type="button" data-next="5" style="margin-top:12px">İlerle →</button>
+        <button class="btn ilerle" type="button" data-next="4" style="margin-top:12px">İlerle →</button>
       </div>
           </div>
         </section>
 
-        <section class="adim-bant" data-bant="5">
-          <button class="adim-bas" type="button" data-bant-bas="5"
-                  aria-expanded="false" aria-controls="bant-ic-5">
-            <span class="nk">05</span>
+        <section class="adim-bant" data-bant="4">
+          <button class="adim-bas" type="button" data-bant-bas="4"
+                  aria-expanded="false" aria-controls="bant-ic-4">
+            <span class="nk">04</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-tuketim"></use></svg></span>
-            <span class="adim-yazi"><span class="adim-ad">Tüketim</span>
+            <span class="adim-yazi"><span class="adim-ad">Malzeme</span>
               <span class="adim-ozet"></span></span>
             <span class="adim-im"></span>
             <span class="adim-ok" aria-hidden="true">›</span>
           </button>
-          <div class="adim-ic" id="bant-ic-5" hidden>
-      <div class="card" data-pane="5" style="margin-top:0">
-        <div class="field"><label for="f-fuel">Bu vardiyada <b>harcanan</b> mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" min="0" inputmode="decimal" data-req="5"></div>
+          <div class="adim-ic" id="bant-ic-4" hidden>
+      <div class="card" data-pane="4" style="margin-top:0">
+        <div class="field"><label for="f-fuel">Bu vardiyada <b>harcanan</b> mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" min="0" inputmode="decimal" data-req="4"></div>
         <div class="hint">Bu kulenin bu vardiyada <b>yaktığı</b> mazot. Sahaya gelen tankeri buraya değil,
           Gider sekmesindeki "Sahaya gelen akaryakıt" kartına yazın. Hiç yakılmadıysa 0.</div>
         <div class="eyebrow" style="margin-top:14px">Kuyuda kullanılan malzeme</div>
@@ -1246,7 +1261,7 @@ details.acilir[open] > summary::after{content:"\2212"}
           style="align-self:flex-start">Malzeme ekle</button>
         <div class="field" style="margin-top:12px"><label for="f-note">Kullanılan malzemeler açıklaması</label>
           <textarea id="f-note" placeholder="Örn: 2 adet matkap ucu, bentonit takviyesi"></textarea></div>
-        <button class="btn ilerle" type="button" data-next="6" style="margin-top:12px">İlerle →</button>
+        <button class="btn ilerle" type="button" data-next="5" style="margin-top:12px">İlerle →</button>
       </div>
           </div>
         </section>
@@ -1263,10 +1278,10 @@ details.acilir[open] > summary::after{content:"\2212"}
              özetten geçiyor. Düğme yine pasif olmuyor (41. dosya):
              basılır, eksik varsa söyler ve eksik bandı açar.
              ============================================================ -->
-        <section class="adim-bant" data-bant="6">
-          <button class="adim-bas" type="button" data-bant-bas="6"
-                  aria-expanded="false" aria-controls="bant-ic-6">
-            <span class="nk">06</span>
+        <section class="adim-bant" data-bant="5">
+          <button class="adim-bas" type="button" data-bant-bas="5"
+                  aria-expanded="false" aria-controls="bant-ic-5">
+            <span class="nk">05</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-ozet"></use></svg></span>
             <!-- 84. dosya · 9. madde: "Özet" → "Vardiya Özeti". Tek
                  başına "Özet" neyin özeti olduğunu söylemiyordu; alt
@@ -1277,8 +1292,8 @@ details.acilir[open] > summary::after{content:"\2212"}
             <span class="adim-im"></span>
             <span class="adim-ok" aria-hidden="true">›</span>
           </button>
-          <div class="adim-ic" id="bant-ic-6" hidden>
-            <div class="card" data-pane="6" style="margin-top:0">
+          <div class="adim-ic" id="bant-ic-5" hidden>
+            <div class="card" data-pane="5" style="margin-top:0">
               <div id="ozet-kart"></div>
               <div class="kc-mesaj" id="step-msg"></div>
               <div class="kc-mesaj" id="shift-msg"></div>
@@ -1468,7 +1483,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <section class="adim-bant" data-kart="gider-4">
           <button class="adim-bas" type="button" data-kart-bas="gider-4"
                   aria-expanded="false" aria-controls="kart-ic-gider-4">
-            <span class="nk">04</span>
+            <span class="nk">03</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-avans"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Avans</span>
               <span class="adim-ozet">Puantajdan girilen avanslar</span></span>
@@ -1685,7 +1700,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <section class="adim-bant" data-kart="malzeme-4">
           <button class="adim-bas" type="button" data-kart-bas="malzeme-4"
                   aria-expanded="false" aria-controls="kart-ic-malzeme-4">
-            <span class="nk">04</span>
+            <span class="nk">03</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-stok"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Sahadaki stok</span>
               <span class="adim-ozet">Sahadaki malzeme bakiyesi</span></span>
@@ -1706,7 +1721,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <section class="adim-bant" data-kart="malzeme-5">
           <button class="adim-bas" type="button" data-kart-bas="malzeme-5"
                   aria-expanded="false" aria-controls="kart-ic-malzeme-5">
-            <span class="nk">05</span>
+            <span class="nk">04</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-hareket"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Stok hareketi</span>
               <span class="adim-ozet">Giriş, kullanım ve iade</span></span>
@@ -1912,7 +1927,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <section class="adim-bant" data-kart="puantaj-4">
           <button class="adim-bas" type="button" data-kart-bas="puantaj-4"
                   aria-expanded="false" aria-controls="kart-ic-puantaj-4">
-            <span class="nk">04</span>
+            <span class="nk">03</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-ekip"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Saha ekibi</span>
               <span class="adim-ozet">Bu şantiyede görevli kişiler</span></span>
@@ -2089,7 +2104,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <section class="adim-bant" data-kart="ozet-4">
           <button class="adim-bas" type="button" data-kart-bas="ozet-4"
                   aria-expanded="false" aria-controls="kart-ic-ozet-4">
-            <span class="nk">04</span>
+            <span class="nk">03</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-tuketim"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Yakıt dökümü</span>
               <span class="adim-ozet">Beyan ile defter karşılaştırması</span></span>
@@ -2113,7 +2128,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <section class="adim-bant" data-kart="ozet-5">
           <button class="adim-bas" type="button" data-kart-bas="ozet-5"
                   aria-expanded="false" aria-controls="kart-ic-ozet-5">
-            <span class="nk">05</span>
+            <span class="nk">04</span>
             <span class="kik"><svg aria-hidden="true"><use href="#ik-tanim"></use></svg></span>
             <span class="adim-yazi"><span class="adim-ad">Tanımlamalar</span>
               <span class="adim-ozet">Yöneticinin tanımladıkları</span></span>
@@ -2156,7 +2171,7 @@ details.acilir[open] > summary::after{content:"\2212"}
   </nav>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/supabase/supabase-js2.45.4/dist/umd/supabase.js"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
 <script src="kart.js"></script>
 <script>
@@ -2785,7 +2800,10 @@ function fillVardiya(){
      "Gündüz 08:00–20:00" diye başlıyor; nakliye de aynı kalıba girdi.
      ⚠ DEĞERLER DEĞİŞMEDİ (nak-gun / nak-gece): kayıtlı vardiyalar ve
      bütün dallanmalar bu dizgilere bakıyor. */
-  [["nak-gun","Gündüz Nakliye"],["nak-gece","Gece Nakliye"]].forEach(function(p){
+  /* 98. dosya · Nakliye artık bir OPERASYON TÜRÜ; vardiya seçimi yalnız
+     gündüz/gece diyor. Seçenekler ARTIK EKLENMİYOR ama `nakliyeMi()`
+     değeri okumaya devam ediyor: eski nakliye vardiyaları düzeltilebilsin. */
+  [].forEach(function(p){
     var o = document.createElement("option"); o.value = p[0]; o.textContent = p[1]; el.appendChild(o);
   });
   if(cur) el.value = cur;
@@ -2839,7 +2857,9 @@ function vardiyaModu(){
 }
 
 /* ---------------- ekip: tek sondör + çoklu işçi ---------------- */
-var ISCI = [];          /* seçili işçi/yardımcı personel kimlikleri */
+var ISCI = [];          /* seçili yardımcı personel kimlikleri */
+var SONDOR_EK = [];     /* 1. sondörden sonraki sondörler (98. dosya) */
+var SOFOR = [];         /* vardiyada görevli şoförler (98. dosya) */
 /* 54. dosya · Tayfun: "Olmaz öyle, şef kuleye falan çıkmaz."
    Şef hem işçi hem sondör listesinden düşüyor. Süzgeç GÖREVE göre —
    projeye atanmış şefi süzmekten sağlam: şef alanı henüz doldurulmamış
@@ -2885,13 +2905,30 @@ function ekipAdayi(p){
   if(!$("#f-project") || !$("#f-project").value) return false;
   return p && p.kind !== "santiye_sefi" && sahadaMi(p);
 }
+/* 98. dosya · görev listesi beşe indi: şantiye şefi · formen · sondör ·
+   yardımcı personel · şoför. Eskiden "yardımcı" = sondör olmayan herkesti
+   ve şoförle formen de o listeye düşüyordu; artık her görevin kendi
+   listesi var. Eski kayıtlarda `alt_eleman`/`sondor_yardimcisi` kalmış
+   olabilir — 62. adım hepsini `yardimci`ye çevirdi, yine de burada
+   eskileri de kabul ediyoruz ki veri gecikmeli gelirse liste boş kalmasın. */
+function gorevli(p, turler){
+  return p && turler.indexOf(p.kind) >= 0 && ekipAdayi(p);
+}
 function yardimcilar(){
   return ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return p.kind !== "sondor" && ekipAdayi(p); });
+    .filter(function(p){ return gorevli(p, ["yardimci","alt_eleman","sondor_yardimcisi"]); });
 }
 function sondorler(){
   return ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return p.kind === "sondor" && ekipAdayi(p); });
+    .filter(function(p){ return gorevli(p, ["sondor"]); });
+}
+function formenler(){
+  return ((MASTER && MASTER.personnel) || [])
+    .filter(function(p){ return gorevli(p, ["formen"]); });
+}
+function soforler(){
+  return ((MASTER && MASTER.personnel) || [])
+    .filter(function(p){ return gorevli(p, ["sofor"]); });
 }
 /* Ekip bandının altındaki açıklama satırı. */
 function ekipNotuCiz(){
@@ -2989,7 +3026,11 @@ function seciliKisiler(){
   var d = {};
   var s1 = $("#f-driller1") ? $("#f-driller1").value : "";
   if(s1) d[s1] = 1;
+  var fm = $("#f-formen") ? $("#f-formen").value : "";
+  if(fm) d[fm] = 1;
   ISCI.forEach(function(x){ if(x) d[x] = 1; });
+  SONDOR_EK.forEach(function(x){ if(x) d[x] = 1; });
+  SOFOR.forEach(function(x){ if(x) d[x] = 1; });
   return d;
 }
 /* Bir seçim listesini, başkasının aldığı kişileri eleyerek kurar. */
@@ -3008,34 +3049,83 @@ function sondorListesiCiz(){
   sel.innerHTML = kisiSecenek(sondorler(), kendi);
   sel.value = kendi || "";
 }
-function isciCiz(){
-  var box = $("#f-helpers"); if(!box) return;
+/* ============================================================
+   ÇOKLU EKİP SATIRI — sondör · yardımcı personel · şoför
+   ============================================================
+   Üçü de aynı desen: bir dizi, bir kutu, bir "ekle" düğmesi. Eskiden
+   yalnız işçi satırı böyleydi ve kodu kopyalamak üç kere aynı hatayı
+   yapmak demekti; tek çiziciye indirildi.
+
+   Seçim değişince BÜTÜN listeler yeniden kuruluyor: yeni seçilen kişi
+   ötekilerden düşsün, bırakılan geri gelsin (22 Ekim kuralı). */
+function cokluCiz(kutuId, dizi, kisiFn, etiket, bosYazi){
+  var box = $(kutuId); if(!box) return;
   box.innerHTML = "";
-  if(!ISCI.length){ box.innerHTML = '<div class="hint">İşçi eklenmedi.</div>'; return; }
-  ISCI.forEach(function(pid, i){
+  if(!dizi.length){ box.innerHTML = '<div class="hint">' + bosYazi + '</div>'; return; }
+  dizi.forEach(function(pid, i){
     var row = document.createElement("div");
     row.className = "satir";
     var sel = document.createElement("select");
     sel.className = "esnek";
-    sel.setAttribute("aria-label", (i+1) + ". işçi");
-    sel.innerHTML = kisiSecenek(yardimcilar(), pid);
+    sel.setAttribute("aria-label", (i+1) + ". " + etiket);
+    sel.innerHTML = kisiSecenek(kisiFn(), pid);
     sel.value = pid || "";
-    /* Seçim değişince BÜTÜN listeler yeniden kuruluyor: yeni seçilen
-       kişi diğerlerinden düşsün, bırakılan kişi geri gelsin. */
     sel.addEventListener("change", function(){
-      ISCI[i] = sel.value; isciCiz(); sondorListesiCiz(); refreshState(); });
+      dizi[i] = sel.value; vardiyaEkibiCiz(); refreshState(); });
     var sil = document.createElement("button");
     sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
-    var ad = (yardimcilar().filter(function(p){ return p.id === pid; })[0] || {}).full_name;
-    sil.setAttribute("aria-label", (ad ? ad : (i+1) + ". işçi") + " satırını sil");
+    var ad = (kisiFn().filter(function(p){ return p.id === pid; })[0] || {}).full_name;
+    sil.setAttribute("aria-label", (ad ? ad : (i+1) + ". " + etiket) + " satırını sil");
     sil.addEventListener("click", function(){
-      ISCI.splice(i,1); isciCiz(); sondorListesiCiz(); refreshState(); });
+      dizi.splice(i,1); vardiyaEkibiCiz(); refreshState(); });
     row.appendChild(sel); row.appendChild(sil);
     box.appendChild(row);
   });
 }
-$("#btn-helper-add").addEventListener("click", function(){ ISCI.push(""); isciCiz(); });
-$("#f-driller1").addEventListener("change", function(){ isciCiz(); });
+/* Bütün ekip listelerini birlikte çizer — biri değişince hepsi. */
+function vardiyaEkibiCiz(){
+  formenListesiCiz();
+  sondorListesiCiz();
+  cokluCiz("#f-sondor-ek",  SONDOR_EK, sondorler,   "sondör",            "Başka sondör eklenmedi.");
+  cokluCiz("#f-helpers",    ISCI,      yardimcilar, "yardımcı personel", "Yardımcı personel eklenmedi.");
+  cokluCiz("#f-soforler",   SOFOR,     soforler,    "şoför",             "Şoför eklenmedi.");
+}
+/* ⚠ ADI `ekipCiz` OLAMAZ. Panelde "Saha ekibi" sekmesinin kendi
+   `ekipCiz()` fonksiyonu var (8200'lü satırlar). Fonksiyon bildirimleri
+   yükseltildiği için SONRAKİ tanım öncekini eziyor: vardiya ekibinin
+   çizicisi sessizce kayboluyor, "Sondör ekle" düğmesi hiçbir şey
+   yapmıyordu ve hiçbir yerde hata çıkmıyordu. Sınama yakaladı. */
+function isciCiz(){ vardiyaEkibiCiz(); }   /* eski ad — çağıran yerler değişmesin */
+/* Merkezden gelen ekip satırlarını ekranın dört listesine dağıtır.
+   Tek yerde duruyor: hem kuyu önerisi hem düzeltme ekranı bunu çağırıyor,
+   ikisi ayrı yazılıydı ve biri düzeltilince öteki unutuluyordu. */
+function ekipDagit(ekip){
+  ekip = ekip || [];
+  var sondorlerL = ekip.filter(function(c){ return c.crew_role === "sondor"; });
+  $("#f-driller1").value = (sondorlerL[0] || {}).personnel_id || "";
+  SONDOR_EK = sondorlerL.slice(1).map(function(c){ return c.personnel_id; });
+  if($("#f-formen")){
+    var fm = ekip.filter(function(c){ return c.crew_role === "formen"; })[0];
+    $("#f-formen").value = fm ? fm.personnel_id : "";
+  }
+  SOFOR = ekip.filter(function(c){ return c.crew_role === "sofor"; })
+              .map(function(c){ return c.personnel_id; });
+  /* Eski kayıtlarda `alt_eleman` / `sondor_yardimcisi` yazıyor olabilir. */
+  ISCI = ekip.filter(function(c){
+           return ["yardimci","alt_eleman","sondor_yardimcisi"].indexOf(c.crew_role) >= 0; })
+             .map(function(c){ return c.personnel_id; });
+}
+function formenListesiCiz(){
+  var sel = $("#f-formen"); if(!sel) return;
+  var kendi = sel.value;
+  sel.innerHTML = kisiSecenek(formenler(), kendi);
+  sel.value = kendi || "";
+}
+$("#btn-helper-add").addEventListener("click", function(){ ISCI.push(""); vardiyaEkibiCiz(); });
+$("#btn-sondor-add").addEventListener("click", function(){ SONDOR_EK.push(""); vardiyaEkibiCiz(); });
+$("#btn-sofor-add").addEventListener("click", function(){ SOFOR.push(""); vardiyaEkibiCiz(); });
+$("#f-driller1").addEventListener("change", function(){ vardiyaEkibiCiz(); });
+$("#f-formen").addEventListener("change", function(){ vardiyaEkibiCiz(); refreshState(); });
 
 /* Kuyu seçilince ekip kendiliğinden gelir: o kuyuda en son girilen vardiyanın
    ekibi, yoksa kuyu tanımındaki ekip. İkisi de değiştirilebilir. */
@@ -3044,11 +3134,11 @@ function ekipOneriYukle(){
   if(!wid || !slot || DUZELT) return;
   function uygula(ekip, kaynak){
     if(!ekip || !ekip.length) return;
-    var sondor = ekip.filter(function(c){ return c.crew_role === "sondor"; })[0];
-    if(sondor) $("#f-driller1").value = sondor.personnel_id;
-    ISCI = ekip.filter(function(c){ return c.crew_role !== "sondor"; })
-               .map(function(c){ return c.personnel_id; });
-    isciCiz(); sondorListesiCiz();
+    /* 98. dosya · ekip dört göreve ayrıldı. Eski kayıtlarda yalnız
+       "sondor" ve "alt_eleman" var; alt_eleman yardımcıya düşüyor,
+       formen ve şoför boş kalıyor — doğrusu bu, o kayıtlarda yoklardı. */
+    ekipDagit(ekip);
+    vardiyaEkibiCiz();
     $("#ekip-kaynak").textContent = (kaynak === "son_vardiya")
       ? "Ekip, bu kuyuda en son girilen vardiyadan geldi. Değiştirebilirsiniz."
       : "Ekip, kuyu açılırken tanımlanan ekipten geldi. Değiştirebilirsiniz.";
@@ -3226,18 +3316,31 @@ $("#btn-new-well").addEventListener("click", function(){
     return '<option value="' + ad + '">' + ad + '</option>'; }).join("");
   if(!progs) progs = '<option value="Maden arama">Maden arama</option>' +
                      '<option value="Maden planlama">Maden planlama</option>';
+  /* 98. dosya · 4. madde
+       · PROGRAM ALANI KALKTI — "Kuyu eklemeye bastığımız zaman program
+         kısmı olmasına gerek yok."
+       · EĞİM artık YÖN + DERECE. Tayfun: "eksi, yatay, artı sonra da
+         manuel eğim derece girişi… 0 = yatay." Derece yataydan ölçülüyor,
+         yön ayrı kolonda (`wells.dip_yon`, 62. adım). Yatay seçilince
+         derece 0 sayılıyor ve alan kapanıyor. */
   wrap.innerHTML = '<div class="field"><label for="nw-code">Yeni kuyu adı</label><input id="nw-code" placeholder="EBA-10"></div>' +
-    '<div class="field"><label for="nw-prog">Program</label><select id="nw-prog">' +
-    '<option value="">— seçin —</option>' + progs + '</select></div>' +
+    '<div class="field"><label for="nw-yon">Eğim yönü</label><select id="nw-yon">' +
+      '<option value="asagi">Aşağı (−)</option>' +
+      '<option value="yatay">Yatay (0°)</option>' +
+      '<option value="yukari">Yukarı (+)</option></select></div>' +
     '<div class="grid2">' +
-      '<div class="field"><label for="nw-dip">Eğim (derece)</label><select id="nw-dip">' +
-      '<option>90</option><option>85</option><option>80</option><option>75</option><option>70</option>' +
-      '<option>65</option><option>60</option><option>55</option><option>50</option><option>45</option></select></div>' +
+      '<div class="field" id="nw-dip-wrap"><label for="nw-dip">Eğim (derece)</label>' +
+      '<input id="nw-dip" type="number" inputmode="numeric" min="0" max="90" placeholder="0–90"></div>' +
       '<div class="field"><label for="nw-az">Azimut (derece)</label>' +
       '<input id="nw-az" type="number" inputmode="numeric" min="0" max="360" placeholder="0–360"></div>' +
     '</div>' +
-    '<div class="hint">Eğim ve azimut kuyuya bir kere girilir, sonra değişmez.</div>' +
+    '<div class="hint">Derece yataydan ölçülüyor: 0° yatay, 90° dik. Eğim ve azimut kuyuya bir kere girilir, sonra değişmez.</div>' +
     '<div class="field"><label for="nw-planned">Planlanan derinlik (m)</label><input id="nw-planned" type="number" min="0" inputmode="decimal" placeholder="işverenin verdiği derinlik"></div>';
+  var yonSel = wrap.querySelector("#nw-yon");
+  if(yonSel) yonSel.addEventListener("change", function(){
+    var w = wrap.querySelector("#nw-dip-wrap");
+    if(w) w.hidden = (yonSel.value === "yatay");
+  });
   var ok = document.createElement("button"); ok.className="btn"; ok.type="button"; ok.textContent="Kuyuyu oluştur";
   var no = document.createElement("button"); no.className="btn ghost"; no.type="button"; no.textContent="Vazgeç";
   wrap.appendChild(ok); wrap.appendChild(no);
@@ -3249,17 +3352,19 @@ $("#btn-new-well").addEventListener("click", function(){
     if(!c) return;
     ok.disabled = true;
     var pid = $("#f-project").value;
-    var dip = Number(wrap.querySelector("#nw-dip").value) || 90;
+    /* 98. dosya · yön + derece. Yatay seçilirse derece 0, ne yazılmış
+       olursa olsun — "yatay 15°" diye bir şey yok. */
+    var yon = wrap.querySelector("#nw-yon").value || "asagi";
+    var dip = (yon === "yatay") ? 0 : (Number(wrap.querySelector("#nw-dip").value) || 0);
     var az  = wrap.querySelector("#nw-az").value === "" ? null : Number(wrap.querySelector("#nw-az").value);
     var exists = (MASTER.wells||[]).some(function(w){ return w.project_id === pid && w.code.toLowerCase() === c.toLowerCase(); });
     if(exists){ msg($("#step-msg"), "Bu kuyu zaten listede.", "err"); wrap.remove(); return; }
 
     // Çevrimdışı da olsa kuyu hemen açılır; kaydı kuyruğa alınır.
-    var prog = wrap.querySelector("#nw-prog").value;
     var planned = wrap.querySelector("#nw-planned").value ? Number(wrap.querySelector("#nw-planned").value) : null;
     var localId = "local:" + uuid();
     (MASTER.wells = MASTER.wells || []).push({id:localId, project_id:pid, code:c.toUpperCase(),
-      current_depth:0, status:"drilling", program:prog, dip:dip, azimuth:az, planned_depth:planned});
+      current_depth:0, status:"drilling", dip:dip, dip_yon:yon, azimuth:az, planned_depth:planned});
     try { localStorage.setItem("sp_master", JSON.stringify(MASTER)); } catch(e){}
     wrap.remove();
     fillWells();
@@ -3268,13 +3373,29 @@ $("#btn-new-well").addEventListener("click", function(){
     msg($("#step-msg"), navigator.onLine ? "" : "Kuyu cihazda oluşturuldu, bağlantı gelince merkeze gidecek.", "warn");
     enqueue({ id:uuid(), kind:"well", created:Date.now(),
       title:"Yeni kuyu · " + c, sub:"oluşturulacak",
-      payload:{ local_id:localId, project_id:pid, code:c, dip:dip, azimuth:az,
-                program:prog, planned:planned } });
+      payload:{ local_id:localId, project_id:pid, code:c, dip:dip, dip_yon:yon,
+                azimuth:az, planned:planned } });
   });
 });
 
 /* ---------------- kontroller ---------------- */
-var CHECKS = ["Vinç halatı","Kilit kablo","Wire-line","Sondaj malzemeleri","Hidrolik hortumlar","Makine düzeni","Hareketli parça muhafazası","Kablo ve prizler","İlk yardım çantası","Yangın tüpü","İSG levhaları","Emniyet şeridi","İSG dolabı","Emniyet kemeri","Aydınlatma","Yakıt seviyesi","Motor yağı","Hidrolik yağ","Radyatör","Su pompası","Kompresör yağı"];
+/* 98. dosya · 21 madde telefonda vardiya başında işaretlenemeyecek kadar
+   uzundu; Tayfun'un onayladığı 9 maddeye indi. Eşleşme:
+     vinç halatı + kilit kablo + wire-line
+     makine düzeni + hareketli parça muhafazası
+     kablo ve prizler + aydınlatma
+     motor yağı + hidrolik yağ + radyatör + kompresör yağı + su pompası
+     emniyet kemeri + emniyet şeridi + ilk yardım + yangın tüpü
+     İSG levhaları + İSG dolabı */
+var CHECKS = ["Vinç halatı · kilit kablo · wire-line",
+              "Hidrolik hortumlar",
+              "Makine düzeni · hareketli parça muhafazası",
+              "Kablo · priz · aydınlatma",
+              "Yağ ve su seviyeleri",
+              "Yakıt seviyesi",
+              "Sondaj malzemeleri",
+              "Emniyet donanımı",
+              "İSG levhaları ve dolabı"];
 CHECKS.forEach(function(c){
   var b = document.createElement("button");
   b.type="button"; b.className="chip"; b.textContent=c; b.setAttribute("aria-pressed","false");
@@ -3327,6 +3448,12 @@ function arizaSaati(gun, saat){
 }
 /* Arıza kartının başlığı ve tarih açıklaması — seçimden otomatik dolar. */
 function arizaBaslikCiz(){
+  /* 98. dosya · 3. bant kalkınca bu ekranın öğeleri DOM'dan çıktı ama
+     fonksiyon canlı yollardan (tarih/vardiya değişimi, kart çizimi)
+     hâlâ çağrılıyor. Öğe yoksa sessizce dönüyor; yoksa her tarih
+     değişiminde "null.value" patlıyor ve KAYIT YOLU dahil ondan
+     sonraki her şey duruyordu. Kodun tamamen temizlenmesi ayrı iş. */
+  if(!$("#ar-baslik")) return;
   var b = $("#ar-baslik"); if(!b) return;
   /* ⚠ ETİKETE DEĞİL DEĞERE BAKIYORUZ (86. dosya · Tayfun'un ekran
      görüntüsü: "— seçin — · 05.11.2026").
@@ -3420,6 +3547,25 @@ function aralikAn(a, n){
 
 /* Seçiciyi doldurur. ilkDk: listenin başlayacağı dakika (bekleme bitişi
    başlangıçtan sonra olmalı). */
+/* ============================================================
+   OLMAYAN ÖĞEYE DİNLEYİCİ BAĞLANMASIN (98. dosya)
+   ============================================================
+   3. bant (Kontrol & Arıza) kalkınca o ekranın öğeleri DOM'dan
+   çıktı; JS'i ise duruyor. `$("#yok").addEventListener` sayfanın
+   açılışında patlıyordu ve ondan sonraki bütün kurulum satırları
+   hiç koşmuyordu — ekran yarım açılıyordu, üstelik duman sınaması
+   bunu "JS hatası yok" diye geçiyordu (giriş yaptıktan SONRAYA
+   bakıyor, hata açılışta oluyor).
+
+   `ol()` olmayan öğeyi sessizce atlıyor. Eski arıza/bekleme kodu
+   böylece ölü ama zararsız duruyor; operasyon listesi onun yerini
+   aldı ve kaldırılması ayrı bir temizlik işi.
+   ============================================================ */
+function ol(sec, olay, fn){
+  var e = (typeof sec === "string") ? $(sec) : sec;
+  if(e) e.addEventListener(olay, fn);
+  return !!e;
+}
 function saatSeciciKur(sel, ilkDk){
   var el = $(sel); if(!el) return;
   var a = vardiyaAralik();
@@ -3442,6 +3588,12 @@ function saatSeciciKur(sel, ilkDk){
 }
 
 function saatSecicilerKur(){
+  /* 98. dosya · 3. bant kalkınca bu ekranın öğeleri DOM'dan çıktı ama
+     fonksiyon canlı yollardan (tarih/vardiya değişimi, kart çizimi)
+     hâlâ çağrılıyor. Öğe yoksa sessizce dönüyor; yoksa her tarih
+     değişiminde "null.value" patlıyor ve KAYIT YOLU dahil ondan
+     sonraki her şey duruyordu. Kodun tamamen temizlenmesi ayrı iş. */
+  if(!$("#ar-bas") || !$("#bk-bas")) return;
   saatSeciciKur("#ar-bas", 0);
   saatSeciciKur("#bk-bas", 0);
   var bd = $("#bk-bas") && $("#bk-bas").selectedOptions[0]
@@ -3493,11 +3645,17 @@ $$('#ar-son .chip').forEach(function(b){
   });
 });
 
-$("#ar-bas").addEventListener("change", function(){ saatSecicilerKur(); arizaBaslikCiz(); });
-$("#bk-bas").addEventListener("change", saatSecicilerKur);
-$("#bk-bit").addEventListener("change", beklemeSureCiz);
+ol("#ar-bas", "change", function(){ saatSecicilerKur(); arizaBaslikCiz(); });
+ol("#bk-bas", "change", saatSecicilerKur);
+ol("#bk-bit", "change", beklemeSureCiz);
 
 function beklemeSureCiz(){
+  /* 98. dosya · 3. bant kalkınca bu ekranın öğeleri DOM'dan çıktı ama
+     fonksiyon canlı yollardan (tarih/vardiya değişimi, kart çizimi)
+     hâlâ çağrılıyor. Öğe yoksa sessizce dönüyor; yoksa her tarih
+     değişiminde "null.value" patlıyor ve KAYIT YOLU dahil ondan
+     sonraki her şey duruyordu. Kodun tamamen temizlenmesi ayrı iş. */
+  if(!$("#bk-bas") || !$("#bk-bit")) return;
   var el = $("#bk-sure"); if(!el) return;
   var b = secilenAn("#bk-bas"), t = secilenAn("#bk-bit");
   if(!b || !t){ el.textContent = "—"; el.className = "bant"; return; }
@@ -3510,7 +3668,7 @@ function beklemeSureCiz(){
 /* ============================================================
    ARIZA KAYDET
    ============================================================ */
-$("#btn-ariza-kaydet").addEventListener("click", function(){
+ol("#btn-ariza-kaydet", "click", function(){
   /* ⚠ MAKİNE KONTROLÜ EN BAŞTA (90. dosya · 3). Eskiden arıza tipi
      ve saat kontrollerinden SONRA geliyordu: şef tipi ve saati
      seçiyor, sonra "önce makineyi seçin" cevabını alıyordu. İki
@@ -3561,7 +3719,7 @@ $("#btn-ariza-kaydet").addEventListener("click", function(){
    client_uuid'siyle gönderiliyor; sunucu vardiyayı ondan buluyor.
    ============================================================ */
 var BEKLEMELER = [];
-$("#btn-bekleme-kaydet").addEventListener("click", function(){
+ol("#btn-bekleme-kaydet", "click", function(){
   /* Bekleme de vardiyanın duruşu; vardiya makineye yazılıyor
      (90. dosya · 3 · Tayfun: "ikisinde birden"). */
   if(!$("#f-machine").value){
@@ -3576,7 +3734,7 @@ $("#btn-bekleme-kaydet").addEventListener("click", function(){
   BEKLEMELER.push({sebep:sebep, saat:saat, bas:b.saat, bit:t.saat,
                    not:$("#bk-note").value.trim() || null});
   $("#bk-sebep").value = ""; $("#bk-bas").value = ""; $("#bk-bit").value = "";
-  $("#bk-note").value = ""; beklemeSureCiz();
+  if($("#bk-note")) $("#bk-note").value = ""; beklemeSureCiz();
   beklemeListeCiz();
   msg($("#ar-msg"), "Bekleme eklendi. Vardiyayı kaydedince merkeze gidiyor.", "ok");
   refreshState();
@@ -4334,7 +4492,13 @@ function personName(id){
 function baseDepth(){ var w = currentWell(); return w ? Number(w.current_depth||0) : 0; }
 function depth(){ return runs.length ? runs[runs.length-1].to_m : baseDepth(); }
 function totalM(){ return runs.reduce(function(s,r){ return s + (r.to_m - r.from_m); }, 0); }
-function syncDepth(){ $("#ro-m").textContent = tl(totalM()) + " m"; $("#ro-d").textContent = tl(depth()) + " m"; }
+function syncDepth(){
+  /* 98. dosya · üç kutu. Soldaki vardiya başı (kuyunun bugünkü derinliği),
+     ortadaki o ana kadarki derinlik, sağdaki ikisinin farkı — formülden. */
+  if($("#ro-bas")) $("#ro-bas").textContent = tl(baseDepth()) + " m";
+  $("#ro-d").textContent = tl(depth()) + " m";
+  $("#ro-m").textContent = tl(totalM()) + " m";
+}
 function renderRuns(){
   var tb = $("#runs"); tb.innerHTML = "";
   runs.forEach(function(r,i){
@@ -4414,6 +4578,198 @@ $("#btn-add-run").addEventListener("click", function(){
 });
 $("#f-to").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); $("#btn-add-run").click(); } });
 
+/* ============================================================
+   OPERASYON LİSTESİ (98. dosya)
+   ============================================================
+   Vardiya içinde sıralı ve sınırsız: delgi → bekleme → delgi →
+   nakliye → delgi. Aynı tür tekrarlanabiliyor; 62. adım bunun
+   önündeki (shift_id, kind) tekil kısıtını kaldırdı.
+
+   Delgide SAAT YOK — geri kalan süre delgiye sayılıyor. Öteki
+   türlerin hepsi başlangıç–bitiş saati istiyor.
+   ============================================================ */
+var OPERASYONLAR = [];
+var OP_TUR = "";          /* giriş kutusunda seçili tür */
+var OP_BEKLEME = "";      /* operasyonel | operasyonel_degil */
+
+var OP_ADI = {
+  delgi:"Delgi", muhafaza:"Muhafaza", bekleme:"Bekleme", ariza:"Arıza",
+  nakliye:"Nakliye", takim:"Takım çekme / indirme", temizlik:"Kuyu temizliği",
+  kuyu_bitimi:"Kuyu bitimi"
+};
+/* Hangi tür hangi alanı istiyor. `saat:false` olan tek tür delgi. */
+var OP_ALAN = {
+  delgi:       {saat:false},
+  muhafaza:    {saat:true,  metre:true, cap:true},
+  bekleme:     {saat:true,  bekleme:true, not:true, notAd:"Açıklama"},
+  ariza:       {saat:true,  not:true, notAd:"Arıza sebebi", notReq:true},
+  nakliye:     {saat:true,  not:true, notAd:"Açıklama"},
+  takim:       {saat:true},
+  temizlik:    {saat:true},
+  kuyu_bitimi: {kuyu:true}
+};
+function opVar(tur){
+  return OPERASYONLAR.some(function(o){ return o.tur === tur; });
+}
+function opTurCiz(){
+  var box = $("#op-tur"); if(!box) return;
+  box.innerHTML = "";
+  Object.keys(OP_ADI).forEach(function(t){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = OP_ADI[t];
+    b.setAttribute("data-op", t);
+    b.setAttribute("aria-pressed", OP_TUR === t ? "true" : "false");
+    b.addEventListener("click", function(){
+      OP_TUR = (OP_TUR === t) ? "" : t;
+      OP_BEKLEME = "";
+      opTurCiz(); opAlanCiz(); refreshState();
+    });
+    box.appendChild(b);
+  });
+}
+function opAlanCiz(){
+  var a = OP_ALAN[OP_TUR] || {};
+  function goster(id, k){ var e = $(id); if(e) e.hidden = !k; }
+  goster("#op-saat-wrap",     !!a.saat);
+  goster("#op-muhafaza-wrap", !!a.metre);
+  goster("#op-cap-wrap",      !!a.cap);
+  goster("#op-bekleme-wrap",  !!a.bekleme);
+  goster("#op-kuyu-wrap",     !!a.kuyu);
+  goster("#op-not-wrap",      !!a.not);
+  if(a.not && $("#op-not-label")) $("#op-not-label").textContent = a.notAd || "Açıklama";
+  if($("#btn-op-ekle")) $("#btn-op-ekle").hidden = !OP_TUR;
+  /* Delgi seçilince manevra alanları görünsün, başka türde gizlensin:
+     şef "muhafaza" girerken manevra kutusu kafa karıştırıyor. */
+  var mv = $("#mv-alanlar");
+  if(mv) mv.hidden = !!OP_TUR && OP_TUR !== "delgi";
+  if($("#op-kuyu-not")){
+    $("#op-kuyu-not").textContent = ($("#op-kuyu-durum") && $("#op-kuyu-durum").value === "kuyu_iptali")
+      ? "İptal sebebini açıklamaya yazın." : "Kuyu sonu metrajı manevralardan geliyor.";
+  }
+  if(OP_TUR && OP_ALAN[OP_TUR].saat) saatSeciciKur("#op-bas", 0);
+}
+function opSureYaz(){
+  var el = $("#op-sure"); if(!el) return;
+  var t = OPERASYONLAR.reduce(function(x,o){ return x + (Number(o.saat) || 0); }, 0);
+  var a = vardiyaAralik();
+  if(!OPERASYONLAR.length){ el.textContent = ""; return; }
+  el.textContent = a
+    ? "Saatli operasyon " + tl(t,1) + " sa · delgiye kalan " + tl(Math.max(a.sure/60 - t, 0), 1) + " sa"
+    : tl(t,1) + " sa";
+}
+function opCiz(){
+  var box = $("#op-liste"); if(!box) return;
+  box.innerHTML = "";
+  if(!OPERASYONLAR.length){
+    box.innerHTML = '<div class="hint">Henüz operasyon eklenmedi. Türü seçip ekleyin.</div>';
+    opSureYaz(); return;
+  }
+  OPERASYONLAR.forEach(function(o, i){
+    var row = document.createElement("div");
+    row.className = "q-satir";
+    var alt = [];
+    if(o.bas && o.bit) alt.push(saatKisa(o.bas) + "–" + saatKisa(o.bit) + " (" + tl(o.saat,1) + " sa)");
+    if(o.tur === "muhafaza") alt.push(tl(o.from_m) + " → " + tl(o.to_m) + " m · " + (o.cap || "—"));
+    if(o.tur === "bekleme")  alt.push(o.sebep === "operasyonel" ? "operasyonel" : "operasyonel olmayan");
+    if(o.tur === "kuyu_bitimi") alt.push(o.sebep === "kuyu_iptali" ? "kuyu iptali" : "kuyu sonu");
+    if(o.note) alt.push(o.note);
+    row.innerHTML = '<div class="ist-ust"><b>' + (i+1) + ". " + esc(OP_ADI[o.tur] || o.tur) +
+                    '</b></div><div class="dizi">' + esc(alt.join(" · ")) + '</div>';
+    var sil = document.createElement("button");
+    sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
+    sil.setAttribute("aria-label", (i+1) + ". operasyonu sil");
+    sil.addEventListener("click", function(){
+      OPERASYONLAR.splice(i,1); opCiz(); kuyuBitimiYansit(); refreshState(); });
+    row.appendChild(sil);
+    box.appendChild(row);
+  });
+  opSureYaz();
+}
+/* Kuyu bitimi operasyonu gizli `#f-end` alanını sürüyor: kuyu sonu
+   akışının tamamı (kalan muhafaza, ölçümler, kuyu_sonu_kaydet) oradan
+   okuyor ve o yolu yeniden yazmak bu pakette gereksiz risk. */
+function kuyuBitimiYansit(){
+  var e = $("#f-end"); if(!e) return;
+  var o = OPERASYONLAR.filter(function(x){ return x.tur === "kuyu_bitimi"; })[0];
+  var yeni = o ? (o.sebep || "kuyu_sonu") : "";
+  if(e.value !== yeni){
+    e.value = yeni;
+    e.dispatchEvent(new Event("change", {bubbles:true}));
+  }
+}
+function opEkle(){
+  if(!OP_TUR){ msg($("#op-msg"), "Önce operasyon türünü seçin.", "err"); return; }
+  var a = OP_ALAN[OP_TUR], o = {tur:OP_TUR}, eks = [];
+  if(a.saat){
+    o.bas = $("#op-bas").value; o.bit = $("#op-bit").value;
+    if(!o.bas) eks.push("başlangıç saati");
+    if(!o.bit) eks.push("bitiş saati");
+    if(o.bas && o.bit) o.saat = opSaatFarki(o.bas, o.bit);
+  }
+  if(a.metre){
+    o.from_m = $("#op-from").value === "" ? null : Number($("#op-from").value);
+    o.to_m   = $("#op-to").value   === "" ? null : Number($("#op-to").value);
+    if(o.from_m == null) eks.push("başlangıç metre");
+    if(o.to_m == null) eks.push("bitiş metre");
+  }
+  if(a.cap){ o.cap = $("#op-cap").value; if(!o.cap) eks.push("çap"); }
+  if(a.bekleme){ o.sebep = OP_BEKLEME; if(!o.sebep) eks.push("bekleme türü"); }
+  if(a.kuyu){ o.sebep = $("#op-kuyu-durum").value; }
+  if(a.not){
+    o.note = $("#op-not").value.trim();
+    if(a.notReq && !o.note) eks.push(a.notAd.toLowerCase());
+  }
+  if(a.kuyu && o.sebep === "kuyu_iptali" && !$("#op-not").value.trim()){
+    /* İptal sebepsiz kalmasın: altı ay sonra kimse hatırlamıyor. */
+    eks.push("iptal sebebi");
+  }
+  if(eks.length){
+    msg($("#op-msg"), "Operasyon eklenmedi — eksik: " + eks.join(", ") + ".", "err");
+    return;
+  }
+  OPERASYONLAR.push(o);
+  /* Giriş kutusu temizleniyor ama TÜR SEÇİLİ KALMIYOR: Tayfun'un
+     istediği "operasyon değiştir" davranışı bu — her eklemeden sonra
+     şef bir sonraki türü seçiyor, art arda aynı türü eklemek için de
+     tekrar basması yetiyor. */
+  OP_TUR = ""; OP_BEKLEME = "";
+  ["#op-bas","#op-bit","#op-from","#op-to","#op-cap","#op-not"].forEach(function(id){
+    if($(id)) $(id).value = ""; });
+  opTurCiz(); opAlanCiz(); opCiz(); kuyuBitimiYansit();
+  msg($("#op-msg"), OP_ADI[o.tur] + " eklendi.", "ok");
+  refreshState();
+}
+$("#btn-op-ekle").addEventListener("click", opEkle);
+$("#op-bas").addEventListener("change", function(){
+  /* Bitiş listesi başlangıçtan SONRASINI gösteriyor: şef geriye
+     dönük bir bitiş seçemesin (saatSeciciKur'un ilkDk parametresi). */
+  var d = $("#op-bas").selectedOptions[0]
+        ? Number($("#op-bas").selectedOptions[0].dataset.dk || 0) : 0;
+  saatSeciciKur("#op-bit", d + SAAT_ADIM);
+});
+$("#op-bekleme-tur").addEventListener("click", function(e){
+  var b = e.target.closest("[data-bk]"); if(!b) return;
+  OP_BEKLEME = b.getAttribute("data-bk");
+  $$("#op-bekleme-tur .chip").forEach(function(x){
+    x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+});
+$("#op-kuyu-durum").addEventListener("change", opAlanCiz);
+opTurCiz(); opAlanCiz(); opCiz();
+
+function kagitNoUret(){
+  var mk = (MASTER && MASTER.machines || []).filter(function(m){
+    return m.id === $("#f-machine").value; })[0];
+  var kod = (mk && mk.code ? mk.code : "MK").replace(/[^A-Za-z0-9]/g, "");
+  var t = ($("#f-date").value || "").replace(/-/g, "");
+  return "OTO-" + t + "-" + kod + "-" + (secilenSlot() || 1);
+}
+function opSaatFarki(bas, bit){
+  function dk(t){ var x = String(t).split(":"); return Number(x[0])*60 + Number(x[1]||0); }
+  var d = dk(bit) - dk(bas);
+  if(d < 0) d += 24*60;          /* gece vardiyası ertesi güne sarkıyor */
+  return Math.round(d / 60 * 100) / 100;
+}
+
 /* ---------------- adım kontrolü ---------------- */
 function stepProblems(n){
   var p = [];
@@ -4425,44 +4781,37 @@ function stepProblems(n){
     if(!$("#f-well").value) p.push("kuyu");
   }
   if(n === 2){
-    if(!$("#f-driller1").value) p.push("sondör");
-    if(ISCI.some(function(x){ return !x; })) p.push("boş işçi satırı");
-    /* ⚠ ESKİ KAYIT DÜZELTİLİRKEN SAYAÇ ZORUNLU DEĞİL (84. dosya · 7).
-       Sayaç 52. sürümle geldi; ondan önceki vardiyalarda motor saati
-       başlangıç/bitiş SAATİNDEN hesaplanmıştı. O kaydı düzeltmeye
-       açan şefin, geçmişteki sayaç okumasını bilmesi mümkün değil.
-       Zorunlu tutmak düzeltmeyi tamamen engellerdi — yani veri kaybı
-       yerine veri DONMASI. Alanı boş bırakırsa eski saatler olduğu
-       gibi kalıyor (kayıt yolunda engine_start/stop'a dokunulmuyor). */
-    if(!$("#f-sayac").value && !DUZELT_ESKI_MOTOR) p.push("makine saat sayacı");
+    if(!$("#f-driller1").value) p.push("1. sondör");
+    if(ISCI.some(function(x){ return !x; })) p.push("boş yardımcı personel satırı");
+    if(SONDOR_EK.some(function(x){ return !x; })) p.push("boş sondör satırı");
+    if(SOFOR.some(function(x){ return !x; })) p.push("boş şoför satırı");
   }
+  /* 03 OPERASYON — kontroller, makine saati ve operasyon listesi bir arada.
+     Kontrol ve sayaç 2. ve 3. adımdan buraya taşındı (98. dosya). */
   if(n === 3){
     var c = checkedCount();
     if(c === 0) p.push("kontrol listesi");
     else if(c < CHECKS.length && !$("#f-check-note").value.trim()) p.push("uygunsuzluk açıklaması");
+
+    /* ⚠ ESKİ KAYIT DÜZELTİLİRKEN SAYAÇ ZORUNLU DEĞİL (84. dosya · 7).
+       Sayaç 52. sürümle geldi; ondan önceki vardiyalarda motor saati
+       başlangıç/bitiş SAATİNDEN hesaplanmıştı. O kaydı düzeltmeye açan
+       şefin geçmişteki sayaç okumasını bilmesi mümkün değil; zorunlu
+       tutmak düzeltmeyi tamamen engellerdi — veri kaybı değil veri
+       DONMASI olurdu. */
+    if(!$("#f-sayac").value && !DUZELT_ESKI_MOTOR) p.push("vardiya sonu motor saati");
+
+    /* 30j: "hiç çalışmadı" işaretliyse metraj beklenmiyor.
+       98. dosya · "ilerleme olmadı" kutusu KALKTI: delgi operasyonu
+       girilmemişse metraj da beklenmiyor, sebebi operasyon listesinden
+       okunuyor (bekleme · arıza · takım · temizlik · nakliye). */
+    if(!HIC_CALISMADI && !runs.length && opVar("delgi")) p.push("en az bir manevra");
+    if(!HIC_CALISMADI && !OPERASYONLAR.length) p.push("en az bir operasyon");
   }
-  /* 30j: "bu vardiyada hiç çalışmadı" işaretliyse 4. ve 5. adım eksik
-     saymıyor. Metraj yok çünkü makine çalışmadı; mazot da yakılmadı.
-     Ekip (2) ve kontrol (3) duruyor — adam sahada, puantajı işliyor. */
-  /* 23 Ekim · ilerleme olmayan vardiya: manevra zorunluluğu kalkıyor
-     ama yerine SEBEP zorunlu oluyor — sebepsiz "ilerleme yok" altı ay
-     sonra kimseye bir şey anlatmıyor. */
-  if(n === 4){
-    if(ILERLEME_YOK){
-      if(!IY_SEBEP) p.push("ilerleme olmama sebebi");
-      else if(IY_SEBEP === "diger" && !$("#iy-not").value.trim()) p.push("ne yapıldığı");
-      else if(IY_SEBEP === "olcum" && !gecerliOlcumler().length) p.push("en az bir ölçüm");
-    }
-    else if(!HIC_CALISMADI && !runs.length) p.push("en az bir manevra");
-    /* B2 · metraj varken sebep isteğe bağlı, ama "Diğer" seçildiyse ne
-       yapıldığı zorunlu: sunucu da bunu şart koşuyor, kayıt kuyrukta
-       takılmasın. */
-    else if(IY_SEBEP === "diger" && !$("#iy-not").value.trim()) p.push("ne yapıldığı");
-  }
-  /* Mazot: "hiç çalışmadı"da kalkıyor, "ilerleme yok"ta KALKMIYOR —
-     takım çekip indirirken motor çalışıyor, mazot yanıyor
+  /* Mazot: "hiç çalışmadı"da kalkıyor, delgi olmayan vardiyada KALKMIYOR —
+     takım çekip indirirken de motor çalışıyor, mazot yanıyor
      (Tayfun, 23 Ekim: "makina çalışıyorsa mazot zorunlu"). */
-  if(n === 5){ if(!HIC_CALISMADI && $("#f-fuel").value === "") p.push("mazot"); }
+  if(n === 4){ if(!HIC_CALISMADI && $("#f-fuel").value === "") p.push("mazot"); }
   return p;
 }
 function firstIncomplete(){
@@ -4806,7 +5155,10 @@ if(window.ResizeObserver){
    geliyordu ve ekranı baştan aşağı kaplıyordu; şef merdiveni hiç
    görmüyordu. Artık altı başlık bir bakışta duruyor, şef 1. banda
    dokunup başlıyor. Bedeli bir dokunuş; kabul edildi. */
-var BANT_SON = 6;
+/* 98. dosya · akış altı adımdan BEŞE indi:
+     01 Proje · 02 Ekip · 03 Operasyon · 04 Malzeme · 05 Özet
+   3. bant (Kontrol & Arıza) kalktı; içeriği Operasyon'a taşındı. */
+var BANT_SON = 5;
 function bantSifirla(){
   BANT_ACIK = {}; BANT_GECILDI = {};
   for(var i = 1; i <= BANT_SON; i++){ BANT_ACIK[i] = false; BANT_GECILDI[i] = false; }
@@ -4912,6 +5264,11 @@ $$("[data-bant-bas]").forEach(function(bas){
    belli olsun." Özet, bandı açmadan ne yazdığını söylüyor.
    ------------------------------------------------------------ */
 function bantOzet(n){
+  /* 98. dosya · Tayfun: "Proje buttonun üstünde veriler yazmasın.
+     hepsinden kalkacak." Başlıktaki gri özet satırı artık yazılmıyor.
+     Fonksiyon duruyor: çağıran yerler (bantCiz, kartYuklendi) değişmesin
+     ve ileride geri istenirse tek satır yeter. */
+  if(true) return "";
   var p = [];
   if(n === 1){
     /* Şantiye adı YALNIZ birden fazla şantiye görülüyorsa yazılıyor:
@@ -5023,14 +5380,14 @@ function ozetKartCiz(){
   var mk = secimAdi("#f-machine");
   var h = "";
 
-  h += ozetGrup(1, "Vardiya", [
+  h += ozetGrup(1, "Proje", [
     pr.length > 1 ? ozetSatir("Şantiye", saha) : "",
     ozetSatir("Tarih", $("#f-date").value ? trd2($("#f-date").value) : "—"),
     ozetSatir("Vardiya", nak ? ($("#f-shift").value === "nak-gun" ? "Gündüz Nakliye" : "Gece Nakliye")
                              : (vd ? vd.label : "—")),
     nak ? "" : ozetSatir("Makine", mk || "—"),
     nak ? "" : ozetSatir("Kuyu", w ? w.code : "—"),
-    nak ? "" : ozetSatir("Kâğıt form no", $("#f-paper").value || "—")
+    /* 98. dosya · kâğıt no ekrandan kalktı, özette de yok. */
   ]);
 
   if(nak){
@@ -5045,37 +5402,40 @@ function ozetKartCiz(){
   var sondor = secimAdi("#f-driller1");
   var yard = ISCI.filter(Boolean).map(personTam).filter(Boolean);
   h += ozetGrup(2, "Ekip", [
-    ozetSatir("Sondör", sondor || "—"),
-    ozetSatir("Yardımcı", yard.length ? yard.join(", ") : "—"),
-    ozetSatir("Makine saat sayacı",
-      $("#f-sayac").value === "" ? "—" : tl($("#f-sayac").value, 1))
+    ozetSatir("Formen", secimAdi("#f-formen") || "—"),
+    ozetSatir("Sondör", [sondor].concat(SONDOR_EK.map(personTam).filter(Boolean))
+                               .filter(Boolean).join(", ") || "—"),
+    ozetSatir("Yardımcı personel", yard.length ? yard.join(", ") : "—"),
+    ozetSatir("Şoför", SOFOR.map(personTam).filter(Boolean).join(", ") || "—")
   ]);
 
-  var ar = secimAdi("#ar-kind");
-  h += ozetGrup(3, "Kontrol & Arıza", [
-    ozetSatir("Kontrol", checkedCount() + " / " + CHECKS.length),
-    $("#f-check-note").value.trim() ? ozetSatir("Uygunsuzluk", $("#f-check-note").value.trim()) : "",
-    ozetSatir("Arıza", $("#ar-kind").value ? ar : "yok"),
-    BEKLEMELER.length ? ozetSatir("Bekleme", BEKLEMELER.length + " kayıt") : "",
-    HIC_CALISMADI ? ozetSatir("Durum", "Bu vardiyada hiç çalışmadı") : ""
-  ]);
-
+  /* 98. dosya · 3. adım artık Operasyon: kontroller, makine saati,
+     operasyon listesi ve manevralar bir arada. */
   var mv = runs.map(function(r){
     return r.diameter + " · " + tl(r.from_m) + " → " + tl(r.to_m) + " m";
   });
-  h += ozetGrup(4, "Delgi", [
-    ILERLEME_YOK ? ozetSatir("İlerleme", "yok · " + (IY_AD[IY_SEBEP] || IY_SEBEP || "sebep girilmedi")) : "",
-    (!ILERLEME_YOK && mv.length) ? ozetSatir("Manevra", mv.join("  ·  ")) : "",
+  var opOzet = OPERASYONLAR.map(function(o, i){
+    var t = OP_ADI[o.tur] || o.tur;
+    return (i+1) + ". " + t + (o.bas && o.bit ? " (" + saatKisa(o.bas) + "–" + saatKisa(o.bit) + ")" : "");
+  });
+  h += ozetGrup(3, "Operasyon", [
+    ozetSatir("Kontrol", checkedCount() + " / " + CHECKS.length),
+    $("#f-check-note").value.trim() ? ozetSatir("Uygunsuzluk", $("#f-check-note").value.trim()) : "",
+    ozetSatir("Motor saati",
+      ($("#f-sayac-bas") && $("#f-sayac-bas").value !== "" ? tl($("#f-sayac-bas").value,1) : "—") +
+      " → " + ($("#f-sayac").value !== "" ? tl($("#f-sayac").value,1) : "—")),
+    opOzet.length ? ozetSatir("Operasyonlar", opOzet.join("  ·  ")) : ozetSatir("Operasyonlar", "—"),
+    mv.length ? ozetSatir("Manevra", mv.join("  ·  ")) : "",
     ozetSatir("Toplam metraj", tl(totalM()) + " m"),
-    ozetSatir("Kuyu derinliği", tl(depth()) + " m"),
-    ozetSatir("Kuyu durumu", secimAdi("#f-end") || "—"),
-    (!ILERLEME_YOK && IY_SEBEP) ? ozetSatir("Açıklama", IY_AD[IY_SEBEP] || IY_SEBEP) : "",
-    $("#iy-not").value.trim() ? ozetSatir("Ne yapıldı", $("#iy-not").value.trim()) : ""
+    ozetSatir("Kuyu tabanı", tl(depth()) + " m"),
+    $("#f-end").value ? ozetSatir("Kuyu durumu",
+      $("#f-end").value === "kuyu_iptali" ? "Kuyu iptali" : "Kuyu sonu") : "",
+    HIC_CALISMADI ? ozetSatir("Durum", "Bu vardiyada hiç çalışmadı") : ""
   ]);
 
   var mal = KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; })
     .map(function(r){ return ozetMalzemeAdi(r.material_id) + " " + tl(r.qty); });
-  h += ozetGrup(5, "Tüketim", [
+  h += ozetGrup(4, "Malzeme", [
     ozetSatir("Mazot", $("#f-fuel").value === "" ? "girilmedi" : $("#f-fuel").value + " lt"),
     mal.length ? ozetSatir("Malzeme", mal.join(", ")) : "",
     $("#f-note").value.trim() ? ozetSatir("Açıklama", $("#f-note").value.trim()) : ""
@@ -5085,7 +5445,7 @@ function ozetKartCiz(){
   if($("#f-end").value === "kuyu_sonu"){
     var kalan = KALAN.filter(function(r){ return Number(r.qty) > 0; }).length;
     var olcum = gecerliOlcumler().length;
-    h += ozetGrup(4, "Kuyu sonu", [
+    h += ozetGrup(5, "Kuyu sonu", [
       kalan ? ozetSatir("Kuyuda kalan", kalan + " kalem") : "",
       olcum ? ozetSatir("Ölçüm", olcum + " satır") : ""
     ]);
@@ -5216,7 +5576,13 @@ function vardiyaDuzelt(sat, satirEl){
 
          Kart fonksiyonu bu üç alanı zaten döndürüyor; tek eksik onu
          sormaktı.                                                     */
-      sb.rpc("vardiya_karti", {p_shift: sat.id})
+      sb.rpc("vardiya_karti", {p_shift: sat.id}),
+      /* 98. dosya · düzeltmede operasyon listesi de geri geliyor.
+         Gelmezse şef kaydettiği anda liste BOŞ gider ve merkezdeki
+         operasyonlar silinir — sessiz veri kaybı. */
+      sb.from("shift_activities")
+        .select("kind,sira,bas_saat,bit_saat,from_m,to_m,diameter,sebep,note,otomatik")
+        .eq("shift_id", sat.id).order("sira", {ascending:true})
     ]).then(function(res){
       if(res[0].error) throw res[0].error;
       var kart = (res[2] && !res[2].error) ? (res[2].data || null) : null;
@@ -5236,12 +5602,20 @@ function vardiyaDuzelt(sat, satirEl){
       $("#f-end").value     = sat.end_state || "";
       kuyuSonuGoster();
 
-      var ekip = (res[1].data || []);
-      var sondorler = ekip.filter(function(c){ return c.crew_role === "sondor"; });
-      $("#f-driller1").value = (sondorler[0]||{}).personnel_id || "";
-      ISCI = ekip.filter(function(c){ return c.crew_role !== "sondor"; })
-                 .map(function(c){ return c.personnel_id; });
-      isciCiz();
+      ekipDagit(res[1].data || []);
+      vardiyaEkibiCiz();
+
+      OPERASYONLAR = ((res[3] && res[3].data) || [])
+        .filter(function(a){ return !a.otomatik; })
+        .map(function(a){
+          return {tur:a.kind, bas:a.bas_saat || null, bit:a.bit_saat || null,
+                  saat:(a.bas_saat && a.bit_saat) ? opSaatFarki(a.bas_saat, a.bit_saat) : null,
+                  from_m:a.from_m == null ? null : Number(a.from_m),
+                  to_m:a.to_m == null ? null : Number(a.to_m),
+                  cap:a.diameter || null, sebep:a.sebep || null, note:a.note || null};
+        });
+      OP_TUR = ""; OP_BEKLEME = "";
+      opTurCiz(); opAlanCiz(); opCiz();
 
       runs = (res[0].data || []).map(function(x, i){
         return {seq:i+1, diameter:x.diameter, from_m:Number(x.from_m),
@@ -5707,12 +6081,20 @@ $("#btn-save-shift").addEventListener("click", function(){
      şef bunu göremiyordu: "2 kalem" yazarken bir satır sessizce düşüyordu.
      Artık ne düştüğü kayıttan sonra yazılıyor. */
   var sayiUyari = sayiSorunlari();
+  /* 98. dosya · ekip yükü dört görevi birden taşıyor. Sıra ekrandaki
+     sırayla aynı: formen → sondör → yardımcı personel → şoför.
+     `crew_role` artık 62. adımın beş değerli listesinden geliyor;
+     `alt_eleman` yerine `yardimci` yazılıyor. */
   var crew = [];
-  if($("#f-driller1").value) crew.push({personnel_id:$("#f-driller1").value, crew_role:"sondor"});
-  ISCI.forEach(function(v){
-    if(v && !crew.some(function(c){ return c.personnel_id === v; }))
-      crew.push({personnel_id:v, crew_role:"alt_eleman"});
-  });
+  function crewEkle(pid, rol){
+    if(pid && !crew.some(function(c){ return c.personnel_id === pid; }))
+      crew.push({personnel_id:pid, crew_role:rol});
+  }
+  crewEkle($("#f-formen") ? $("#f-formen").value : "", "formen");
+  crewEkle($("#f-driller1").value, "sondor");
+  SONDOR_EK.forEach(function(v){ crewEkle(v, "sondor"); });
+  ISCI.forEach(function(v){ crewEkle(v, "yardimci"); });
+  SOFOR.forEach(function(v){ crewEkle(v, "sofor"); });
   var note = $("#f-note").value || "";
   if($("#f-check-note").value.trim()) note = (note ? note + " | " : "") + "Kontrol: " + $("#f-check-note").value.trim();
   var wellCode = currentWell() ? currentWell().code : "";
@@ -5733,7 +6115,11 @@ $("#btn-save-shift").addEventListener("click", function(){
          tarafından düzeltiliyor; buradan gönderilen değer yalnız başlangıç. */
       shift_slot: secilenSlot(),
       shift: (slotBilgi($("#f-project").value, secilenSlot()) || {}).next_day ? "gece" : "gunduz",
-      paper_no: $("#f-paper").value || null,
+      /* 98. dosya · Kâğıt no ekrandan kalktı, arka planda üretiliyor.
+         Şef artık yazmadığı için eski kayıtlarda duran numara korunuyor
+         (düzeltmede `#f-paper` dolu geliyor), yenisinde tarih + makine +
+         vardiya birleşimi yazılıyor — Excel çıktısında ayırt edilebilsin. */
+      paper_no: $("#f-paper").value || kagitNoUret(),
       /* 84. dosya · 7. madde: motor saati artık SAYAÇTAN. engine_start/
          engine_stop kolonları duruyor (eski kayıtlar onlardan sayılıyor)
          ama yeni kayıtta doldurulmuyor. */
@@ -5775,8 +6161,24 @@ $("#btn-save-shift").addEventListener("click", function(){
      kuyrukta kalıyorlar — sessizce kaybolmuyorlar (20 Ekim dersi). */
   var cu = item.payload.client_uuid;
   var durusKuyrugu = [];
+  /* 98. dosya · operasyon listesi her kayıtta toplu gidiyor. Boş liste
+     de gönderiliyor: düzeltmede şef bütün operasyonları sildiyse
+     merkezdekiler de silinsin — gönderilmezse eskiler orada kalırdı
+     (B2'deki "boşaltma gönderilmezse eski açıklama duruyor" dersi). */
+  var fotolar = $("#f-vfoto") ? filesOf($("#f-vfoto")) : [];
+  if(fotolar.length){
+    durusKuyrugu.push({ id:uuid(), kind:"vfoto", created:Date.now()+3,
+      title:"Kâğıt rapor fotoğrafı · " + wellCode,
+      sub:fotolar.length + " fotoğraf · " + item.payload.work_date,
+      photos:fotolar,
+      payload:{ client_uuid:cu, project_id:$("#f-project").value } });
+  }
+  durusKuyrugu.push({ id:uuid(), kind:"operasyon", created:Date.now()+1,
+    title:"Operasyonlar · " + wellCode,
+    sub:OPERASYONLAR.length + " operasyon · " + item.payload.work_date,
+    payload:{ client_uuid:cu, ops:OPERASYONLAR.slice() } });
   if(HIC_CALISMADI){
-    durusKuyrugu.push({ id:uuid(), kind:"calismadi", created:Date.now()+1,
+    durusKuyrugu.push({ id:uuid(), kind:"calismadi", created:Date.now()+2,
       title:"Hiç çalışmadı · " + wellCode,
       sub:"makine arızası · " + item.payload.work_date,
       payload:{ client_uuid:cu, kind:CALISMADI_TIP } });
@@ -5866,7 +6268,10 @@ function resetForm(){
   $("#f-to").value = ""; $("#f-fuel").value = ""; $("#f-note").value = "";
   $("#f-paper").value = ""; $("#f-end").value = "";
   $("#f-check-note").value = "";
-  KULLANILAN = []; KALAN = []; OLCUM = []; ISCI = [];
+  KULLANILAN = []; KALAN = []; OLCUM = []; ISCI = []; SONDOR_EK = []; SOFOR = [];
+  OPERASYONLAR = []; OP_TUR = ""; OP_BEKLEME = "";
+  if($("#f-vfoto")) $("#f-vfoto").value = "";
+  opTurCiz(); opAlanCiz(); opCiz();
   /* 84. dosya · 7. madde: sayaç her vardiyada yeniden okunuyor —
      taşınması yanlış motor saati demek. */
   DUZELT_ESKI_MOTOR = false;
@@ -5889,7 +6294,7 @@ function resetForm(){
   AR_SON = ""; $$('#ar-son .chip').forEach(function(x){ x.setAttribute("aria-pressed","false"); });
   if($("#ar-bit-wrap")) $("#ar-bit-wrap").hidden = true;
   $("#bk-sebep").value = ""; $("#bk-bas").value = ""; $("#bk-bit").value = "";
-  $("#bk-note").value = ""; beklemeSureCiz();
+  if($("#bk-note")) $("#bk-note").value = ""; beklemeSureCiz();
   durusTurSec("");
   msg($("#cap-msg"), ""); $("#cap-dus-wrap").hidden = true;
   $$("#checks .chip").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
@@ -6550,9 +6955,20 @@ function sendItem(it, tenant){
   if(it.kind === "well"){
     /* create_well3 azimut da alıyor. Eski sürüm yüklü bir merkezde fonksiyon
        yoksa create_well2'ye düşülüyor — şef sahada kalmasın. */
-    return sb.rpc("create_well3", {p_project:it.payload.project_id, p_code:it.payload.code,
+    return sb.rpc("create_well4", {p_project:it.payload.project_id, p_code:it.payload.code,
                                    p_dip:it.payload.dip, p_azimuth:it.payload.azimuth || null,
-                                   p_program:it.payload.program || null, p_planned:it.payload.planned || null})
+                                   p_dip_yon:it.payload.dip_yon || "asagi",
+                                   p_planned:it.payload.planned || null})
+      .then(function(r){
+        /* 62. adım yüklenmemiş bir merkezde create_well4 yok: eğim yönü
+           olmadan create_well3'e düşülüyor. Şef sahada kalmasın. */
+        if(r.error && /create_well4|does not exist/i.test(r.error.message || "")){
+          return sb.rpc("create_well3", {p_project:it.payload.project_id, p_code:it.payload.code,
+            p_dip:it.payload.dip, p_azimuth:it.payload.azimuth || null,
+            p_program:null, p_planned:it.payload.planned || null});
+        }
+        return r;
+      })
       .then(function(r){
         if(r.error && /create_well3|does not exist/i.test(r.error.message || "")){
           return sb.rpc("create_well2", {p_project:it.payload.project_id, p_code:it.payload.code,
@@ -6682,6 +7098,15 @@ function sendItem(it, tenant){
       p_surveys:it.payload.surveys || []})
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
   }
+  /* 98. dosya · Operasyon listesi vardiyanın PEŞİNDEN gidiyor; sunucu
+     vardiyayı client_uuid'den buluyor. Liste TOPLU gönderiliyor: her
+     çağrı şefin girdiği satırların tamamını değiştiriyor, böylece
+     düzeltmede eski satırlar artakalmıyor. */
+  if(it.kind === "operasyon"){
+    return sb.rpc("vardiya_operasyonlari_cu", {p_client:it.payload.client_uuid,
+      p_ops:it.payload.ops})
+      .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
   if(it.kind === "bekleme"){
     return sb.rpc("bekleme_kaydet_cu", {p_client:it.payload.client_uuid,
       p_sebep:it.payload.sebep, p_saat:it.payload.saat, p_not:it.payload.note || null})
@@ -6750,6 +7175,19 @@ function sendItem(it, tenant){
   if(it.kind === "fuel_in"){
     return sb.from("fuel_deliveries").upsert(Object.assign({tenant_id:tenant}, it.payload), {onConflict:"tenant_id,client_uuid"})
       .then(function(r){ if(r.error) throw r.error; return obDel(it.id); });
+  }
+  /* 98. dosya · vardiyanın kâğıt rapor fotoğrafı. Çevrimdışı çekildiği
+     için merkezdeki vardiya kimliği bilinmiyor; `client_uuid`den
+     bulunuyor. `attachments` kayıtları eskiden beri gerçek vardiya
+     kimliğini tutuyor, o düzen bozulmuyor. */
+  if(it.kind === "vfoto"){
+    return sb.from("shifts").select("id").eq("client_uuid", it.payload.client_uuid)
+      .maybeSingle().then(function(r){
+        if(r.error) throw r.error;
+        if(!r.data || !r.data.id)
+          throw new Error("Vardiya henüz merkeze gitmedi, fotoğraf sonraki denemede gönderilecek.");
+        return uploadPhotos(it.photos, tenant, it.payload.project_id, "shift", r.data.id);
+      }).then(function(){ return obDel(it.id); });
   }
   if(it.kind === "photo"){
     return uploadPhotos(it.photos, tenant, it.payload.project_id, "shift", it.payload.shift_id)
@@ -7719,7 +8157,7 @@ function attLoad(sessiz){
         : "Bu gün için kayıt yok.", "ok");
     });
 }
-$("#btn-att-load") && $("#btn-att-load").addEventListener("click", function(){ attLoad(false); });
+$("#btn-att-load") && ol("#btn-att-load", "click", function(){ attLoad(false); });
 ["#p-project","#p-date"].forEach(function(sel){
   $(sel).addEventListener("change", function(){ ATT_YUKLU = null; attLoad(true); });
 });
@@ -8183,7 +8621,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "56";
+var SURUM = "57";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

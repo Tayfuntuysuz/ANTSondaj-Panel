@@ -112,7 +112,7 @@ var AYLAR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos"
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
 function msg(el,t,k){ el.innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
 function iso(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
-var GOREV={santiye_sefi:"Şantiye şefi",sondor:"Sondör",sondor_yardimcisi:"Sondör yrd.",alt_eleman:"Alt eleman",sofor:"Şoför",destek:"Destek",diger:"Diğer"};
+var GOREV={formen:"Formen", yardimci:"Yardımcı personel", santiye_sefi:"Şantiye şefi",sondor:"Sondör",sondor_yardimcisi:"Sondör yrd.",alt_eleman:"Alt eleman",sofor:"Şoför",destek:"Destek",diger:"Diğer"};
 
 var sb=null, DATA=null, SOZ=[];
 

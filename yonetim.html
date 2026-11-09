@@ -257,8 +257,8 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
         <div class="field"><label for="pe-gorev">Görev</label>
           <select id="pe-gorev">
             <option value="sondor">Sondör</option>
-            <option value="sondor_yardimcisi">Sondör yardımcısı</option>
-            <option value="alt_eleman">İşçi</option>
+            <option value="formen">Formen</option>
+            <option value="yardimci">Yardımcı personel</option>
             <option value="sofor">Şoför</option>
             <option value="santiye_sefi">Şantiye şefi</option>
             <option value="destek">Destek</option>
@@ -510,7 +510,7 @@ function sefFormDoldur(){
 }
 var TUR_AD = {kule_destek:"Saha ekipmanı", pickup:"Pikap", kamyon:"Kamyon",
               servis:"Servis", bilinmiyor:"Bilinmiyor", gider_notu:"Gider notu"};
-var GOREV_AD = {sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı", alt_eleman:"İşçi",
+var GOREV_AD = {formen:"Formen", yardimci:"Yardımcı personel", sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı", alt_eleman:"İşçi",
                 sofor:"Şoför", santiye_sefi:"Şantiye şefi", destek:"Destek", diger:"Diğer"};
 
 function secDoldur(sel, liste, alan, bos){

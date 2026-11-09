@@ -31,7 +31,7 @@ function anTarih(s){
   return trd(t.slice(0,10)) + (t.length > 11 ? " " + t.slice(11,16) : "");
 }
 
-var GOREV = {sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı",
+var GOREV = {formen:"Formen", yardimci:"Yardımcı personel", sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı",
   alt_eleman:"İşçi", sofor:"Şoför", santiye_sefi:"Şantiye şefi",
   destek:"Destek", diger:"Diğer"};
 var BEKLEME_AD = {su:"Su", musteri:"Müşteri", malzeme:"Malzeme / parça",
