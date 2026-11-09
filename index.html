@@ -1076,11 +1076,44 @@ details.acilir[open] > summary::after{content:"\2212"}
           <span class="eyebrow">Operasyonlar</span>
           <span class="hint" id="op-sure"></span>
         </div>
-        <div id="op-liste"></div>
         <div class="kat" id="op-giris">
           <div class="field">
             <label>Operasyon türü</label>
             <div class="secim" id="op-tur"></div>
+          </div>
+          <!-- ============================================================
+               103. dosya · DELGİ ALANLARI TÜR SEÇİCİNİN HEMEN ALTINDA
+               ------------------------------------------------------------
+               Tayfun: "Direk Delgi seçili çıkacak ve onun altında
+               sırasıyla ekte gösterdiğim gibi tablo olacak ve o veriler
+               doldurulacak. Sonra manevra ekle olacak."
+
+               58. sürümde bu dört alan "Operasyonu ekle" düğmesinin,
+               açıklamanın ve fotoğrafın da ALTINDA kalıyordu: şef türü
+               seçiyor, hemen altında ekle düğmesi görüyor, doldurması
+               gereken alanlar ekranın dibinde duruyordu.
+
+               Kuyu tabanı ile manevra boyu birbirinin türevi; ikisi BAĞLI
+               çalışıyor — şef hangisini yazarsa öteki anında hesaplanıyor.
+               Başlangıç, ilk manevrada kuyunun vardiya başı derinliği,
+               sonrakilerde bir öncekinin kuyu tabanı; ikisi de otomatik.
+               ============================================================ -->
+          <div class="kat" id="mv-alanlar">
+            <div class="grid2">
+              <div class="field"><label for="f-mv-no">Manevra no</label>
+                <input id="f-mv-no" type="text" readonly tabindex="-1">
+                <div class="hint">Kendiliğinden sıralanır.</div></div>
+              <div class="field"><label for="f-dia">Delgi çapı <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
+            </div>
+            <div class="grid2">
+              <div class="field"><label for="f-to">Kuyu tabanı (m) <span class="req">*</span></label>
+                <input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
+              <div class="field"><label for="f-mv-boy">Manevra boyu (m)</label>
+                <input id="f-mv-boy" type="number" min="0" step="0.01" inputmode="decimal"></div>
+            </div>
+            <div class="hint" id="mv-bas-not"></div>
+            <button class="btn ghost kesikli" id="btn-add-run" type="button">Manevra ekle</button>
+            <div id="run-msg"></div>
           </div>
           <div class="grid2" id="op-saat-wrap" hidden>
             <div class="field"><label for="op-bas">Başlangıç saati</label><select id="op-bas"></select></div>
@@ -1106,11 +1139,17 @@ details.acilir[open] > summary::after{content:"\2212"}
               <option value="kuyu_sonu">Kuyu sonu</option>
               <option value="kuyu_iptali">Kuyu iptali</option></select>
             <div class="hint" id="op-kuyu-not"></div></div>
-          <div class="field" id="op-not-wrap" hidden><label for="op-not" id="op-not-label">Açıklama</label>
-            <input id="op-not" placeholder="Ne oldu, ne yapıldı"></div>
           <button class="btn ghost kesikli" id="btn-op-ekle" type="button">Operasyonu ekle</button>
           <div id="op-msg"></div>
         </div>
+
+        <!-- Eklenenler giriş kutusunun ALTINDA: şef yukarıdan aşağı
+             okuyor — türü seç, alanları doldur, ekle, listede gör.
+             Manevra tablosu artık `#mv-alanlar`ın DIŞINDA: muhafazaya
+             geçilince giriş alanları gizleniyor ama girilmiş manevralar
+             ekranda kalmalı. -->
+        <div id="op-liste"></div>
+        <table id="mv-tablo" hidden><thead><tr><th>No</th><th>Çap</th><th>Başlangıç</th><th>Kuyu tabanı</th><th>Boy</th><th></th></tr></thead><tbody id="runs"></tbody></table>
 
         <!-- 101. dosya · Tayfun: "delgi sonrası muhafaza da yaptık diyelim,
              o zaman altta operasyonda değişiklik kutucuğu olacak,
@@ -1120,10 +1159,14 @@ details.acilir[open] > summary::after{content:"\2212"}
         <button class="btn ghost" id="btn-op-degistir" type="button" hidden
                 style="margin-top:8px">+ Operasyon değiştir</button>
 
-        <!-- Operasyon açıklaması — Malzeme adımındakinden AYRI (101. dosya,
-             Tayfun: "açıklama 2 yerde olacak"). Tür ne olursa olsun görünür. -->
+        <!-- 103. dosya · TEK AÇIKLAMA
+             Tayfun: "operasyon türlerinde 2 kere açıklama yazmasına gerek
+             yok. Açıklama diye bir kısım hepsinde olacak, o kadar basit."
+             Tür başına ayrı kutu (arızada "Arıza sebebi", beklemede
+             "Açıklama") KALKTI; geriye bu tek kutu kaldı ve tür ne olursa
+             olsun görünüyor. Malzeme adımındaki açıklama ayrı duruyor. -->
         <div class="field" style="margin-top:12px">
-          <label for="f-op-note">Operasyon açıklaması</label>
+          <label for="f-op-note">Açıklama</label>
           <textarea id="f-op-note" placeholder="Vardiyada olan biten — kısaca"></textarea>
         </div>
 
@@ -1141,37 +1184,6 @@ details.acilir[open] > summary::after{content:"\2212"}
              ama alan GİZLİ duruyor: kuyu sonu akışının tamamı (kalan
              muhafaza, ölçümler, kuyu_sonu_kaydet) buradan okuyor. -->
         <input id="f-end" type="hidden" value="">
-        <!-- Manevra alanları tek kutuda: "ilerleme olmadı" işaretlenince
-             hepsi birden GİZLENİYOR. Pasifleştirme değil gizleme — pasif
-             düğme sahada "program bozuk" dedirtiyor (58. dosya). -->
-        <!-- 101. dosya · Delgi seçilince DÖRT alan birden görünüyor.
-             Tayfun: "Manevra No : 1 · Delgi Çapı : PQ · Kuyu Tabanı: 860 ·
-             Manevra Boyu : 12 m".
-
-             Kuyu tabanı ile manevra boyu birbirinin türevi; ikisi BAĞLI
-             çalışıyor — şef hangisini yazarsa öteki anında hesaplanıyor.
-             Başlangıç, ilk manevrada kuyunun vardiya başı derinliği,
-             sonrakilerde bir öncekinin kuyu tabanı; ikisi de otomatik. -->
-        <div class="kat" id="mv-alanlar">
-          <div class="grid2">
-            <div class="field"><label for="f-mv-no">Manevra no</label>
-              <input id="f-mv-no" type="text" readonly tabindex="-1">
-              <div class="hint">Kendiliğinden sıralanır.</div></div>
-            <div class="field"><label for="f-dia">Delgi çapı <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
-          </div>
-          <div class="grid2">
-            <div class="field"><label for="f-to">Kuyu tabanı (m) <span class="req">*</span></label>
-              <input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
-            <div class="field"><label for="f-mv-boy">Manevra boyu (m)</label>
-              <input id="f-mv-boy" type="number" min="0" step="0.01" inputmode="decimal"></div>
-          </div>
-          <div class="hint" id="mv-bas-not"></div>
-          <button class="btn ghost kesikli" id="btn-add-run" type="button">Manevra ekle</button>
-          <div id="run-msg"></div>
-          <!-- Boş tablo yer kaplamasın: manevra yoksa gizli, böylece iki
-               düğme gerçekten alt alta geliyor. -->
-          <table id="mv-tablo" hidden><thead><tr><th>No</th><th>Çap</th><th>Başlangıç</th><th>Kuyu tabanı</th><th>Boy</th><th></th></tr></thead><tbody id="runs"></tbody></table>
-        </div>
 
         <!-- ============================================================
              101. dosya · "BU VARDİYADA İLERLEME OLMADI" KUTUSU KALKTI
@@ -4333,7 +4345,7 @@ function ilerlemeYokCiz(){
      `ILERLEME_YOK` artık hiç true olmuyor — eski kayıt düzeltilirken
      sunucudan gelen sebep yalnız özet metninde görünüyor. */
   var mv = $("#mv-alanlar");
-  if(mv) mv.hidden = (OP_TUR !== "" && OP_TUR !== "delgi");
+  if(mv) mv.hidden = (OP_TUR !== "delgi");
   kuyuSonuGoster();
   refreshState();
 }
@@ -4667,6 +4679,18 @@ $("#btn-add-run").addEventListener("click", function(){
   else { msg($("#run-msg"), ""); }
   runs.push({seq:runs.length+1, diameter:$("#f-dia").value, from_m:depth(), to_m:v,
              personnel_id:$("#f-driller1").value || null});
+  /* ============================================================
+     103. dosya · MANEVRA EKLENİNCE DELGİ OPERASYONU DA AÇILIYOR
+     ------------------------------------------------------------
+     Tayfun'un akışında delgi için ayrı "Operasyonu ekle" yok:
+     tür seçiliyor, dört alan doldurulup manevra ekleniyor.
+     Arka arkaya manevralar TEK delgi operasyonu sayılıyor; araya
+     muhafaza/bekleme girilip delgiye dönülürse yenisi açılıyor —
+     "her manevra sonrası değişiklik yapılabilir" dediği şey bu.
+     ============================================================ */
+  var sonOp = OPERASYONLAR[OPERASYONLAR.length - 1];
+  if(!sonOp || sonOp.tur !== "delgi") OPERASYONLAR.push({tur:"delgi"});
+  opCiz(); kuyuBitimiYansit();
   $("#f-to").value = ""; $("#f-mv-boy").value = "";
   renderRuns(); mvNoCiz(); refreshState();
   /* Kutu temizlendiği için "eksik bitiş metresi" uyarısı yeniden çıkmasın;
@@ -4687,7 +4711,10 @@ $("#f-to").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.pre
    türlerin hepsi başlangıç–bitiş saati istiyor.
    ============================================================ */
 var OPERASYONLAR = [];
-var OP_TUR = "";          /* giriş kutusunda seçili tür */
+/* 103. dosya · Tayfun: "Veyahut direk Delgi seçili çıkacak."
+   Vardiyaların ezici çoğunluğu delgiyle başlıyor; açılışta seçili
+   gelince dört alan hemen görünüyor ve şef fazladan tık yapmıyor. */
+var OP_TUR = "delgi";     /* giriş kutusunda seçili tür */
 var OP_BEKLEME = "";      /* operasyonel | operasyonel_degil */
 
 var OP_ADI = {
@@ -4696,12 +4723,14 @@ var OP_ADI = {
   kuyu_bitimi:"Kuyu bitimi"
 };
 /* Hangi tür hangi alanı istiyor. `saat:false` olan tek tür delgi. */
+/* 103. dosya · tür başına `not` alanı KALKTI — açıklama tek ve ortak
+   (adımın altındaki `#f-op-note`). Arızanın sebebi de oraya yazılıyor. */
 var OP_ALAN = {
-  delgi:       {saat:false},
+  delgi:       {manevra:true},
   muhafaza:    {saat:true,  metre:true, cap:true},
-  bekleme:     {saat:true,  bekleme:true, not:true, notAd:"Açıklama"},
-  ariza:       {saat:true,  not:true, notAd:"Arıza sebebi", notReq:true},
-  nakliye:     {saat:true,  not:true, notAd:"Açıklama"},
+  bekleme:     {saat:true,  bekleme:true},
+  ariza:       {saat:true},
+  nakliye:     {saat:true},
   takim:       {saat:true},
   temizlik:    {saat:true},
   kuyu_bitimi: {kuyu:true}
@@ -4733,13 +4762,13 @@ function opAlanCiz(){
   goster("#op-cap-wrap",      !!a.cap);
   goster("#op-bekleme-wrap",  !!a.bekleme);
   goster("#op-kuyu-wrap",     !!a.kuyu);
-  goster("#op-not-wrap",      !!a.not);
-  if(a.not && $("#op-not-label")) $("#op-not-label").textContent = a.notAd || "Açıklama";
-  if($("#btn-op-ekle")) $("#btn-op-ekle").hidden = !OP_TUR;
-  /* Delgi seçilince manevra alanları görünsün, başka türde gizlensin:
-     şef "muhafaza" girerken manevra kutusu kafa karıştırıyor. */
+  /* 103. dosya · İKİ AYRI EKLE DÜĞMESİ, AYNI YERDE
+     Delgide "Manevra ekle", ötekilerde "Operasyonu ekle". Tayfun:
+     "onun altında tablo olacak ve o veriler doldurulacak. Sonra
+     manevra ekle olacak." İkisi birden görünmüyor. */
+  if($("#btn-op-ekle")) $("#btn-op-ekle").hidden = !OP_TUR || OP_TUR === "delgi";
   var mv = $("#mv-alanlar");
-  if(mv) mv.hidden = !!OP_TUR && OP_TUR !== "delgi";
+  if(mv) mv.hidden = OP_TUR !== "delgi";
   if($("#op-kuyu-not")){
     $("#op-kuyu-not").textContent = ($("#op-kuyu-durum") && $("#op-kuyu-durum").value === "kuyu_iptali")
       ? "İptal sebebini açıklamaya yazın." : "Kuyu sonu metrajı manevralardan geliyor.";
@@ -4799,6 +4828,10 @@ function kuyuBitimiYansit(){
 }
 function opEkle(){
   if(!OP_TUR){ msg($("#op-msg"), "Önce operasyon türünü seçin.", "err"); return; }
+  /* Delgi bu yoldan eklenmiyor: manevra eklendiğinde kendiliğinden
+     açılıyor. Düğme gizli ama klavyeyle tetiklenebiliyor — sessizce
+     yutmak yerine doğru düğmeye yolluyoruz. */
+  if(OP_TUR === "delgi"){ $("#btn-add-run").click(); return; }
   var a = OP_ALAN[OP_TUR], o = {tur:OP_TUR}, eks = [];
   if(a.saat){
     o.bas = $("#op-bas").value; o.bit = $("#op-bit").value;
@@ -4815,13 +4848,13 @@ function opEkle(){
   if(a.cap){ o.cap = $("#op-cap").value; if(!o.cap) eks.push("çap"); }
   if(a.bekleme){ o.sebep = OP_BEKLEME; if(!o.sebep) eks.push("bekleme türü"); }
   if(a.kuyu){ o.sebep = $("#op-kuyu-durum").value; }
-  if(a.not){
-    o.note = $("#op-not").value.trim();
-    if(a.notReq && !o.note) eks.push(a.notAd.toLowerCase());
-  }
-  if(a.kuyu && o.sebep === "kuyu_iptali" && !$("#op-not").value.trim()){
-    /* İptal sebepsiz kalmasın: altı ay sonra kimse hatırlamıyor. */
-    eks.push("iptal sebebi");
+  /* 103. dosya · açıklama tek ortak kutuya indi. Kuyu iptali onu
+     ZORUNLU kılıyor: sebepsiz iptal altı ay sonra kimseye bir şey
+     anlatmıyor. Arıza sebebi de aynı kutuya yazılıyor ama zorunlu
+     değil — kaydı tamamen engellemek sahada daha çok zarar veriyor. */
+  if(a.kuyu && o.sebep === "kuyu_iptali" &&
+     !($("#f-op-note") && $("#f-op-note").value.trim())){
+    eks.push("iptal sebebi (Açıklama kutusu)");
   }
   if(eks.length){
     msg($("#op-msg"), "Operasyon eklenmedi — eksik: " + eks.join(", ") + ".", "err");
@@ -4832,8 +4865,8 @@ function opEkle(){
      istediği "operasyon değiştir" davranışı bu — her eklemeden sonra
      şef bir sonraki türü seçiyor, art arda aynı türü eklemek için de
      tekrar basması yetiyor. */
-  OP_TUR = ""; OP_BEKLEME = "";
-  ["#op-bas","#op-bit","#op-from","#op-to","#op-cap","#op-not"].forEach(function(id){
+  OP_TUR = "delgi"; OP_BEKLEME = "";
+  ["#op-bas","#op-bit","#op-from","#op-to","#op-cap"].forEach(function(id){
     if($(id)) $(id).value = ""; });
   opTurCiz(); opAlanCiz(); opCiz(); kuyuBitimiYansit();
   msg($("#op-msg"), OP_ADI[o.tur] + " eklendi.", "ok");
@@ -5727,7 +5760,7 @@ function vardiyaDuzelt(sat, satirEl){
                   to_m:a.to_m == null ? null : Number(a.to_m),
                   cap:a.diameter || null, sebep:a.sebep || null, note:a.note || null};
         });
-      OP_TUR = ""; OP_BEKLEME = "";
+      OP_TUR = "delgi"; OP_BEKLEME = "";
       opTurCiz(); opAlanCiz(); opCiz();
 
       runs = (res[0].data || []).map(function(x, i){
@@ -6392,7 +6425,7 @@ function resetForm(){
   KULLANILAN = []; KALAN = []; OLCUM = []; ISCI = []; SONDOR_EK = []; SOFOR = [];
   ["#f-kimyasal", "#f-kimyasal-qty", "#f-yag", "#f-kasa"].forEach(function(id){
     if($(id)) $(id).value = ""; });
-  OPERASYONLAR = []; OP_TUR = ""; OP_BEKLEME = "";
+  OPERASYONLAR = []; OP_TUR = "delgi"; OP_BEKLEME = "";
   if($("#f-op-note")) $("#f-op-note").value = "";
   if($("#f-vfoto")) $("#f-vfoto").value = "";
   opTurCiz(); opAlanCiz(); opCiz();
@@ -8744,7 +8777,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "58";
+var SURUM = "59";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
