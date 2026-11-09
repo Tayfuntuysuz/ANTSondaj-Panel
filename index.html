@@ -24,7 +24,7 @@ try{localStorage.removeItem("sp_tema");localStorage.removeItem("sp_yazi");}catch
      Eskiden iki tip vardı (başlıklarda Barlow Condensed, gövdede IBM Plex
      Sans) ve bantlardaki sıkıştırılmış BÜYÜK HARF başlık örnekle
      uyuşmuyordu. -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
 <style>
 :root{
   /* Lacivert ust cubuk her temada lacivert kalir; uzerindeki yazi rengi de
@@ -59,7 +59,7 @@ body{background:var(--bg)}
    Eskiden bütün sütun bembeyazdı ve bantların bittiği yer, boş alan
    ile aynı renkteydi. */
 .app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
-media (min-width:560px){
+@media (min-width:560px){
   .app{border-inline:1px solid var(--line);min-height:100dvh}
 }
 /* ============================================================
@@ -214,7 +214,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
    ⚠ `:has()` kullanmıyoruz (79. dosyanın kuralı); tarih taşıyan
    ızgaralar sınıfla işaretli.
    ============================================================ */
-media (max-width:430px){ .grid2.kir-alt{grid-template-columns:1fr} }
+@media (max-width:430px){ .grid2.kir-alt{grid-template-columns:1fr} }
 input[type="date"],input[type="time"],input[type="month"],select{min-width:0;max-width:100%}
 /* ============================================================
    TARİH / AY / SAAT ALANLARININ TAŞMASI (90. dosya · 6)
@@ -2171,7 +2171,7 @@ details.acilir[open] > summary::after{content:"\2212"}
   </nav>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/supabase/supabase-js2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
 <script src="kart.js"></script>
 <script>
