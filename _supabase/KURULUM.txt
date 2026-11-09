@@ -1,16 +1,15 @@
-Collarlog 55. sürüm — İşveren Paneli 1. paket
+Collarlog 56. sürüm — İşveren Paneli 2. paket
 
-1) Supabase > SQL Editor: 077-sondaj-panel-60-isveren-paneli.sql dosyasının
-   içeriğini yapıştırıp çalıştırın. Sonunda şu not çıkmalı:
-   "60. adım: işveren paneli fonksiyonları kuruldu, mazot kapalı."
-   Dosya iki kez çalıştırılırsa zarar vermez.
+1) Supabase > SQL Editor > New query: 078-sondaj-panel-61-isveren-paneli-2.sql
+   dosyasını TextEdit ile açın, hepsini kopyalayıp yapıştırın, Run.
+   Sonunda şu not çıkmalı:
+   "61. adım: Kuyular, öngörülen bitiş ve PDF rapor fonksiyonları kuruldu; sondör ve ekip kapalı."
+   (55. sürümün 077 dosyası önceden çalıştırılmış olmalı.)
 
-2) Bu klasördeki sayfa dosyalarını (isveren.html, app-shell.js,
-   index.html, sw.js ve diğerleri) GitHub'a yükleyin.
-   _supabase klasörünü yüklemenize gerek yok.
+2) Bu klasördeki sayfa dosyalarını GitHub'a yükleyin
+   (isveren.html, app-shell.js, ofis.html, index.html, sw.js ve diğerleri).
+   _supabase klasörünü yüklemeyin.
 
-3) Telefonlarda uygulamayı bir kez kapatıp açın (önbellek v55).
+3) Telefonlarda uygulamayı bir kez kapatıp açın (önbellek v56).
 
-Önce SQL, sonra sayfalar: sayfa yeni fonksiyonu (employer_genel) arıyor.
-Ters giderse 54. sürüm dosyaları geri konabilir; SQL geri alınmaz ama
-eski sayfa yeni fonksiyonlarla da çalışır (yalnız mazot kutusu boş görünür).
+İşverenin panel dili: Merkez ofis > İşveren kullanıcıları > "İşveren Paneli dili".

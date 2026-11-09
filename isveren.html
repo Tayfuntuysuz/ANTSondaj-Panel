@@ -104,6 +104,74 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
   .alt-rakam{grid-template-columns:repeat(2,minmax(0,1fr))}
   .durus-sat{grid-template-columns:90px minmax(0,1fr) 56px}
 }
+
+/* ---------- Kuyular sekmesi (2. paket) ---------- */
+.ky-duzen{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr);gap:14px;align-items:start}
+.ky-liste table td{padding:9px 8px;vertical-align:middle;white-space:normal}
+.ky-liste table th{white-space:normal;padding:8px}
+/* Liste kendi içinde kayar; ayrıntı yerinde kalır */
+.ky-liste .scroll{max-height:72vh;overflow:auto}
+.ky-liste thead th{position:sticky;top:0;background:var(--card);z-index:1}
+.ky-detay{position:sticky;top:12px}
+.ky-bilgi b small{font-size:13px;color:var(--ink-2);margin-inline-start:3px;font-family:"IBM Plex Sans",sans-serif;font-weight:500}
+.ky-uyari{font-size:12.5px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:7px 10px;margin-top:8px}
+.ky-liste tr.tik{cursor:pointer}
+.ky-liste tr.tik:hover td{background:var(--line-soft)}
+.ky-liste tr.sec td{background:var(--accent-soft)}
+.ky-kucuk{font-size:11.5px;color:var(--ink-3)}
+.ky-bar{height:6px;border-radius:3px;background:var(--line-soft);overflow:hidden;margin-top:4px;min-width:70px}
+.ky-bar i{display:block;height:100%;background:var(--accent)}
+.ky-bar i.tam{background:var(--good)}
+.ky-tahmin{color:#E8731A;font-weight:600;white-space:nowrap}
+.ky-pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.ky-pill.drilling{background:var(--accent-soft);color:var(--accent-ink)}
+.ky-pill.completed{background:var(--good-soft);color:var(--good)}
+.ky-pill.planned{background:var(--line-soft);color:var(--ink-2)}
+.ky-detay h3{font-family:"Barlow Condensed",sans-serif;font-size:24px;margin:0}
+.ky-tahmin-kutu{border:1px solid #E8731A;border-radius:11px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;margin-top:12px}
+.ky-tahmin-kutu .etk{width:100%;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.ky-tahmin-kutu b{font-family:"Barlow Condensed",sans-serif;font-size:30px;color:#E8731A}
+.ky-tahmin-kutu span{color:var(--ink-2);font-size:13px}
+.ky-bos{color:var(--ink-3);font-size:13px;border:1px dashed var(--line);border-radius:10px;padding:12px;margin-top:12px}
+.ky-bilgi{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}
+.ky-bilgi span{display:block;font-size:12px;color:var(--ink-3)}
+.ky-bilgi b{font-family:"Barlow Condensed",sans-serif;font-size:19px}
+.ky-alt{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;margin-top:18px;align-items:start}
+.ky-etk{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:16px 0 6px}
+.cz .tahminc{stroke:#E8731A;stroke-width:2;stroke-dasharray:6 4;fill:none}
+.cz .nokta{fill:#E8731A}
+
+/* ---------- PDF rapor ---------- */
+.rp-ayar .row{align-items:flex-end}
+.rp-donem{display:flex;gap:4px;flex-wrap:wrap}
+.rp-donem button{border:1px solid var(--line);background:none;color:var(--ink-2);padding:6px 12px;border-radius:8px;font:inherit;font-size:13px;cursor:pointer}
+.rp-donem button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.rapor{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:26px 30px;max-width:900px}
+.rapor .rp-antet{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--accent);padding-bottom:10px;margin-bottom:14px}
+.rapor .rp-antet img{height:34px;width:auto;max-width:140px;object-fit:contain}
+.rapor .rp-antet h2{font-family:"Barlow Condensed",sans-serif;font-size:23px;margin:0}
+.rapor .rp-antet .sg{margin-inline-start:auto;text-align:end;font-size:12px;color:var(--ink-3)}
+.rapor h4{font-family:"Barlow Condensed",sans-serif;font-size:16px;letter-spacing:.03em;margin:18px 0 6px;color:var(--accent-ink)}
+.rp-k4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rp-k4 div{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.rp-k4 span{display:block;font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+.rp-k4 b{font-family:"Barlow Condensed",sans-serif;font-size:21px}
+.rapor table{font-size:12.5px}
+.rp-ayak{margin-top:16px;padding-top:6px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);display:flex;justify-content:space-between;gap:10px}
+@media print{
+  .rapor{border:0;padding:0;max-width:none}
+  .rp-k4,.rapor .cz,.rapor table{break-inside:avoid}
+  .rapor h4{break-after:avoid}
+  .ip-proje,#msg{display:none!important}
+  .rapor-sekmesi .antet{display:none!important}
+  .rp-k4{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media (max-width:900px){
+  .ky-duzen{grid-template-columns:minmax(0,1fr)}
+  .ky-bilgi{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ky-alt{grid-template-columns:minmax(0,1fr)}
+  .rp-k4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 @media print{ .ip-tabs,.no-print{display:none!important} }
 </style>
 </head>
@@ -116,18 +184,19 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 
     <div class="ip-proje">
       <div>
-        <div class="etk">Proje</div>
+        <div class="etk" data-t="proje">Proje</div>
         <h2 id="p-ad">—</h2>
         <div class="alt" id="p-alt"></div>
       </div>
-      <div class="field sec no-print"><label for="f-proj">Saha / proje</label><select id="f-proj"></select></div>
+      <div class="field sec no-print"><label for="f-proj" data-t="sahaProje">Saha / proje</label><select id="f-proj"></select></div>
     </div>
     <div id="msg"></div>
 
     <nav class="ip-tabs" id="tabs">
-      <button type="button" data-t="genel" class="on">Genel durum</button>
-      <button type="button" data-t="gun">Günlük rapor</button>
-      <button type="button" data-t="donem">Dönem raporu</button>
+      <button type="button" data-s="genel" class="on" data-t="tGenel">Genel durum</button>
+      <button type="button" data-s="kuyu" data-t="tKuyu">Kuyular</button>
+      <button type="button" data-s="gun" data-t="tGun">Günlük rapor</button>
+      <button type="button" data-s="rapor" data-t="tRapor">PDF rapor</button>
     </nav>
 
     <!-- GENEL DURUM -->
@@ -137,32 +206,52 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div class="ip-not" id="genel-not"></div>
     </section>
 
+    <!-- KUYULAR -->
+    <section data-p="kuyu" hidden>
+      <div class="ky-duzen">
+        <div class="card ky-liste">
+          <h3 data-t="tKuyu">Kuyular</h3>
+          <div class="note" data-t="kuyuSec">Kuyuya tıklayın, ayrıntısı sağda açılır.</div>
+          <div class="scroll"><table id="ky-tablo"></table></div>
+        </div>
+        <div class="card ky-detay" id="ky-detay"></div>
+      </div>
+    </section>
+
     <!-- GÜNLÜK -->
     <section data-p="gun" hidden>
       <div class="card no-print">
         <div class="row">
-          <div class="field"><label>Tarih</label><input id="g-date" type="date"></div>
-          <button class="btn" id="btn-gun" type="button">Getir</button>
-          <button class="btn ghost" id="btn-gun-dun" type="button">Önceki gün</button>
-          <button class="btn ghost" id="btn-gun-yaz" type="button">Yazdır / PDF</button>
+          <div class="field"><label for="g-date" data-t="tarih">Tarih</label><input id="g-date" type="date"></div>
+          <button class="btn" id="btn-gun" type="button" data-t="getir">Getir</button>
+          <button class="btn ghost" id="btn-gun-dun" type="button" data-t="oncekiGun">Önceki gün</button>
+          <button class="btn ghost" id="btn-gun-yaz" type="button" data-t="yazdir">Yazdır / PDF</button>
         </div>
       </div>
       <div id="gun-out"></div>
     </section>
 
-    <!-- DÖNEM -->
-    <section data-p="donem" hidden>
-      <div class="card no-print">
+    <!-- PDF RAPOR -->
+    <section data-p="rapor" hidden>
+      <div class="card no-print rp-ayar">
         <div class="row">
-          <div class="field"><label>Başlangıç</label><input id="d-from" type="date"></div>
-          <div class="field"><label>Bitiş</label><input id="d-to" type="date"></div>
-          <button class="btn" id="btn-donem" type="button">Getir</button>
-          <button class="btn ghost" id="btn-d-ay" type="button">Bu ay</button>
-          <button class="btn ghost" id="btn-d-excel" type="button">Excel (CSV)</button>
-          <button class="btn ghost" id="btn-d-yaz" type="button">Yazdır / PDF</button>
+          <div class="field"><label data-t="donem">Dönem</label>
+            <div class="rp-donem" id="rp-donem">
+              <button type="button" data-d="gun" data-t="dGun">Günlük</button>
+              <button type="button" data-d="hafta" class="on" data-t="dHafta">Haftalık</button>
+              <button type="button" data-d="ay" data-t="dAy">Aylık</button>
+              <button type="button" data-d="aralik" data-t="dAralik">Tarih aralığı</button>
+            </div></div>
+          <div class="field" id="rp-tek"><label for="rp-gun" data-t="rpGun">Gün</label><input id="rp-gun" type="date"></div>
+          <div class="field" id="rp-bas-k" hidden><label for="rp-bas" data-t="bas">Başlangıç</label><input id="rp-bas" type="date"></div>
+          <div class="field" id="rp-bit-k" hidden><label for="rp-bit" data-t="bit">Bitiş</label><input id="rp-bit" type="date"></div>
+          <button class="btn" id="btn-rp" type="button" data-t="hazirla">Raporu hazırla</button>
+          <button class="btn ghost" id="btn-rp-pdf" type="button" data-t="pdfKaydet">PDF olarak kaydet</button>
+          <button class="btn ghost" id="btn-rp-csv" type="button" data-t="excel">Excel (CSV)</button>
         </div>
+        <div class="note" id="rp-donem-yazi"></div>
       </div>
-      <div id="donem-out"></div>
+      <div id="rapor-out"></div>
     </section>
   </div>
 </div>
@@ -174,23 +263,156 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 "use strict";
 var $=function(s){return document.querySelector(s);};
 var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
-var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
-function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
-function msg(el,t,k){ el.innerHTML = t ? '<div class="msg '+(k||"")+'">'+t+'</div>' : ""; }
-function iso(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
-function trd(s){ if(!s) return "—"; var p=String(s).slice(0,10).split("-"); return p[2]+"."+p[1]+"."+p[0]; }
-function kisa(s){ if(!s) return ""; var p=String(s).slice(0,10).split("-"); return p[2]+"."+p[1]; }
-var AYLAR=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
-var VARD={gunduz:"Gündüz", gece:"Gece"};
-var KDURUM={planned:"Planlandı", drilling:"Devam ediyor", completed:"Tamamlandı", cancelled:"İptal"};
-var PROGRAM={arama:"Maden arama", planlama:"Maden planlama"};
-/* Duruş adları — işverenin göreceği dil */
-var DTUR={ariza:"Arıza", bekleme:"Bekleme", tasima:"Nakliye", bakim:"Bakım", ilerleme_yok:"İlerleme yok"};
-var DSEBEP={hidrolik:"hidrolik", rotasyon:"rotasyon", mekanik:"mekanik", elektrik:"elektrik", diger:"diğer",
-  su:"su", musteri:"işveren kaynaklı", malzeme:"malzeme / parça", hava:"hava", yol:"yol",
-  olcum:"ölçüm", takim:"takım", muhafaza:"muhafaza", temizleme:"temizleme"};
 
-var sb=null, BOOT=null, DONEM=null, GENEL=null, SECILI="", MAKSEC="";
+/* ============================================================
+   DİL (S6) — işverenin dili kaydında (employers.lang). Şirket
+   kullanıcısının önizlemesi Türkçe. Şefin serbest yazdığı notlar
+   çevrilmez.
+   ============================================================ */
+var DIL="tr";
+var T={
+ tr:{baslik:"İşveren Paneli", proje:"Proje", sahaProje:"Saha / proje", tGenel:"Genel durum", tKuyu:"Kuyular",
+  tGun:"Günlük rapor", tRapor:"PDF rapor", tarih:"Tarih", getir:"Getir", oncekiGun:"Önceki gün", yazdir:"Yazdır / PDF",
+  yukleniyor:"Yükleniyor…", sahaYok:"Hesabınıza tanımlı saha bulunmuyor.", canli:"Sahada çalışıyor",
+  sonVardiya:"Son vardiya", vardiyaYok:"Henüz vardiya kaydı yok.",
+  gDelinen:"Güncel delinen metre", gTeslim:"Teslim edilen kuyular",
+  grpOrt:"Delgi ortalamaları", grpDurus:"Duruşlar",
+  a:"Makine başı vardiya delgi ortalaması", b:"Haftalık delgi ortalaması", c:"Aylık delgi ortalaması",
+  d:"Toplam delgi ortalaması", durus:"Duruş ve arıza",
+  mVardiya:"m / vardiya", mHafta:"m / hafta", mAy:"m / ay", mGun:"m / gün", m:"m", sa:"sa",
+  aAcik:"Her makinenin metresi, ilerleme yapılan vardiya sayısına bölünür. Hiç ilerleme olmayan vardiyalar ortalamaya girmez. Duruş yaşanan vardiyalar grafikte kırmızıdır.",
+  bAcik:"Kapanmış haftaların toplam metresinin ortalaması. Devam eden hafta ve işin başladığı yarım hafta açık renkte, ortalamaya girmez.",
+  cAcik:"Kapanmış ayların ortalaması. Devam eden ay ve işin başladığı yarım ay açık renkte, ortalamaya girmez.",
+  dAcik:"Başlangıçtan bugüne birikimli metre. Günlük ortalama, ilk vardiyadan son vardiyaya geçen takvim günlerine bölünür.",
+  tumMakine:"Tüm makineler", ortalama:"Ortalama", vardiya:"vardiya", duruslu:"duruşlu",
+  sonN:"son {n} vardiya", durusluVardiya:"Duruşlu vardiya", makineOrt:"Makine ortalaması",
+  enIyiV:"En iyi vardiya", enDusukV:"En düşük vardiya", kapanmis:"Kapanmış", girmeyen:"Ortalamaya girmeyen",
+  enIyi:"En iyi", enDusuk:"En düşük", buHafta:"Bu hafta (devam)", haftasi:"haftası", devamEdiyor:"devam ediyor",
+  yarimHafta:"işin başladığı yarım hafta", yarimAy:"işin başladığı yarım ay",
+  birikimli:"Birikimli metre", plan:"Plan", toplam:"Toplam", gunlukOrt:"Günlük ortalama", plana:"Plana göre", gun:"Gün",
+  kayipSaat:"kayıp saat", durusYok:"Son 30 günde duruş kaydı yok.", ilerlemeYokV:"İlerleme olmayan vardiya",
+  sonKayit:"Son kayıtlar", ilerlemeYok:"ilerleme yok",
+  notTaban:"Ortalamalar {t} tarihinden bu yana sisteme girilen vardiyalardan hesaplanıyor. Güncel delinen metre kuyu derinliklerinin toplamıdır; öncesinde delinen {m} m ortalamalara girmiyor.",
+  kuyuSec:"Kuyuya tıklayın, ayrıntısı sağda açılır.", kuyu:"Kuyu", makine:"Makine", delPlan:"Delinen / planlanan",
+  durum:"Durum", bitisTahmin:"Bitiş / tahmini", vSonra:"{n} vardiya sonra", vSonra1:"1 vardiya sonra", kuyuYok:"Bu projede kuyu yok.",
+  tahminiBitis:"Öngörülen bitiş tarihi",
+  tahminAcik:"Bu kuyunun ortalama hızıyla (günde {h} m) {g} gün sonra",
+  tYokVardiya:"Öngörülen bitiş tarihi bu kuyuda 10 vardiya ({gn} gün) tamamlanınca çıkar. Şu an {v} vardiya var, {n} vardiya kaldı.",
+  tYokPlan:"Bu kuyunun planlanan derinliği girilmemiş; bitiş tarihi hesaplanamıyor.",
+  tYokMetre:"Bu kuyuda henüz metre yapılmadı; bitiş tarihi hesaplanamıyor.",
+  baslamadi:"Bu kuyuda henüz delgi yok.", planYok:"plan girilmemiş",
+  bosta:"Bu kuyuda son vardiya {t} ({g} gün önce). Tarih, delgiye bugün yeniden başlanırsa geçerli.",
+  planlanan:"Planlanan", delinen:"Delinen", ortHiz:"Ortalama delgi hızı", baslama:"Başlama", kalan:"Kalan",
+  bitis:"Teslim", sure:"Süre", gunK:"gün", ilerlemeGraf:"Derinlik ilerlemesi", tahmin:"Tahmin",
+  derinlikM:"Derinlik (m)", kesit:"Kuyu kesiti", olcumler:"Ölçümler · azimut / eğim", derinlik:"Derinlik",
+  azimut:"Azimut", egim:"Eğim", olcumYok:"Ölçüm kaydı yok.", zemin:"Zemin",
+  gunNot:"Gece vardiyası gece yarısını geçse de başladığı günün raporuna yazılır.",
+  gunMetraj:"Günün metrajı", vardiyaS:"Vardiya", vardiyasi:"vardiyası", form:"form", kuyuDerinligi:"Kuyu derinliği",
+  motor:"motor", vardiyaMetraji:"vardiya metrajı", olcum:"ölçüm", kayitYok:"Bu tarihte kayıt bulunmuyor.",
+  sira:"Sıra", cap:"Çap", basM:"Başlangıç", bitM:"Bitiş", metre:"Metre", manevraYok:"Manevra kaydı yok.",
+  not:"Not", kuyuIptal:"Kuyu iptal edildi", kuyuTamam:"Kuyu tamamlandı",
+  donem:"Dönem", dGun:"Günlük", dHafta:"Haftalık", dAy:"Aylık", dAralik:"Tarih aralığı", rpGun:"Gün",
+  bas:"Başlangıç", bit:"Bitiş", hazirla:"Raporu hazırla", pdfKaydet:"PDF olarak kaydet", excel:"Excel (CSV)",
+  rpAd_gun:"Günlük sondaj raporu", rpAd_hafta:"Haftalık sondaj raporu", rpAd_ay:"Aylık sondaj raporu", rpAd_aralik:"Dönem sondaj raporu",
+  rpDonem:"Dönem: {a} – {b}", rpBuDonem:"Bu dönem", rpProjeGenel:"Proje geneli (bugüne kadar)",
+  rpMetre:"Delinen metre", rpVardiyaOrt:"Vardiya ortalaması", rpGunlukOrt:"Günlük ortalama", rpCalisilan:"Çalışılan gün",
+  rpGunluk:"Günlük metraj", rpKuyular:"Kuyu durumu", rpKuyuNot:"Devam eden kuyular ve bu dönemde teslim edilenler",
+  rpDurus:"Duruş ve arıza", rpDurusYok:"Bu dönemde duruş kaydı yok.", rpHazirlayan:"Collarlog ile hazırlandı",
+  rpHazirlanma:"Hazırlanma", rpBos:"Dönemi seçip \"Raporu hazırla\"ya basın.", rpMakineSay:"Makine", rpKuyuSay:"Kuyu",
+  rpPdfNot:"Açılan pencerede yazıcı olarak \"PDF olarak kaydet\"i seçin.",
+  csvTarih:"Tarih", csvMetraj:"Metraj", csvGecerli:"Gecerli", csvMakine:"Makine", csvKuyu:"Kuyu", csvToplam:"TOPLAM",
+  csvGun:"Gun", csvGunlukOrt:"Gunluk ortalama", csvProgram:"Program", csvDonemMetraji:"Donem metraji",
+  csvKuyuDerinligi:"Kuyu derinligi", csvOlcum:"Olcum", csvDurum:"Durum"},
+ en:{baslik:"Client Panel", proje:"Project", sahaProje:"Site / project", tGenel:"Overview", tKuyu:"Holes",
+  tGun:"Daily report", tRapor:"PDF report", tarih:"Date", getir:"Show", oncekiGun:"Previous day", yazdir:"Print / PDF",
+  yukleniyor:"Loading…", sahaYok:"No site is assigned to your account.", canli:"Drilling now",
+  sonVardiya:"Last shift", vardiyaYok:"No shifts recorded yet.",
+  gDelinen:"Metres drilled to date", gTeslim:"Holes completed",
+  grpOrt:"Drilling averages", grpDurus:"Downtime",
+  a:"Average metres per shift per rig", b:"Weekly drilling average", c:"Monthly drilling average",
+  d:"Overall drilling average", durus:"Downtime and breakdowns",
+  mVardiya:"m / shift", mHafta:"m / week", mAy:"m / month", mGun:"m / day", m:"m", sa:"h",
+  aAcik:"Each rig's metres divided by the shifts that made progress. Shifts with no progress are left out of the average. Shifts with downtime are shown in red.",
+  bAcik:"Average of completed weeks. The current week and the part week in which work started are shown lighter and are not averaged.",
+  cAcik:"Average of completed months. The current month and the part month in which work started are shown lighter and are not averaged.",
+  dAcik:"Cumulative metres since the start. The daily average divides by the calendar days from the first shift to the last.",
+  tumMakine:"All rigs", ortalama:"Average", vardiya:"shifts", duruslu:"with downtime",
+  sonN:"last {n} shifts", durusluVardiya:"Shift with downtime", makineOrt:"Rig average",
+  enIyiV:"Best shift", enDusukV:"Lowest shift", kapanmis:"Completed", girmeyen:"Not averaged",
+  enIyi:"Best", enDusuk:"Lowest", buHafta:"This week (running)", haftasi:"week", devamEdiyor:"running",
+  yarimHafta:"part week in which work started", yarimAy:"part month in which work started",
+  birikimli:"Cumulative metres", plan:"Plan", toplam:"Total", gunlukOrt:"Daily average", plana:"Against plan", gun:"Days",
+  kayipSaat:"hours lost", durusYok:"No downtime recorded in the last 30 days.", ilerlemeYokV:"Shifts with no progress",
+  sonKayit:"Latest entries", ilerlemeYok:"no progress",
+  notTaban:"Averages are calculated from shifts entered since {t}. Metres drilled to date is the sum of hole depths; the {m} m drilled before that is not in the averages.",
+  kuyuSec:"Click a hole to see its details on the right.", kuyu:"Hole", makine:"Rig", delPlan:"Drilled / planned",
+  durum:"Status", bitisTahmin:"Completed / forecast", vSonra:"after {n} more shifts", vSonra1:"after 1 more shift", kuyuYok:"No holes in this project.",
+  tahminiBitis:"Forecast completion date",
+  tahminAcik:"At this hole's average rate ({h} m per day), in {g} days",
+  tYokVardiya:"The forecast completion date appears once this hole has 10 shifts ({gn} days). It has {v} so far, {n} to go.",
+  tYokPlan:"The planned depth of this hole has not been entered, so no completion date can be calculated.",
+  tYokMetre:"No metres drilled on this hole yet, so no completion date can be calculated.",
+  baslamadi:"No drilling on this hole yet.", planYok:"no planned depth",
+  bosta:"The last shift on this hole was {t} ({g} days ago). The date assumes drilling resumes today.",
+  planlanan:"Planned", delinen:"Drilled", ortHiz:"Average drilling rate", baslama:"Started", kalan:"Remaining",
+  bitis:"Completed", sure:"Duration", gunK:"days", ilerlemeGraf:"Depth progress", tahmin:"Forecast",
+  derinlikM:"Depth (m)", kesit:"Hole section", olcumler:"Surveys · azimuth / dip", derinlik:"Depth",
+  azimut:"Azimuth", egim:"Dip", olcumYok:"No surveys recorded.", zemin:"Ground",
+  gunNot:"A night shift that runs past midnight is reported on the day it started.",
+  gunMetraj:"Metres today", vardiyaS:"Shifts", vardiyasi:"shift", form:"form", kuyuDerinligi:"Hole depth",
+  motor:"engine", vardiyaMetraji:"shift metres", olcum:"surveys", kayitYok:"No records for this date.",
+  sira:"No.", cap:"Size", basM:"From", bitM:"To", metre:"Metres", manevraYok:"No runs recorded.",
+  not:"Note", kuyuIptal:"Hole cancelled", kuyuTamam:"Hole completed",
+  donem:"Period", dGun:"Daily", dHafta:"Weekly", dAy:"Monthly", dAralik:"Date range", rpGun:"Day",
+  bas:"From", bit:"To", hazirla:"Prepare report", pdfKaydet:"Save as PDF", excel:"Excel (CSV)",
+  rpAd_gun:"Daily drilling report", rpAd_hafta:"Weekly drilling report", rpAd_ay:"Monthly drilling report", rpAd_aralik:"Drilling report",
+  rpDonem:"Period: {a} – {b}", rpBuDonem:"This period", rpProjeGenel:"Project to date",
+  rpMetre:"Metres drilled", rpVardiyaOrt:"Average per shift", rpGunlukOrt:"Daily average", rpCalisilan:"Days worked",
+  rpGunluk:"Daily metres", rpKuyular:"Hole status", rpKuyuNot:"Holes in progress and holes completed in this period",
+  rpDurus:"Downtime and breakdowns", rpDurusYok:"No downtime recorded in this period.", rpHazirlayan:"Prepared with Collarlog",
+  rpHazirlanma:"Prepared", rpBos:"Choose a period and press \"Prepare report\".", rpMakineSay:"Rigs", rpKuyuSay:"Holes",
+  rpPdfNot:"In the window that opens, choose \"Save as PDF\" as the printer.",
+  csvTarih:"Date", csvMetraj:"Metres", csvGecerli:"Valid", csvMakine:"Rigs", csvKuyu:"Holes", csvToplam:"TOTAL",
+  csvGun:"Days", csvGunlukOrt:"Daily average", csvProgram:"Programme", csvDonemMetraji:"Period metres",
+  csvKuyuDerinligi:"Hole depth", csvOlcum:"Surveys", csvDurum:"Status"}
+};
+var SOZ={
+ tr:{VARD:{gunduz:"Gündüz", gece:"Gece"},
+     KDURUM:{planned:"Başlamadı", drilling:"Devam", completed:"Teslim", cancelled:"İptal"},
+     PROGRAM:{arama:"Maden arama", planlama:"Maden planlama"},
+     DTUR:{ariza:"Arıza", bekleme:"Bekleme", tasima:"Nakliye", bakim:"Bakım", ilerleme_yok:"İlerleme yok"},
+     DSEBEP:{hidrolik:"hidrolik", rotasyon:"rotasyon", mekanik:"mekanik", elektrik:"elektrik", diger:"diğer",
+       su:"su", musteri:"işveren kaynaklı", malzeme:"malzeme / parça", hava:"hava", yol:"yol",
+       olcum:"ölçüm", takim:"takım", muhafaza:"muhafaza", temizleme:"temizleme"},
+     AY:["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"]},
+ en:{VARD:{gunduz:"Day", gece:"Night"},
+     KDURUM:{planned:"Not started", drilling:"In progress", completed:"Completed", cancelled:"Cancelled"},
+     PROGRAM:{arama:"Exploration", planlama:"Mine planning"},
+     DTUR:{ariza:"Breakdown", bekleme:"Standby", tasima:"Rig move", bakim:"Maintenance", ilerleme_yok:"No progress"},
+     DSEBEP:{hidrolik:"hydraulic", rotasyon:"rotation", mekanik:"mechanical", elektrik:"electrical", diger:"other",
+       su:"water", musteri:"client", malzeme:"materials / parts", hava:"weather", yol:"road",
+       olcum:"survey", takim:"tooling", muhafaza:"casing", temizleme:"cleaning"},
+     AY:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]}
+};
+function t(k, v){ var s=(T[DIL]&&T[DIL][k]!=null)?T[DIL][k]:(T.tr[k]!=null?T.tr[k]:k);
+  if(v) Object.keys(v).forEach(function(x){ s=s.split("{"+x+"}").join(v[x]); }); return s; }
+function S(k){ return SOZ[DIL][k]; }
+function metinleriUygula(){
+  document.documentElement.lang=DIL;
+  $$("[data-t]").forEach(function(e){ e.textContent=t(e.getAttribute("data-t")); });
+  document.title="Collarlog · "+t("baslik");
+  var b=document.getElementById("sp-baslik"); if(b) b.textContent=t("baslik");
+}
+
+var tl=function(n,d){ d=(d===undefined?2:d); return Number(n||0).toLocaleString(DIL==="en"?"en-GB":"tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d}); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
+function msg(el,x,k){ el.innerHTML = x ? '<div class="msg '+(k||"")+'">'+x+'</div>' : ""; }
+function iso(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function trd(s){ if(!s) return "—"; var p=String(s).slice(0,10).split("-"); return p[2]+(DIL==="en"?"/":".")+p[1]+(DIL==="en"?"/":".")+p[0]; }
+function kisa(s){ if(!s) return ""; var p=String(s).slice(0,10).split("-"); return p[2]+(DIL==="en"?"/":".")+p[1]; }
+function gunEkle(s,n){ var d=new Date(s+"T00:00:00"); d.setDate(d.getDate()+n); return iso(d); }
+
+var sb=null, BOOT=null, DONEM=null, GENEL=null, KUYULAR=null, SECILI="", MAKSEC="", KSEC="", SEKME="genel";
 
 SP.boot({sayfa:"isveren", baslik:"İşveren Paneli", hazir:function(erisim){
   sb = SP.sb;
@@ -203,21 +425,28 @@ SP.boot({sayfa:"isveren", baslik:"İşveren Paneli", hazir:function(erisim){
 }});
 
 $$("#tabs button").forEach(function(b){
-  b.addEventListener("click", function(){
-    $$("#tabs button").forEach(function(x){ x.classList.toggle("on", x===b); });
-    $$("section[data-p]").forEach(function(s){ s.hidden = (s.dataset.p !== b.dataset.t); });
-    if(b.dataset.t==="gun" && !$("#gun-out").innerHTML) gun();
-  });
+  b.addEventListener("click", function(){ sekmeAc(b.dataset.s); });
 });
+function sekmeAc(s){
+  SEKME=s;
+  document.documentElement.classList.toggle("rapor-sekmesi", s==="rapor");
+  $$("#tabs button").forEach(function(x){ x.classList.toggle("on", x.dataset.s===s); });
+  $$("section[data-p]").forEach(function(x){ x.hidden = (x.dataset.p !== s); });
+  if(s==="gun" && !$("#gun-out").innerHTML) gun();
+  if(s==="kuyu" && !KUYULAR) kuyular();
+  if(s==="rapor" && !$("#rapor-out").innerHTML) $("#rapor-out").innerHTML='<div class="hint">'+t("rpBos")+'</div>';
+}
 
 function boot(){
   var d=new Date(); d.setDate(d.getDate()-1);
-  $("#g-date").value=iso(d);
+  $("#g-date").value=iso(d); $("#rp-gun").value=iso(d);
   var first=new Date(); first.setDate(1);
-  $("#d-from").value=iso(first); $("#d-to").value=iso(new Date());
+  $("#rp-bas").value=iso(first); $("#rp-bit").value=iso(new Date());
   sb.rpc("employer_bootstrap").then(function(r){
     if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
     BOOT=r.data;
+    DIL=(BOOT.dil==="en")?"en":"tr";
+    metinleriUygula(); rpDonemYaz();
     var lg = (BOOT.logo || "logo-mark.png");
     $("#antet").innerHTML = '<img src="'+lg+'" alt="" onerror="this.onerror=null;this.src=\'icon.svg\'">' +
       '<div class="ad">'+esc(BOOT.firma||"")+'</div>' +
@@ -225,85 +454,40 @@ function boot(){
     var s=$("#f-proj");
     s.innerHTML=(BOOT.projeler||[]).map(function(p){
       return '<option value="'+p.id+'">'+esc(p.ad)+(p.il?' — '+esc(p.il):'')+'</option>'; }).join("");
-    if(!(BOOT.projeler||[]).length){ msg($("#msg"), "Hesabınıza tanımlı saha bulunmuyor.", "warn"); return; }
+    if(!(BOOT.projeler||[]).length){ msg($("#msg"), t("sahaYok"), "warn"); return; }
     projeDegisti();
   });
 }
 function projeDegisti(){
-  GENEL=null; SECILI=""; MAKSEC=""; DONEM=null;
-  $("#donem-out").innerHTML=""; $("#gun-out").innerHTML="";
+  GENEL=null; KUYULAR=null; SECILI=""; MAKSEC=""; KSEC=""; DONEM=null;
+  $("#rapor-out").innerHTML=""; $("#gun-out").innerHTML=""; $("#ky-tablo").innerHTML=""; $("#ky-detay").innerHTML="";
   var p=(BOOT.projeler||[]).filter(function(x){ return x.id===$("#f-proj").value; })[0]||{};
   $("#p-ad").textContent=p.ad||"—";
   $("#p-alt").innerHTML="";
   genel();
-  if(!$("section[data-p=gun]").hidden) gun();
+  if(SEKME==="gun") gun();
+  if(SEKME==="kuyu") kuyular();
+  if(SEKME==="rapor") $("#rapor-out").innerHTML='<div class="hint">'+t("rpBos")+'</div>';
 }
 $("#f-proj").addEventListener("change", projeDegisti);
 
 /* ============================================================
-   GENEL DURUM
+   ORTAK ÇİZİMLER (SVG — dışarıdan kitaplık yok)
    ============================================================ */
-function genel(){
-  var pj=$("#f-proj").value; if(!pj) return;
-  $("#ozet").innerHTML='<div class="hint">Yükleniyor…</div>'; $("#liste").innerHTML="";
-  sb.rpc("employer_genel", {p_project:pj}).then(function(r){
-    if(r.error){ $("#ozet").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
-    GENEL=r.data; genelCiz();
-  });
+function gzAdim(mx){
+  var ham=mx/5, us=Math.pow(10, Math.floor(Math.log10(ham||1))), n=ham/us;
+  return (n<=1?1:n<=2?2:n<=5?5:10)*us;
 }
-
-function genelCiz(){
-  var g=GENEL, o=g.ozet||{};
-  /* Proje alt satırı: son vardiya, iki günden yeniyse "sahada çalışıyor" */
-  var sv=o.son_vardiya;
-  if(sv){
-    var gunFark=(new Date(g.bugun)-new Date(sv.tarih))/864e5;
-    $("#p-alt").innerHTML=(gunFark<=2?'<span class="canli">Sahada çalışıyor</span> · ':'')+
-      'Son vardiya '+trd(sv.tarih)+' '+(VARD[sv.vardiya]||"");
-  } else $("#p-alt").textContent="Henüz vardiya kaydı yok.";
-
-  $("#ozet").innerHTML=
-    '<div><span class="k">Güncel delinen metre</span><span class="v num" id="oz-delinen">'+tl(o.delinen,0)+'<small>m</small></span></div>'+
-    '<div><span class="k">Teslim edilen kuyular</span><span class="v num" id="oz-teslim">'+(o.teslim||0)+'<small>/ '+(o.kuyu||0)+'</small></span></div>';
-
-  var sat=[{id:"a",ad:"Makine başı vardiya delgi ortalaması",g:"Delgi ortalamaları"},
-           {id:"b",ad:"Haftalık delgi ortalaması"},{id:"c",ad:"Aylık delgi ortalaması"},
-           {id:"d",ad:"Toplam delgi ortalaması"},
-           {id:"durus",ad:"Duruş ve arıza",g:"Duruşlar"}];
-  $("#liste").innerHTML=sat.map(function(x){
-    var acik=(x.id===SECILI), harf=/^[abcd]$/.test(x.id);
-    return (x.g?'<div class="grup">'+x.g+'</div>':'')+
-      '<div class="ips'+(acik?' on':'')+'" data-satir="'+x.id+'">'+
-      '<button class="ips-bas" type="button" data-k="'+x.id+'" aria-expanded="'+acik+'">'+
-      '<span class="harf">'+(harf?x.id.toUpperCase():'')+'</span><span class="ips-ad">'+x.ad+'</span>'+
-      '<span class="ips-ok" aria-hidden="true">'+(acik?'−':'+')+'</span></button>'+
-      (acik?'<div class="ips-ic" id="ic"></div>':'')+'</div>';
-  }).join("");
-  $$("#liste .ips-bas").forEach(function(b){ b.onclick=function(){
-    SECILI=(SECILI===b.dataset.k?"":b.dataset.k); MAKSEC=""; genelCiz(); }; });
-  if(SECILI==="a") icA(); else if(SECILI==="b") icB(); else if(SECILI==="c") icC();
-  else if(SECILI==="d") icD(); else if(SECILI==="durus") icDurus();
-
-  /* Sistemdeki kayıtlar kuyuların tamamını kapsamıyorsa söyle: üstteki
-     rakam kuyu derinliklerinden, ortalamalar vardiya kayıtlarından. */
-  var vt=Number((g.d||{}).toplam)||0, dl=Number(o.delinen)||0;
-  $("#genel-not").textContent = (dl - vt > 1 && g.ilk)
-    ? "Ortalamalar "+trd(g.ilk)+" tarihinden bu yana sisteme girilen vardiyalardan hesaplanıyor. "+
-      "Güncel delinen metre kuyu derinliklerinin toplamıdır; öncesinde delinen "+tl(dl-vt,0)+" m ortalamalara girmiyor."
-    : "";
-}
-
-/* ---------- ortak çizim: çubuk grafik (SVG) ----------
-   d: [{e:etiket, v:değer, cls:"", ipucu:""}], ort: kesikli çizgi */
+/* d: [{e:etiket, v:değer, cls:"", ipucu:""}], ort: kesikli çizgi */
 function cubukSvg(d, ort, ops){
-  ops=ops||{}; var W=1000, H=ops.h||300, SL=52, SR=12, ST=12, SB=30;
+  ops=ops||{}; var W=1000, H=ops.h||300, SL=60, SR=12, ST=12, SB=30;
   var mx=Math.max.apply(null, d.map(function(x){return Number(x.v)||0;}).concat([Number(ort)||0, 1]));
   var adim=gzAdim(mx); mx=Math.ceil(mx/adim)*adim;
   var y=function(v){ return ST+(H-ST-SB)*(1-v/mx); };
   var bw=(W-SL-SR)/Math.max(d.length,1), s='<svg class="cz" viewBox="0 0 '+W+' '+H+'" role="img">';
-  for(var t=0;t<=mx+1e-9;t+=adim){
-    s+='<line class="izgara" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(t)+'" y2="'+y(t)+'"/>'+
-       '<text x="'+(SL-8)+'" y="'+(y(t)+4)+'" text-anchor="end">'+tl(t,0)+'</text>';
+  for(var k=0;k<=mx+1e-9;k+=adim){
+    s+='<line class="izgara" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(k)+'" y2="'+y(k)+'"/>'+
+       '<text x="'+(SL-8)+'" y="'+(y(k)+4)+'" text-anchor="end">'+tl(k,0)+'</text>';
   }
   var her=Math.max(1, Math.ceil(d.length/(ops.etiket||14)));
   d.forEach(function(x,i){
@@ -315,11 +499,8 @@ function cubukSvg(d, ort, ops){
   if(ort!=null && isFinite(ort)) s+='<line class="ort" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(ort)+'" y2="'+y(ort)+'"/>';
   return s+'</svg>';
 }
-function gzAdim(mx){
-  var ham=mx/5, us=Math.pow(10, Math.floor(Math.log10(ham||1))), n=ham/us;
-  return (n<=1?1:n<=2?2:n<=5?5:10)*us;
-}
 function ipucuBagla(el, d){
+  if(!el) return;
   var kutu=document.createElement("div"); kutu.className="cz-ipucu"; el.appendChild(kutu);
   el.querySelectorAll(".cb").forEach(function(r){
     var g=function(){ kutu.textContent=d[r.getAttribute("data-i")].ipucu||""; };
@@ -330,43 +511,91 @@ function lejant(l){ return '<div class="lejant">'+l.map(function(x){
   return '<span><i style="background:'+x[0]+'"></i>'+x[1]+'</span>'; }).join("")+'</div>'; }
 function altRakam(l){ return '<div class="alt-rakam num">'+l.map(function(x){
   return '<div>'+x[0]+'<b>'+x[1]+'</b>'+(x[2]||"")+'</div>'; }).join("")+'</div>'; }
+function sebepYazi(k){ return k.sebep ? String(k.sebep).split(",").map(function(s){ return S("DSEBEP")[s]||s; }).join(", ") : ""; }
 function durusYazi(kalemler){
   return (kalemler||[]).map(function(k){
-    return (DTUR[k.tur]||k.tur)+(k.sebep?' ('+String(k.sebep).split(",").map(function(s){return DSEBEP[s]||s;}).join(", ")+')':'')+
-      (k.saat!=null?' '+tl(k.saat,1)+' sa':'')+(k["not"]?' — '+k["not"]:''); }).join(" · ");
+    return (S("DTUR")[k.tur]||k.tur)+(k.sebep?' ('+sebepYazi(k)+')':'')+
+      (k.saat!=null?' '+tl(k.saat,1)+' '+t("sa"):'')+(k["not"]?' — '+k["not"]:''); }).join(" · ");
 }
 /* Türü ve saati ayrı rozetle gösterilen yerlerde: yalnız sebep ve not */
 function durusAciklama(kalemler){
   return (kalemler||[]).map(function(k){
-    var p=[]; if(k.sebep) p.push(String(k.sebep).split(",").map(function(s){return DSEBEP[s]||s;}).join(", "));
+    var p=[]; if(k.sebep) p.push(sebepYazi(k));
     if(k["not"]) p.push(k["not"]); return p.join(": "); }).filter(Boolean).join(" · ");
 }
+function durusRozet(k){ return '<span class="dp '+esc(k.tur)+'">'+(S("DTUR")[k.tur]||k.tur)+(k.saat!=null?' · '+tl(k.saat,1)+' '+t("sa"):'')+'</span>'; }
 var RENK={ac:"var(--accent)", acik:"color-mix(in srgb, var(--accent) 30%, transparent)", kirmizi:"var(--bad)", ort:"#E8731A", plan:"var(--ink-3)"};
+var AYAD=function(a){ return S("AY")[+a.slice(5,7)-1]+" "+a.slice(2,4); };
+
+/* ============================================================
+   GENEL DURUM
+   ============================================================ */
+function genel(cb){
+  var pj=$("#f-proj").value; if(!pj) return;
+  $("#ozet").innerHTML='<div class="hint">'+t("yukleniyor")+'</div>'; $("#liste").innerHTML="";
+  sb.rpc("employer_genel", {p_project:pj}).then(function(r){
+    if(r.error){ $("#ozet").innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    GENEL=r.data; genelCiz(); if(cb) cb();
+  });
+}
+
+function genelCiz(){
+  var g=GENEL, o=g.ozet||{};
+  var sv=o.son_vardiya;
+  if(sv){
+    var gunFark=(new Date(g.bugun)-new Date(sv.tarih))/864e5;
+    $("#p-alt").innerHTML=(gunFark<=2?'<span class="canli">'+t("canli")+'</span> · ':'')+
+      t("sonVardiya")+' '+trd(sv.tarih)+' '+(S("VARD")[sv.vardiya]||"");
+  } else $("#p-alt").textContent=t("vardiyaYok");
+
+  $("#ozet").innerHTML=
+    '<div><span class="k">'+t("gDelinen")+'</span><span class="v num" id="oz-delinen">'+tl(o.delinen,0)+'<small>m</small></span></div>'+
+    '<div><span class="k">'+t("gTeslim")+'</span><span class="v num" id="oz-teslim">'+(o.teslim||0)+'<small>/ '+(o.kuyu||0)+'</small></span></div>';
+
+  var sat=[{id:"a",g:"grpOrt"},{id:"b"},{id:"c"},{id:"d"},{id:"durus",g:"grpDurus"}];
+  $("#liste").innerHTML=sat.map(function(x){
+    var acik=(x.id===SECILI), harf=/^[abcd]$/.test(x.id);
+    return (x.g?'<div class="grup">'+t(x.g)+'</div>':'')+
+      '<div class="ips'+(acik?' on':'')+'" data-satir="'+x.id+'">'+
+      '<button class="ips-bas" type="button" data-k="'+x.id+'" aria-expanded="'+acik+'">'+
+      '<span class="harf">'+(harf?x.id.toUpperCase():'')+'</span><span class="ips-ad">'+t(x.id)+'</span>'+
+      '<span class="ips-ok" aria-hidden="true">'+(acik?'−':'+')+'</span></button>'+
+      (acik?'<div class="ips-ic" id="ic"></div>':'')+'</div>';
+  }).join("");
+  $$("#liste .ips-bas").forEach(function(b){ b.onclick=function(){
+    SECILI=(SECILI===b.dataset.k?"":b.dataset.k); MAKSEC=""; genelCiz(); }; });
+  if(SECILI==="a") icA(); else if(SECILI==="b") icB(); else if(SECILI==="c") icC();
+  else if(SECILI==="d") icD(); else if(SECILI==="durus") icDurus();
+
+  /* Üstteki rakam kuyu derinliklerinden, ortalamalar vardiya kayıtlarından. */
+  var vt=Number((g.d||{}).toplam)||0, dl=Number(o.delinen)||0;
+  $("#genel-not").textContent = (dl - vt > 1 && g.ilk) ? t("notTaban",{t:trd(g.ilk), m:tl(dl-vt,0)}) : "";
+}
 
 /* A — makine başı vardiya ortalaması */
 function icA(){
   var a=GENEL.a||{}, mk=a.makineler||[], el=$("#ic");
   var sec='<div class="secim">'+[""].concat(mk.map(function(m){return m.makine;})).map(function(m){
-    return '<button type="button" data-m="'+esc(m)+'" class="'+(m===MAKSEC?"on":"")+'">'+(m?esc(m):"Tüm makineler")+'</button>'; }).join("")+'</div>';
+    return '<button type="button" data-m="'+esc(m)+'" class="'+(m===MAKSEC?"on":"")+'">'+(m?esc(m):t("tumMakine"))+'</button>'; }).join("")+'</div>';
   var mSec=MAKSEC?mk.filter(function(x){return x.makine===MAKSEC;})[0]:null;
-  var h='<div class="ic-bas"><div><div class="buyuk num">'+tl(mSec?mSec.ortalama:a.ortalama,1)+'<small>m / vardiya'+(mSec?' · '+esc(mSec.makine):'')+'</small></div>'+
-    '<div class="acik">Her makinenin metresi, ilerleme yapılan vardiya sayısına bölünür. Hiç ilerleme olmayan vardiyalar ortalamaya girmez. Duruş yaşanan vardiyalar grafikte kırmızıdır.</div></div>'+sec+'</div>';
-  if(!mk.length){ el.innerHTML=h+'<div class="hint">Henüz vardiya kaydı yok.</div>'; return; }
-  var d, lj, alt;
-  if(!MAKSEC){
-    d=mk.map(function(m){ return {e:m.makine, v:m.ortalama, ipucu:m.makine+": "+tl(m.ortalama,1)+" m / vardiya · "+m.vardiya+" vardiya"}; });
-    lj=lejant([[RENK.ac,"m / vardiya"],[RENK.ort,"Ortalama "+tl(a.ortalama,1)]]);
-    alt=altRakam(mk.map(function(m){ return [esc(m.makine), tl(m.ortalama,1)+" m", m.vardiya+" vardiya · "+m.duruslu+" duruşlu"]; }));
-    h+='<div id="cz-a">'+cubukSvg(d, a.ortalama, {etiket:20})+'</div>'+lj+alt;
+  var h='<div class="ic-bas"><div><div class="buyuk num">'+tl(mSec?mSec.ortalama:a.ortalama,1)+'<small>'+t("mVardiya")+(mSec?' · '+esc(mSec.makine):'')+'</small></div>'+
+    '<div class="acik">'+t("aAcik")+'</div></div>'+sec+'</div>';
+  if(!mk.length){ el.innerHTML=h+'<div class="hint">'+t("vardiyaYok")+'</div>'; return; }
+  var d;
+  if(!mSec){
+    d=mk.map(function(m){ return {e:m.makine, v:m.ortalama, ipucu:m.makine+": "+tl(m.ortalama,1)+" "+t("mVardiya")+" · "+m.vardiya+" "+t("vardiya")}; });
+    h+='<div id="cz-a">'+cubukSvg(d, a.ortalama, {etiket:20})+'</div>'+
+      lejant([[RENK.ac,t("mVardiya")],[RENK.ort,t("ortalama")+" "+tl(a.ortalama,1)]])+
+      altRakam(mk.map(function(m){ return [esc(m.makine), tl(m.ortalama,1)+" m", m.vardiya+" "+t("vardiya")+" · "+m.duruslu+" "+t("duruslu")]; }));
   } else {
-    var m=mk.filter(function(x){return x.makine===MAKSEC;})[0]||mk[0], son=m.son||[];
+    var son=mSec.son||[];
     d=son.map(function(x){
       return {e:kisa(x.tarih)+(x.vardiya==="gece"?" ☾":" ☀"), v:x.metre, cls:x.durus?"kirmizi":"",
-        ipucu:trd(x.tarih)+" "+(VARD[x.vardiya]||"")+": "+tl(x.metre,1)+" m"+(x.durus&&x.durus.length?" · "+durusYazi(x.durus):(x.durus?" · ilerleme yok":""))}; });
-    lj=lejant([[RENK.ac,"m / vardiya (son "+son.length+" vardiya)"],[RENK.kirmizi,"Duruşlu vardiya"],[RENK.ort,"Ortalama"]]);
-    alt=altRakam([["Makine ortalaması", tl(m.ortalama,1), " · "+m.vardiya+" vardiya"],["En iyi vardiya", tl(m.enbuyuk,1)],["En düşük vardiya", tl(m.enkucuk,1)],
-      ["Duruşlu vardiya", son.filter(function(x){return x.durus;}).length+" / "+son.length]]);
-    h+='<div id="cz-a">'+cubukSvg(d, m.ortalama, {enaz:6, etiket:12})+'</div>'+lj+alt;
+        ipucu:trd(x.tarih)+" "+(S("VARD")[x.vardiya]||"")+": "+tl(x.metre,1)+" m"+(x.durus&&x.durus.length?" · "+durusYazi(x.durus):(x.durus?" · "+t("ilerlemeYok"):""))}; });
+    h+='<div id="cz-a">'+cubukSvg(d, mSec.ortalama, {enaz:6, etiket:12})+'</div>'+
+      lejant([[RENK.ac,t("mVardiya")+" ("+t("sonN",{n:son.length})+")"],[RENK.kirmizi,t("durusluVardiya")],[RENK.ort,t("ortalama")]])+
+      altRakam([[t("makineOrt"), tl(mSec.ortalama,1), " · "+mSec.vardiya+" "+t("vardiya")],[t("enIyiV"), tl(mSec.enbuyuk,1)],[t("enDusukV"), tl(mSec.enkucuk,1)],
+        [t("durusluVardiya"), son.filter(function(x){return x.durus;}).length+" / "+son.length]]);
   }
   el.innerHTML=h;
   ipucuBagla($("#cz-a"), d);
@@ -377,80 +606,215 @@ function icA(){
 function icB(){
   var b=GENEL.b||{}, hf=b.haftalar||[], el=$("#ic");
   var d=hf.map(function(x){ return {e:kisa(x.bas), v:x.metre, cls:x.durum!=="kapali"?"acik-renk":"",
-    ipucu:trd(x.bas)+" haftası: "+tl(x.metre,0)+" m · "+x.vardiya+" vardiya"+(x.durum==="devam"?" (devam ediyor)":x.durum==="ilk_yarim"?" (işin başladığı yarım hafta)":"")}; });
+    ipucu:trd(x.bas)+" "+t("haftasi")+": "+tl(x.metre,0)+" m · "+x.vardiya+" "+t("vardiya")+(x.durum==="devam"?" ("+t("devamEdiyor")+")":x.durum==="ilk_yarim"?" ("+t("yarimHafta")+")":"")}; });
   var kap=hf.filter(function(x){return x.durum==="kapali";}).map(function(x){return Number(x.metre);});
   var dev=hf.filter(function(x){return x.durum==="devam";})[0];
-  el.innerHTML='<div class="ic-bas"><div><div class="buyuk num">'+(b.ortalama!=null?tl(b.ortalama,0):"—")+'<small>m / hafta</small></div>'+
-    '<div class="acik">Kapanmış haftaların toplam metresinin ortalaması. Devam eden hafta ve işin başladığı yarım hafta açık renkte, ortalamaya girmez.</div></div></div>'+
+  el.innerHTML='<div class="ic-bas"><div><div class="buyuk num">'+(b.ortalama!=null?tl(b.ortalama,0):"—")+'<small>'+t("mHafta")+'</small></div>'+
+    '<div class="acik">'+t("bAcik")+'</div></div></div>'+
     (hf.length?'<div id="cz-b">'+cubukSvg(d, b.ortalama, {etiket:16})+'</div>'+
-      lejant([[RENK.ac,"Kapanmış"],[RENK.acik,"Ortalamaya girmeyen"],[RENK.ort,"Ortalama"]])+
-      altRakam([["Ortalama", b.ortalama!=null?tl(b.ortalama,0)+" m":"—"],["En iyi", kap.length?tl(Math.max.apply(null,kap),0):"—"],
-        ["En düşük", kap.length?tl(Math.min.apply(null,kap),0):"—"],["Bu hafta (devam)", dev?tl(dev.metre,0):"—"]])
-      :'<div class="hint">Henüz vardiya kaydı yok.</div>');
+      lejant([[RENK.ac,t("kapanmis")],[RENK.acik,t("girmeyen")],[RENK.ort,t("ortalama")]])+
+      altRakam([[t("ortalama"), b.ortalama!=null?tl(b.ortalama,0)+" m":"—"],[t("enIyi"), kap.length?tl(Math.max.apply(null,kap),0):"—"],
+        [t("enDusuk"), kap.length?tl(Math.min.apply(null,kap),0):"—"],[t("buHafta"), dev?tl(dev.metre,0):"—"]])
+      :'<div class="hint">'+t("vardiyaYok")+'</div>');
   if(hf.length) ipucuBagla($("#cz-b"), d);
 }
 
 /* C — aylık */
 function icC(){
   var c=GENEL.c||{}, ay=c.aylar||[], el=$("#ic");
-  var ad=function(a){ return AYLAR[+a.slice(5,7)-1]+" "+a.slice(2,4); };
-  var d=ay.map(function(x){ return {e:ad(x.ay), v:x.metre, cls:x.durum!=="kapali"?"acik-renk":"",
-    ipucu:ad(x.ay)+": "+tl(x.metre,0)+" m · "+tl(x.vardiya_ort,1)+" m / vardiya"+(x.durum==="devam"?" (devam ediyor)":x.durum==="ilk_yarim"?" (işin başladığı yarım ay)":"")}; });
-  el.innerHTML='<div class="ic-bas"><div><div class="buyuk num">'+(c.ortalama!=null?tl(c.ortalama,0):"—")+'<small>m / ay</small></div>'+
-    '<div class="acik">Kapanmış ayların ortalaması. Devam eden ay ve işin başladığı yarım ay açık renkte, ortalamaya girmez.</div></div></div>'+
+  var d=ay.map(function(x){ return {e:AYAD(x.ay), v:x.metre, cls:x.durum!=="kapali"?"acik-renk":"",
+    ipucu:AYAD(x.ay)+": "+tl(x.metre,0)+" m · "+tl(x.vardiya_ort,1)+" "+t("mVardiya")+(x.durum==="devam"?" ("+t("devamEdiyor")+")":x.durum==="ilk_yarim"?" ("+t("yarimAy")+")":"")}; });
+  el.innerHTML='<div class="ic-bas"><div><div class="buyuk num">'+(c.ortalama!=null?tl(c.ortalama,0):"—")+'<small>'+t("mAy")+'</small></div>'+
+    '<div class="acik">'+t("cAcik")+'</div></div></div>'+
     (ay.length?'<div id="cz-c">'+cubukSvg(d, c.ortalama, {h:260})+'</div>'+
-      lejant([[RENK.ac,"Kapanmış"],[RENK.acik,"Ortalamaya girmeyen"],[RENK.ort,"Ortalama"]])+
-      altRakam(ay.slice(-4).map(function(x){ return [ad(x.ay), tl(x.metre,0), tl(x.vardiya_ort,1)+" m / vardiya"]; }))
-      :'<div class="hint">Henüz vardiya kaydı yok.</div>');
+      lejant([[RENK.ac,t("kapanmis")],[RENK.acik,t("girmeyen")],[RENK.ort,t("ortalama")]])+
+      altRakam(ay.slice(-4).map(function(x){ return [AYAD(x.ay), tl(x.metre,0), tl(x.vardiya_ort,1)+" "+t("mVardiya")]; }))
+      :'<div class="hint">'+t("vardiyaYok")+'</div>');
   if(ay.length) ipucuBagla($("#cz-c"), d);
 }
 
 /* D — toplam: birikimli metre eğrisi + plan */
-function icD(){
-  var dd=GENEL.d||{}, gn=dd.gunler||[], el=$("#ic");
-  var h='<div class="ic-bas"><div><div class="buyuk num">'+tl(dd.gunluk,1)+'<small>m / gün</small></div>'+
-    '<div class="acik">Başlangıçtan bugüne birikimli metre'+(dd.plan?' ve plan çizgisi':'')+'. Günlük ortalama, ilk vardiyadan son vardiyaya geçen takvim günlerine bölünür.</div></div></div>';
-  if(!gn.length){ el.innerHTML=h+'<div class="hint">Henüz vardiya kaydı yok.</div>'; return; }
-  var W=1000, H=300, SL=60, SR=14, ST=12, SB=30, son=Number(gn[gn.length-1].birikimli)||0;
-  var plan=Number(dd.plan)||0, mx=Math.max(son, plan, 1), adim=gzAdim(mx); mx=Math.ceil(mx/adim)*adim;
+function egriSvg(gn, plan, ops){
+  ops=ops||{};
+  var W=1000, H=ops.h||300, SL=66, SR=14, ST=12, SB=30, son=Number(gn[gn.length-1].birikimli)||0;
+  var mx=Math.max(son, plan||0, 1), adim=gzAdim(mx); mx=Math.ceil(mx/adim)*adim;
   var x=function(i){ return SL+(W-SL-SR)*(gn.length>1?i/(gn.length-1):0); };
   var y=function(v){ return ST+(H-ST-SB)*(1-v/mx); };
   var s='<svg class="cz" viewBox="0 0 '+W+' '+H+'" role="img">';
-  for(var t=0;t<=mx+1e-9;t+=adim) s+='<line class="izgara" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(t)+'" y2="'+y(t)+'"/><text x="'+(SL-8)+'" y="'+(y(t)+4)+'" text-anchor="end">'+tl(t,0)+'</text>';
+  for(var k=0;k<=mx+1e-9;k+=adim) s+='<line class="izgara" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(k)+'" y2="'+y(k)+'"/><text x="'+(SL-8)+'" y="'+(y(k)+4)+'" text-anchor="end">'+tl(k,0)+'</text>';
   var nok=gn.map(function(g,i){ return x(i).toFixed(1)+","+y(Number(g.birikimli)).toFixed(1); });
   s+='<path class="alan" d="M'+x(0)+','+y(0)+' L'+nok.join(" L")+' L'+x(gn.length-1)+','+y(0)+' Z"/>';
   s+='<path class="egri" d="M'+nok.join(" L")+'"/>';
   if(plan) s+='<line class="plan" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(plan)+'" y2="'+y(plan)+'"/>';
   var her=Math.max(1,Math.ceil(gn.length/10));
   gn.forEach(function(g,i){ if(i%her===0) s+='<text x="'+x(i)+'" y="'+(H-10)+'" text-anchor="middle">'+kisa(g.tarih)+'</text>'; });
-  s+='</svg>';
-  h+='<div>'+s+'</div>'+lejant([[RENK.ac,"Birikimli metre"]].concat(plan?[[RENK.plan,"Plan ("+tl(plan,0)+" m)"]]:[]))+
-    altRakam([["Toplam", tl(dd.toplam,0)+" m"],["Günlük ortalama", tl(dd.gunluk,1)],["m / vardiya", tl(dd.vardiya_ort,1)],
-      plan?["Plana göre", "%"+tl(son/plan*100,0)]:["Gün", String(dd.gun)]]);
+  return s+'</svg>';
+}
+function icD(){
+  var dd=GENEL.d||{}, gn=dd.gunler||[], el=$("#ic");
+  var h='<div class="ic-bas"><div><div class="buyuk num">'+tl(dd.gunluk,1)+'<small>'+t("mGun")+'</small></div>'+
+    '<div class="acik">'+t("dAcik")+'</div></div></div>';
+  if(!gn.length){ el.innerHTML=h+'<div class="hint">'+t("vardiyaYok")+'</div>'; return; }
+  var plan=Number(dd.plan)||0, son=Number(gn[gn.length-1].birikimli)||0;
+  h+='<div>'+egriSvg(gn, plan)+'</div>'+lejant([[RENK.ac,t("birikimli")]].concat(plan?[[RENK.plan,t("plan")+" ("+tl(plan,0)+" m)"]]:[]))+
+    altRakam([[t("toplam"), tl(dd.toplam,0)+" m"],[t("gunlukOrt"), tl(dd.gunluk,1)],[t("mVardiya"), tl(dd.vardiya_ort,1)],
+      plan?[t("plana"), "%"+tl(son/plan*100,0)]:[t("gun"), String(dd.gun)]]);
   el.innerHTML=h;
 }
 
 /* Duruş ve arıza — son 30 gün */
-function icDurus(){
-  var u=GENEL.durus||{}, tr=u.turler||[], el=$("#ic");
+function durusBarlar(tr){
   var mx=Math.max.apply(null, tr.map(function(x){return Number(x.saat)||0;}).concat([1]));
   var renk={ariza:"var(--bad)", bekleme:"var(--warn)", tasima:"var(--ink-3)", bakim:"var(--accent-2)"};
-  var h='<div class="acik" style="margin:0 0 10px">'+trd(u.bas)+' – '+trd(u.bit)+' · kayıp saat</div>';
-  if(!tr.length && !u.ilerleme_yok){ el.innerHTML=h+'<div class="hint">Son 30 günde duruş kaydı yok.</div>'; return; }
-  h+=tr.map(function(x){ return '<div class="durus-sat"><span>'+(DTUR[x.tur]||x.tur)+'</span><div class="iz"><i style="width:'+
-      (Number(x.saat)/mx*100)+'%;background:'+(renk[x.tur]||"var(--ink-3)")+'"></i></div><span class="num" style="text-align:end">'+tl(x.saat,1)+' sa</span></div>'; }).join("");
-  if(u.ilerleme_yok) h+='<div class="hint" style="margin-top:6px">İlerleme olmayan vardiya: '+u.ilerleme_yok+'</div>';
-  if((u.son||[]).length){
-    h+='<div class="grup" style="margin-top:16px">Son kayıtlar</div>'+(u.son||[]).map(function(o){
-      return '<div class="olay"><span class="t num">'+trd(o.tarih)+' · '+(VARD[o.vardiya]||"")+'</span><span>'+
-        (o.kalemler||[]).map(function(k){ return '<span class="dp '+esc(k.tur)+'">'+(DTUR[k.tur]||k.tur)+(k.saat!=null?' · '+tl(k.saat,1)+' sa':'')+'</span>'; }).join(" ")+
-        ' '+esc(o.makine)+(durusAciklama(o.kalemler)?' — '+esc(durusAciklama(o.kalemler)):'')+'</span></div>'; }).join("");
-  }
+  return tr.map(function(x){ return '<div class="durus-sat"><span>'+(S("DTUR")[x.tur]||x.tur)+'</span><div class="iz"><i style="width:'+
+      (Number(x.saat)/mx*100)+'%;background:'+(renk[x.tur]||"var(--ink-3)")+'"></i></div><span class="num" style="text-align:end">'+tl(x.saat,1)+' '+t("sa")+'</span></div>'; }).join("");
+}
+function durusOlaylari(l){
+  return (l||[]).map(function(o){
+    var ac=durusAciklama(o.kalemler);
+    return '<div class="olay"><span class="t num">'+trd(o.tarih)+' · '+(S("VARD")[o.vardiya]||"")+'</span><span>'+
+      (o.kalemler||[]).map(durusRozet).join(" ")+' '+esc(o.makine)+(ac?' — '+esc(ac):'')+'</span></div>'; }).join("");
+}
+function icDurus(){
+  var u=GENEL.durus||{}, tr=u.turler||[], el=$("#ic");
+  var h='<div class="acik" style="margin:0 0 10px">'+trd(u.bas)+' – '+trd(u.bit)+' · '+t("kayipSaat")+'</div>';
+  if(!tr.length && !u.ilerleme_yok){ el.innerHTML=h+'<div class="hint">'+t("durusYok")+'</div>'; return; }
+  h+=durusBarlar(tr);
+  if(u.ilerleme_yok) h+='<div class="hint" style="margin-top:6px">'+t("ilerlemeYokV")+': '+u.ilerleme_yok+'</div>';
+  if((u.son||[]).length) h+='<div class="grup" style="margin-top:16px">'+t("sonKayit")+'</div>'+durusOlaylari(u.son);
   el.innerHTML=h;
 }
 
 /* ============================================================
-   GÜNLÜK — mazot kalktı (S2), duruş geldi (S3)
+   KUYULAR (2. paket)
+   ============================================================ */
+function kuyular(){
+  var pj=$("#f-proj").value; if(!pj) return;
+  $("#ky-tablo").innerHTML='<tbody><tr><td class="hint">'+t("yukleniyor")+'</td></tr></tbody>';
+  sb.rpc("employer_kuyular", {p_project:pj}).then(function(r){
+    if(r.error){ $("#ky-tablo").innerHTML='<tbody><tr><td><div class="msg err">'+esc(r.error.message)+'</div></td></tr></tbody>'; return; }
+    KUYULAR=r.data; kuyuListe();
+  });
+}
+function bitisHucre(k){
+  if(k.durum==="completed") return trd(k.bitis);
+  if(k.tahmin) return '<span class="ky-tahmin">~ '+trd(k.tahmin)+'</span>';
+  if(k.eksik_vardiya) return '<span class="ky-kucuk">'+t(k.eksik_vardiya===1?"vSonra1":"vSonra",{n:k.eksik_vardiya})+'</span>';
+  if(k.tahmin_yok==="plan") return '<span class="ky-kucuk">'+t("planYok")+'</span>';
+  return '—';
+}
+function kuyuListe(){
+  var L=(KUYULAR||{}).kuyular||[];
+  if(!L.length){ $("#ky-tablo").innerHTML='<tbody><tr><td class="hint">'+t("kuyuYok")+'</td></tr></tbody>'; $("#ky-detay").innerHTML=""; return; }
+  if(!KSEC || !L.some(function(k){return k.id===KSEC;})) KSEC=L[0].id;
+  $("#ky-tablo").innerHTML='<thead><tr><th>'+t("kuyu")+'</th><th style="text-align:end">'+t("delPlan")+'</th><th>'+t("durum")+'</th><th style="text-align:end">'+t("bitisTahmin")+'</th></tr></thead><tbody>'+
+    L.map(function(k){
+      var y=k.planlanan?Math.min(100, k.derinlik/k.planlanan*100):(k.durum==="completed"?100:0);
+      return '<tr class="tik'+(k.id===KSEC?' sec':'')+'" data-k="'+k.id+'"><td><b>'+esc(k.kod)+'</b><div class="ky-kucuk">'+esc(k.makine||"—")+'</div></td>'+
+        '<td class="num" style="text-align:end">'+tl(k.derinlik,0)+' <span class="ky-kucuk">/ '+(k.planlanan?tl(k.planlanan,0):'—')+'</span>'+
+        '<div class="ky-bar"><i class="'+(k.durum==="completed"?'tam':'')+'" style="width:'+y+'%"></i></div></td>'+
+        '<td><span class="ky-pill '+esc(k.durum)+'">'+(S("KDURUM")[k.durum]||k.durum)+'</span></td>'+
+        '<td class="num" style="text-align:end">'+bitisHucre(k)+'</td></tr>'; }).join("")+'</tbody>';
+  $$("#ky-tablo tr.tik").forEach(function(tr){ tr.onclick=function(){
+    KSEC=tr.dataset.k; $$("#ky-tablo tr.tik").forEach(function(x){ x.classList.toggle("sec", x===tr); }); kuyuDetay(); }; });
+  kuyuDetay();
+}
+function kuyuDetay(){
+  var el=$("#ky-detay");
+  el.innerHTML='<div class="hint">'+t("yukleniyor")+'</div>';
+  var istenen=KSEC;
+  sb.rpc("employer_kuyu", {p_well:KSEC}).then(function(r){
+    if(istenen!==KSEC) return;
+    if(r.error){ el.innerHTML='<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
+    kuyuCiz(r.data);
+  });
+}
+function bugunTarih(){ return (KUYULAR&&KUYULAR.bugun)||(GENEL&&GENEL.bugun)||iso(new Date()); }
+function bostaGun(k){ return k.son_vardiya ? Math.round((new Date(bugunTarih())-new Date(k.son_vardiya))/864e5) : 0; }
+function kuyuCiz(D){
+  var k=D.kuyu||{}, el=$("#ky-detay"), h='';
+  h+='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h3 id="ky-ad">'+esc(k.kod)+(k.makine?' · '+esc(k.makine):'')+'</h3>'+
+     '<span class="ky-pill '+esc(k.durum)+'">'+(S("KDURUM")[k.durum]||k.durum)+'</span></div>';
+  if(k.durum==="drilling"){
+    if(k.tahmin) h+='<div class="ky-tahmin-kutu" id="ky-tahmin"><span class="etk">'+t("tahminiBitis")+'</span><b class="num">'+trd(k.tahmin)+'</b>'+
+        '<span>'+t("tahminAcik",{h:tl(k.hiz*k.gunluk_vardiya,1), g:k.kalan_gun})+'</span></div>'+
+        (bostaGun(k)>2?'<div class="ky-uyari" id="ky-bosta">'+t("bosta",{t:trd(k.son_vardiya), g:bostaGun(k)})+'</div>':'');
+    else h+='<div class="ky-bos" id="ky-tahmin-yok">'+(k.tahmin_yok==="vardiya"
+        ? t("tYokVardiya",{v:k.vardiya, n:k.eksik_vardiya, gn:Math.ceil(10/(k.gunluk_vardiya||2))})
+        : k.tahmin_yok==="plan" ? t("tYokPlan") : t("tYokMetre"))+'</div>';
+  }
+  if(!Number(k.derinlik) && !k.vardiya){ el.innerHTML=h+'<div class="ky-bos">'+t("baslamadi")+'</div>'; return; }
+  var b=[[t("planlanan"), k.planlanan?tl(k.planlanan,0)+" m":"—"],[t("delinen"), tl(k.derinlik,0)+" m"],
+         [t("ortHiz"), k.hiz!=null?tl(k.hiz,1)+"<small>"+t("mVardiya")+"</small>":"—"],[t("baslama"), trd(k.baslama)]];
+  if(k.durum==="completed"){
+    var gs=(k.bitis&&k.baslama)?Math.round((new Date(k.bitis)-new Date(k.baslama))/864e5)+1:null;
+    b.push([t("bitis"), trd(k.bitis)]); b.push([t("sure"), gs!=null?gs+" "+t("gunK"):"—"]);
+  } else b.push([t("kalan"), k.kalan!=null?tl(k.kalan,0)+" m":"—"]);
+  h+='<div class="ky-bilgi num">'+b.map(function(x){ return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>'; }).join("")+'</div>';
+  /* derinlik ilerlemesi */
+  var seri=D.seri||[];
+  if(seri.length){
+    h+='<div class="ky-etk">'+t("ilerlemeGraf")+'</div><div id="ky-graf">'+derinlikSvg(seri, k)+'</div>'+
+      lejant([[RENK.ac,t("delinen")]].concat(k.tahmin?[[RENK.ort,t("tahmin")+" ("+t("ortHiz").toLowerCase()+")"]]:[]).concat(k.planlanan?[[RENK.plan,t("planlanan")+" "+tl(k.planlanan,0)+" m"]]:[]));
+  }
+  /* kesit + ölçümler */
+  h+='<div class="ky-alt"><div><div class="ky-etk" style="margin-top:0">'+t("kesit")+'</div>'+kesitSvg(D)+'</div>'+
+     '<div><div class="ky-etk" style="margin-top:0">'+t("olcumler")+'</div>'+olcumTablo(D.olcumler||[])+'</div></div>';
+  el.innerHTML=h;
+}
+/* Derinlik ekseni aşağı doğru: kuyu derinleştikçe çizgi iner */
+function derinlikSvg(seri, k){
+  var W=1000, H=260, SL=66, SR=14, ST=12, SB=30;
+  var bas=seri[0].tarih, son=k.tahmin||seri[seri.length-1].tarih;
+  var gunSay=Math.max(1, Math.round((new Date(son)-new Date(bas))/864e5));
+  var mx=Math.max(Number(k.planlanan)||0, Number(k.derinlik)||0, Number(seri[seri.length-1].derinlik)||0, 1);
+  var adim=gzAdim(mx); mx=Math.ceil(mx/adim)*adim;
+  var x=function(tar){ return SL+(W-SL-SR)*Math.round((new Date(tar)-new Date(bas))/864e5)/gunSay; };
+  var y=function(v){ return ST+(H-ST-SB)*(v/mx); };
+  var s='<svg class="cz" viewBox="0 0 '+W+' '+H+'" role="img">';
+  for(var m=0;m<=mx+1e-9;m+=adim) s+='<line class="izgara" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(m)+'" y2="'+y(m)+'"/><text x="'+(SL-8)+'" y="'+(y(m)+4)+'" text-anchor="end">'+tl(m,0)+'</text>';
+  if(k.planlanan) s+='<line class="plan" x1="'+SL+'" x2="'+(W-SR)+'" y1="'+y(k.planlanan)+'" y2="'+y(k.planlanan)+'"/>';
+  s+='<path class="egri" d="M'+seri.map(function(p){ return x(p.tarih).toFixed(1)+","+y(Number(p.derinlik)).toFixed(1); }).join(" L")+'"/>';
+  if(k.tahmin){
+    /* Tahmin BUGÜNDEN başlar. Kuyu bir süre boşta kaldıysa son
+       vardiyadan bugüne düz, gri kesikli çizgi: o aralıkta delgi yok. */
+    var sonN=seri[seri.length-1], bug=bugunTarih(); if(bug<sonN.tarih) bug=sonN.tarih;
+    if(bug>sonN.tarih) s+='<path class="plan" d="M'+x(sonN.tarih)+','+y(Number(k.derinlik))+' L'+x(bug)+','+y(Number(k.derinlik))+'"/>';
+    s+='<path class="tahminc" d="M'+x(bug)+','+y(Number(k.derinlik))+' L'+x(k.tahmin)+','+y(Number(k.planlanan))+'"/>'+
+       '<circle class="nokta" cx="'+x(k.tahmin)+'" cy="'+y(Number(k.planlanan))+'" r="6"/>';
+  }
+  var her=Math.max(1, Math.ceil(gunSay/9));
+  for(var i=0;i<=gunSay;i+=her){ var tar=gunEkle(bas,i); s+='<text x="'+x(tar)+'" y="'+(H-10)+'" text-anchor="middle">'+kisa(tar)+'</text>'; }
+  return s+'</svg>';
+}
+function kesitSvg(D){
+  var k=D.kuyu||{}, c=D.caplar||[];
+  var plan=Math.max(Number(k.planlanan)||0, Number(k.derinlik)||0, 1);
+  var H=360, UST=24, ALT=14, X=100, olcek=(H-UST-ALT)/plan, y=function(m){ return UST+m*olcek; };
+  var gen={PQ:46, HQ:36, NQ:26, PW:52}, renk={PQ:"var(--pq)", HQ:"var(--hq)", NQ:"var(--nq)", PW:"var(--pw)"};
+  var adim=gzAdim(plan);
+  var s='<svg class="cz" viewBox="0 0 200 '+H+'" style="max-width:220px" role="img">';
+  s+='<rect x="45" y="'+UST+'" width="110" height="'+(H-UST-ALT)+'" fill="var(--kaya-2)" opacity=".35" rx="3"/>';
+  for(var m=0;m<=plan+1e-9;m+=adim) s+='<line x1="38" x2="45" y1="'+y(m)+'" y2="'+y(m)+'" stroke="var(--ink-3)"/><text x="34" y="'+(y(m)+4)+'" text-anchor="end" style="font-size:11px">'+tl(m,0)+'</text>';
+  c.forEach(function(p){
+    var w=gen[p.cap]||30, b=Number(p.bas)||0, e=Number(p.son)||0; if(e<=b) return;
+    s+='<rect x="'+(X-w/2)+'" y="'+y(b)+'" width="'+w+'" height="'+(y(e)-y(b))+'" fill="'+(renk[p.cap]||"var(--accent)")+'"/>'+
+       '<text x="'+(X+w/2+5)+'" y="'+(y((b+e)/2)+4)+'" style="font-size:11px;font-weight:600;fill:var(--ink)">'+esc(p.cap)+'</text>';
+  });
+  s+='<line x1="70" x2="130" y1="'+y(Number(k.derinlik)||0)+'" y2="'+y(Number(k.derinlik)||0)+'" stroke="#E8731A" stroke-width="2.5"/>'+
+     '<text x="158" y="'+(y(Number(k.derinlik)||0)+4)+'" style="font-size:11px;font-weight:700;fill:#E8731A">'+tl(k.derinlik,0)+' m</text>';
+  s+='<text x="100" y="14" text-anchor="middle" style="font-size:11px">'+t("zemin")+' 0 m</text>';
+  return s+'</svg>';
+}
+function olcumTablo(L){
+  if(!L.length) return '<div class="hint">'+t("olcumYok")+'</div>';
+  return '<div class="scroll"><table><thead><tr><th style="text-align:end">'+t("derinlik")+'</th><th style="text-align:end">'+t("azimut")+'</th><th style="text-align:end">'+t("egim")+'</th><th>'+t("tarih")+'</th></tr></thead><tbody>'+
+    L.map(function(o){ return '<tr><td class="num" style="text-align:end">'+(o.derinlik!=null?tl(o.derinlik,1)+' m':'—')+'</td><td class="num" style="text-align:end">'+(o.azimut!=null?tl(o.azimut,1)+'°':'—')+
+      '</td><td class="num" style="text-align:end">'+(o.egim!=null?tl(o.egim,1)+'°':'—')+'</td><td class="hint">'+trd(o.tarih)+'</td></tr>'; }).join("")+'</tbody></table></div>';
+}
+
+/* ============================================================
+   GÜNLÜK — mazot (S2), sondör ve ekip (S4) yok; duruş var (S3)
    ============================================================ */
 function tbl(cols, rows, empty, foot){
   if(!rows || !rows.length) return '<div class="hint">'+empty+'</div>';
@@ -463,46 +827,36 @@ function tiles(list){
     return '<div class="tile"><div class="k">'+x[0]+'</div><div class="v num">'+x[1]+
       '</div><div class="hint">'+(x[2]||"")+'</div></div>'; }).join("")+'</div>';
 }
-function barsHtml(rows, key, lbl, fmt){
-  if(!rows || !rows.length) return '<div class="hint">Veri yok.</div>';
-  var max=Math.max.apply(null, rows.map(function(r){ return Number(r[key])||0; })) || 1;
-  return '<div class="bars">'+rows.map(function(r){
-    return '<div class="bar"><span>'+esc(r[lbl])+'</span><span class="track"><i style="width:'+
-      ((Number(r[key])||0)/max*100)+'%"></i></span><span class="val">'+fmt(r[key])+'</span></div>'; }).join("")+'</div>';
-}
 function gun(){
   var pj=$("#f-proj").value; if(!pj) return;
-  $("#gun-out").innerHTML='<div class="card"><div class="hint">Yükleniyor…</div></div>';
+  $("#gun-out").innerHTML='<div class="card"><div class="hint">'+t("yukleniyor")+'</div></div>';
   sb.rpc("employer_daily", {p_project:pj, p_date:$("#g-date").value}).then(function(r){
     if(r.error){ $("#gun-out").innerHTML='<div class="card"><div class="msg err">'+esc(r.error.message)+'</div></div>'; return; }
     var d=r.data, v=d.vardiyalar||[];
     var h='<div class="card"><h3>'+esc(d.proje||"")+' · '+trd(d.tarih)+'</h3>'+
-      '<div class="note">Gece vardiyası gece yarısını geçse de başladığı günün raporuna yazılır.</div>'+
-      tiles([["Günün metrajı", tl(d.toplam_metraj)+' <small>m</small>'],
-             ["Vardiya", String(v.length)],
-             ["Duruşlu vardiya", String(v.filter(function(s){ return (s.durus||[]).length; }).length)]])+'</div>';
-    if(!v.length){ h+='<div class="card"><div class="hint">Bu tarihte kayıt bulunmuyor.</div></div>'; }
+      '<div class="note">'+t("gunNot")+'</div>'+
+      tiles([[t("gunMetraj"), tl(d.toplam_metraj)+' <small>m</small>'],
+             [t("vardiyaS"), String(v.length)],
+             [t("durusluVardiya"), String(v.filter(function(s){ return (s.durus||[]).length; }).length)]])+'</div>';
+    if(!v.length){ h+='<div class="card"><div class="hint">'+t("kayitYok")+'</div></div>'; }
     v.forEach(function(s){
       var du=s.durus||[];
-      h+='<div class="card" data-vardiya><div class="vard"><h4>'+(VARD[s.vardiya]||s.vardiya)+' vardiyası — '+
-        esc(s.kuyu)+' · '+esc(s.makine)+(s.form_no?' <span class="hint">form '+esc(s.form_no)+'</span>':'')+'</h4>'+
-        '<div class="hint">Kuyu derinliği '+tl(s.kuyu_derinlik)+' m · '+(KDURUM[s.kuyu_durum]||s.kuyu_durum)+
-        (s.motor_bas?' · motor '+String(s.motor_bas).slice(0,5)+'–'+String(s.motor_bit||"").slice(0,5):'')+
-        ' · vardiya metrajı <b>'+tl(s.metraj)+' m</b>'+(s.olcum?' · '+s.olcum+' ölçüm':'')+'</div>'+
-        ((s.ekip||[]).length?'<div class="hint">Ekip: '+(s.ekip||[]).map(esc).join(", ")+'</div>':'')+
-        (du.length?'<div class="durus-satir" style="margin-top:6px">'+du.map(function(k){
-            return '<span class="dp '+esc(k.tur)+'">'+(DTUR[k.tur]||k.tur)+(k.saat!=null?' · '+tl(k.saat,1)+' sa':'')+'</span>'; }).join(" ")+
-          ' <span class="hint">'+esc(durusYazi(du))+'</span></div>':'')+
+      h+='<div class="card" data-vardiya><div class="vard"><h4>'+(S("VARD")[s.vardiya]||s.vardiya)+' '+t("vardiyasi")+' — '+
+        esc(s.kuyu)+' · '+esc(s.makine)+(s.form_no?' <span class="hint">'+t("form")+' '+esc(s.form_no)+'</span>':'')+'</h4>'+
+        '<div class="hint">'+t("kuyuDerinligi")+' '+tl(s.kuyu_derinlik)+' m · '+(S("KDURUM")[s.kuyu_durum]||s.kuyu_durum)+
+        (s.motor_bas?' · '+t("motor")+' '+String(s.motor_bas).slice(0,5)+'–'+String(s.motor_bit||"").slice(0,5):'')+
+        ' · '+t("vardiyaMetraji")+' <b>'+tl(s.metraj)+' m</b>'+(s.olcum?' · '+s.olcum+' '+t("olcum"):'')+'</div>'+
+        (du.length?'<div style="margin-top:6px">'+du.map(durusRozet).join(" ")+
+          ' <span class="hint">'+esc(durusAciklama(du))+'</span></div>':'')+
         '</div>'+
-        tbl([["Sıra",function(x){return x.sira;}],
-             ["Çap",function(x){return esc(x.cap);}],
-             ["Başlangıç",function(x){return '<span class="num">'+tl(x.baslangic)+'</span>';}],
-             ["Bitiş",function(x){return '<span class="num">'+tl(x.bitis)+'</span>';}],
-             ["Metre",function(x){return '<span class="num"><b>'+tl(x.metre)+'</b></span>';}],
-             ["Sondör",function(x){return esc(x.sondor||"—");}]],
-            s.manevralar, "Manevra kaydı yok.") +
-        (s["not"]?'<div class="hint" style="margin-top:8px">Not: '+esc(s["not"])+'</div>':'')+
-        (s.bitis?'<div class="msg warn" style="margin-top:8px">'+(s.bitis==="kuyu_iptali"?"Kuyu iptal edildi":"Kuyu tamamlandı")+'</div>':'')+
+        tbl([[t("sira"),function(x){return x.sira;}],
+             [t("cap"),function(x){return esc(x.cap);}],
+             [t("basM"),function(x){return '<span class="num">'+tl(x.baslangic)+'</span>';}],
+             [t("bitM"),function(x){return '<span class="num">'+tl(x.bitis)+'</span>';}],
+             [t("metre"),function(x){return '<span class="num"><b>'+tl(x.metre)+'</b></span>';}]],
+            s.manevralar, t("manevraYok")) +
+        (s["not"]?'<div class="hint" style="margin-top:8px">'+t("not")+': '+esc(s["not"])+'</div>':'')+
+        (s.bitis?'<div class="msg warn" style="margin-top:8px">'+(s.bitis==="kuyu_iptali"?t("kuyuIptal"):t("kuyuTamam"))+'</div>':'')+
         '</div>';
     });
     $("#gun-out").innerHTML=h;
@@ -511,86 +865,107 @@ function gun(){
 $("#btn-gun").addEventListener("click", gun);
 $("#g-date").addEventListener("change", gun);
 $("#btn-gun-dun").addEventListener("click", function(){
-  var d=new Date($("#g-date").value||new Date()); d.setDate(d.getDate()-1);
-  $("#g-date").value=iso(d); gun();
+  $("#g-date").value=gunEkle($("#g-date").value||iso(new Date()), -1); gun();
 });
 $("#btn-gun-yaz").addEventListener("click", function(){ window.print(); });
 
 /* ============================================================
-   DÖNEM — mazot kalktı. 2. pakette "PDF rapor" sekmesine dönüşecek.
+   PDF RAPOR — günlük / haftalık (Pzt–Paz) / aylık / tarih aralığı.
+   PDF tarayıcının "PDF olarak kaydet"i ile çıkar.
    ============================================================ */
-function donem(){
+var RDON="hafta";
+function donemAraligi(){
+  var g=$("#rp-gun").value||iso(new Date());
+  if(RDON==="gun") return [g,g];
+  if(RDON==="hafta"){ var d=new Date(g+"T00:00:00"), f=(d.getDay()+6)%7; var b=gunEkle(g,-f); return [b, gunEkle(b,6)]; }
+  if(RDON==="ay"){ var a=g.slice(0,8)+"01", s=new Date(+g.slice(0,4), +g.slice(5,7), 0); return [a, iso(s)]; }
+  return [$("#rp-bas").value, $("#rp-bit").value];
+}
+function rpDonemYaz(){
+  var a=donemAraligi(); $("#rp-donem-yazi").textContent=t("rpDonem",{a:trd(a[0]), b:trd(a[1])})+" · "+t("rpPdfNot");
+}
+$$("#rp-donem button").forEach(function(b){ b.addEventListener("click", function(){
+  RDON=b.dataset.d; $$("#rp-donem button").forEach(function(x){ x.classList.toggle("on", x===b); });
+  var ar=(RDON==="aralik"); $("#rp-tek").hidden=ar; $("#rp-bas-k").hidden=!ar; $("#rp-bit-k").hidden=!ar;
+  $("#rp-tek label").textContent=t(RDON==="ay"?"dAy":RDON==="hafta"?"dHafta":"rpGun");
+  rpDonemYaz();
+}); });
+["#rp-gun","#rp-bas","#rp-bit"].forEach(function(s){ $(s).addEventListener("change", rpDonemYaz); });
+
+function rapor(sonra){
   var pj=$("#f-proj").value; if(!pj) return;
-  $("#donem-out").innerHTML='<div class="card"><div class="hint">Yükleniyor…</div></div>';
-  sb.rpc("employer_report", {p_project:pj, p_from:$("#d-from").value, p_to:$("#d-to").value}).then(function(r){
-    if(r.error){ $("#donem-out").innerHTML='<div class="card"><div class="msg err">'+esc(r.error.message)+'</div></div>'; return; }
-    DONEM=r.data; var d=r.data, t=d.toplam||{}, p=d.proje||{};
-    var h='<div class="card"><h3>'+esc(p.ad||"")+'</h3>'+
-      '<div class="note">'+esc(p.tam_ad||"")+(p.il?' · '+esc(p.il)+(p.ilce?' / '+esc(p.ilce):''):'')+
-      ' · '+trd(d.donem.baslangic)+' – '+trd(d.donem.bitis)+'</div>'+
-      tiles([["Delinen metraj", tl(t.metraj)+' <small>m</small>', (Number(t.iptal)>0?'iptal '+tl(t.iptal)+' m hariç geçerli '+tl(t.gecerli)+' m':'')],
-             ["Çalışılan gün", String(t.gun)],
-             ["Kuyu", String(t.kuyu), t.biten+' tamamlandı'],
-             ["Ölçüm", String(t.olcum)]])+'</div>';
-
-    h+='<div class="card"><h3>Günlük metraj</h3>'+
-      tbl([["Tarih",function(x){return trd(x.tarih);}],
-           ["Metraj",function(x){return '<span class="num">'+tl(x.metraj)+' m</span>';}],
-           ["Geçerli",function(x){return '<span class="num">'+tl(x.gecerli)+' m</span>';}],
-           ["Makine",function(x){return x.makine;}],
-           ["Kuyu",function(x){return x.kuyu;}]],
-          d.gunler, "Kayıt yok.",
-          '<td>Toplam</td><td class="num">'+tl(t.metraj)+' m</td><td class="num">'+tl(t.gecerli)+
-          ' m</td><td></td><td></td>')+'</div>';
-
-    h+='<div class="card"><h3>Kuyu bilgileri</h3>'+
-      tbl([["Kuyu",function(x){return '<b>'+esc(x.kuyu)+'</b>';}],
-           ["Program",function(x){return PROGRAM[x.program]||esc(x.program||"—");}],
-           ["PQ",function(x){return '<span class="num">'+tl(x.pq)+'</span>';}],
-           ["HQ",function(x){return '<span class="num">'+tl(x.hq)+'</span>';}],
-           ["NQ",function(x){return '<span class="num">'+tl(x.nq)+'</span>';}],
-           ["Dönem metrajı",function(x){return '<span class="num"><b>'+tl(x.metraj)+'</b></span>';}],
-           ["Kuyu derinliği",function(x){return '<span class="num">'+tl(x.derinlik)+'</span>';}],
-           ["Ölçüm",function(x){return x.olcum;}],
-           ["İlk–son",function(x){return '<span class="hint">'+trd(x.ilk)+' – '+trd(x.son)+'</span>';}],
-           ["Durum",function(x){return '<span class="pill'+(x.durum==="cancelled"?" warn":"")+'">'+(KDURUM[x.durum]||x.durum)+'</span>';}]],
-          d.kuyular, "Kayıt yok.")+'</div>';
-
-    h+='<div class="card"><h3>Makine performansı</h3>'+
-      tbl([["Makine",function(x){return '<b>'+esc(x.makine)+'</b>';}],
-           ["Metraj",function(x){return '<span class="num">'+tl(x.metraj)+' m</span>';}],
-           ["Gün",function(x){return x.gun;}],
-           ["Günlük ortalama",function(x){return '<span class="num">'+tl(x.gunluk_ort)+' m</span>';}]],
-          d.makineler, "Kayıt yok.")+'</div>';
-
-    h+='<div class="card"><h3>Çap dağılımı</h3>'+barsHtml(d.caplar||[], "metraj", "cap",
-        function(v){ return tl(v)+" m"; })+'</div>';
-
-    $("#donem-out").innerHTML=h;
+  var a=donemAraligi(); if(!a[0]||!a[1]||a[0]>a[1]) return;
+  $("#rapor-out").innerHTML='<div class="hint">'+t("yukleniyor")+'</div>';
+  var istek=[sb.rpc("employer_report", {p_project:pj, p_from:a[0], p_to:a[1]}),
+             sb.rpc("employer_durus_donem", {p_project:pj, p_from:a[0], p_to:a[1]}),
+             sb.rpc("employer_kuyular", {p_project:pj, p_gun:a[1]}),
+             GENEL ? Promise.resolve({data:GENEL}) : sb.rpc("employer_genel", {p_project:pj})];
+  Promise.all(istek).then(function(c){
+    var hata=c.filter(function(x){ return x.error; })[0];
+    if(hata){ $("#rapor-out").innerHTML='<div class="msg err">'+esc(hata.error.message)+'</div>'; return; }
+    DONEM=c[0].data; if(!GENEL) GENEL=c[3].data;
+    raporCiz(a, c[0].data, c[1].data, c[2].data, GENEL);
+    if(sonra) sonra();
   });
 }
-$("#btn-donem").addEventListener("click", donem);
-$("#btn-d-ay").addEventListener("click", function(){
-  var f=new Date(); f.setDate(1); $("#d-from").value=iso(f); $("#d-to").value=iso(new Date()); donem();
+function raporCiz(a, R, U, K, G){
+  var tt=R.toplam||{}, p=R.proje||{};
+  var vo=Number(tt.uretken)?Number(tt.metraj)/Number(tt.uretken):null;
+  var h='<div class="rapor" id="rapor">';
+  h+='<div class="rp-antet"><img src="'+esc((BOOT&&BOOT.logo)||"logo-mark.png")+'" alt="" onerror="this.onerror=null;this.src=\'icon.svg\'">'+
+     '<div><h2>'+t("rpAd_"+RDON)+'</h2><div class="hint">'+esc(p.ad||"")+(BOOT&&BOOT.isveren?' · '+esc(BOOT.isveren):'')+'</div></div>'+
+     '<div class="sg">'+t("rpDonem",{a:trd(a[0]), b:trd(a[1])})+'<br>'+esc((BOOT&&BOOT.firma)||"")+'</div></div>';
+  h+='<h4>'+t("rpBuDonem")+'</h4><div class="rp-k4 num">'+
+     '<div><span>'+t("rpMetre")+'</span><b>'+tl(tt.metraj,1)+' m</b></div>'+
+     '<div><span>'+t("rpVardiyaOrt")+'</span><b>'+(vo!=null?tl(vo,1):'—')+'</b></div>'+
+     '<div><span>'+t("rpGunlukOrt")+'</span><b>'+(Number(tt.gun)?tl(Number(tt.metraj)/Number(tt.gun),1):'—')+'</b></div>'+
+     '<div><span>'+t("rpCalisilan")+'</span><b>'+(tt.gun||0)+'</b></div></div>';
+  h+='<h4>'+t("rpProjeGenel")+'</h4><div class="rp-k4 num">'+
+     '<div><span>A · '+t("mVardiya")+'</span><b>'+tl((G.a||{}).ortalama,1)+'</b></div>'+
+     '<div><span>B · '+t("mHafta")+'</span><b>'+((G.b||{}).ortalama!=null?tl(G.b.ortalama,0):'—')+'</b></div>'+
+     '<div><span>C · '+t("mAy")+'</span><b>'+((G.c||{}).ortalama!=null?tl(G.c.ortalama,0):'—')+'</b></div>'+
+     '<div><span>D · '+t("mGun")+'</span><b>'+tl((G.d||{}).gunluk,1)+'</b></div></div>';
+  var gn=R.gunler||[];
+  if(gn.length>1) h+='<h4>'+t("rpGunluk")+'</h4>'+cubukSvg(gn.map(function(x){ return {e:kisa(x.tarih), v:x.metraj}; }), null, {h:220, etiket:16});
+  /* kuyular: devam edenler + bu dönemde teslim edilenler */
+  var ky=((K||{}).kuyular||[]).filter(function(k){ return k.durum==="drilling" || (k.durum==="completed" && k.bitis>=a[0] && k.bitis<=a[1]); });
+  h+='<h4>'+t("rpKuyular")+'</h4><div class="hint" style="margin-bottom:4px">'+t("rpKuyuNot")+'</div>'+
+    tbl([[t("kuyu"),function(k){return '<b>'+esc(k.kod)+'</b>';}],[t("makine"),function(k){return esc(k.makine||"—");}],
+         [t("planlanan"),function(k){return '<span class="num">'+(k.planlanan?tl(k.planlanan,0):'—')+'</span>';}],
+         [t("delinen"),function(k){return '<span class="num">'+tl(k.derinlik,0)+'</span>';}],
+         [t("durum"),function(k){return S("KDURUM")[k.durum]||k.durum;}],
+         [t("bitisTahmin"),function(k){return bitisHucre(k);}]], ky, "—");
+  h+='<h4>'+t("rpDurus")+'</h4>';
+  if(!(U.turler||[]).length && !U.ilerleme_yok) h+='<div class="hint">'+t("rpDurusYok")+'</div>';
+  else h+=durusBarlar(U.turler||[])+(U.ilerleme_yok?'<div class="hint">'+t("ilerlemeYokV")+': '+U.ilerleme_yok+'</div>':'')+durusOlaylari(U.kayitlar||[]);
+  h+='<h4>'+t("rpGunluk")+'</h4>'+tbl([[t("tarih"),function(x){return trd(x.tarih);}],
+       [t("metre"),function(x){return '<span class="num">'+tl(x.metraj,1)+'</span>';}],
+       [t("rpMakineSay"),function(x){return x.makine;}],[t("rpKuyuSay"),function(x){return x.kuyu;}]], gn, "—",
+       '<td>'+t("toplam")+'</td><td class="num">'+tl(tt.metraj,1)+'</td><td></td><td></td>');
+  h+='<div class="rp-ayak"><span>'+t("rpHazirlayan")+'</span><span>'+t("rpHazirlanma")+' '+trd(iso(new Date()))+'</span></div></div>';
+  $("#rapor-out").innerHTML=h;
+}
+$("#btn-rp").addEventListener("click", function(){ rapor(); });
+$("#btn-rp-pdf").addEventListener("click", function(){
+  if($("#rapor")) window.print(); else rapor(function(){ setTimeout(function(){ window.print(); }, 300); });
 });
-$("#btn-d-yaz").addEventListener("click", function(){ if(!DONEM) donem(); else window.print(); });
-$("#btn-d-excel").addEventListener("click", function(){
-  if(!DONEM){ donem(); return; }
+$("#btn-rp-csv").addEventListener("click", function(){
+  if(!DONEM){ rapor(function(){ $("#btn-rp-csv").click(); }); return; }
   var d=DONEM, L=[];
   var q=function(v){ return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'; };
   L.push([q(d.proje.ad), q(trd(d.donem.baslangic)+" - "+trd(d.donem.bitis))].join(";"));
   L.push("");
-  L.push(["Tarih","Metraj","Gecerli","Makine","Kuyu"].map(q).join(";"));
+  L.push([t("csvTarih"),t("csvMetraj"),t("csvGecerli"),t("csvMakine"),t("csvKuyu")].map(q).join(";"));
   (d.gunler||[]).forEach(function(x){ L.push([q(trd(x.tarih)), tl(x.metraj), tl(x.gecerli), x.makine, x.kuyu].join(";")); });
   L.push("");
-  L.push(["Kuyu","Program","PQ","HQ","NQ","Donem metraji","Kuyu derinligi","Olcum","Durum"].map(q).join(";"));
-  (d.kuyular||[]).forEach(function(x){ L.push([q(x.kuyu), q(PROGRAM[x.program]||x.program||""), tl(x.pq), tl(x.hq),
-      tl(x.nq), tl(x.metraj), tl(x.derinlik), x.olcum, q(KDURUM[x.durum]||x.durum)].join(";")); });
+  L.push([t("csvKuyu"),t("csvProgram"),"PQ","HQ","NQ",t("csvDonemMetraji"),t("csvKuyuDerinligi"),t("csvOlcum"),t("csvDurum")].map(q).join(";"));
+  (d.kuyular||[]).forEach(function(x){ L.push([q(x.kuyu), q(S("PROGRAM")[x.program]||x.program||""), tl(x.pq), tl(x.hq),
+      tl(x.nq), tl(x.metraj), tl(x.derinlik), x.olcum, q(S("KDURUM")[x.durum]||x.durum)].join(";")); });
   L.push("");
-  L.push(["Makine","Metraj","Gun","Gunluk ortalama"].map(q).join(";"));
+  L.push([t("csvMakine"),t("csvMetraj"),t("csvGun"),t("csvGunlukOrt")].map(q).join(";"));
   (d.makineler||[]).forEach(function(x){ L.push([q(x.makine), tl(x.metraj), x.gun, tl(x.gunluk_ort)].join(";")); });
   L.push("");
-  L.push([q("TOPLAM"), tl(d.toplam.metraj)].join(";"));
+  L.push([q(t("csvToplam")), tl(d.toplam.metraj)].join(";"));
   var blob=new Blob(["﻿"+L.join("\r\n")], {type:"text/csv;charset=utf-8"});
   var a=document.createElement("a");
   a.href=URL.createObjectURL(blob);

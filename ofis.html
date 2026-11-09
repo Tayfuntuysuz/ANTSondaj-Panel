@@ -82,7 +82,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 
     <div class="card">
       <h3>İşveren kullanıcıları</h3>
-      <div class="note">Kullanıcıyı önce Supabase &gt; Authentication &gt; Users içinde e-posta ve parola ile aç, sonra UUID'sini buraya yapıştırıp işvereni seç. Bu kullanıcı yalnızca kendi sahalarının günlük ve dönem raporlarını görür; fiyat, maliyet ve personel verisi kapalıdır.</div>
+      <div class="note">Kullanıcıyı önce Supabase &gt; Authentication &gt; Users içinde e-posta ve parola ile aç, sonra UUID'sini buraya yapıştırıp işvereni seç. Bu kullanıcı yalnızca kendi sahalarının İşveren Paneli'ni görür; fiyat, maliyet, mazot ve personel verisi kapalıdır.</div>
       <div class="row">
         <div class="field" style="flex:1;min-width:250px"><label for="iv-user">Kullanıcı UUID</label>
           <input id="iv-user" placeholder="00000000-0000-0000-0000-000000000000"></div>
@@ -92,6 +92,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       </div>
       <div id="iv-msg"></div>
       <div class="scroll" id="iv-liste" style="margin-top:12px"></div>
+      <h4 style="margin-top:18px">İşveren Paneli dili</h4>
+      <div class="note">İşveren kullanıcıları paneli bu dilde görür. Şefin sahadan yazdığı notlar çevrilmez.</div>
+      <div class="scroll" id="iv-dil" style="margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -140,7 +143,7 @@ function boot(){
         o.textContent = p.full_name + " (" + (GOREV[p.kind]||p.kind) + ")"; sel.appendChild(o); });
     }
     load();
-    loadEmployerUsers();
+    loadEmployerUsers(); loadEmployerLangs();
   });
 }
 
@@ -261,6 +264,25 @@ function loadEmployerUsers(){
       : '<div class="hint">Tanımlı işveren kullanıcısı yok.</div>';
   });
 }
+function loadEmployerLangs(){
+  sb.rpc("employer_dilleri").then(function(r){
+    if(r.error){ $("#iv-dil").innerHTML='<div class="hint">'+esc(r.error.message)+'</div>'; return; }
+    var L=r.data||[];
+    $("#iv-dil").innerHTML = L.length
+      ? '<table><thead><tr><th>İşveren</th><th>Panel dili</th></tr></thead><tbody>'+L.map(function(e){
+          return '<tr><td><b>'+esc(e.ad)+'</b></td><td><select data-iv-dil="'+e.id+'">'+
+            '<option value="tr"'+(e.dil==="tr"?' selected':'')+'>Türkçe</option>'+
+            '<option value="en"'+(e.dil==="en"?' selected':'')+'>English</option></select></td></tr>'; }).join("")+'</tbody></table>'
+      : '<div class="hint">Tanımlı işveren yok.</div>';
+  });
+}
+$("#iv-dil").addEventListener("change", function(ev){
+  var s=ev.target.closest("[data-iv-dil]"); if(!s) return;
+  sb.rpc("employer_dil_ayarla", {p_employer:s.dataset.ivDil, p_dil:s.value}).then(function(r){
+    msg($("#iv-msg"), r.error ? esc(r.error.message) : "Panel dili kaydedildi.", r.error ? "err" : "ok");
+    if(r.error) loadEmployerLangs();
+  });
+});
 $("#btn-iv-add").addEventListener("click", function(){
   var u=$("#iv-user").value.trim(), n=$("#iv-name").value.trim(), e=$("#iv-emp").value;
   if(!/^[0-9a-f-]{36}$/i.test(u)){ msg($("#iv-msg"), "Geçerli bir kullanıcı UUID'si girin.", "err"); return; }

@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "55";
+var SURUM = "56";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -382,10 +382,17 @@ function girisEkrani(hata){
   tamEkran(
     '<div class="sp-orta"><div class="logo"><img src="logo/collarlog-logo.svg" ' +
       'alt="Collarlog" onerror="this.onerror=null;this.src=\'logo.png\'"></div>' +
-    '<h2>Giriş</h2>' +
-    '<input id="gr-mail" type="email" placeholder="E-posta" autocomplete="username">' +
-    '<input id="gr-pass" type="password" placeholder="Parola" autocomplete="current-password">' +
-    '<button class="btn" id="gr-btn" type="button">Giriş yap</button>' +
+    /* İşveren Paneli yabancı işverene de açılıyor; dil girişten SONRA
+       bilindiği için giriş ekranı iki dilli (93. dosya, S6). */
+    (AYAR.sayfa === "isveren"
+      ? '<h2>Giriş · Sign in</h2>' +
+        '<input id="gr-mail" type="email" placeholder="E-posta · Email" autocomplete="username">' +
+        '<input id="gr-pass" type="password" placeholder="Parola · Password" autocomplete="current-password">' +
+        '<button class="btn" id="gr-btn" type="button">Giriş yap · Sign in</button>'
+      : '<h2>Giriş</h2>' +
+        '<input id="gr-mail" type="email" placeholder="E-posta" autocomplete="username">' +
+        '<input id="gr-pass" type="password" placeholder="Parola" autocomplete="current-password">' +
+        '<button class="btn" id="gr-btn" type="button">Giriş yap</button>') +
     '<div id="gr-msg"></div></div>');
   if(hata) msg($("#gr-msg"), esc(hata), "err");
   var dene = function(){
