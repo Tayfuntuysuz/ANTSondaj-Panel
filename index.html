@@ -1112,6 +1112,21 @@ details.acilir[open] > summary::after{content:"\2212"}
           <div id="op-msg"></div>
         </div>
 
+        <!-- 101. dosya · Tayfun: "delgi sonrası muhafaza da yaptık diyelim,
+             o zaman altta operasyonda değişiklik kutucuğu olacak,
+             tıklanırsa tekrar 2. operasyon türü seçilip verileri
+             girilecek." Motor 57. sürümde vardı ama ekranda düğme yoktu;
+             şef sırada ne yapacağını okuyamıyordu. -->
+        <button class="btn ghost" id="btn-op-degistir" type="button" hidden
+                style="margin-top:8px">+ Operasyon değiştir</button>
+
+        <!-- Operasyon açıklaması — Malzeme adımındakinden AYRI (101. dosya,
+             Tayfun: "açıklama 2 yerde olacak"). Tür ne olursa olsun görünür. -->
+        <div class="field" style="margin-top:12px">
+          <label for="f-op-note">Operasyon açıklaması</label>
+          <textarea id="f-op-note" placeholder="Vardiyada olan biten — kısaca"></textarea>
+        </div>
+
         <!-- 98. dosya · Tayfun: "Vardiyada sondörlerin tuttuğu kağıt raporun
              fotosu gerekiyor. onu whatsapptan birbirlerine gönderiyorlar.
              Şantiye şefi onun fotosunu operasyon kısmına ekleyebilsin."
@@ -1129,74 +1144,45 @@ details.acilir[open] > summary::after{content:"\2212"}
         <!-- Manevra alanları tek kutuda: "ilerleme olmadı" işaretlenince
              hepsi birden GİZLENİYOR. Pasifleştirme değil gizleme — pasif
              düğme sahada "program bozuk" dedirtiyor (58. dosya). -->
+        <!-- 101. dosya · Delgi seçilince DÖRT alan birden görünüyor.
+             Tayfun: "Manevra No : 1 · Delgi Çapı : PQ · Kuyu Tabanı: 860 ·
+             Manevra Boyu : 12 m".
+
+             Kuyu tabanı ile manevra boyu birbirinin türevi; ikisi BAĞLI
+             çalışıyor — şef hangisini yazarsa öteki anında hesaplanıyor.
+             Başlangıç, ilk manevrada kuyunun vardiya başı derinliği,
+             sonrakilerde bir öncekinin kuyu tabanı; ikisi de otomatik. -->
         <div class="kat" id="mv-alanlar">
           <div class="grid2">
-            <div class="field"><label for="f-dia">Çap <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
-            <div class="field"><label for="f-to">Vardiya bitiş metresi <span class="req">*</span></label><input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
+            <div class="field"><label for="f-mv-no">Manevra no</label>
+              <input id="f-mv-no" type="text" readonly tabindex="-1">
+              <div class="hint">Kendiliğinden sıralanır.</div></div>
+            <div class="field"><label for="f-dia">Delgi çapı <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
           </div>
+          <div class="grid2">
+            <div class="field"><label for="f-to">Kuyu tabanı (m) <span class="req">*</span></label>
+              <input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
+            <div class="field"><label for="f-mv-boy">Manevra boyu (m)</label>
+              <input id="f-mv-boy" type="number" min="0" step="0.01" inputmode="decimal"></div>
+          </div>
+          <div class="hint" id="mv-bas-not"></div>
           <button class="btn ghost kesikli" id="btn-add-run" type="button">Manevra ekle</button>
           <div id="run-msg"></div>
           <!-- Boş tablo yer kaplamasın: manevra yoksa gizli, böylece iki
                düğme gerçekten alt alta geliyor. -->
-          <table id="mv-tablo" hidden><thead><tr><th>Çap</th><th>Başlangıç</th><th>Bitiş</th><th>Manevra</th><th></th></tr></thead><tbody id="runs"></tbody></table>
+          <table id="mv-tablo" hidden><thead><tr><th>No</th><th>Çap</th><th>Başlangıç</th><th>Kuyu tabanı</th><th>Boy</th><th></th></tr></thead><tbody id="runs"></tbody></table>
         </div>
 
         <!-- ============================================================
-             İLERLEME OLMAYAN VARDİYA — 23 Ekim, Murat'ın bildirdiği engel
+             101. dosya · "BU VARDİYADA İLERLEME OLMADI" KUTUSU KALKTI
              ============================================================
-             "Takım çekilip tekrar kuyuya inildi, kuyu içi ölçümler
-             alındığı için metraj ilerlemesi yapılmadı. Sistem kayıt
-             yapılmasına izin vermiyor."
-
-             Önceden tek kaçış "makine hiç çalışmadı"ydı; o da vardiyanın
-             tamamını ARIZA yazıyor. Çalışan kuleyi arızalı göstermek hem
-             duruş istatistiğini bozuyor hem hakedişte aleyhimize dönüyor.
-             Burası ayrı yol: makine çalıştı, metraj yok.
+             55. ve 56. dosyalarda özel olarak yapılmıştı: makine çalıştı
+             ama metraj yok. Operasyon listesi onun yerini aldı — delgi
+             operasyonu girilmemişse metraj da yok, sebebi de listeden
+             belli (bekleme · arıza · takım · temizlik · nakliye).
+             Sunucu tarafı (`ilerleme_yok_sebep`, `vardiya_ilerlemesiz`)
+             ESKİ KAYITLAR İÇİN duruyor, yeni kayıtta yazılmıyor.
              ============================================================ -->
-        <div id="ilerleme-yok-blok" style="margin-top:8px">
-          <!-- Manevra ekle ile aynı genişlikte, hemen altında: aynı sorunun
-               iki cevabı, aynı dilde (58. dosya). -->
-          <button class="btn ghost" id="btn-ilerleme-yok" type="button">Bu vardiyada ilerleme olmadı</button>
-          <div class="hint" id="iy-ipucu" style="margin-top:6px">Takım çekildi, ölçüm alındı, muhafaza indirildi — metraj ilerlemediyse buradan işaretleyin.
-            Makine arızalıysa bunu değil 3. adımdaki arıza kaydını kullanın.</div>
-          <!-- ============================================================
-               VARDİYA AÇIKLAMASI — 1 Kasım, Murat'ın isteği (64. dosya)
-               ============================================================
-               "İlerleme var ama 1,00 metre; takım çekilmiş, elmas
-               değiştirilmiş, takım inilmiş."
-
-               48. adımda açılan sebep alanının aynısı, yalnız artık
-               metraj sıfır olmak zorunda değil. İki kip tek kutuda:
-                 metraj yok  → "Bu vardiyada ilerleme olmadı" (sebep zorunlu)
-                 metraj var  → yalnız açıklama (sebep isteğe bağlı)
-               Alan adı veride değişmiyor; ay sonu dökümü ve hakediş
-               tarafı aynı yerden okumaya devam ediyor.
-               ============================================================ -->
-          <div id="iy-wrap" hidden style="margin-top:10px">
-            <div class="arasi" id="iy-baslik-satir" hidden>
-              <span class="eyebrow" id="iy-baslik">Vardiya açıklaması</span>
-            </div>
-            <div class="hint" id="iy-aciklama-ipucu" hidden style="margin-bottom:8px">Metraj
-              yapıldı ama vardiyanın bir kısmı başka işe gittiyse buraya yazın —
-              takım çekme, ölçüm, muhafaza, kuyu temizleme. İsteğe bağlı.</div>
-            <div class="field"><label for="iy-sebep" id="iy-sebep-label">Sebep <span class="req" id="iy-sebep-req">*</span></label>
-              <select id="iy-sebep">
-                <option value="">— seçin —</option>
-                <option value="olcum">Kuyu içi ölçüm</option>
-                <option value="takim">Takım çekme / indirme</option>
-                <option value="muhafaza">Muhafaza borusu indirme</option>
-                <option value="temizleme">Kuyu temizleme / yıkama</option>
-                <option value="diger">Diğer</option>
-              </select></div>
-            <div class="field" id="iy-not-wrap" hidden><label for="iy-not">Ne yapıldı <span class="req">*</span></label>
-              <input id="iy-not" placeholder="Örn. jeofizik loglama ekibi bekledi"></div>
-            <div class="hint" id="iy-olcum-uyari" hidden>Ölçüm seçtiniz — aşağıdaki
-              <b>Kuyu ölçümü</b> bölümüne aldığınız ölçümleri yazın. Hakedişte ayrı
-              kalem olarak faturalanıyor.</div>
-            <button class="btn ghost" id="btn-iy-geri" type="button" style="margin-top:10px">Vazgeç — manevra yazacağım</button>
-          </div>
-          <div id="iy-msg"></div>
-        </div>
 
         <!-- ÇAP DÜŞTÜ: bir kuyuda bir kere, bir alt çapa -->
         <div class="ayrac-ust">
@@ -1255,7 +1241,38 @@ details.acilir[open] > summary::after{content:"\2212"}
         <div class="field"><label for="f-fuel">Bu vardiyada <b>harcanan</b> mazot (litre) <span class="req">*</span></label><input id="f-fuel" type="number" min="0" inputmode="decimal" data-req="4"></div>
         <div class="hint">Bu kulenin bu vardiyada <b>yaktığı</b> mazot. Sahaya gelen tankeri buraya değil,
           Gider sekmesindeki "Sahaya gelen akaryakıt" kartına yazın. Hiç yakılmadıysa 0.</div>
-        <div class="eyebrow" style="margin-top:14px">Kuyuda kullanılan malzeme</div>
+        <!-- ============================================================
+             101. dosya · SIK KULLANILAN DÖRT KALEM HAZIR GELİYOR
+             ============================================================
+             Tayfun: "Mazot · Sondaj Kimyasalı (marka listeden, adet/torba) ·
+             Yağ · Karot Kasası. Ekle altta olacak, diğer kullanılan
+             malzemeleri listeden seçeceğiz."
+
+             Mazot yukarıdaki kendi alanında kalıyor — vardiyanın alanı
+             (`shifts.fuel_liters`), malzeme satırı değil. Makine, kuyu
+             ve tarihle birlikte duruyor; maliyet analizi oradan okunuyor.
+             Malzeme satırına çevirmek o bağı koparırdı.
+
+             Üçü de `KULLANILAN` dizisine yazıyor; kayıt yolu ve sunucu
+             tarafı hiç değişmiyor — yalnız ekranda hazır duruyorlar.
+             ============================================================ -->
+        <div class="eyebrow" style="margin-top:14px">Sık kullanılanlar</div>
+        <div class="field"><label for="f-kimyasal">Sondaj kimyasalı</label>
+          <div class="satir">
+            <select id="f-kimyasal" class="esnek"></select>
+            <input id="f-kimyasal-qty" class="dar" type="number" min="0" step="0.01"
+                   inputmode="decimal" placeholder="0" aria-label="Kimyasal miktarı">
+            <span class="birim-et" id="f-kimyasal-birim">—</span>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="f-yag">Hidrolik yağ (litre)</label>
+            <input id="f-yag" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
+          <div class="field"><label for="f-kasa">Karot kasası (adet)</label>
+            <input id="f-kasa" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>
+        </div>
+
+        <div class="eyebrow" style="margin-top:14px">Kuyuda kullanılan diğer malzeme</div>
         <div id="kullanilan-liste"></div>
         <button class="btn ghost sm" id="btn-kullanilan-add" type="button"
           style="align-self:flex-start">Malzeme ekle</button>
@@ -2473,6 +2490,10 @@ function fillSelects(){
   sondorListesiCiz();
   var mats = MASTER.materials || [];
   opt("#st-material", mats, function(m){ return m.name + " (" + m.unit + ")"; });
+  /* 101. dosya · sabit malzeme satırları ana veri gelince kuruluyor.
+     İlk yazışta yalnız sıfırlamada çağrılıyordu ve kimyasal listesi
+     vardiya kaydedilene kadar BOŞ kalıyordu — sınama yakaladı. */
+  sabitCiz();
   fillVardiya();
   isciCiz();
   if(pr.length === 1) $("#f-project").value = pr[0].id;
@@ -4306,38 +4327,15 @@ var IY_AD = {olcum:"Kuyu içi ölçüm", takim:"Takım çekme / indirme",
              temizleme:"Kuyu temizleme / yıkama", diger:"Diğer"};
 
 function ilerlemeYokCiz(){
-  /* 58. dosya: pasifleştirme yok, gizleme var. İşaretliyken manevra
-     alanlarının tamamı (çap, bitiş metresi, düğme, uyarı, tablo)
-     kayboluyor; şefe doldurmadığı alan "eksik" diye gösterilmiyor. */
-  $("#mv-alanlar").hidden = ILERLEME_YOK;
-  /* 1 Kasım · B2: blok artık HER ZAMAN duruyor. Önceden manevra
-     yazıldığında tamamen gizleniyordu; Murat'ın "1 metre + takım
-     çekildi" durumunda yazacak yer kalmıyordu. */
-  $("#ilerleme-yok-blok").hidden = false;
-  var metrajVar = runs.length > 0;
-  /* "Bu vardiyada ilerleme olmadı" düğmesi yalnız metraj yokken anlamlı:
-     metraj yazılmışsa ilerleme olmuştur. */
-  $("#btn-ilerleme-yok").hidden = (ILERLEME_YOK || metrajVar);
-  $("#iy-ipucu").hidden = (ILERLEME_YOK || metrajVar);
-  /* Açıklama kutusu: ilerleme-yok kipinde ya da metraj varken açık.
-     Metraj yokken ve kip de kapalıyken kapalı — orada düğme konuşuyor. */
-  $("#iy-wrap").hidden = !(ILERLEME_YOK || metrajVar);
-  $("#iy-baslik-satir").hidden = !metrajVar || ILERLEME_YOK;
-  $("#iy-aciklama-ipucu").hidden = !metrajVar || ILERLEME_YOK;
-  /* Metraj varken sebep İSTEĞE BAĞLI; yıldız ve "— seçin —" yazısı
-     zorunluluk sözü veriyordu. */
-  var zorunlu = ILERLEME_YOK;
-  $("#iy-sebep-label").firstChild.nodeValue = zorunlu ? "Sebep " : "Ne yapıldı ";
-  $("#iy-sebep-req").hidden = !zorunlu;
-  var ilkSecenek = $("#iy-sebep").options[0];
-  if(ilkSecenek) ilkSecenek.textContent = zorunlu ? "— seçin —" : "— yok —";
-  $("#btn-iy-geri").hidden = !ILERLEME_YOK;
-  $("#iy-not-wrap").hidden = (IY_SEBEP !== "diger");
-  $("#iy-olcum-uyari").hidden = (IY_SEBEP !== "olcum" || !ILERLEME_YOK);
-  if(ILERLEME_YOK) msg($("#run-msg"), "");
+  /* 101. dosya · kutu ekrandan kalktı; fonksiyon duruyor çünkü
+     `renderRuns` ve birkaç yer onu çağırıyor. Yaptığı tek iş kaldı:
+     manevra alanlarını yerinde tutmak ve bağlı ekranları tazelemek.
+     `ILERLEME_YOK` artık hiç true olmuyor — eski kayıt düzeltilirken
+     sunucudan gelen sebep yalnız özet metninde görünüyor. */
+  var mv = $("#mv-alanlar");
+  if(mv) mv.hidden = (OP_TUR !== "" && OP_TUR !== "delgi");
   kuyuSonuGoster();
   refreshState();
-  ilerlemeSeridiCiz();
 }
 function ilerlemeSeridiCiz(){
   var el = $("#iy-serit");
@@ -4358,35 +4356,78 @@ function ilerlemeSeridiCiz(){
       " — metraj sıfır, makine çalıştı.";
   }
 }
-$("#btn-ilerleme-yok").addEventListener("click", function(){
-  if(runs.length){
-    msg($("#iy-msg"), "Bu vardiyada manevra yazılmış. Önce manevraları silin.", "err");
-    return;
-  }
-  ILERLEME_YOK = true; msg($("#iy-msg"), ""); ilerlemeYokCiz();
-});
-$("#btn-iy-geri").addEventListener("click", function(){
-  ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
-  $("#iy-sebep").value = ""; $("#iy-not").value = "";
-  msg($("#iy-msg"), ""); ilerlemeYokCiz();
-});
-$("#iy-sebep").addEventListener("change", function(){
-  IY_SEBEP = $("#iy-sebep").value;
-  /* Ölçüm seçilince ilk satır kendiliğinden açılıyor — şef "ölçüm ekle"
-     düğmesini aramasın, hakedişin kalemi sessizce boş kalmasın. */
-  if(IY_SEBEP === "olcum" && !OLCUM.length){
-    var w = currentWell();
-    OLCUM.push({derinlik:"", azimut:(w && w.azimuth) || "", egim:(w && w.dip) || ""});
-    olcumCiz();
-  }
-  ilerlemeYokCiz();
-});
-$("#iy-not").addEventListener("input", function(){ IY_NOT = $("#iy-not").value; refreshState(); });
+/* 101. dosya · "ilerleme olmadı" ekranının dinleyicileri kalktı; öğeler
+   artık DOM'da yok. `ILERLEME_YOK` ve `IY_SEBEP` değişkenleri duruyor:
+   eski bir kayıt düzeltmeye açıldığında sunucudan gelen sebep özet
+   metninde görünsün diye (5600'lü satırlar). Yeni kayıtta hiç yazılmıyor. */
 
 /* ---------------- kuyuda kullanılan malzeme (tüketim) ---------------- */
+/* ============================================================
+   SABİT MALZEME SATIRLARI (101. dosya)
+   ============================================================
+   Üç kalem her vardiyada hazır: sondaj kimyasalı, hidrolik yağ,
+   karot kasası. Hepsi `KULLANILAN` dizisine yazıyor — kayıt yolu
+   değişmiyor. "Ekle" listesinden düşüyorlar ki aynı kalem iki kere
+   girilmesin ve miktarlar sessizce toplanmasın. */
+var KIMYASALLAR = ["Bentonit", "Polimer", "Köpük"];
+var SABIT_ADLAR = KIMYASALLAR.concat(["Hidrolik yağ", "Karot kasası"]);
+function malzemeBul(ad){
+  return malzemeler().filter(function(m){
+    return (m.name || "").toLocaleLowerCase("tr") === ad.toLocaleLowerCase("tr"); })[0] || null;
+}
 function kullanilanMalzemeler(){
-  /* Muhafaza borusu ve tij bu listeden çıktı; onlar kuyu sonunda yazılıyor. */
-  return malzemeler().filter(function(m){ return !/muhafaza|tij/i.test(m.name || ""); });
+  /* Muhafaza borusu ve tij bu listeden çıktı; onlar kuyu sonunda yazılıyor.
+     Sabit satırı olan kalemler de düşüyor (101. dosya). */
+  return malzemeler().filter(function(m){
+    return !/muhafaza|tij/i.test(m.name || "") &&
+           SABIT_ADLAR.indexOf(m.name) < 0; });
+}
+function sabitCiz(){
+  var sel = $("#f-kimyasal"); if(!sel) return;
+  var kendi = sel.value;
+  sel.innerHTML = '<option value="">— seçin —</option>' +
+    KIMYASALLAR.map(function(ad){
+      var m = malzemeBul(ad);
+      return m ? '<option value="' + m.id + '">' + esc(ad) + '</option>' : ""; }).join("");
+  sel.value = kendi || "";
+  sabitBirimCiz();
+}
+function sabitBirimCiz(){
+  var sel = $("#f-kimyasal"), be = $("#f-kimyasal-birim"); if(!sel || !be) return;
+  var m = malzemeler().filter(function(x){ return x.id === sel.value; })[0];
+  var u = m ? m.unit : "";
+  birimYaz(be, u);
+  miktarKur($("#f-kimyasal-qty"), u);
+}
+/* Üç sabit satırı `KULLANILAN` biçimine çevirir. Kayıt yükü bunu
+   serbest satırların arkasına ekliyor. */
+function sabitSatirlar(){
+  var out = [];
+  function ekle(id, miktar){
+    var q = Number(String(miktar).replace(",", "."));
+    if(id && isFinite(q) && q > 0) out.push({material_id:id, qty:q});
+  }
+  ekle($("#f-kimyasal") ? $("#f-kimyasal").value : "", $("#f-kimyasal-qty").value);
+  var yag  = malzemeBul("Hidrolik yağ"),  kasa = malzemeBul("Karot kasası");
+  if(yag)  ekle(yag.id,  $("#f-yag").value);
+  if(kasa) ekle(kasa.id, $("#f-kasa").value);
+  return out;
+}
+/* Düzeltmede merkezden gelen satırları sabit kutulara dağıtır;
+   geri kalanı serbest listeye bırakır. */
+function sabitDagit(satirlar){
+  var kalan = [];
+  (satirlar || []).forEach(function(r){
+    var m = malzemeler().filter(function(x){ return x.id === r.material_id; })[0];
+    var ad = m ? m.name : "";
+    if(KIMYASALLAR.indexOf(ad) >= 0){
+      $("#f-kimyasal").value = r.material_id; $("#f-kimyasal-qty").value = r.qty;
+    } else if(ad === "Hidrolik yağ"){ $("#f-yag").value = r.qty;
+    } else if(ad === "Karot kasası"){ $("#f-kasa").value = r.qty;
+    } else kalan.push(r);
+  });
+  sabitBirimCiz();
+  return kalan;
 }
 function kullanilanCiz(){
   var box = $("#kullanilan-liste"); if(!box) return;
@@ -4431,6 +4472,10 @@ function kullanilanToplam(){
 }
 $("#btn-kullanilan-add").addEventListener("click", function(){
   KULLANILAN.push({material_id:"", qty:""}); kullanilanCiz();
+});
+$("#f-kimyasal").addEventListener("change", function(){ sabitBirimCiz(); refreshState(); });
+["#f-kimyasal-qty", "#f-yag", "#f-kasa"].forEach(function(id){
+  if($(id)) $(id).addEventListener("input", refreshState);
 });
 
 /* ---------------- nakliye günü ---------------- */
@@ -4505,16 +4550,22 @@ function renderRuns(){
     var tr = document.createElement("tr");
     /* Manevrayı yapan sondör alanı kaldırıldı: metraj vardiyanın sondörüne
        yazılıyor (Tayfun, 17 Ekim). Tabloda yerine başlangıç metresi var. */
-    tr.innerHTML = "<td>"+r.diameter+"</td><td class='num'>"+tl(r.from_m)+"</td><td class='num'>"+tl(r.to_m)+
-      "</td><td class='num'><b>"+tl(r.to_m-r.from_m)+"</b></td><td><button class='chip' type='button'>×</button></td>";
-    tr.querySelector("button").addEventListener("click", function(){ runs.splice(i,1); renderRuns(); });
+    tr.innerHTML = "<td class='num'>"+(i+1)+"</td><td>"+r.diameter+"</td><td class='num'>"+tl(r.from_m)+
+      "</td><td class='num'>"+tl(r.to_m)+"</td><td class='num'><b>"+tl(r.to_m-r.from_m)+
+      "</b></td><td><button class='chip' type='button'>×</button></td>";
+    tr.querySelector("button").addEventListener("click", function(){
+      runs.splice(i,1);
+      /* Numaralar silinince yeniden sıralanıyor: tabloda 1,3,4 kalmasın. */
+      runs.forEach(function(x, k){ x.seq = k + 1; });
+      renderRuns(); mvNoCiz(); });
     tb.appendChild(tr);
   });
   /* Boş tablo başlığı ekranda yer tutmasın; manevra yoksa iki düğme
      gerçekten alt alta dursun (58. dosya). */
   $("#mv-tablo").hidden = !runs.length;
   syncDepth();
-  ilerlemeYokCiz();            /* blok manevra varken gizleniyor */
+  mvNoCiz();
+  ilerlemeYokCiz();
 }
 function runFormReady(){
   var v = parseFloat(String($("#f-to").value).replace(",","."));
@@ -4552,6 +4603,53 @@ function updateRunButton(){
   $(s).addEventListener("input", function(){ MV_UYAR = true; updateRunButton(); });
   $(s).addEventListener("change", function(){ MV_UYAR = true; updateRunButton(); });
 });
+/* ============================================================
+   MANEVRA GİRİŞİ — kuyu tabanı ⇄ manevra boyu (101. dosya)
+   ============================================================
+   İki alan birbirinin türevi:
+       manevra boyu = kuyu tabanı − başlangıç
+   Şef hangisini yazarsa öteki anında hesaplanıyor. Başlangıç,
+   ilk manevrada kuyunun vardiya başı derinliği, sonrakilerde bir
+   öncekinin kuyu tabanı — ikisi de `depth()`ten geliyor, elle
+   girilmiyor.
+
+   ⚠ Hesap TEK YÖNDE tetikleniyor: `f-to` yazılınca `f-mv-boy`
+   güncelleniyor ve tersi. İkisini de "input" olayında birbirine
+   yazdırırsak sonsuz döngüye giriyor; bu yüzden yazan alan
+   kilitleniyor (MV_YAZAN). */
+var MV_YAZAN = "";
+function mvBaslangic(){ return depth(); }
+function mvNoCiz(){
+  var e = $("#f-mv-no"); if(e) e.value = String(runs.length + 1);
+  var b = $("#mv-bas-not");
+  if(b) b.textContent = "Bu manevra " + tl(mvBaslangic()) + " m'den başlıyor.";
+}
+function mvSayi(sec){
+  var v = String($(sec).value).replace(",", ".").trim();
+  if(v === "") return null;
+  var x = parseFloat(v);
+  return isFinite(x) ? x : null;
+}
+function mvTabandanBoy(){
+  if(MV_YAZAN === "boy") return;
+  MV_YAZAN = "taban";
+  var t = mvSayi("#f-to");
+  $("#f-mv-boy").value = (t == null) ? "" : String(Math.round((t - mvBaslangic()) * 100) / 100);
+  MV_YAZAN = "";
+  updateRunButton();
+}
+function mvBoydanTaban(){
+  if(MV_YAZAN === "taban") return;
+  MV_YAZAN = "boy";
+  var b = mvSayi("#f-mv-boy");
+  $("#f-to").value = (b == null) ? "" : String(Math.round((mvBaslangic() + b) * 100) / 100);
+  MV_YAZAN = "";
+  updateRunButton();
+}
+$("#f-to").addEventListener("input", mvTabandanBoy);
+$("#f-mv-boy").addEventListener("input", mvBoydanTaban);
+mvNoCiz();
+
 $("#btn-add-run").addEventListener("click", function(){
   var v = parseFloat(String($("#f-to").value).replace(",","."));
   if(ILERLEME_YOK) return;            /* alanlar gizliyken tetiklenmesin */
@@ -4560,21 +4658,21 @@ $("#btn-add-run").addEventListener("click", function(){
     updateRunButton();
     var eks = [];
     if(!$("#f-dia").value) eks.push("çap");
-    if(!$("#f-to").value) eks.push("vardiya bitiş metresi");
+    if(!$("#f-to").value) eks.push("kuyu tabanı");
     msg($("#run-msg"), "Manevra eklenmedi — eksik: " + eks.join(", ") + ".", "err");
     (!$("#f-dia").value ? $("#f-dia") : $("#f-to")).scrollIntoView({block:"center"});
     return; }
-  if(v <= depth()){ msg($("#run-msg"), "Bitiş metresi mevcut derinlikten (" + tl(depth()) + " m) büyük olmalı.", "err"); return; }
+  if(v <= depth()){ msg($("#run-msg"), "Kuyu tabanı mevcut derinlikten (" + tl(depth()) + " m) büyük olmalı.", "err"); return; }
   if(v - depth() > 12){ msg($("#run-msg"), "Dikkat: tek manevrada " + tl(v-depth()) + " m girdiniz.", "warn"); }
   else { msg($("#run-msg"), ""); }
   runs.push({seq:runs.length+1, diameter:$("#f-dia").value, from_m:depth(), to_m:v,
              personnel_id:$("#f-driller1").value || null});
-  $("#f-to").value = "";
-  renderRuns(); refreshState();
+  $("#f-to").value = ""; $("#f-mv-boy").value = "";
+  renderRuns(); mvNoCiz(); refreshState();
   /* Kutu temizlendiği için "eksik bitiş metresi" uyarısı yeniden çıkmasın;
      yerine ne olduğunu söyleyen onay göster. */
-  msg($("#run-msg"), "Manevra eklendi. Kuyu derinliği " + tl(depth()) +
-      " m. Başka manevra varsa bitiş metresini yazın.", "ok");
+  msg($("#run-msg"), "Manevra eklendi. Kuyu tabanı " + tl(depth()) +
+      " m. Başka manevra varsa kuyu tabanını ya da manevra boyunu yazın.", "ok");
 });
 $("#f-to").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); $("#btn-add-run").click(); } });
 
@@ -4662,8 +4760,10 @@ function opCiz(){
   box.innerHTML = "";
   if(!OPERASYONLAR.length){
     box.innerHTML = '<div class="hint">Henüz operasyon eklenmedi. Türü seçip ekleyin.</div>';
+    if($("#btn-op-degistir")) $("#btn-op-degistir").hidden = true;
     opSureYaz(); return;
   }
+  if($("#btn-op-degistir")) $("#btn-op-degistir").hidden = false;
   OPERASYONLAR.forEach(function(o, i){
     var row = document.createElement("div");
     row.className = "q-satir";
@@ -4754,6 +4854,16 @@ $("#op-bekleme-tur").addEventListener("click", function(e){
     x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
 });
 $("#op-kuyu-durum").addEventListener("change", opAlanCiz);
+/* 101. dosya · "Operasyon değiştir": tür seçiciyi açıp oraya kaydırıyor.
+   Düğme yalnız en az bir operasyon eklendikten SONRA çıkıyor — boş
+   listede "değiştir" demek anlamsız, orada zaten tür seçici açık. */
+$("#btn-op-degistir").addEventListener("click", function(){
+  OP_TUR = ""; OP_BEKLEME = "";
+  opTurCiz(); opAlanCiz();
+  $("#op-giris").hidden = false;
+  $("#op-tur").scrollIntoView({block:"center", behavior:"smooth"});
+  msg($("#op-msg"), "Yeni operasyonun türünü seçin.", "ok");
+});
 opTurCiz(); opAlanCiz(); opCiz();
 
 function kagitNoUret(){
@@ -5425,6 +5535,8 @@ function ozetKartCiz(){
       ($("#f-sayac-bas") && $("#f-sayac-bas").value !== "" ? tl($("#f-sayac-bas").value,1) : "—") +
       " → " + ($("#f-sayac").value !== "" ? tl($("#f-sayac").value,1) : "—")),
     opOzet.length ? ozetSatir("Operasyonlar", opOzet.join("  ·  ")) : ozetSatir("Operasyonlar", "—"),
+    ($("#f-op-note") && $("#f-op-note").value.trim())
+      ? ozetSatir("Açıklama", $("#f-op-note").value.trim()) : "",
     mv.length ? ozetSatir("Manevra", mv.join("  ·  ")) : "",
     ozetSatir("Toplam metraj", tl(totalM()) + " m"),
     ozetSatir("Kuyu tabanı", tl(depth()) + " m"),
@@ -5434,6 +5546,7 @@ function ozetKartCiz(){
   ]);
 
   var mal = KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; })
+    .concat(sabitSatirlar())
     .map(function(r){ return ozetMalzemeAdi(r.material_id) + " " + tl(r.qty); });
   h += ozetGrup(4, "Malzeme", [
     ozetSatir("Mazot", $("#f-fuel").value === "" ? "girilmedi" : $("#f-fuel").value + " lt"),
@@ -5677,12 +5790,12 @@ function vardiyaDuzelt(sat, satirEl){
       if(kart && kart.ilerleme_yok){
         IY_SEBEP = kart.ilerleme_yok.sebep || "";
         IY_NOT   = kart.ilerleme_yok["not"] || "";
-        $("#iy-sebep").value = IY_SEBEP;
-        $("#iy-not").value   = IY_NOT;
+        /* 101. dosya · alanlar ekrandan kalktı; değerler yalnız özette
+           ve kayıt yükünde kullanılıyor. */
         ILERLEME_YOK = (runs.length === 0 && !!IY_SEBEP);
       } else {
         ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
-        $("#iy-sebep").value = ""; $("#iy-not").value = "";
+
       }
       ilerlemeYokCiz();
 
@@ -6095,7 +6208,12 @@ $("#btn-save-shift").addEventListener("click", function(){
   SONDOR_EK.forEach(function(v){ crewEkle(v, "sondor"); });
   ISCI.forEach(function(v){ crewEkle(v, "yardimci"); });
   SOFOR.forEach(function(v){ crewEkle(v, "sofor"); });
-  var note = $("#f-note").value || "";
+  /* 101. dosya · iki açıklama var: Operasyon adımındaki ve Malzeme
+     adımındaki. İkisi de aynı alana (`operation_note`) yazılıyor,
+     araya ayraç konuyor — merkezde tek metin olarak okunsun. */
+  var note = [($("#f-op-note") ? $("#f-op-note").value.trim() : ""),
+              ($("#f-note") ? $("#f-note").value.trim() : "")]
+             .filter(Boolean).join(" | ");
   if($("#f-check-note").value.trim()) note = (note ? note + " | " : "") + "Kontrol: " + $("#f-check-note").value.trim();
   var wellCode = currentWell() ? currentWell().code : "";
   var metraj = totalM(), fuel = Number($("#f-fuel").value);
@@ -6138,7 +6256,10 @@ $("#btn-save-shift").addEventListener("click", function(){
        4 paket" düzeltmeden sonra 8 pakete çıkıyordu. Mevcut satırlar
        A2 kutusunda salt okunur gösteriliyor; değişmesi gerekiyorsa
        yönetici düzeltiyor. */
-    used: DUZELT ? [] : KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; }),
+    /* 101. dosya · sabit satırlar (kimyasal · hidrolik yağ · karot kasası)
+       serbest satırlarla aynı dizide gidiyor; sunucu tarafı değişmedi. */
+    used: DUZELT ? [] : KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; })
+                                  .concat(sabitSatirlar()),
     /* Kuyu sonu: kuyuda kalan muhafaza/tij ve kuyu ölçümleri.
        Aynı sebeple düzeltmede gönderilmiyor — `kuyu_sonu_kaydet` de
        ekliyor, değiştirmiyor. */
@@ -6197,7 +6318,7 @@ $("#btn-save-shift").addEventListener("click", function(){
     durusKuyrugu.push({ id:uuid(), kind:"ilerlemesiz", created:Date.now()+1,
       title:(ILERLEME_YOK ? "İlerleme yok · " : "Vardiya açıklaması · ") + wellCode,
       sub:(IY_AD[IY_SEBEP] || IY_SEBEP) + " · " + item.payload.work_date,
-      payload:{ client_uuid:cu, sebep:IY_SEBEP, note:$("#iy-not").value.trim() || null } });
+      payload:{ client_uuid:cu, sebep:IY_SEBEP, note:(IY_NOT || "").trim() || null } });
   } else if(duzeltmeMi && DUZELT_ACIKLAMA_VARDI){
     durusKuyrugu.push({ id:uuid(), kind:"ilerlemesiz", created:Date.now()+1,
       title:"Vardiya açıklaması silindi · " + wellCode,
@@ -6269,7 +6390,10 @@ function resetForm(){
   $("#f-paper").value = ""; $("#f-end").value = "";
   $("#f-check-note").value = "";
   KULLANILAN = []; KALAN = []; OLCUM = []; ISCI = []; SONDOR_EK = []; SOFOR = [];
+  ["#f-kimyasal", "#f-kimyasal-qty", "#f-yag", "#f-kasa"].forEach(function(id){
+    if($(id)) $(id).value = ""; });
   OPERASYONLAR = []; OP_TUR = ""; OP_BEKLEME = "";
+  if($("#f-op-note")) $("#f-op-note").value = "";
   if($("#f-vfoto")) $("#f-vfoto").value = "";
   opTurCiz(); opAlanCiz(); opCiz();
   /* 84. dosya · 7. madde: sayaç her vardiyada yeniden okunuyor —
@@ -6278,7 +6402,7 @@ function resetForm(){
   $("#f-sayac").value = ""; sayacNotuCiz(null);
   MV_UYAR = false; msg($("#run-msg"), "");
   duzeltYanTemizle();
-  kullanilanCiz(); kalanCiz(); olcumCiz(); kuyuSonuGoster(); isciCiz();
+  kullanilanCiz(); sabitCiz(); kalanCiz(); olcumCiz(); kuyuSonuGoster(); isciCiz();
   $("#ekip-kaynak").textContent = "";
   $("#nak-note").value = ""; msg($("#nak-msg"), "");
   $("#ar-kind").value = ""; $("#ar-bas").value = ""; $("#ar-bit").value = "";
@@ -6288,8 +6412,7 @@ function resetForm(){
   HIC_CALISMADI = false; calismadiSeridiCiz();
   ILERLEME_YOK = false; IY_SEBEP = ""; IY_NOT = "";
   DUZELT_ACIKLAMA_VARDI = false; DUZELT_YUKLENIYOR = false;
-  if($("#iy-sebep")) $("#iy-sebep").value = "";
-  if($("#iy-not")) $("#iy-not").value = "";
+  IY_SEBEP = ""; IY_NOT = ""; ILERLEME_YOK = false;
   ilerlemeYokCiz();
   AR_SON = ""; $$('#ar-son .chip').forEach(function(x){ x.setAttribute("aria-pressed","false"); });
   if($("#ar-bit-wrap")) $("#ar-bit-wrap").hidden = true;
@@ -8621,7 +8744,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "57";
+var SURUM = "58";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
