@@ -382,6 +382,26 @@ td:first-child{text-align:start;color:var(--ink-2)}
 .secim{display:flex;flex-wrap:wrap;gap:6px}
 .secim .chip{min-height:40px;padding:8px 11px}
 /* ============================================================
+   KUTUCUK IZGARASI — SATIR BAŞINA ÜÇ (104. dosya · 11 Kasım)
+   ------------------------------------------------------------
+   Tayfun: "Buradaki kontrol butonları belirli bir hizada düzgün
+   şekilde olsun. Mesela 3'er 3'er sıralı alt alta."
+
+   `flex-wrap` kutucukları yazı uzunluğuna göre diziyordu: dokuz
+   kontrol 2 · 2 · 3 · 2 gibi düzensiz çıkıyordu. Izgara sütunları
+   `1fr` olduğu için hepsi EŞİT genişlikte; `align-items:stretch`
+   (ızgaranın varsayılanı) aynı satırdaki kutucukları aynı boya
+   getiriyor, yani uzun yazı satırı bozmuyor.
+
+   Yazı 12.5 px kalıyor: iOS'un 16 px kuralı yazı GİRİLEN alanlar
+   için, düğme için değil — düğmeye dokunmak ekranı zıplatmıyor.
+   ============================================================ */
+.izgara3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.izgara3 .chip{display:flex;align-items:center;justify-content:center;
+  text-align:center;min-height:44px;padding:7px 8px;line-height:1.25;gap:3px}
+/* `content:"✓ "` sondaki boşluğu esnek kutuda yutuluyor; aradaki
+   boşluğu `gap` veriyor, yoksa "✓Delgi" diye bitişik yazılıyor. */
+/* ============================================================
    ADIM BANTLARI (79. dosya · 5 Kasım 2026)
    ------------------------------------------------------------
    Burada duran şey eskiden `.steps` idi: beş düğme yan yana,
@@ -605,6 +625,12 @@ details.acilir[open] > summary::after{content:"\2212"}
 .satir .bos,.satir-bas .bos,.satir-top .bos{flex:none;width:44px}
 /* Miktarın yanındaki birim etiketi — malzeme seçilince doluyor (41. dosya, 1b) */
 .satir .birim-et{flex:none;width:62px;font-size:12px;color:var(--ink-3)}
+/* 104. dosya · sabit malzeme satırlarının sol hücresi: ya düz ad
+   (Hidrolik yağ) ya ad + marka seçici (Sondaj kimyasalı). Seçici
+   hücrenin tamamını kaplıyor ki miktar sütunu hizasından kaymasın. */
+.satir .ad-hucre{display:block;font-size:13px;color:var(--ink-2)}
+.satir .ad-hucre .ad-ust{display:block;font-size:11.5px;color:var(--ink-3);margin-bottom:4px}
+.satir .ad-hucre select{display:block;width:100%}
 .satir-bas .dar:last-of-type{width:62px}
 .satir input,.satir select{padding:9px 10px;min-height:44px}
 /* satır sonundaki silme düğmesi: çerçeveli, 44 px, çıplak × değil */
@@ -1055,7 +1081,7 @@ details.acilir[open] > summary::after{content:"\2212"}
           <span class="eyebrow">Çalışma öncesi kontroller</span>
           <button class="btn ghost sm" id="btn-check-all" type="button">Tümü uygun</button>
         </div>
-        <div class="chips" id="checks"></div>
+        <div class="chips izgara3" id="checks"></div>
         <div class="hint" id="check-count"></div>
         <div class="field" id="check-note-wrap" hidden>
           <label for="f-check-note">Uygun olmayan maddelerin açıklaması <span class="req">*</span></label>
@@ -1079,7 +1105,7 @@ details.acilir[open] > summary::after{content:"\2212"}
         <div class="kat" id="op-giris">
           <div class="field">
             <label>Operasyon türü</label>
-            <div class="secim" id="op-tur"></div>
+            <div class="secim izgara3" id="op-tur"></div>
           </div>
           <!-- ============================================================
                103. dosya · DELGİ ALANLARI TÜR SEÇİCİNİN HEMEN ALTINDA
@@ -1269,19 +1295,50 @@ details.acilir[open] > summary::after{content:"\2212"}
              tarafı hiç değişmiyor — yalnız ekranda hazır duruyorlar.
              ============================================================ -->
         <div class="eyebrow" style="margin-top:14px">Sık kullanılanlar</div>
-        <div class="field"><label for="f-kimyasal">Sondaj kimyasalı</label>
+        <!-- ============================================================
+             104. dosya · SIK KULLANILANLAR DA SATIR DÜZENİNE GEÇTİ
+             ------------------------------------------------------------
+             Tayfun: "Sık kullanılan malzemeler sırasıyla adı solda,
+             adedi litresi vs. sağ tarafa girilecek şekilde alt alta
+             düzenli bir şekilde çıksın. Ekleme yapıldığında da gene
+             aşağıya aynı düzende eklensin."
+
+             Üç kalem artık aşağıdaki "Kuyuda kullanılan diğer malzeme"
+             listesiyle AYNI satır kalıbını kullanıyor: ad solda
+             (`esnek`), miktar sağda (`dar`), birim en sağda
+             (`birim-et`). Sondaj kimyasalının sol hücresi marka
+             seçicisini de taşıyor.
+
+             Sondaki boş `.bos` hücresi, aşağıdaki satırların silme
+             düğmesinin yerini tutuyor — sabit satırlar silinemediği
+             için düğme yok ama sütunlar hizalı kalmalı.
+             ============================================================ -->
+        <div id="sabit-liste">
+          <div class="satir-bas"><span class="esnek">Malzeme</span><span class="dar">Miktar</span><span class="dar">Birim</span><span class="bos"></span></div>
           <div class="satir">
-            <select id="f-kimyasal" class="esnek"></select>
+            <span class="esnek ad-hucre">
+              <span class="ad-ust">Sondaj kimyasalı</span>
+              <select id="f-kimyasal" aria-label="Sondaj kimyasalı markası"></select>
+            </span>
             <input id="f-kimyasal-qty" class="dar" type="number" min="0" step="0.01"
-                   inputmode="decimal" placeholder="0" aria-label="Kimyasal miktarı">
+                   inputmode="decimal" placeholder="0" aria-label="Sondaj kimyasalı miktarı">
             <span class="birim-et" id="f-kimyasal-birim">—</span>
+            <span class="bos"></span>
           </div>
-        </div>
-        <div class="grid2">
-          <div class="field"><label for="f-yag">Hidrolik yağ (litre)</label>
-            <input id="f-yag" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
-          <div class="field"><label for="f-kasa">Karot kasası (adet)</label>
-            <input id="f-kasa" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>
+          <div class="satir">
+            <label class="esnek ad-hucre" for="f-yag">Hidrolik yağ</label>
+            <input id="f-yag" class="dar" type="number" min="0" step="0.01"
+                   inputmode="decimal" placeholder="0">
+            <span class="birim-et">litre</span>
+            <span class="bos"></span>
+          </div>
+          <div class="satir">
+            <label class="esnek ad-hucre" for="f-kasa">Karot kasası</label>
+            <input id="f-kasa" class="dar" type="number" min="0" step="1"
+                   inputmode="numeric" placeholder="0">
+            <span class="birim-et">adet</span>
+            <span class="bos"></span>
+          </div>
         </div>
 
         <div class="eyebrow" style="margin-top:14px">Kuyuda kullanılan diğer malzeme</div>
@@ -3432,6 +3489,11 @@ var CHECKS = ["Vinç halatı · kilit kablo · wire-line",
 CHECKS.forEach(function(c){
   var b = document.createElement("button");
   b.type="button"; b.className="chip"; b.textContent=c; b.setAttribute("aria-pressed","false");
+  /* ⚠ Kaydın anahtarı GÖRÜNEN YAZI değil, bu öznitelik. Kontrol
+     `checks` içinde madde adıyla saklanıyor; yazı kısaltılırsa eski
+     vardiyaların anahtarları tutmaz ve düzeltme ekranı işaretleri
+     geri yükleyemez. İsim burada sabit duruyor (104. dosya). */
+  b.dataset.ad = c;
   b.addEventListener("click", function(){
     b.setAttribute("aria-pressed", b.getAttribute("aria-pressed")==="true" ? "false":"true");
     countChecks(); refreshState(); });
@@ -3451,7 +3513,7 @@ $("#btn-check-all").addEventListener("click", function(){
 countChecks();
 function checksPayload(){
   var o = {};
-  $$("#checks .chip").forEach(function(b){ o[b.textContent] = b.getAttribute("aria-pressed")==="true"; });
+  $$("#checks .chip").forEach(function(b){ o[b.dataset.ad || b.textContent] = b.getAttribute("aria-pressed")==="true"; });
   return o;
 }
 $("#f-check-note").addEventListener("input", refreshState);
@@ -5808,7 +5870,7 @@ function vardiyaDuzelt(sat, satirEl){
         ? kart.kontrol : null;
       var ktEksik = 0;
       $$("#checks .chip").forEach(function(c){
-        var ad = c.textContent;
+        var ad = c.dataset.ad || c.textContent;
         var v = (kt && Object.prototype.hasOwnProperty.call(kt, ad)) ? !!kt[ad] : true;
         if(kt && !Object.prototype.hasOwnProperty.call(kt, ad)) ktEksik++;
         c.setAttribute("aria-pressed", String(v));
@@ -8777,7 +8839,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "59";
+var SURUM = "60";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
