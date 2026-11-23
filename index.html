@@ -340,7 +340,16 @@ input[type="month"]::-webkit-calendar-picker-indicator{margin-inline-start:auto}
 .ekip-grup{display:flex;justify-content:space-between;align-items:baseline;
   gap:8px;padding:15px 0 4px}
 .ekip-grup:first-child{padding-top:2px}
-.q-satir{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
+/* 109. dosya · Tayfun: "Operasyon silme için çıkan × kutucuğu kocaman
+   aşağıda çıkıyor. Ufalt ve yan tarafta olsun."
+   Satır blok akışındaydı: iki yazı div'i alt alta, 44 px'lik düğme de
+   onların ALTINA düşüyordu. Artık esnek satır — yazı solda, düğme
+   sağda ve küçük. Dokunma alanı 44'ten 34'e indi; düğme kenarda tek
+   başına durduğu için yanlış dokunma riski düşük. */
+.q-satir{display:flex;align-items:center;gap:10px;
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--card)}
+.q-satir .q-govde{flex:1 1 auto;min-width:0}
+.q-satir .sil{width:34px;min-width:34px;min-height:34px;font-size:15px;align-self:flex-start}
 .q-satir.takildi{border-color:var(--bad);background:var(--bad-soft)}
 /* Takılan kayıt uyarısı — "kaydedildi" diyen ekranın içinde (20 Ekim dersi) */
 .uyari-kutu{border:1px solid var(--bad);background:var(--bad-soft);color:var(--bad);
@@ -1155,6 +1164,21 @@ details.acilir[open] > summary::after{content:"\2212"}
                ============================================================ -->
           <div class="kat" id="mv-alanlar">
             <div class="hint" id="mv-bas-not"></div>
+            <!-- 109. dosya · Tayfun: "Delgide manevra eklerken saat
+                 aralığı girilsin. Bir sonraki manevra, bir öncekinin
+                 bitişinin başlangıcı olarak otomatik gelsin.
+                 Eklemeler sırasıyla birbirini takip etsin, çakışma
+                 olmasın."
+                 Başlangıç YAZILMIYOR, hesaplanıyor: bir önceki
+                 kaydın bitişi. Bitiş seçicisi de yalnız ondan
+                 SONRAKİ saatleri gösteriyor — çakışma kurguyla
+                 imkânsız, denetime gerek kalmıyor. -->
+            <div class="grid2">
+              <div class="field"><label for="mv-bas">Başlangıç</label>
+                <input id="mv-bas" type="text" readonly tabindex="-1"></div>
+              <div class="field"><label for="mv-bit">Bitiş <span class="req">*</span></label>
+                <select id="mv-bit"></select></div>
+            </div>
             <div class="uclu-giris">
               <div class="field"><label for="f-dia">Çap <span class="req">*</span></label>
                 <select id="f-dia"><option value="">—</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
@@ -1167,8 +1191,10 @@ details.acilir[open] > summary::after{content:"\2212"}
             <div id="run-msg"></div>
           </div>
           <div class="grid2" id="op-saat-wrap" hidden>
-            <div class="field"><label for="op-bas">Başlangıç saati</label><select id="op-bas"></select></div>
-            <div class="field"><label for="op-bit">Bitiş saati</label><select id="op-bit"></select></div>
+            <div class="field"><label for="op-bas">Başlangıç</label>
+              <input id="op-bas" type="text" readonly tabindex="-1"></div>
+            <div class="field"><label for="op-bit">Bitiş <span class="req">*</span></label>
+              <select id="op-bit"></select></div>
           </div>
           <div class="grid2" id="op-muhafaza-wrap" hidden>
             <div class="field"><label for="op-from">Başlangıç metre</label>
@@ -4733,11 +4759,7 @@ function mvBaslangic(){ return depth(); }
 /* 108. dosya · C14 · numara kutusu kalktı, sıra yazının içinde.
    Tayfun: "Ben yazmayacaksam zaten yukarıda 1 diye yazılı olsun."
    Manevra eklendikçe burası 1 → 2 → 3 diye ilerliyor. */
-function mvNoCiz(){
-  var b = $("#mv-bas-not");
-  if(b) b.textContent = (runs.length + 1) + ". manevra · " +
-                        tl(mvBaslangic()) + " m'den başlıyor.";
-}
+function mvNoCiz(){ saatAkisiCiz(); }
 function mvSayi(sec){
   var v = String($(sec).value).replace(",", ".").trim();
   if(v === "") return null;
@@ -4777,6 +4799,14 @@ $("#btn-add-run").addEventListener("click", function(){
     (!$("#f-dia").value ? $("#f-dia") : $("#f-to")).scrollIntoView({block:"center"});
     return; }
   if(v <= depth()){ msg($("#run-msg"), "Kuyu tabanı mevcut derinlikten (" + tl(depth()) + " m) büyük olmalı.", "err"); return; }
+  /* 109. dosya · saat aralığı zorunlu. Başlangıç hesaplanıyor,
+     yalnız bitiş seçiliyor; seçici zaten geriye dönük saat
+     göstermediği için çakışma oluşamıyor. */
+  var mvBitDk = saatDk("#mv-bit");
+  if(mvBitDk == null){
+    msg($("#run-msg"), "Manevra eklenmedi — bitiş saatini seçin.", "err");
+    $("#mv-bit").scrollIntoView({block:"center"});
+    return; }
   if(v - depth() > 12){ msg($("#run-msg"), "Dikkat: tek manevrada " + tl(v-depth()) + " m girdiniz.", "warn"); }
   else { msg($("#run-msg"), ""); }
   /* ============================================================
@@ -4797,7 +4827,9 @@ $("#btn-add-run").addEventListener("click", function(){
   if(!sonOp || sonOp.tur !== "delgi")
     OPERASYONLAR.push({tur:"delgi", r0:runs.length, otomatik:true});
   runs.push({seq:runs.length+1, diameter:$("#f-dia").value, from_m:depth(), to_m:v,
-             personnel_id:$("#f-driller1").value || null});
+             personnel_id:$("#f-driller1").value || null,
+             bas_saat:$("#mv-bas").value || null, bit_saat:$("#mv-bit").value || null,
+             basDk:sonBitisDk(), bitDk:mvBitDk});
   opCiz(); kuyuBitimiYansit();
   $("#f-to").value = ""; $("#f-mv-boy").value = "";
   renderRuns(); mvNoCiz(); refreshState();
@@ -4881,7 +4913,7 @@ function opAlanCiz(){
     $("#op-kuyu-not").textContent = ($("#op-kuyu-durum") && $("#op-kuyu-durum").value === "kuyu_iptali")
       ? "İptal sebebini açıklamaya yazın." : "Kuyu sonu metrajı manevralardan geliyor.";
   }
-  if(OP_TUR && OP_ALAN[OP_TUR].saat) saatSeciciKur("#op-bas", 0);
+  if(OP_TUR && OP_ALAN[OP_TUR].saat) saatAkisiCiz();
 }
 function opSureYaz(){
   var el = $("#op-sure"); if(!el) return;
@@ -4907,6 +4939,57 @@ function opSureYaz(){
      · kapsamı boşalan OTOMATİK blok kendiliğinden kalkıyor
      · alt yazısı manevra özeti, kutu artık boş değil
    ============================================================ */
+/* ============================================================
+   109. dosya · VARDİYANIN ZAMAN ÇİZGİSİ
+   ------------------------------------------------------------
+   Tayfun: "Eklemeler sırasıyla operasyon saatleri birbirini takip
+   etsin ve çakışma olmasın. Aynı saat aralığında iki manevra
+   yazılmasına veya farklı operasyon girişine izin vermesin."
+
+   Çözüm denetim DEĞİL, KURGU: her yeni kaydın başlangıcı bir
+   önceki kaydın bitişi. Başlangıç seçilmiyor, yazılıyor; bitiş
+   seçicisi de yalnız ondan sonraki saatleri gösteriyor. Çakışma
+   ve boşluk kurguyla imkânsız — sonradan "çakıştı" diye uyarı
+   vermeye gerek kalmıyor.
+
+   Ölçü birimi "HH:MM" değil, VARDİYA BAŞINDAN DAKİKA (`dk`):
+   gece vardiyası gece yarısını aştığı için saat metni sıralamaya
+   elverişli değil (23:45 < 00:15 ama sonra geliyor).
+   ============================================================ */
+function saatDk(sel){
+  var e = $(sel); if(!e || !e.selectedOptions || !e.selectedOptions[0]) return null;
+  var d = e.selectedOptions[0].dataset.dk;
+  return d == null ? null : Number(d);
+}
+/* "HH:MM" → vardiya başından dakika (gece yarısı sarması dahil) */
+function saatiDkYap(a, t){
+  if(!a || !t) return null;
+  var p = String(t).split(":");
+  var m = Number(p[0]) * 60 + Number(p[1] || 0);
+  return ((m - a.basDk) + 24*60) % (24*60);
+}
+function sonBitisDk(){
+  var son = 0;
+  function bak(x){ if(x != null && x > son) son = x; }
+  (OPERASYONLAR || []).forEach(function(o){ bak(o.bitDk); });
+  (runs || []).forEach(function(r){ bak(r.bitDk); });
+  return son;
+}
+function saatAkisiCiz(){
+  var a = vardiyaAralik();
+  var dk = sonBitisDk();
+  var yazi = a ? aralikAn(a, dk).saat : "";
+  ["#mv-bas","#op-bas"].forEach(function(id){ var e = $(id); if(e) e.value = yazi; });
+  /* Bitiş seçicileri her seferinde SIFIRDAN: `saatSeciciKur` eski
+     değeri koruyor, o da artık geçersiz olabiliyor. */
+  ["#mv-bit","#op-bit"].forEach(function(id){ var e = $(id); if(e) e.value = ""; });
+  saatSeciciKur("#mv-bit", dk + SAAT_ADIM);
+  saatSeciciKur("#op-bit", dk + SAAT_ADIM);
+  var n = $("#mv-bas-not");
+  if(n && a) n.textContent = (runs.length + 1) + ". manevra · " +
+      tl(mvBaslangic()) + " m'den ve " + yazi + "'den başlıyor" +
+      (dk >= a.sure ? " — vardiya süresi doldu." : ".");
+}
 function delgiAralik(i){
   var o = OPERASYONLAR[i];
   if(!o || o.tur !== "delgi" || o.r0 == null) return null;
@@ -4931,7 +5014,14 @@ function delgiOzet(i){
     if(cap.indexOf(runs[k].diameter) < 0) cap.push(runs[k].diameter);
   }
   if(!n) return "";
-  return n + " manevra · " + tl(m) + " m" + (cap.length ? " · " + cap.join(" · ") : "");
+  /* 109. dosya · bloğun saat aralığı: ilk manevranın başı, son
+     manevranın bitişi. Delginin kendi saat alanı yok, süresi
+     manevralardan okunuyor. */
+  var b1 = runs[a.bas] && runs[a.bas].bas_saat;
+  var b2 = runs[a.bit - 1] && runs[a.bit - 1].bit_saat;
+  var sa = (b1 && b2) ? " · " + saatKisa(b1) + "–" + saatKisa(b2) : "";
+  return n + " manevra · " + tl(m) + " m" +
+         (cap.length ? " · " + cap.join(" · ") : "") + sa;
 }
 /* Kapsamı boşalan otomatik delgi bloğunu kaldırıyor. Sondan başa
    gidiyor ki `splice` sonraki indisleri kaydırmasın. Dönüş: liste
@@ -4967,8 +5057,9 @@ function opCiz(){
     if(o.tur === "kuyu_bitimi") alt.push(o.sebep === "kuyu_iptali" ? "kuyu iptali" : "kuyu sonu");
     if(o.tur === "delgi"){ var oz = delgiOzet(i); if(oz) alt.push(oz); }
     if(o.note) alt.push(o.note);
-    row.innerHTML = '<div class="ist-ust"><b>' + (i+1) + ". " + esc(OP_ADI[o.tur] || o.tur) +
-                    '</b></div><div class="dizi">' + esc(alt.join(" · ")) + '</div>';
+    row.innerHTML = '<div class="q-govde"><div class="ist-ust"><b>' + (i+1) + ". " +
+                    esc(OP_ADI[o.tur] || o.tur) + '</b></div><div class="dizi">' +
+                    esc(alt.join(" · ")) + '</div></div>';
     /* 108. dosya · C17 · delgide silme düğmesi YOK: satır
        manevralardan türetiliyor, manevra tablosundaki × ile
        yönetiliyor. Son manevra silinince satır kendiliğinden kalkar. */
@@ -4977,7 +5068,8 @@ function opCiz(){
       sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
       sil.setAttribute("aria-label", (i+1) + ". operasyonu sil");
       sil.addEventListener("click", function(){
-        OPERASYONLAR.splice(i,1); opCiz(); kuyuBitimiYansit(); refreshState(); });
+        OPERASYONLAR.splice(i,1); opCiz(); kuyuBitimiYansit();
+        saatAkisiCiz(); refreshState(); });
       row.appendChild(sil);
     }
     box.appendChild(row);
@@ -5005,9 +5097,12 @@ function opEkle(){
   var a = OP_ALAN[OP_TUR], o = {tur:OP_TUR}, eks = [];
   if(a.saat){
     o.bas = $("#op-bas").value; o.bit = $("#op-bit").value;
-    if(!o.bas) eks.push("başlangıç saati");
+    if(!o.bas) eks.push("vardiya seçimi (başlangıç hesaplanamıyor)");
     if(!o.bit) eks.push("bitiş saati");
-    if(o.bas && o.bit) o.saat = opSaatFarki(o.bas, o.bit);
+    if(o.bas && o.bit){
+      o.saat = opSaatFarki(o.bas, o.bit);
+      o.basDk = sonBitisDk(); o.bitDk = saatDk("#op-bit");
+    }
   }
   if(a.metre){
     o.from_m = $("#op-from").value === "" ? null : Number($("#op-from").value);
@@ -5038,18 +5133,14 @@ function opEkle(){
   OP_TUR = "delgi"; OP_BEKLEME = "";
   ["#op-bas","#op-bit","#op-from","#op-to","#op-cap"].forEach(function(id){
     if($(id)) $(id).value = ""; });
-  opTurCiz(); opAlanCiz(); opCiz(); kuyuBitimiYansit();
+  opTurCiz(); opAlanCiz(); opCiz(); kuyuBitimiYansit(); saatAkisiCiz();
   msg($("#op-msg"), OP_ADI[o.tur] + " eklendi.", "ok");
   refreshState();
 }
 $("#btn-op-ekle").addEventListener("click", opEkle);
-$("#op-bas").addEventListener("change", function(){
-  /* Bitiş listesi başlangıçtan SONRASINI gösteriyor: şef geriye
-     dönük bir bitiş seçemesin (saatSeciciKur'un ilkDk parametresi). */
-  var d = $("#op-bas").selectedOptions[0]
-        ? Number($("#op-bas").selectedOptions[0].dataset.dk || 0) : 0;
-  saatSeciciKur("#op-bit", d + SAAT_ADIM);
-});
+/* 109. dosya · başlangıç artık SEÇİLMİYOR, hesaplanıyor — eski
+   "başlangıcı seç, bitiş listesi ona göre dolsun" dinleyicisi kalktı.
+   Yerini `saatAkisiCiz` aldı. */
 $("#op-bekleme-tur").addEventListener("click", function(e){
   var b = e.target.closest("[data-bk]"); if(!b) return;
   OP_BEKLEME = b.getAttribute("data-bk");
@@ -5880,7 +5971,7 @@ function vardiyaDuzelt(sat, satirEl){
     if(!izin.olur){ dur(izin.sebep || "Bu kayıt düzeltilemez.", "err"); return; }
 
     return Promise.all([
-      sb.from("shift_runs").select("seq,diameter,from_m,to_m,personnel_id,meters")
+      sb.from("shift_runs").select("seq,diameter,from_m,to_m,personnel_id,meters,bas_saat,bit_saat")
         .eq("shift_id", sat.id).order("seq"),
       sb.from("shift_crew").select("personnel_id,crew_role").eq("shift_id", sat.id),
       /* ============================================================
@@ -5934,6 +6025,8 @@ function vardiyaDuzelt(sat, satirEl){
         .filter(function(a){ return !a.otomatik; })
         .map(function(a){
           return {tur:a.kind, bas:a.bas_saat || null, bit:a.bit_saat || null,
+                  basDk:saatiDkYap(vardiyaAralik(), a.bas_saat),
+                  bitDk:saatiDkYap(vardiyaAralik(), a.bit_saat),
                   saat:(a.bas_saat && a.bit_saat) ? opSaatFarki(a.bas_saat, a.bit_saat) : null,
                   from_m:a.from_m == null ? null : Number(a.from_m),
                   to_m:a.to_m == null ? null : Number(a.to_m),
@@ -5942,9 +6035,15 @@ function vardiyaDuzelt(sat, satirEl){
       OP_TUR = "delgi"; OP_BEKLEME = "";
       opTurCiz(); opAlanCiz(); opCiz();
 
+      /* 109. dosya · saatler de geri yükleniyor; `dk` karşılıkları
+         vardiya penceresine göre yeniden hesaplanıyor ki düzeltme
+         ekranında zaman çizgisi doğru yerden devam etsin. */
+      var _va = vardiyaAralik();
       runs = (res[0].data || []).map(function(x, i){
         return {seq:i+1, diameter:x.diameter, from_m:Number(x.from_m),
-                to_m:Number(x.to_m), personnel_id:x.personnel_id}; });
+                to_m:Number(x.to_m), personnel_id:x.personnel_id,
+                bas_saat:x.bas_saat || null, bit_saat:x.bit_saat || null,
+                basDk:saatiDkYap(_va, x.bas_saat), bitDk:saatiDkYap(_va, x.bit_saat)}; });
       renderRuns();
 
       /* ---- 84. dosya · 7. madde · makine saat sayacı ----
@@ -7363,7 +7462,8 @@ function sendItem(it, tenant){
                   if(!it.runs || !it.runs.length) return null;
                   return sb.from("shift_runs").insert(it.runs.map(function(x,i){
                     return {tenant_id:tenant, shift_id:sid, seq:i+1, diameter:x.diameter,
-                            from_m:x.from_m, to_m:x.to_m, personnel_id:x.personnel_id};
+                            from_m:x.from_m, to_m:x.to_m, personnel_id:x.personnel_id,
+                            bas_saat:x.bas_saat || null, bit_saat:x.bit_saat || null};
                   })).then(bak("Metraj (manevra) kaydedilemedi"));
                 });
             }
@@ -8956,7 +9056,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "61";
+var SURUM = "62";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
