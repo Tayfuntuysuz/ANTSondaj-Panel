@@ -396,6 +396,16 @@ td:first-child{text-align:start;color:var(--ink-2)}
    Yazı 12.5 px kalıyor: iOS'un 16 px kuralı yazı GİRİLEN alanlar
    için, düğme için değil — düğmeye dokunmak ekranı zıplatmıyor.
    ============================================================ */
+/* 108. dosya · C14 · manevra girişinin üç alanı tek sırada.
+   Kuyu tabanı ile manevra boyu `1fr` — EŞİT genişlikte; çap seçim
+   kutusu olduğu için dar. `end` hizası, etiket iki satıra sarsa bile
+   kutuların aynı çizgide durmasını sağlıyor. Yazı boyu 16 px'in
+   altına inmiyor (90. dosya · iOS odak zıplaması). */
+.uclu-giris{display:grid;grid-template-columns:minmax(58px,.72fr) 1fr 1fr;
+  gap:8px;align-items:end}
+.uclu-giris .field{min-width:0}
+.uclu-giris .nowrap{white-space:nowrap}
+.uclu-giris label{white-space:normal}
 .izgara3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .izgara3 .chip{display:flex;align-items:center;justify-content:center;
   text-align:center;min-height:44px;padding:7px 8px;line-height:1.25;gap:3px}
@@ -620,19 +630,20 @@ details.acilir[open] > summary::after{content:"\2212"}
 .satir-top .esnek{font-size:12.5px;color:var(--ink-2)}
 .satir .esnek,.satir-bas .esnek,.satir-top .esnek{flex:1 1 auto;min-width:0}
 .satir .orta,.satir-bas .orta,.satir-top .orta{flex:1 1 0;min-width:0}
-.satir .dar,.satir-bas .dar,.satir-top .dar{flex:none;width:88px}
+.satir .dar,.satir-bas .dar,.satir-top .dar{flex:none;width:76px}
 .satir .dar,.satir-top .dar{text-align:end;font-variant-numeric:tabular-nums}
 .satir .bos,.satir-bas .bos,.satir-top .bos{flex:none;width:44px}
 /* Miktarın yanındaki birim etiketi — malzeme seçilince doluyor (41. dosya, 1b) */
-.satir .birim-et{flex:none;width:62px;font-size:12px;color:var(--ink-3)}
+.satir .birim-et{flex:none;width:52px;font-size:12px;color:var(--ink-3)}
 /* 104. dosya · sabit malzeme satırlarının sol hücresi: ya düz ad
    (Hidrolik yağ) ya ad + marka seçici (Sondaj kimyasalı). Seçici
    hücrenin tamamını kaplıyor ki miktar sütunu hizasından kaymasın. */
 .satir .ad-hucre{display:block;font-size:13px;color:var(--ink-2)}
-.satir .ad-hucre .ad-ust{display:block;font-size:11.5px;color:var(--ink-3);margin-bottom:4px}
-.satir .ad-hucre select{display:block;width:100%}
-.satir-bas .dar:last-of-type{width:62px}
+.satir-bas .dar:last-of-type{width:52px}
 .satir input,.satir select{padding:9px 10px;min-height:44px}
+/* 108. dosya · C15 · ad hücresindeki seçici hücrenin tamamını kaplıyor
+   ki miktar sütunu hizasından kaymasın. */
+.satir select.esnek{width:100%}
 /* satır sonundaki silme düğmesi: çerçeveli, 44 px, çıplak × değil */
 .sil{flex:none;width:44px;min-width:44px;min-height:44px;padding:0;border:1px solid var(--line);
   background:none;color:var(--bad);border-radius:10px;font-size:17px;line-height:1;cursor:pointer}
@@ -1124,20 +1135,34 @@ details.acilir[open] > summary::after{content:"\2212"}
                Başlangıç, ilk manevrada kuyunun vardiya başı derinliği,
                sonrakilerde bir öncekinin kuyu tabanı; ikisi de otomatik.
                ============================================================ -->
+          <!-- ============================================================
+               108. dosya · C14 · MANEVRA GİRİŞİ TEK SIRA
+               ------------------------------------------------------------
+               Tayfun: "Manevra no otomatik sıralanıyorsa neden ben
+               yazacakmışım gibi kutucuk çıkıyor? Kaldıralım. Kuyu
+               tabanı, manevra boyu eşit yan yana. Kutucukların
+               genişlikleri küçük olsun."
+
+               Manevra numarası artık KUTU DEĞİL, üstteki yazının
+               içinde: "3. manevra · 43,00 m'den başlıyor." Şef zaten
+               yazmıyordu; yazılabilir gibi duran salt-okunur kutu
+               yanıltıcıydı.
+
+               Üç alan tek ızgarada. Kuyu tabanı ile manevra boyu
+               `1fr` — eşit; çap seçim kutusu olduğu için dar.
+               `align-items:end` etiketler iki satıra sarsa bile
+               kutuları aynı hizada tutuyor.
+               ============================================================ -->
           <div class="kat" id="mv-alanlar">
-            <div class="grid2">
-              <div class="field"><label for="f-mv-no">Manevra no</label>
-                <input id="f-mv-no" type="text" readonly tabindex="-1">
-                <div class="hint">Kendiliğinden sıralanır.</div></div>
-              <div class="field"><label for="f-dia">Delgi çapı <span class="req">*</span></label><select id="f-dia"><option value="">— seçin —</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
-            </div>
-            <div class="grid2">
-              <div class="field"><label for="f-to">Kuyu tabanı (m) <span class="req">*</span></label>
+            <div class="hint" id="mv-bas-not"></div>
+            <div class="uclu-giris">
+              <div class="field"><label for="f-dia">Çap <span class="req">*</span></label>
+                <select id="f-dia"><option value="">—</option><option>SQ</option><option>PQ</option><option>HQ</option><option>NQ</option><option>BQ</option></select></div>
+              <div class="field"><label for="f-to">Kuyu tabanı<span class="nowrap">&nbsp;(m)&nbsp;<span class="req">*</span></span></label>
                 <input id="f-to" type="number" min="0" step="0.01" inputmode="decimal"></div>
-              <div class="field"><label for="f-mv-boy">Manevra boyu (m)</label>
+              <div class="field"><label for="f-mv-boy">Manevra boyu<span class="nowrap">&nbsp;(m)</span></label>
                 <input id="f-mv-boy" type="number" min="0" step="0.01" inputmode="decimal"></div>
             </div>
-            <div class="hint" id="mv-bas-not"></div>
             <button class="btn ghost kesikli" id="btn-add-run" type="button">Manevra ekle</button>
             <div id="run-msg"></div>
           </div>
@@ -1315,11 +1340,15 @@ details.acilir[open] > summary::after{content:"\2212"}
              ============================================================ -->
         <div id="sabit-liste">
           <div class="satir-bas"><span class="esnek">Malzeme</span><span class="dar">Miktar</span><span class="dar">Birim</span><span class="bos"></span></div>
+          <!-- 108. dosya · C15 · üç satır da TEK SATIR yüksekliğinde.
+               60. sürümde kimyasalın adı küçük ve soluk bir ÜST YAZIYDI,
+               seçici onun altına iniyordu: satır ötekilerin iki katı
+               yüksek çıkıyor, miktar kutusu ortada asılı kalıyordu.
+               Artık seçicinin KENDİSİ ad hücresi — boşken "Sondaj
+               kimyasalı" yazıyor, marka seçilince "Bentonit" oluyor.
+               Aşağıdaki "diğer malzeme" satırlarıyla aynı kalıp. -->
           <div class="satir">
-            <span class="esnek ad-hucre">
-              <span class="ad-ust">Sondaj kimyasalı</span>
-              <select id="f-kimyasal" aria-label="Sondaj kimyasalı markası"></select>
-            </span>
+            <select id="f-kimyasal" class="esnek" aria-label="Sondaj kimyasalı"></select>
             <input id="f-kimyasal-qty" class="dar" type="number" min="0" step="0.01"
                    inputmode="decimal" placeholder="0" aria-label="Sondaj kimyasalı miktarı">
             <span class="birim-et" id="f-kimyasal-birim">—</span>
@@ -4459,7 +4488,9 @@ function kullanilanMalzemeler(){
 function sabitCiz(){
   var sel = $("#f-kimyasal"); if(!sel) return;
   var kendi = sel.value;
-  sel.innerHTML = '<option value="">— seçin —</option>' +
+  /* Boş seçenek artık satırın ADINI taşıyor (108. dosya · C15):
+     hücrede ayrı etiket yok, yerini seçicinin kendisi tutuyor. */
+  sel.innerHTML = '<option value="">— Kimyasal —</option>' +
     KIMYASALLAR.map(function(ad){
       var m = malzemeBul(ad);
       return m ? '<option value="' + m.id + '">' + esc(ad) + '</option>' : ""; }).join("");
@@ -4637,6 +4668,9 @@ function renderRuns(){
   /* Boş tablo başlığı ekranda yer tutmasın; manevra yoksa iki düğme
      gerçekten alt alta dursun (58. dosya). */
   $("#mv-tablo").hidden = !runs.length;
+  /* 108. dosya · C17 · manevra silinince kapsamı boşalan delgi
+     bloğu da kalkıyor. Liste değiştiyse yeniden çizmek gerekiyor. */
+  if(delgiSenkron()) opCiz();
   syncDepth();
   mvNoCiz();
   ilerlemeYokCiz();
@@ -4670,7 +4704,10 @@ function updateRunButton(){
      basınca ne eksik olduğunu söyler. */
   var why = [];
   if(!$("#f-dia").value) why.push("çap");
-  if(!$("#f-to").value) why.push("vardiya bitiş metresi");
+  /* 108. dosya · yazı alanın ADIYLA aynı olmalı. 59. sürümde alan
+     "Kuyu tabanı (m)" oldu ama uyarı "vardiya bitiş metresi" demeye
+     devam ediyordu — şef ekranda o adı aramıştı, bulamıyordu. */
+  if(!$("#f-to").value) why.push("kuyu tabanı");
   msg($("#run-msg"), why.length ? "Eksik: " + why.join(", ") + "." : "", "warn");
 }
 ["#f-dia","#f-to"].forEach(function(s){
@@ -4693,10 +4730,13 @@ function updateRunButton(){
    kilitleniyor (MV_YAZAN). */
 var MV_YAZAN = "";
 function mvBaslangic(){ return depth(); }
+/* 108. dosya · C14 · numara kutusu kalktı, sıra yazının içinde.
+   Tayfun: "Ben yazmayacaksam zaten yukarıda 1 diye yazılı olsun."
+   Manevra eklendikçe burası 1 → 2 → 3 diye ilerliyor. */
 function mvNoCiz(){
-  var e = $("#f-mv-no"); if(e) e.value = String(runs.length + 1);
   var b = $("#mv-bas-not");
-  if(b) b.textContent = "Bu manevra " + tl(mvBaslangic()) + " m'den başlıyor.";
+  if(b) b.textContent = (runs.length + 1) + ". manevra · " +
+                        tl(mvBaslangic()) + " m'den başlıyor.";
 }
 function mvSayi(sec){
   var v = String($(sec).value).replace(",", ".").trim();
@@ -4739,19 +4779,25 @@ $("#btn-add-run").addEventListener("click", function(){
   if(v <= depth()){ msg($("#run-msg"), "Kuyu tabanı mevcut derinlikten (" + tl(depth()) + " m) büyük olmalı.", "err"); return; }
   if(v - depth() > 12){ msg($("#run-msg"), "Dikkat: tek manevrada " + tl(v-depth()) + " m girdiniz.", "warn"); }
   else { msg($("#run-msg"), ""); }
-  runs.push({seq:runs.length+1, diameter:$("#f-dia").value, from_m:depth(), to_m:v,
-             personnel_id:$("#f-driller1").value || null});
   /* ============================================================
      103. dosya · MANEVRA EKLENİNCE DELGİ OPERASYONU DA AÇILIYOR
      ------------------------------------------------------------
      Tayfun'un akışında delgi için ayrı "Operasyonu ekle" yok:
-     tür seçiliyor, dört alan doldurulup manevra ekleniyor.
+     tür seçiliyor, alanlar doldurulup manevra ekleniyor.
      Arka arkaya manevralar TEK delgi operasyonu sayılıyor; araya
-     muhafaza/bekleme girilip delgiye dönülürse yenisi açılıyor —
-     "her manevra sonrası değişiklik yapılabilir" dediği şey bu.
+     muhafaza/bekleme girilip delgiye dönülürse yenisi açılıyor.
+
+     108. dosya · C17 · Blok, kendisinden SONRAKİ manevraları
+     kapsıyor; bu yüzden `r0` manevra eklenmeden ÖNCE yazılıyor.
+     `otomatik` damgası, bu bloğun ekranda türetildiğini söylüyor —
+     yalnız öyle olanlar kendiliğinden kalkabiliyor (merkezden
+     yüklenmiş eski kayıtlara dokunulmuyor).
      ============================================================ */
   var sonOp = OPERASYONLAR[OPERASYONLAR.length - 1];
-  if(!sonOp || sonOp.tur !== "delgi") OPERASYONLAR.push({tur:"delgi"});
+  if(!sonOp || sonOp.tur !== "delgi")
+    OPERASYONLAR.push({tur:"delgi", r0:runs.length, otomatik:true});
+  runs.push({seq:runs.length+1, diameter:$("#f-dia").value, from_m:depth(), to_m:v,
+             personnel_id:$("#f-driller1").value || null});
   opCiz(); kuyuBitimiYansit();
   $("#f-to").value = ""; $("#f-mv-boy").value = "";
   renderRuns(); mvNoCiz(); refreshState();
@@ -4846,6 +4892,62 @@ function opSureYaz(){
     ? "Saatli operasyon " + tl(t,1) + " sa · delgiye kalan " + tl(Math.max(a.sure/60 - t, 0), 1) + " sa"
     : tl(t,1) + " sa";
 }
+/* ============================================================
+   108. dosya · C17 · DELGİ SATIRI TÜRETİLMİŞTİR
+   ------------------------------------------------------------
+   107. dosyadaki inceleme: delgi operasyonu manevralardan
+   türetiliyordu ama listede elle silinebiliyordu. Silinince
+   manevralar kalıyor, başka bir operasyon varsa kayıt gidiyordu —
+   ölçüldü: 21 m metraj, operasyon defterinde yalnız "bekleme".
+   Ters yönü de bozuktu: bütün manevralar silinince boş delgi
+   satırı kalıyordu.
+
+   Çözüm (Tayfun "1. öneriyi deneyelim" dedi):
+     · delgi satırında × YOK — elle eklenmeyeni elle silmek yok
+     · kapsamı boşalan OTOMATİK blok kendiliğinden kalkıyor
+     · alt yazısı manevra özeti, kutu artık boş değil
+   ============================================================ */
+function delgiAralik(i){
+  var o = OPERASYONLAR[i];
+  if(!o || o.tur !== "delgi" || o.r0 == null) return null;
+  var bit = runs.length;
+  for(var k = i + 1; k < OPERASYONLAR.length; k++){
+    if(OPERASYONLAR[k].tur === "delgi" && OPERASYONLAR[k].r0 != null){
+      bit = OPERASYONLAR[k].r0; break;
+    }
+  }
+  return { bas: o.r0, bit: Math.max(bit, o.r0) };
+}
+function delgiOzet(i){
+  var a = delgiAralik(i);
+  /* Merkezden yüklenmiş eski kayıtta `r0` yok: manevranın hangi
+     delgi bloğuna ait olduğu veride durmuyor. O zaman blok başına
+     ayrıştırmak yerine kutuyu boş bırakmıyoruz, nereye bakılacağını
+     söylüyoruz. */
+  if(!a) return runs.length ? runs.length + " manevra · tablo aşağıda" : "";
+  var n = a.bit - a.bas, m = 0, cap = [];
+  for(var k = a.bas; k < a.bit; k++){
+    m += (Number(runs[k].to_m) - Number(runs[k].from_m));
+    if(cap.indexOf(runs[k].diameter) < 0) cap.push(runs[k].diameter);
+  }
+  if(!n) return "";
+  return n + " manevra · " + tl(m) + " m" + (cap.length ? " · " + cap.join(" · ") : "");
+}
+/* Kapsamı boşalan otomatik delgi bloğunu kaldırıyor. Sondan başa
+   gidiyor ki `splice` sonraki indisleri kaydırmasın. Dönüş: liste
+   değişti mi. */
+function delgiSenkron(){
+  /* `renderRuns` açılışta OPERASYONLAR atanmadan da çağrılabiliyor. */
+  if(!OPERASYONLAR || !OPERASYONLAR.length) return false;
+  var degisti = false;
+  for(var i = OPERASYONLAR.length - 1; i >= 0; i--){
+    var o = OPERASYONLAR[i];
+    if(o.tur !== "delgi" || !o.otomatik) continue;
+    var a = delgiAralik(i);
+    if(a && a.bit - a.bas <= 0){ OPERASYONLAR.splice(i, 1); degisti = true; }
+  }
+  return degisti;
+}
 function opCiz(){
   var box = $("#op-liste"); if(!box) return;
   box.innerHTML = "";
@@ -4863,15 +4965,21 @@ function opCiz(){
     if(o.tur === "muhafaza") alt.push(tl(o.from_m) + " → " + tl(o.to_m) + " m · " + (o.cap || "—"));
     if(o.tur === "bekleme")  alt.push(o.sebep === "operasyonel" ? "operasyonel" : "operasyonel olmayan");
     if(o.tur === "kuyu_bitimi") alt.push(o.sebep === "kuyu_iptali" ? "kuyu iptali" : "kuyu sonu");
+    if(o.tur === "delgi"){ var oz = delgiOzet(i); if(oz) alt.push(oz); }
     if(o.note) alt.push(o.note);
     row.innerHTML = '<div class="ist-ust"><b>' + (i+1) + ". " + esc(OP_ADI[o.tur] || o.tur) +
                     '</b></div><div class="dizi">' + esc(alt.join(" · ")) + '</div>';
-    var sil = document.createElement("button");
-    sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
-    sil.setAttribute("aria-label", (i+1) + ". operasyonu sil");
-    sil.addEventListener("click", function(){
-      OPERASYONLAR.splice(i,1); opCiz(); kuyuBitimiYansit(); refreshState(); });
-    row.appendChild(sil);
+    /* 108. dosya · C17 · delgide silme düğmesi YOK: satır
+       manevralardan türetiliyor, manevra tablosundaki × ile
+       yönetiliyor. Son manevra silinince satır kendiliğinden kalkar. */
+    if(o.tur !== "delgi"){
+      var sil = document.createElement("button");
+      sil.type = "button"; sil.className = "sil"; sil.textContent = "×";
+      sil.setAttribute("aria-label", (i+1) + ". operasyonu sil");
+      sil.addEventListener("click", function(){
+        OPERASYONLAR.splice(i,1); opCiz(); kuyuBitimiYansit(); refreshState(); });
+      row.appendChild(sil);
+    }
     box.appendChild(row);
   });
   opSureYaz();
@@ -5012,6 +5120,15 @@ function stepProblems(n){
        okunuyor (bekleme · arıza · takım · temizlik · nakliye). */
     if(!HIC_CALISMADI && !runs.length && opVar("delgi")) p.push("en az bir manevra");
     if(!HIC_CALISMADI && !OPERASYONLAR.length) p.push("en az bir operasyon");
+    /* ⚠ 108. dosya · C17 · SON KAPI
+       Manevra varken delgi operasyonu yoksa kayıt kendi kendisiyle
+       çelişir: metraj "21 m deldik" der, operasyon defteri "yalnız
+       bekleme oldu" der. 107. dosyada bu tam olarak oldu ve kayıt
+       merkeze gitti. Ekran tarafı artık buna izin vermiyor (delgide
+       × yok), ama kural burada da duruyor: eski bir kaydı düzeltirken
+       ya da ileride akış değişirse ekranın insafına kalmasın. */
+    if(!HIC_CALISMADI && runs.length && !opVar("delgi"))
+      p.push("manevra var ama delgi operasyonu yok");
   }
   /* Mazot: "hiç çalışmadı"da kalkıyor, delgi olmayan vardiyada KALKMIYOR —
      takım çekip indirirken de motor çalışıyor, mazot yanıyor
@@ -8839,7 +8956,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "60";
+var SURUM = "61";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
