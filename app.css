@@ -496,3 +496,68 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .q-satir:last-child{margin-bottom:0}
 .q-satir .ist-ust{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .q-satir .dizi{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* ============================================================
+   GÜNLÜK DÖKÜM — "Dün ne oldu" (110. dosya · 66. adım)
+   ------------------------------------------------------------
+   Tayfun: "Günlük girilmiş veriler her şantiyeden direkt önüne
+   düzgün bir şekilde çıksa. O hata hangi şantiyedeyse hangi
+   kuyuda ise yan tarafında yanıp sönen uyarı gözüksün."
+
+   Tablo değil, okunabilir satırlar: şantiye kartı + kule satırları.
+   Uyarı ayrı bir şeritte toplanmıyor, ait olduğu satırda duruyor.
+   ============================================================ */
+.saha-kart{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  margin-bottom:12px;overflow:hidden}
+.saha-ust{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--line-soft);background:var(--card-2)}
+.saha-ad{font-size:15px;font-weight:600;cursor:pointer}
+.saha-ad:hover{text-decoration:underline;text-underline-offset:3px}
+.saha-ad:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.saha-top{font-size:14px;color:var(--ink-2);white-space:nowrap}
+/* Sessiz şantiye gri satır olarak duruyor (Tayfun'un kararı):
+   listeden çıkarılsa eksik olan fark edilmez. */
+.saha-kart.sessiz .saha-ust{background:var(--bg)}
+.saha-kart.sessiz .saha-ad{color:var(--ink-2)}
+
+.kule-sat{display:grid;grid-template-columns:130px 70px minmax(0,1fr) 110px minmax(0,1.4fr);
+  gap:14px;align-items:center;padding:10px 16px;
+  border-bottom:1px solid var(--line-soft);font-size:14px}
+.kule-sat:last-child{border-bottom:0}
+.kule-sat .mk{font-weight:600}
+.kule-sat .vd{font-size:12.5px;color:var(--ink-3)}
+.kule-sat .ku{color:var(--ink-2);min-width:0;overflow-wrap:anywhere}
+.kule-sat .mt{text-align:end;font-variant-numeric:tabular-nums}
+.kule-sat .mt i{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3)}
+.kule-sat .mt .yok{color:var(--bad);font-weight:600}
+.kule-sat .dl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kule-sat .dl .ek{flex-basis:100%;font-size:12.5px;color:var(--ink-3);font-style:italic}
+/* Vardiya girilmemiş kule: satır listede kalıyor ama sönük. */
+.kule-sat.durgun{background:var(--bg)}
+.kule-sat.durgun .mk{color:var(--ink-2)}
+
+.kule-sat .p{font-size:12px;border-radius:999px;padding:2px 9px;font-weight:500;
+  background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap}
+.kule-sat .p.k{background:var(--bad-soft);color:var(--bad)}
+.kule-sat .p.s{background:var(--warn-soft);color:var(--warn)}
+.kule-sat .p.n{background:var(--line-soft);color:var(--ink-2)}
+
+/* ⚠ YANIP SÖNEN YALNIZ AÇIK ARIZA.
+   Üç şey birden yanıp sönerse hiçbiri görünmez; "makine şu an
+   duruyor" saat başı para kaybettiren tek durum.
+   Nabız gibi yavaş (1,6 sn) — sert flaş değil. */
+@keyframes cl-yanip{0%,100%{opacity:1}50%{opacity:.35}}
+.yanip{animation:cl-yanip 1.6s ease-in-out infinite}
+/* Hareketi azaltılmış cihazda sönme yok; uyarı çerçeveyle duruyor. */
+@media (prefers-reduced-motion:reduce){
+  .yanip{animation:none;box-shadow:0 0 0 2px var(--bad)}
+}
+
+/* Sol menüdeki turuncu sayı — "aşağıda bir şey var" demenin tek yolu */
+.menu-rozet{margin-inline-start:auto;background:#e8731a;color:#fff;
+  font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:999px;
+  display:inline-grid;place-items:center;padding:0 5px;line-height:1}
+
+/* 66. adım: kulesi olmayan şantiye kartında tek satır — ızgaranın
+   bütün kolonlarını kaplıyor, yoksa 130 px'lik ilk göze sıkışıyor. */
+.kule-sat .kule-yok{grid-column:1 / -1}
