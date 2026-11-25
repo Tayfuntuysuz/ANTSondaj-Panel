@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "66";
+var SURUM = "67";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -108,7 +108,7 @@ function ikon(k){
    indi — bugüne kadar yalnız üst çubuktaki isme basarak giriliyordu,
    menüde hiç satırı yoktu. */
 var SAYFALAR = [
-  {k:"panel",    d:"panel.html",     ad:"Genel bakış",        i:"pano",   g:"Günlük"},
+  {k:"panel",    d:"panel.html",     ad:"Günlük rapor",       i:"pano",   g:"Günlük"},
   {k:"saha",     d:"index.html",     ad:"Vardiya girişi",     i:"kule",   g:"Günlük"},
   /* ⚠ KUYULAR SATIRI KALKTI (25 Kasım 2026, Tayfun: "Solda neden hâlâ
      kuyular var? kaldıralım dedik.")

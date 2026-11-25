@@ -545,51 +545,79 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
    Tablo değil, okunabilir satırlar: şantiye kartı + kule satırları.
    Uyarı ayrı bir şeritte toplanmıyor, ait olduğu satırda duruyor.
    ============================================================ */
-/* Genel bakış dökümünün başlığı: tarihin kendisi; altında şantiye ·
-   vardiya · metraj (117. dosya, 3. tur). */
+/* Günlük rapor (119. dosya · sürüm 67): başlık tarihin kendisi */
 #gunluk-basl{font-size:21px}
-#gelen-gun{font-size:15px;color:var(--ink-2)}
-.saha-kart{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
-.saha-ust{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:12px 16px;border-bottom:1px solid var(--serit-cizgi);background:var(--serit)}
-.saha-ust .note{color:var(--serit-not)}
-.saha-ad{font-size:15px;font-weight:600;cursor:pointer}
-.saha-ad:hover{text-decoration:underline;text-underline-offset:3px}
-.saha-ad:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
-.saha-top{font-size:14px;color:var(--ink-2);white-space:nowrap}
-/* Sessiz şantiye gri satır olarak duruyor (Tayfun'un kararı):
-   listeden çıkarılsa eksik olan fark edilmez. */
-/* Sessiz şantiyenin şeridi ötekilerle AYNI renk (Tayfun, 3. tur).
-   Sessizliği kırmızı rozet ve soluk ad söylüyor. */
-.saha-kart.sessiz .saha-ad{color:var(--ink-2)}
 
-.kule-sat{display:grid;grid-template-columns:130px 70px minmax(0,1fr) 110px minmax(0,1.4fr);
-  gap:14px;align-items:center;padding:10px 16px;
-  border-bottom:1px solid var(--line-soft);font-size:14px}
-.kule-sat:last-child{border-bottom:0}
-.kule-sat .mk{font-weight:600}
-.kule-sat .vd{font-size:12.5px;color:var(--ink-3)}
-.kule-sat .ku{color:var(--ink-2);min-width:0;overflow-wrap:anywhere}
-.kule-sat .mt{text-align:end;font-variant-numeric:tabular-nums}
-.kule-sat .mt i{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3)}
-.kule-sat .mt .yok{color:var(--bad);font-weight:600}
-.kule-sat .dl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.kule-sat .dl .ek{flex-basis:100%;font-size:12.5px;color:var(--ink-3);font-style:italic}
-/* Vardiya girilmemiş kule: satır listede kalıyor ama sönük. */
-/* Kuyu satırları her zaman beyaz (Tayfun, 2. tur) — vardiya
-   girilmeyen satır da. Önce zemin rengini alıyordu; artık soluk
-   yazısıyla ayrılıyor. */
-.kule-sat.durgun{background:var(--card)}
-.kule-sat.durgun .mk{color:var(--ink-2)}
-/* Vardiyası olmayan kulenin son kuyusu — o gün çalışılmadı, soluk. */
-.kule-sat .soluk{color:var(--ink-2)}
+/* Üstteki dört kutu: toplam (koyu) · gündüz · gece · çalışan şantiye */
+.go-kutular{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px;margin:0 0 16px}
+.go-k{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow)}
+.go-k span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.go-k b{display:block;font-size:26px;font-variant-numeric:tabular-nums;margin-top:2px}
+.go-k i{font-style:normal;font-size:12.5px;color:var(--ink-2)}
+.go-k.ana{background:var(--nav);border-color:var(--nav)}
+.go-k.ana span{color:var(--nav-ink-2)}
+.go-k.ana b{color:#fff;font-size:30px}
+.go-k.ana i{color:var(--nav-ink)}
 
-.kule-sat .p{font-size:12px;border-radius:999px;padding:2px 9px;font-weight:500;
-  background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap}
-.kule-sat .p.k{background:var(--bad-soft);color:var(--bad)}
-.kule-sat .p.s{background:var(--warn-soft);color:var(--warn)}
-.kule-sat .p.n{background:var(--line-soft);color:var(--ink-2)}
+/* Şantiye: kapalı başlık. Uyarı başlıkta — kapalıyken de görünsün.
+   Sessiz şantiyenin şeridi ötekilerle AYNI renk (Tayfun, 3. tur);
+   sessizliği kırmızı rozet ve soluk ad söylüyor. */
+.sk{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;
+  overflow:hidden;box-shadow:var(--shadow)}
+.sk-bas{all:unset;box-sizing:border-box;width:100%;display:grid;cursor:pointer;
+  grid-template-columns:22px minmax(0,1fr) auto auto;gap:12px;align-items:center;
+  padding:13px 16px;background:var(--serit)}
+.sk-bas:hover{filter:brightness(.98)}
+.sk-bas:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.sk-bas .ok{color:var(--ink-2);transition:transform .15s;display:inline-block;font-size:13px}
+.sk.acik .sk-bas .ok{transform:rotate(90deg)}
+.sk-bas .ad{font-size:15.5px;font-weight:600}
+.sk-bas .mus{color:var(--serit-not);font-size:13.5px;margin-left:8px}
+.sk-bas .uy{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.sk-bas .mt{text-align:right;min-width:150px}
+.sk-bas .mt b{font-size:16px;font-variant-numeric:tabular-nums}
+.sk-bas .mt small{display:block;font-size:12px;color:var(--serit-not)}
+.sk.sessiz .sk-bas .ad{color:var(--ink-2)}
+.sk-ic{border-top:1px solid var(--serit-cizgi)}
+
+/* Kuyu satırı: kuyu · kule · derinlik · vardiya rozetleri · metraj */
+.ky{all:unset;box-sizing:border-box;width:100%;display:grid;cursor:pointer;
+  grid-template-columns:minmax(0,1.5fr) 130px 100px minmax(0,1.3fr) 110px 18px;gap:14px;align-items:center;
+  padding:11px 16px 11px 50px;border-bottom:1px solid var(--line-soft);font-size:14px}
+.ky:hover,.ky.acik{background:var(--card-2)}
+.ky:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.ky .kd{font-weight:600;overflow-wrap:anywhere}
+.ky .mk{color:var(--ink-2)}
+.ky .dr{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.ky .vd{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.ky .m{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.ky .m .yok{color:var(--bad)}
+.ky .ok2{color:var(--ink-3);text-align:right;transition:transform .15s}
+.ky.acik .ok2{transform:rotate(90deg)}
+.ky-kart{padding:4px 16px 14px 50px;background:var(--card-2);border-bottom:1px solid var(--line-soft)}
+.ky-kart h4{margin:12px 0 6px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.cl{padding:10px 16px 12px 50px;font-size:13px;color:var(--ink-2);border-bottom:1px solid var(--line-soft)}
+.cl b{font-weight:600}
+.cl .soluk{color:var(--ink-3)}
+.sk-alt{padding:8px 16px 10px 50px}
+.sk-alt .lnk{all:unset;cursor:pointer;font-size:13px;color:var(--accent)}
+.sk-alt .lnk:hover{text-decoration:underline}
+.sk-alt .lnk:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* Vardiya rozetleri — gündüz sarı, gece lacivert */
+.pv{font-size:11.5px;border-radius:999px;padding:2px 8px;font-weight:600;white-space:nowrap}
+.pv.g{background:#fff3d6;color:#8a5a00}
+.pv.c{background:#1b3550;color:#dbe8f3}
+:root[data-tema="koyu"] .pv.g{background:#3a2e12;color:#f0c870}
+:root[data-tema="koyu"] .pv.c{background:#2a4f72;color:#e6f0f8}
+@media (prefers-color-scheme:dark){
+  :root:not([data-tema="acik"]) .pv.g{background:#3a2e12;color:#f0c870}
+  :root:not([data-tema="acik"]) .pv.c{background:#2a4f72;color:#e6f0f8}
+}
+/* Uyarı hapları (başlıkta, kuyu satırında, çalışmayan kuleler satırında) */
+.sk .p{font-size:12px;border-radius:999px;padding:2px 9px;font-weight:500;white-space:nowrap}
+.sk .p.k{background:var(--bad-soft);color:var(--bad)}
+.sk .p.s{background:var(--warn-soft);color:var(--warn)}
 
 /* ⚠ YANIP SÖNEN YALNIZ AÇIK ARIZA.
    Üç şey birden yanıp sönerse hiçbiri görünmez; "makine şu an
@@ -607,25 +635,26 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
   font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:999px;
   display:inline-grid;place-items:center;padding:0 5px;line-height:1}
 
-/* 66. adım: kulesi olmayan şantiye kartında tek satır — ızgaranın
-   bütün kolonlarını kaplıyor, yoksa 130 px'lik ilk göze sıkışıyor. */
-.kule-sat .kule-yok{grid-column:1 / -1}
-
-/* ⚠ Dar ekranda kule satırı (25 Kasım). Beş sabit sütun telefonda
-   sığmıyordu: kuyu sütunu bir harfe kadar daralıyor, kuyu adı harf harf
-   alt alta yazılıyordu. Paket 1'den beri böyleydi; telefonda bakılınca
-   görüldü. Dar ekranda satır üç sıraya bölünüyor:
-     makine · vardiya ............ metraj
-     kuyu · derinlik
-     zaman dilimleri, uyarılar */
+/* Dar ekranda (telefon): şantiye başlığı iki sıra, kuyu satırı üç sıra.
+     ▸ şantiye adı ........ metraj
+       uyarılar
+     kuyu ............ metraj ›
+     kule · derinlik
+     vardiya rozetleri, uyarılar */
 @media (max-width:700px){
-  .kule-sat{grid-template-columns:auto minmax(0,1fr) auto;
-            grid-template-areas:"mk vd mt" "ku ku ku" "dl dl dl";gap:4px 10px;padding:10px 14px}
-  .kule-sat .mk{grid-area:mk}
-  .kule-sat .vd{grid-area:vd}
-  .kule-sat .ku{grid-area:ku;overflow-wrap:normal}
-  .kule-sat .mt{grid-area:mt}
-  .kule-sat .dl{grid-area:dl}
-  .kule-sat .dl:empty{display:none}
-  .saha-ust{flex-wrap:wrap}
+  .go-kutular{grid-template-columns:1fr 1fr;gap:8px}
+  .go-k{padding:10px 12px}
+  .go-k b{font-size:21px}
+  .go-k.ana b{font-size:23px}
+  .sk-bas{grid-template-columns:18px minmax(0,1fr) auto;grid-template-areas:"ok ad mt" ". uy uy";
+          gap:6px 10px;padding:12px 14px}
+  .sk-bas .ok{grid-area:ok} .sk-bas .ad-k{grid-area:ad} .sk-bas .mt{grid-area:mt;min-width:0}
+  .sk-bas .uy{grid-area:uy;justify-content:flex-start}
+  .sk-bas .uy:empty{display:none}
+  .sk-bas .mus{display:block;margin-left:0}
+  .ky{grid-template-columns:minmax(0,1fr) auto 14px;
+      grid-template-areas:"kd m ok" "mk dr ." "vd vd vd";gap:4px 10px;padding:10px 14px 10px 32px}
+  .ky .kd{grid-area:kd} .ky .m{grid-area:m} .ky .ok2{grid-area:ok}
+  .ky .mk{grid-area:mk} .ky .dr{grid-area:dr;text-align:right} .ky .vd{grid-area:vd}
+  .ky-kart,.cl,.sk-alt{padding-left:14px;padding-right:14px}
 }

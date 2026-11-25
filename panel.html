@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=66">
+<link rel="stylesheet" href="app.css?v=67">
 </head>
 <body>
 
@@ -67,8 +67,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          ⚠ Uyarı ayrı bir şeride toplanmıyor, ait olduğu satırda
          duruyor. Yanıp sönen YALNIZ açık arıza — üç şey birden
          yanıp sönerse hiçbiri görünmez. -->
-    <div class="sechead" style="margin-top:0"><h2 id="gunluk-basl">Yükleniyor…</h2>
-      <span id="gelen-gun">Yükleniyor…</span></div>
+    <!-- 119. dosya: tarih başlığın kendisi; "N şantiye · N vardiya · X m"
+         alt satırı kalktı, aynı bilgiyi artık üstteki kutular veriyor. -->
+    <div class="sechead" style="margin-top:0"><h2 id="gunluk-basl">Yükleniyor…</h2></div>
     <div id="gunluk">Yükleniyor…</div>
 
     <!-- ⚠ "Tek şantiye" başlığı kalktı (25 Kasım 2026, Tayfun'un
@@ -208,9 +209,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=66"></script>
+<script src="app-shell.js?v=67"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=66"></script>
+<script src="kart.js?v=67"></script>
 <script>
 (function(){
 "use strict";
@@ -224,7 +225,7 @@ function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return
 
 var sb=null, MASTER=null;
 
-SP.boot({sayfa:"panel", esanahtar:["sefozet","kuyular"], baslik:"Genel bakış", hazir:function(){
+SP.boot({sayfa:"panel", esanahtar:["sefozet","kuyular"], baslik:"Günlük rapor", hazir:function(){
   sb = SP.sb;
   boot();
   $("#k-sec").addEventListener("change", kuyuCiz);
@@ -623,138 +624,198 @@ function zamanKisa(t){
 }
 
 /* ============================================================
-   GÜNLÜK DÖKÜM — "Dün ne oldu" (110. dosya · 66. adım)
+   GÜNLÜK RAPOR (119. dosya · sürüm 67 · 69. adım)
    ------------------------------------------------------------
-   Tek çağrı: hangi şantiyede hangi kule ne yapmış, metraj ne,
-   zaman nereye gitmiş, dikkat edilecek ne var.
+   Tayfun, 25 Kasım: "En üst kısımda bütün şantiyelerin toplam
+   delinen metrajı yazsın, gündüz ve gece vardiyası. Şantiyeler tek
+   başlık olarak çıksın, üstüne tıklayınca kuyuları açılsın. Kuyulara
+   tıklayınca içine vardiya detayına girsin." Örnek ekranı onayladı:
+   "Bence gayet güzel oldu bu. Bu şekilde yapalım."
 
-   Eski tablo ve `sahalardan_gelenler` çağrısı kalktı: o tablo
-   "kim rapor göndermedi" sorusunu cevaplıyordu, "sahada ne oldu"
-   sorusunu değil.
+     üstte   toplam · gündüz · gece · çalışan şantiye
+     şantiye kapalı başlık; uyarı BAŞLIKTA (yanıp sönen arıza, ⚑
+             uygunsuz kontrol, sessiz) — kapalıyken de görünsün
+     kuyu    satır: kule(ler), derinlik, vardiya rozetleri, metraj
+     kart    kuyuya basınca o günün vardiya kart(lar)ı — şefin girdiği
+             her şey (vardiya_karti). İki vardiya varsa ikisi de.
+   Çalışmayan kuleler tek satırda; basılmıyor (kartı yok).
    ============================================================ */
-var VARDIYA_AD = {gunduz:"gündüz", gece:"gece",
-                  s1:"1. vardiya", s2:"2. vardiya", s3:"3. vardiya"};
-/* Dilim rengi: kaybedilen zaman kırmızı/sarı, üretken zaman sakin.
-   Hepsini boyamak renge anlam bırakmıyor. */
-var DILIM_SINIF = {ariza:"k", bekleme:"s", bakim:"s", nakliye:"n", delgi:""};
-var DILIM_AD = {delgi:"delgi", muhafaza:"muhafaza", bekleme:"bekleme", ariza:"arıza",
-                nakliye:"nakliye", takim:"takım", temizlik:"temizlik",
-                kuyu_bitimi:"kuyu bitimi", manevra:"manevra",
-                kuyu_hazirlik:"kuyu hazırlık", bakim:"bakım", diger:"diğer"};
 
 /* ⚠ Arıza mesajı SÜREYLE SERTLEŞİYOR. Parça bekleyen arıza
    haftalarca açık kalır; aynı cümle üç hafta yanıp sönerse insan
    görmez olur — tam da en kötü durumda duyarsızlaşma. */
-function arizaEtiketi(a){
+function arizaEtiketi(a, adet){
   var g = Number(a.gun || 0);
-  if(g >= 3) return '<span class="p k yanip"><b>DURUYOR · ' + g + ' gündür</b></span>';
-  if(g >= 1) return '<span class="p k yanip">arızada · ' + g + ' gün</span>';
-  return '<span class="p k yanip">arızada · bugün</span>';
+  var on = adet > 1 ? adet + ' kule arızada · ' : '';
+  if(g >= 3) return '<span class="p k yanip"><b>' + (adet > 1 ? on + 'en uzunu ' + g + ' gündür'
+                                                              : 'DURUYOR · ' + g + ' gündür') + '</b></span>';
+  if(g >= 1) return '<span class="p k yanip">' + (on || 'arızada · ') + g + ' gün</span>';
+  return '<span class="p k yanip">' + (on || 'arızada · ') + 'bugün</span>';
 }
+function geceMi(k){ return k.vardiya === "gece"; }
+function vardiyaRozeti(k){
+  return geceMi(k) ? '<span class="pv c">Gece</span>' : '<span class="pv g">Gündüz</span>';
+}
+
+/* Ekrandaki satırların arkasındaki veri — düğmelere metin değil sıra
+   numarası yazılıyor, kart buradan açılıyor. */
+var GUNLUK = [];
 
 function gunlukYukle(){
   var el = $("#gunluk"); if(!el) return;
-  /* Başlık yüklenirken "Yükleniyor…" diyor; hata ya da kayıt yoksa
-     orada takılı kalmasın — her çıkış yolu başlığı da yazıyor. */
-  var yaz = function(baslik, alt){
-    var h = $("#gunluk-basl"), a = $("#gelen-gun");
-    if(h) h.textContent = baslik; if(a) a.textContent = alt || "";
-  };
+  var yaz = function(baslik){ var h = $("#gunluk-basl"); if(h) h.textContent = baslik; };
   sb.rpc("yonetici_gunluk", {p_gun:null}).then(function(r){
     if(r.error){
-      yaz("Şantiyelerden gelenler", "");
+      yaz("Günlük rapor");
       el.innerHTML = '<div class="msg bad">' + esc(r.error.message) + '</div>'; return; }
     var d = r.data || {}, sahalar = d.santiyeler || [];
-    var basl = $("#gelen-gun");
-
     if(!sahalar.length){
-      yaz("Şantiyelerden gelenler", "");
+      yaz("Günlük rapor");
       el.innerHTML = '<div class="card"><div class="note">Etkin şantiye yok.</div></div>';
       return;
     }
     if(!d.gun){
-      yaz("Şantiyelerden gelenler", "");
+      yaz("Günlük rapor");
       el.innerHTML = '<div class="card"><div class="note">Henüz hiç vardiya kaydı girilmemiş.</div></div>';
       rozetYaz(0); return;
     }
-
-    /* ⚠ 25 Kasım (117. dosya) · Tayfun: "Son kayıt günü diye bir şey
-       yazmasın. Tarih, şantiye adedi, vardiya adedi ve toplam metraj
-       yazsın." Başlık tarihin KENDİSİ; "Dün/Bugün ne oldu" ve
-       "N gün önce" kalktı. */
-    var h = $("#gunluk-basl");
-    if(h) h.textContent = tarihYaz(d.gun);
-
-    var vardiyaSayi = 0, toplam = 0;
-    sahalar.forEach(function(x){
-      toplam += Number(x.metraj || 0);
-      (x.kuleler || []).forEach(function(k){ if(k.vardiya) vardiyaSayi++; });
-    });
-    var dolu = sahalar.filter(function(x){ return !x.sessiz; }).length;
-    if(basl) basl.textContent = dolu + " şantiye · " + vardiyaSayi + " vardiya · " +
-                                tl(toplam) + " m";
+    /* Başlık tarihin KENDİSİ (117. dosya). */
+    yaz(tarihYaz(d.gun));
     rozetYaz(d.uyari || 0);
 
-    el.innerHTML = sahalar.map(function(x){
-      var sessizNot = x.son_kayit
-        ? '<span class="pill bad">' + gunYaz(x.sessiz_gun) + ' sessiz</span>'
-        : '<span class="pill bad">hiç kayıt girilmemiş</span>';
-      return '<section class="saha-kart' + (x.sessiz ? ' sessiz' : '') + '">' +
-        '<div class="saha-ust">' +
-          '<div><b class="saha-ad" data-proje="' + esc(x.proje) + '" role="button" tabindex="0">' +
-            esc(x.saha) + '</b>' +
-            (x.musteri ? '<span class="note"> ' + esc(x.musteri) + '</span>' : '') + '</div>' +
-          '<div class="saha-top">' +
-            (x.sessiz ? sessizNot : '<b>' + tl(x.metraj) + ' m</b>') + '</div>' +
-        '</div>' +
-        /* Kulesi olmayan şantiye bomboş bir kart olarak çıkmasın.
-           "Buradan niye bir şey gelmiyor" sorusunun cevabı bu:
-           şantiyeye atanmış kule yok, şef makine bile seçemez. */
-        ((x.kuleler || []).length
-          ? (x.kuleler || []).map(kuleSatiri).join("")
-          : '<div class="kule-sat durgun"><div class="kule-yok note">' +
-            'Bu şantiyeye atanmış kule yok — şef vardiya giremez.</div></div>') +
-      '</section>';
-    }).join("");
+    var G = 0, C = 0, nG = 0, nC = 0;
+    sahalar.forEach(function(s){ (s.kuleler || []).forEach(function(k){
+      if(!k.vardiya) return;
+      if(geceMi(k)){ C += Number(k.metraj || 0); nC++; } else { G += Number(k.metraj || 0); nG++; }
+    }); });
+    var calisan = sahalar.filter(function(s){ return !s.sessiz; }).length;
+
+    GUNLUK = [];
+    var ozet = '<div class="go-kutular">' +
+      '<div class="go-k ana"><span>Toplam delinen</span><b id="go-toplam">' + tl(G + C) + ' m</b>' +
+        '<i>' + (nG + nC) + ' vardiya</i></div>' +
+      '<div class="go-k"><span>Gündüz</span><b id="go-gunduz">' + tl(G) + ' m</b><i>' + nG + ' vardiya</i></div>' +
+      '<div class="go-k"><span>Gece</span><b id="go-gece">' + tl(C) + ' m</b><i>' + nC + ' vardiya</i></div>' +
+      '<div class="go-k"><span>Çalışan şantiye</span><b id="go-santiye">' + calisan + ' / ' + sahalar.length +
+        '</b><i>&nbsp;</i></div></div>';
+
+    el.innerHTML = ozet + sahalar.map(santiyeBlogu).join("");
   });
 }
 
-function kuleSatiri(k){
-  var durgun = !k.vardiya;
-  var dilim = (k.dilimler || []).map(function(z){
-    return '<span class="p ' + (DILIM_SINIF[z.tur] || "") + '">' +
-      esc(DILIM_AD[z.tur] || z.tur) + ' ' + tl(z.saat,1) + ' sa</span>';
+function santiyeBlogu(s){
+  var kuyular = [], kuyuSira = {}, bos = [];
+  var sG = 0, sC = 0, nsG = 0, nsC = 0, uyg = 0, arizalar = [];
+  var arizaliKule = {};
+  (s.kuleler || []).forEach(function(k){
+    /* Bir kulenin iki vardiya satırı var; arıza kule başına bir kez sayılır */
+    if(k.ariza && !arizaliKule[k.makine]){ arizaliKule[k.makine] = 1; arizalar.push(k.ariza); }
+    uyg += (k.uygunsuz || []).length;
+    if(!k.vardiya){ bos.push(k); return; }
+    if(geceMi(k)){ sC += Number(k.metraj || 0); nsC++; } else { sG += Number(k.metraj || 0); nsG++; }
+    var a = kuyuSira[k.kuyu];
+    if(a == null){
+      a = kuyuSira[k.kuyu] = kuyular.length;
+      kuyular.push({kuyu:k.kuyu, derinlik:k.derinlik, makine:[], v:[], m:0, ariza:null, uyg:0});
+    }
+    var y = kuyular[a];
+    if(y.makine.indexOf(k.makine) < 0) y.makine.push(k.makine);
+    y.v.push(k); y.m += Number(k.metraj || 0);
+    if(k.ariza) y.ariza = k.ariza;
+    y.uyg += (k.uygunsuz || []).length;
+    if(Number(k.derinlik) > Number(y.derinlik || 0)) y.derinlik = k.derinlik;
+  });
+
+  /* Başlıktaki uyarılar: şantiye kapalıyken de görünsün */
+  arizalar.sort(function(x, y){ return Number(y.gun || 0) - Number(x.gun || 0); });
+  var uyari = (arizalar.length ? arizaEtiketi(arizalar[0], arizalar.length) : '') +
+    (uyg ? '<span class="p s">⚑ ' + uyg + ' madde uygun değil</span>' : '') +
+    (s.sessiz ? (s.son_kayit ? '<span class="p k">' + gunYaz(s.sessiz_gun) + ' sessiz</span>'
+                             : '<span class="p k">hiç kayıt girilmemiş</span>') : '');
+  var mt = s.sessiz ? '' :
+    '<b>' + tl(s.metraj) + ' m</b><small>Gündüz ' + (nsG ? tl(sG) : '—') +
+    ' · Gece ' + (nsC ? tl(sC) : '—') + '</small>';
+
+  var satirlar = kuyular.map(function(y){
+    var no = GUNLUK.push(y) - 1;
+    return '<button class="ky" type="button" aria-expanded="false" data-no="' + no + '">' +
+      '<span class="kd">' + esc(y.kuyu || '—') + '</span>' +
+      '<span class="mk">' + esc(y.makine.join(' · ')) + '</span>' +
+      '<span class="dr">' + (y.derinlik ? tl(y.derinlik) + ' m' : '—') + '</span>' +
+      '<span class="vd">' + y.v.map(vardiyaRozeti).join('') +
+        (y.ariza ? arizaEtiketi(y.ariza, 1) : '') +
+        (y.uyg ? '<span class="p s">⚑ ' + y.uyg + '</span>' : '') + '</span>' +
+      '<span class="m">' + (y.m > 0 ? tl(y.m) + ' m' : '<span class="yok">metraj yok</span>') + '</span>' +
+      '<span class="ok2" aria-hidden="true">›</span></button>' +
+      '<div class="ky-kart" hidden></div>';
   }).join("");
 
-  if(k.ariza) dilim = arizaEtiketi(k.ariza) + dilim;
-  /* Vardiyası olmayan satırda "vardiya girilmedi" sağdaki boş alanda —
-     kuyu sütununda iki satıra kırılıyordu (25 Kasım). */
-  if(durgun) dilim += '<span class="note">vardiya girilmedi</span>';
-  var uyg = (k.uygunsuz || []).length;
-  if(uyg) dilim += '<span class="p s">⚑ ' + uyg + ' madde uygun değil</span>';
+  /* Çalışmayan kuleler: son kuyusu ve varsa arızası. Kartı yok. */
+  var bosSatir = bos.length ? '<div class="cl"><b>Çalışmayan kuleler:</b> ' + bos.map(function(k){
+      return esc(k.makine) + (k.kuyu ? ' <span class="soluk">(' + esc(k.kuyu) + ')</span>' : '') +
+             (k.ariza ? ' ' + arizaEtiketi(k.ariza, 1) : '');
+    }).join(' · ') + '</div>' : '';
+  var ic = (satirlar + bosSatir) ||
+    '<div class="cl">Bu şantiyeye atanmış kule yok — şef vardiya giremez.</div>';
+  /* Eski "şantiye adına bas → aşağıda aylık ayrıntı" yolu korunuyor:
+     kuyuların kesit ve ilerleme bölümüne Operasyonlar gelene kadar
+     tek ulaşılan yer aşağısı. */
+  ic += '<div class="sk-alt"><button class="lnk sk-ayrinti" type="button" data-proje="' + esc(s.proje) +
+        '">Bu şantiyenin aylık ayrıntısı ↓</button></div>';
 
-  var ek = "";
-  if(k.ariza && k.ariza["not"]) ek = esc(k.ariza["not"]);
-  else if(uyg && k.kontrol_not) ek = esc(k.kontrol_not);
-
-  return '<div class="kule-sat' + (durgun ? ' durgun' : '') + '">' +
-    '<div class="mk">' + esc(k.makine) + '</div>' +
-    '<div class="vd">' + (k.vardiya ? esc(VARDIYA_AD[k.vardiya] || k.vardiya) : "—") + '</div>' +
-    /* 25 Kasım (68. adım): vardiyası olmayan kulenin de son kuyusu
-       geliyor — Tayfun: "kuyu adları neden gözükmüyor?" O gün çalışmadığı
-       için soluk; yanında "vardiya girilmedi". Hiç vardiyası olmayan
-       kulede kuyu yok, yalnız not. */
-    '<div class="ku">' + (k.kuyu
-        ? '<span class="' + (durgun ? 'soluk' : '') + '">' + esc(k.kuyu) + '</span>' +
-          (k.derinlik ? ' <span class="note">· ' + tl(k.derinlik) + ' m</span>' : '')
-        : '') + '</div>' +
-    '<div class="mt">' + (k.metraj == null ? '<span class="note">—</span>'
-        : (Number(k.metraj) > 0 ? '<b>' + tl(k.metraj) + ' m</b>'
-                                : '<b class="yok">metraj yok</b>')) +
-      (k.ortalama ? '<i>ort. ' + tl(k.ortalama,1) + '</i>' : '') + '</div>' +
-    '<div class="dl">' + dilim + (ek ? '<div class="ek">“' + ek + '”</div>' : '') + '</div>' +
-  '</div>';
+  return '<section class="sk' + (s.sessiz ? ' sessiz' : '') + '">' +
+    '<button class="sk-bas" type="button" aria-expanded="false">' +
+      '<span class="ok" aria-hidden="true">▸</span>' +
+      '<span class="ad-k"><span class="ad">' + esc(s.saha) + '</span>' +
+        (s.musteri ? '<span class="mus">' + esc(s.musteri) + '</span>' : '') + '</span>' +
+      '<span class="uy">' + uyari + '</span>' +
+      '<span class="mt">' + mt + '</span>' +
+    '</button><div class="sk-ic" hidden>' + ic + '</div></section>';
 }
+
+/* Tıklamalar: şantiye başlığı aç/kapa, kuyu satırı kart aç/kapa,
+   "aylık ayrıntı" aşağıdaki seçiciyi doldurup getirir. */
+document.addEventListener("click", function(e){
+  if(!e.target.closest) return;
+  var bas = e.target.closest(".sk-bas");
+  if(bas){
+    var sk = bas.parentElement, acik = !sk.classList.contains("acik");
+    sk.classList.toggle("acik", acik);
+    bas.setAttribute("aria-expanded", acik ? "true" : "false");
+    sk.querySelector(".sk-ic").hidden = !acik;
+    return;
+  }
+  var ky = e.target.closest(".ky[data-no]");
+  if(ky){
+    var kart = ky.nextElementSibling, ac = kart.hidden;
+    ky.classList.toggle("acik", ac);
+    ky.setAttribute("aria-expanded", ac ? "true" : "false");
+    kart.hidden = !ac;
+    if(ac && !kart.dataset.dolu){
+      kart.dataset.dolu = "1";
+      var y = GUNLUK[Number(ky.dataset.no)];
+      kart.innerHTML = y.v.map(function(k, i){
+        return '<h4>' + (geceMi(k) ? 'Gece' : 'Gündüz') + ' vardiyası · ' + esc(k.makine) + '</h4>' +
+               '<div class="ky-vk" data-i="' + i + '"></div>';
+      }).join("");
+      y.v.forEach(function(k, i){
+        var hedef = kart.querySelector('.ky-vk[data-i="' + i + '"]');
+        if(k.vardiya_id) VKART.ac(sb, k.vardiya_id, hedef);
+        else hedef.innerHTML = '<div class="note">Vardiya kimliği gelmedi — merkezde 69. adım kurulu değil.</div>';
+      });
+    }
+    return;
+  }
+  var ay = e.target.closest(".sk-ayrinti[data-proje]");
+  if(ay){
+    var sel = $("#f-project"); if(!sel) return;
+    sel.value = ay.getAttribute("data-proje");
+    sel.dispatchEvent(new Event("change", {bubbles:true}));
+    var btn = $("#btn-load"); if(btn) btn.click();
+    var hedef = $("#tiles") || btn;
+    if(hedef && hedef.scrollIntoView) hedef.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+});
 
 /* Sol menüdeki turuncu sayı. Yedi şantiyede altıncıdaki arıza
    kaydırmadan görünmez; "aşağıda bir şey var" demenin tek yolu bu. */
@@ -776,19 +837,6 @@ function tarihYaz(g){
   var p = String(g).split("-"), t = new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
   return Number(p[2]) + " " + AY[Number(p[1])-1] + " " + p[0] + ", " + GUN[t.getDay()];
 }
-
-/* Şantiye adına tıklayınca o sahanın ayrıntısı açılıyor — "seç ve
-   Getir'e bas" adımı kalkıyor (110. dosya). */
-document.addEventListener("click", function(e){
-  var b = e.target.closest ? e.target.closest(".saha-ad[data-proje]") : null;
-  if(!b) return;
-  var sel = $("#f-project"); if(!sel) return;
-  sel.value = b.getAttribute("data-proje");
-  sel.dispatchEvent(new Event("change", {bubbles:true}));
-  var btn = $("#btn-load"); if(btn) btn.click();
-  var hedef = $("#tiles") || btn;
-  if(hedef && hedef.scrollIntoView) hedef.scrollIntoView({behavior:"smooth", block:"start"});
-});
 
 var WSTAT={drilling:['Devam',''],completed:['Bitti','good'],cancelled:['İptal','bad'],planned:['Planlı','']};
 var PROG={arama:'Maden arama',planlama:'Maden planlama',belirsiz:'Belirsiz'};

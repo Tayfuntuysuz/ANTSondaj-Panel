@@ -75,6 +75,31 @@ function beklemeIc(d){
            '</span><span>' + tl(b.saat, 1) + ' saat</span></div>' +
            (b["not"] ? '<div class="vk-kucuk">' + esc(b["not"]) + '</div>' : ''); }).join("");
 }
+/* 70. adım · Operasyon listesi şefin girdiği SIRAYLA (119. dosya).
+   Önce bütün operasyonlar "Bekleme" başlığı altında, türe göre ve
+   saatsiz çıkıyordu; delgi "0,0 saat" görünüyordu. */
+var OP_AD = {delgi:"Delgi", muhafaza:"Muhafaza borusu", bekleme:"Bekleme",
+  ariza:"Arıza", nakliye:"Nakliye", takim:"Takım çekme / indirme",
+  temizlik:"Kuyu temizleme", kuyu_bitimi:"Kuyu bitimi",
+  manevra:"Manevra", kuyu_hazirlik:"Kuyu hazırlık", bakim:"Bakım", diger:"Diğer"};
+var OP_SEBEP = {operasyonel:"operasyonel", operasyonel_degil:"operasyonel değil",
+  kuyu_sonu:"kuyu sonu", kuyu_iptali:"kuyu iptali"};
+function operasyonIc(d){
+  return (d.operasyonlar || []).map(function(o){
+    var ek = [];
+    if(o.sebep) ek.push(OP_SEBEP[o.sebep] || BEKLEME_AD[o.sebep] || o.sebep);
+    if(o.from_m != null || o.to_m != null)
+      ek.push(tl(o.from_m) + '–' + tl(o.to_m) + ' m' + (o.cap ? ' · ' + o.cap : ''));
+    else if(o.cap) ek.push(o.cap);
+    if(o.tur === "delgi") ek.push("manevralar yukarıda");
+    if(o.otomatik) ek.push("program hesapladı");
+    var sag = o.bas && o.bit ? esc(o.bas) + '–' + esc(o.bit) + ' · ' + tl(o.saat, 1) + ' sa'
+            : (o.saat ? tl(o.saat, 1) + ' saat' : '');
+    return '<div class="vk-sat"><span>' + esc(OP_AD[o.tur] || o.tur || "") +
+           (ek.length ? ' <span class="vk-kucuk">' + esc(ek.join(" · ")) + '</span>' : '') +
+           '</span><span>' + sag + '</span></div>' +
+           (o["not"] && !o.otomatik ? '<div class="vk-kucuk">' + esc(o["not"]) + '</div>' : ''); }).join("");
+}
 function malzemeIc(d){
   return (d.malzeme || []).map(function(m){
     return '<div class="vk-sat"><span>' + esc(m.ad) +
@@ -152,11 +177,16 @@ function ciz(d){
     ? saat(d.motor_bas) + " – " + saat(d.motor_bit) : "";
 
   /* ---- manevralar ---- */
+  /* 70. adım: manevra saati de geliyor (şef 62. sürümden beri giriyor);
+     hiçbir manevrada saat yoksa sütun çıkmıyor (eski kayıtlar). */
+  var mvSaat = (d.manevralar || []).some(function(r){ return r.bas || r.bit; });
   var mv = (d.manevralar || []).length
-    ? '<table class="vk-tbl"><thead><tr><th>Çap</th><th>Başlangıç</th>' +
-      '<th>Bitiş</th><th>Metre</th></tr></thead><tbody>' +
+    ? '<table class="vk-tbl"><thead><tr>' + (mvSaat ? '<th>Saat</th>' : '') +
+      '<th>Çap</th><th class="s">Başlangıç</th>' +
+      '<th class="s">Bitiş</th><th class="s">Metre</th></tr></thead><tbody>' +
       d.manevralar.map(function(r){
-        return '<tr><td>' + esc(r.cap) + '</td><td class="s">' + tl(r.from_m) +
+        return '<tr>' + (mvSaat ? '<td>' + esc(r.bas || '') + (r.bit ? '–' + esc(r.bit) : '') + '</td>' : '') +
+               '<td>' + esc(r.cap) + '</td><td class="s">' + tl(r.from_m) +
                '</td><td class="s">' + tl(r.to_m) + '</td><td class="s"><b>' +
                tl(r.metre) + '</b></td></tr>'; }).join("") +
       '</tbody></table>'
@@ -198,11 +228,13 @@ function ciz(d){
     bolum("Ekip", ekip),
     bolum("Motor", motor),
     bolum("Manevra", mv),
+    /* Merkezde 70. adım yoksa eski "Bekleme" bölümü */
+    d.operasyonlar ? bolum("Operasyonlar", operasyonIc(d)) : "",
     iy ? bolum("İlerleme", iy) : "",
     bolum("Mazot", d.mazot == null ? "" : tl(d.mazot, 0) + " lt"),
     bolum("Kuyu durumu", KUYU_DURUM[d.kuyu_durumu] || ""),
     bolum("Arıza", ar),
-    bolum("Bekleme", bk),
+    d.operasyonlar ? "" : bolum("Bekleme", bk),
     bolum("Malzeme", ml),
     bolum("O günün ölçümleri", ol),
     bolum("O günün giderleri", gd),
@@ -240,9 +272,15 @@ function yan(d){
   if(!d) return "";
   var ar = arizaIc(d), bk = beklemeIc(d), ml = malzemeIc(d),
       ol = olcumIc(d), gd = giderIc(d), dz = izIc(d);
+  /* Operasyon listesi düzeltme ekranında zaten düzenleniyor; burada
+     yalnız program hesabı (arıza saati) kalıyor. Merkezde 70. adım
+     yoksa eski "Bekleme" bölümü. */
+  if(d.operasyonlar){
+    bk = operasyonIc({operasyonlar: d.operasyonlar.filter(function(o){ return o.otomatik; })});
+  }
   var govde = satirlar([
     bolum("Arıza", ar),
-    bolum("Bekleme", bk),
+    bolum(d.operasyonlar ? "Program hesabı" : "Bekleme", bk),
     bolum("Malzeme", ml),
     bolum("O günün ölçümleri", ol),
     bolum("O günün giderleri", gd),
@@ -282,8 +320,8 @@ function stil(){
     ".vk-tbl{width:100%;border-collapse:collapse;font-size:13px}" +
     ".vk-tbl th{text-align:left;font-weight:600;opacity:.6;font-size:11px;" +
       "text-transform:uppercase;letter-spacing:.06em;padding:2px 6px 4px 0}" +
-    ".vk-tbl td{padding:2px 6px 2px 0}" +
-    ".vk-tbl td.s,.vk-tbl th:nth-child(n+2){text-align:right}" +
+    ".vk-tbl td{padding:2px 6px 2px 0;text-align:left}" +
+    ".vk-tbl td.s,.vk-tbl th.s{text-align:right}" +
     ".vk-tbl td.s{font-variant-numeric:tabular-nums}" +
     ".vk-alt{margin-top:9px;font-size:12px;opacity:.6}" +
     ".vk-bos{opacity:.6;padding:10px 0}" +
