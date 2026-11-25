@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="app.css?v=66">
 </head>
 <body>
 
@@ -67,7 +67,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          ⚠ Uyarı ayrı bir şeride toplanmıyor, ait olduğu satırda
          duruyor. Yanıp sönen YALNIZ açık arıza — üç şey birden
          yanıp sönerse hiçbiri görünmez. -->
-    <div class="sechead" style="margin-top:0"><h2 id="gunluk-basl">Dün ne oldu</h2>
+    <div class="sechead" style="margin-top:0"><h2 id="gunluk-basl">Yükleniyor…</h2>
       <span id="gelen-gun">Yükleniyor…</span></div>
     <div id="gunluk">Yükleniyor…</div>
 
@@ -199,23 +199,18 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          Uyarı kaybolmuyor, yerine gidiyor: yönetim → Araç ve ekipman
          sekmesi ile muhasebe → araç belgeleri. Eşik de 60 günden
          30 güne indi (53. SQL). -->
-    <div class="donem-blok">
-      <div class="sechead" id="puantaj"><h2>Puantaj</h2><span>Çalışılan gün, izin, avans</span></div>
-      <div class="card">
-        <div class="note">Çalışanlar vardiyadan sayılıyor: kuleye çıkan çalıştı,
-          çıkmayan sayılmaz. Şef, şoför ve aşçı vardiyaya girmeden tam gün sayılır.
-          İzin, rapor ve avans şefin puantaj ekranından geliyor.</div>
-        <div class="scroll" id="attendance"></div></div>
-    </div>
+    <!-- PUANTAJ BURADAN KALKTI — 25 Kasım 2026 (114. dosya §2).
+         Kendi sayfası var: Personel → [Puantaj | Maaş tablosu]
+         (puantaj.html). Burada kalsaydı aynı tablo iki yerde dururdu. -->
 
     <p class="foot">Bütün rakamlar sahadaki günlük vardiya kayıtlarından türetilir. İptal edilen kuyu metrajı delgi toplamına girer; sondör metrajına, teslim edilen metraja ve prime girmez.</p>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js"></script>
+<script src="app-shell.js?v=66"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js"></script>
+<script src="kart.js?v=66"></script>
 <script>
 (function(){
 "use strict";
@@ -229,7 +224,7 @@ function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return
 
 var sb=null, MASTER=null;
 
-SP.boot({sayfa:"panel", esanahtar:["sefozet","kuyular","puantaj"], baslik:"Genel bakış", hazir:function(){
+SP.boot({sayfa:"panel", esanahtar:["sefozet","kuyular"], baslik:"Genel bakış", hazir:function(){
   sb = SP.sb;
   boot();
   $("#k-sec").addEventListener("change", kuyuCiz);
@@ -659,33 +654,36 @@ function arizaEtiketi(a){
 
 function gunlukYukle(){
   var el = $("#gunluk"); if(!el) return;
+  /* Başlık yüklenirken "Yükleniyor…" diyor; hata ya da kayıt yoksa
+     orada takılı kalmasın — her çıkış yolu başlığı da yazıyor. */
+  var yaz = function(baslik, alt){
+    var h = $("#gunluk-basl"), a = $("#gelen-gun");
+    if(h) h.textContent = baslik; if(a) a.textContent = alt || "";
+  };
   sb.rpc("yonetici_gunluk", {p_gun:null}).then(function(r){
     if(r.error){
+      yaz("Şantiyelerden gelenler", "");
       el.innerHTML = '<div class="msg bad">' + esc(r.error.message) + '</div>'; return; }
     var d = r.data || {}, sahalar = d.santiyeler || [];
     var basl = $("#gelen-gun");
 
     if(!sahalar.length){
-      if(basl) basl.textContent = "";
+      yaz("Şantiyelerden gelenler", "");
       el.innerHTML = '<div class="card"><div class="note">Etkin şantiye yok.</div></div>';
       return;
     }
     if(!d.gun){
-      if(basl) basl.textContent = "";
+      yaz("Şantiyelerden gelenler", "");
       el.innerHTML = '<div class="card"><div class="note">Henüz hiç vardiya kaydı girilmemiş.</div></div>';
       rozetYaz(0); return;
     }
 
-    /* Başlık günü takip ediyor. Sabit "Dün ne oldu" yazıp altında
-       "31 Ağustos" göstermek kendi kendini yalanlıyordu: döküm en son
-       KAYIT GİRİLMİŞ günü gösteriyor, o da dün olmayabilir. */
+    /* ⚠ 25 Kasım (117. dosya) · Tayfun: "Son kayıt günü diye bir şey
+       yazmasın. Tarih, şantiye adedi, vardiya adedi ve toplam metraj
+       yazsın." Başlık tarihin KENDİSİ; "Dün/Bugün ne oldu" ve
+       "N gün önce" kalktı. */
     var h = $("#gunluk-basl");
-    if(h){
-      var fark = gunFarki(d.gun);
-      h.textContent = fark === 0 ? "Bugün ne oldu"
-                    : fark === 1 ? "Dün ne oldu"
-                    : "Son kayıt günü";
-    }
+    if(h) h.textContent = tarihYaz(d.gun);
 
     var vardiyaSayi = 0, toplam = 0;
     sahalar.forEach(function(x){
@@ -693,10 +691,8 @@ function gunlukYukle(){
       (x.kuleler || []).forEach(function(k){ if(k.vardiya) vardiyaSayi++; });
     });
     var dolu = sahalar.filter(function(x){ return !x.sessiz; }).length;
-    var fark2 = gunFarki(d.gun);
-    if(basl) basl.textContent = tarihYaz(d.gun) +
-      (fark2 > 1 ? " · " + fark2 + " gün önce" : "") +
-      " · " + dolu + " şantiye · " + vardiyaSayi + " vardiya · " + tl(toplam) + " m";
+    if(basl) basl.textContent = dolu + " şantiye · " + vardiyaSayi + " vardiya · " +
+                                tl(toplam) + " m";
     rozetYaz(d.uyari || 0);
 
     el.innerHTML = sahalar.map(function(x){
@@ -731,6 +727,9 @@ function kuleSatiri(k){
   }).join("");
 
   if(k.ariza) dilim = arizaEtiketi(k.ariza) + dilim;
+  /* Vardiyası olmayan satırda "vardiya girilmedi" sağdaki boş alanda —
+     kuyu sütununda iki satıra kırılıyordu (25 Kasım). */
+  if(durgun) dilim += '<span class="note">vardiya girilmedi</span>';
   var uyg = (k.uygunsuz || []).length;
   if(uyg) dilim += '<span class="p s">⚑ ' + uyg + ' madde uygun değil</span>';
 
@@ -741,9 +740,14 @@ function kuleSatiri(k){
   return '<div class="kule-sat' + (durgun ? ' durgun' : '') + '">' +
     '<div class="mk">' + esc(k.makine) + '</div>' +
     '<div class="vd">' + (k.vardiya ? esc(VARDIYA_AD[k.vardiya] || k.vardiya) : "—") + '</div>' +
+    /* 25 Kasım (68. adım): vardiyası olmayan kulenin de son kuyusu
+       geliyor — Tayfun: "kuyu adları neden gözükmüyor?" O gün çalışmadığı
+       için soluk; yanında "vardiya girilmedi". Hiç vardiyası olmayan
+       kulede kuyu yok, yalnız not. */
     '<div class="ku">' + (k.kuyu
-        ? esc(k.kuyu) + (k.derinlik ? ' <span class="note">· ' + tl(k.derinlik) + ' m</span>' : '')
-        : '<span class="note">vardiya girilmedi</span>') + '</div>' +
+        ? '<span class="' + (durgun ? 'soluk' : '') + '">' + esc(k.kuyu) + '</span>' +
+          (k.derinlik ? ' <span class="note">· ' + tl(k.derinlik) + ' m</span>' : '')
+        : '') + '</div>' +
     '<div class="mt">' + (k.metraj == null ? '<span class="note">—</span>'
         : (Number(k.metraj) > 0 ? '<b>' + tl(k.metraj) + ' m</b>'
                                 : '<b class="yok">metraj yok</b>')) +
@@ -762,16 +766,6 @@ function rozetYaz(n){
   if(!r){ r = document.createElement("span"); r.className = "menu-rozet"; a.appendChild(r); }
   r.textContent = String(n);
   r.setAttribute("aria-label", n + " dikkat gerektiren kayıt");
-}
-
-/* Verilen günün bugünden kaç gün öncesi olduğu. Saat dilimi
-   kaymasın diye iki tarih de yerel gün başına çekiliyor. */
-function gunFarki(g){
-  if(!g) return null;
-  var p = String(g).split("-");
-  var a = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-  var b = new Date(); b.setHours(0,0,0,0);
-  return Math.round((b - a) / 86400000);
 }
 
 function tarihYaz(g){
@@ -903,21 +897,7 @@ function renderDash(d){
     ["Matris döken",function(r){return r.matris?'<span class="pill warn">'+r.matris+'</span>':'—';}]
   ], d.bits, "Bu dönemde matkap kaydı yok.");
 
-  table($("#attendance"), [
-    ["Ad",function(r){return esc(r.name);}],
-    ["Görev",function(r){return esc(String(r.kind).replace(/_/g," "));}],
-    ["Çalıştı",function(r){return '<span class="num">'+r.calisti+'</span>';}],
-    /* 71. dosya: gün sayısı yanında VARDİYA sayısı. Aynı gün iki
-       vardiyaya çıkan kişi gün sütununda bir kere görünüyor.
-       Vardiyaya girmeden çalışanlarda (şef, şoför, aşçı) sıfır —
-       tam gün sayılıyorlar, vardiyaları yok. */
-    ["Vardiya",function(r){return '<span class="num">'+
-       (Number(r.vardiya) ? r.vardiya : '—')+'</span>';}],
-    ["İzin",function(r){return '<span class="num">'+r.izin+'</span>';}],
-    ["Rapor",function(r){return '<span class="num">'+r.rapor+'</span>';}],
-    ["Tek çalışma",function(r){return '<span class="num">'+r.tek+'</span>';}],
-    ["Avans",function(r){return '<span class="num">'+(Number(r.avans)?money(r.avans):'—')+'</span>';}]
-  ], d.attendance, "Bu dönemde puantaj kaydı yok.");
+  /* Puantaj tablosu puantaj.html'e taşındı (25 Kasım). */
 }
 
 function renderCharts(c, p){

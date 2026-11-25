@@ -5,8 +5,20 @@
    ============================================================ */
 
 :root{
-  --bg:#f4f7f9; --card:#fff; --paper:#fff;
-  --line:#e2eaef; --line-soft:#eef3f6;
+  /* ⚠ 25 Kasım 2026 — 117. dosya, Tayfun'un seçtiği "B · lacivert
+     çerçeve": sol menü ve üst çubuk aynı lacivert, çalışma alanı buz
+     mavisi, kartlar beyaz. Önce zemin #f4f7f9'du — beyaza o kadar
+     yakındı ki "her taraf bembeyaz, iç içe ayrım gözükmüyor". */
+  --bg:#dde7ef; --card:#fff; --paper:#fff;
+  --line:#cfdbe5; --line-soft:#eef3f6;
+  /* Kartın içindeki ikinci yüzey. Paket 1'de şantiye başlık şeridine
+     verilmişti ama BURADA TANIMSIZDI (yalnız saha panelinde vardı) →
+     şerit tonsuz, bembeyaz çıkıyordu. */
+  --card-2:#eef4f9;
+  /* Genel bakış'taki şantiye başlık şeridi — zeminden belirgin koyu
+     (Tayfun, 2. tur: "daha belirgin bir tonda koyu"). Sessiz şantiye
+     de AYNI renk (3. tur: "sessizlerin rengini değiştirme"). */
+  --serit:#b2c7d8; --serit-cizgi:#9fb7cb; --serit-not:#3d5868;
   --ink:#0d1f2b; --ink-2:#4a6575; --ink-3:#7e9aa8;
   --nav:#0f2537; --nav-2:#16344a; --nav-ink:#b9d2df; --nav-ink-2:#6f93a6;
   /* Lacivert yan menu her temada lacivert; uzerindeki yazi da temayla
@@ -21,7 +33,7 @@
   /* sondaj: çap kodları her ekranda aynı */
   --pq:#0f2537; --hq:#12708f; --nq:#4bb3d6; --pw:#7cc9e3;
   --kaya:#a8815a; --kaya-2:#c6a988;
-  --shadow:0 1px 2px rgba(13,31,43,.05), 0 6px 20px rgba(13,31,43,.05);
+  --shadow:0 1px 2px rgba(13,31,43,.07), 0 6px 18px rgba(13,31,43,.07);
   --yan:244px;
   color-scheme:light;
 }
@@ -41,6 +53,7 @@
     --warn:#d8a44b; --warn-soft:#332715;
     --bad:#e2776a; --bad-soft:#35191a;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
+    --card-2:#15303d; --serit:#1a3a4c; --serit-cizgi:#25404e; --serit-not:#a3bcc8;
     color-scheme:dark;
   }
 }
@@ -54,6 +67,10 @@
   --warn:#d8a44b; --warn-soft:#332715;
   --bad:#e2776a; --bad-soft:#35191a;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.28);
+  /* Yeni renklerin koyu karşılıkları. Koyu tema ofiste paket 5'te
+     kalkacak (110. dosya §7); o güne kadar bunlar olmazsa koyu temalı
+     bilgisayarda açık şerit üstünde açık yazı çıkar. */
+  --card-2:#15303d; --serit:#1a3a4c; --serit-cizgi:#25404e; --serit-not:#a3bcc8;
   color-scheme:dark;
 }
 /* Yazı boyutu — sahada güneşte, eldivenle okunması için */
@@ -102,19 +119,27 @@ a{color:inherit;text-decoration:none}
 .sp-nav svg{width:17px;height:17px;flex:none;opacity:.9}
 .sp-nav .tag{margin-inline-start:auto;font-size:9.5px;background:var(--nav-etiket);
   padding:1px 6px;border-radius:20px;color:var(--nav-etiket-yazi);letter-spacing:.04em}
-.sp-side .foot{margin-top:auto;padding:11px 14px;border-top:1px solid var(--nav-cizgi);
+/* Ayarlar yan barın DİBİNE sabit, hemen altında sürüm (25 Kasım).
+   Menü kutusu kalan yüksekliği dolduruyor, Ayarlar grubu onun
+   dibine itiliyor; menü kısa da olsa uzun da olsa yeri değişmez. */
+#sp-menu{flex:1 0 auto;display:flex;flex-direction:column}
+.sp-grp-ayarlar{margin-top:auto;border-top:1px solid var(--nav-cizgi);padding-top:8px}
+.sp-side .foot{padding:11px 14px;border-top:1px solid var(--nav-cizgi);
   font-size:11px;color:var(--nav-ink-2);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 /* Alt şeritteki logo 24 Kasım'da sol üst köşeye taşındı; burada
    yalnız sürüm numarası kaldı. */
 
 .sp-main{display:flex;flex-direction:column;min-width:0}
-.sp-top{background:var(--card);border-bottom:1px solid var(--line);padding:10px 20px;
+/* Üst çubuk sol menüyle AYNI lacivert → çalışma alanının etrafında
+   bir çerçeve (117. dosya). */
+.sp-top{background:var(--nav);border-bottom:1px solid var(--nav-cizgi);padding:10px 20px;
   display:flex;align-items:center;gap:13px;position:sticky;top:0;z-index:6;flex-wrap:wrap}
-.sp-top h1{font-size:20.5px;line-height:1.15}
-.sp-top .yol{font-size:11.5px;color:var(--ink-3)}
+.sp-top h1{font-size:20.5px;line-height:1.15;color:var(--dolu-yazi)}
+.sp-top .yol{font-size:11.5px;color:var(--nav-ink-2)}
 .sp-top .sp{margin-inline-start:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .sp-kisi{display:flex;align-items:center;gap:9px;padding-block:4px;padding-inline:4px 11px;
-  border:1px solid var(--line);border-radius:24px;background:var(--card);color:inherit;
+  border:1px solid rgba(255,255,255,.16);border-radius:24px;background:rgba(255,255,255,.06);
+  color:var(--dolu-yazi);
   cursor:pointer;text-align:start}
 .sp-kisi .av{width:29px;height:29px;border-radius:50%;background:var(--accent);color:var(--dolu-yazi);
   display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
@@ -122,7 +147,7 @@ a{color:inherit;text-decoration:none}
 /* İkinci satır 24 Kasım'dan beri "Firma · Rol". Uzun unvanlar
    (… Tic. San. Ltd. Şti.) üst çubuğu itmesin diye tek satıra
    sıkışıp kısaltılıyor. */
-.sp-kisi .rol{font-size:10.5px;color:var(--ink-3);display:block;max-width:230px;
+.sp-kisi .rol{font-size:10.5px;color:var(--nav-ink);display:block;max-width:230px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Eş sayfa şeridi — menüden bir satır eksilirken sayfalar birbirine
    bağlanıyor (22 Ekim menü sadeleştirmesi). Başlıkla içerik arasında,
@@ -281,6 +306,10 @@ td select{text-align:start}
      küçültüyoruz. */
   .sp-side .sp-brand .urun{height:20px}
   .sp-side .foot{display:none}
+  /* Dar ekranda yan bar yatay şerit: menü de yatay, Ayarlar dibe değil
+     sıranın sonuna. */
+  #sp-menu{flex-direction:row;flex:none}
+  .sp-grp-ayarlar{margin-top:0;border-top:0;padding-top:6px}
   .sp-grp{display:flex;padding:6px 0;flex:none}
   .sp-grp .lbl{display:none}
   .sp-nav{display:flex;gap:3px}
@@ -516,17 +545,23 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
    Tablo değil, okunabilir satırlar: şantiye kartı + kule satırları.
    Uyarı ayrı bir şeritte toplanmıyor, ait olduğu satırda duruyor.
    ============================================================ */
+/* Genel bakış dökümünün başlığı: tarihin kendisi; altında şantiye ·
+   vardiya · metraj (117. dosya, 3. tur). */
+#gunluk-basl{font-size:21px}
+#gelen-gun{font-size:15px;color:var(--ink-2)}
 .saha-kart{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  margin-bottom:12px;overflow:hidden}
+  margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
 .saha-ust{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:12px 16px;border-bottom:1px solid var(--line-soft);background:var(--card-2)}
+  padding:12px 16px;border-bottom:1px solid var(--serit-cizgi);background:var(--serit)}
+.saha-ust .note{color:var(--serit-not)}
 .saha-ad{font-size:15px;font-weight:600;cursor:pointer}
 .saha-ad:hover{text-decoration:underline;text-underline-offset:3px}
 .saha-ad:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
 .saha-top{font-size:14px;color:var(--ink-2);white-space:nowrap}
 /* Sessiz şantiye gri satır olarak duruyor (Tayfun'un kararı):
    listeden çıkarılsa eksik olan fark edilmez. */
-.saha-kart.sessiz .saha-ust{background:var(--bg)}
+/* Sessiz şantiyenin şeridi ötekilerle AYNI renk (Tayfun, 3. tur).
+   Sessizliği kırmızı rozet ve soluk ad söylüyor. */
 .saha-kart.sessiz .saha-ad{color:var(--ink-2)}
 
 .kule-sat{display:grid;grid-template-columns:130px 70px minmax(0,1fr) 110px minmax(0,1.4fr);
@@ -542,8 +577,13 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .kule-sat .dl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .kule-sat .dl .ek{flex-basis:100%;font-size:12.5px;color:var(--ink-3);font-style:italic}
 /* Vardiya girilmemiş kule: satır listede kalıyor ama sönük. */
-.kule-sat.durgun{background:var(--bg)}
+/* Kuyu satırları her zaman beyaz (Tayfun, 2. tur) — vardiya
+   girilmeyen satır da. Önce zemin rengini alıyordu; artık soluk
+   yazısıyla ayrılıyor. */
+.kule-sat.durgun{background:var(--card)}
 .kule-sat.durgun .mk{color:var(--ink-2)}
+/* Vardiyası olmayan kulenin son kuyusu — o gün çalışılmadı, soluk. */
+.kule-sat .soluk{color:var(--ink-2)}
 
 .kule-sat .p{font-size:12px;border-radius:999px;padding:2px 9px;font-weight:500;
   background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap}
@@ -570,3 +610,22 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 /* 66. adım: kulesi olmayan şantiye kartında tek satır — ızgaranın
    bütün kolonlarını kaplıyor, yoksa 130 px'lik ilk göze sıkışıyor. */
 .kule-sat .kule-yok{grid-column:1 / -1}
+
+/* ⚠ Dar ekranda kule satırı (25 Kasım). Beş sabit sütun telefonda
+   sığmıyordu: kuyu sütunu bir harfe kadar daralıyor, kuyu adı harf harf
+   alt alta yazılıyordu. Paket 1'den beri böyleydi; telefonda bakılınca
+   görüldü. Dar ekranda satır üç sıraya bölünüyor:
+     makine · vardiya ............ metraj
+     kuyu · derinlik
+     zaman dilimleri, uyarılar */
+@media (max-width:700px){
+  .kule-sat{grid-template-columns:auto minmax(0,1fr) auto;
+            grid-template-areas:"mk vd mt" "ku ku ku" "dl dl dl";gap:4px 10px;padding:10px 14px}
+  .kule-sat .mk{grid-area:mk}
+  .kule-sat .vd{grid-area:vd}
+  .kule-sat .ku{grid-area:ku;overflow-wrap:normal}
+  .kule-sat .mt{grid-area:mt}
+  .kule-sat .dl{grid-area:dl}
+  .kule-sat .dl:empty{display:none}
+  .saha-ust{flex-wrap:wrap}
+}

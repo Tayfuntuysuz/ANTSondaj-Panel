@@ -2314,7 +2314,7 @@ details.acilir[open] > summary::after{content:"\2212"}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js"></script>
+<script src="kart.js?v=66"></script>
 <script>
 (function(){
 "use strict";
@@ -3502,7 +3502,13 @@ $("#btn-new-well").addEventListener("click", function(){
     var yon = wrap.querySelector("#nw-yon").value || "asagi";
     var dip = (yon === "yatay") ? 0 : (Number(wrap.querySelector("#nw-dip").value) || 0);
     var az  = wrap.querySelector("#nw-az").value === "" ? null : Number(wrap.querySelector("#nw-az").value);
-    var exists = (MASTER.wells||[]).some(function(w){ return w.project_id === pid && w.code.toLowerCase() === c.toLowerCase(); });
+    /* Kuyu kodu karşılaştırması: dört i harfi (I İ ı i) tek harfe
+       iniyor. Düz toLowerCase() "ILC"yi "ilc", "ılc"yi "ılc" yapıyordu
+       — şef "ılc-a2" yazınca mükerrer kuyu yakalanmıyordu. Türkçe
+       toLocaleLowerCase de yetmez: "ILC"yi "ılc" yapar, telefonda
+       yazılan "ilc" ile yine eşleşmez (25 Kasım, 116. dosya). */
+    var kodAnahtari = function(k){ return String(k || "").trim().replace(/[İIıi]/g, "i").toLowerCase(); };
+    var exists = (MASTER.wells||[]).some(function(w){ return w.project_id === pid && kodAnahtari(w.code) === kodAnahtari(c); });
     if(exists){ msg($("#step-msg"), "Bu kuyu zaten listede.", "err"); wrap.remove(); return; }
 
     // Çevrimdışı da olsa kuyu hemen açılır; kaydı kuyruğa alınır.
@@ -9056,7 +9062,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "65";
+var SURUM = "66";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }

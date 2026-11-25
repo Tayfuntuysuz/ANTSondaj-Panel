@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<script>/* tema: sayfa boyanmadan once uygulanir, yoksa koyu temada beyaz parlama olur */
+try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
+if(_t)document.documentElement.setAttribute("data-tema",_t);
+if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collarlog · Puantaj</title>
+<link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="logo/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#16212A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css?v=66">
+</head>
+<body>
+<!-- ============================================================
+     PUANTAJ — ofis tarafı (salt okunur)
+     ============================================================
+     25 Kasım 2026, 114. dosya §2. Puantaj eskiden Genel bakış
+     sayfasının dibinde bir bölümdü; menüden kalkınca ULAŞILAMAZ oldu —
+     yalnız şantiye seçilip aşağı kaydırılınca görünüyordu. Artık kendi
+     sayfası: Personel → [Puantaj | Maaş tablosu].
+
+     Rakamlar Genel bakış'taki bölümle AYNI kaynaktan geliyor
+     (`dashboard` → attendance) — taşınırken hiçbir sayı değişmesin.
+     Giriş şefin saha panelinde; burası bakılacak yer.
+     ============================================================ -->
+<div id="sp-icerik">
+  <div class="card filters">
+    <div class="row">
+      <div class="field grow"><label for="f-project">Şantiye</label>
+        <select id="f-project"><option value="">— şantiye seçin —</option></select></div>
+      <div class="field"><label for="f-year">Yıl</label><select id="f-year"></select></div>
+      <div class="field"><label for="f-month">Ay</label><select id="f-month"></select></div>
+      <button class="btn" id="btn-load" type="button">Getir</button>
+    </div>
+  </div>
+
+  <div id="secim-yok" class="card"><div class="note">Puantajı görmek için şantiye ve ay seçin.</div></div>
+
+  <div id="sonuc" hidden>
+    <div class="sechead"><h2 id="p-baslik">Puantaj</h2><span id="p-aralik"></span></div>
+    <div class="card">
+      <div class="note">Çalışanlar vardiyadan sayılıyor: kuleye çıkan çalıştı,
+        çıkmayan sayılmaz. Şef, şoför ve aşçı vardiyaya girmeden tam gün sayılır.
+        İzin, rapor ve avans şefin puantaj ekranından geliyor.</div>
+      <div id="p-msg"></div>
+      <div class="scroll" id="attendance"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js?v=66"></script>
+<script>
+(function(){
+"use strict";
+var $ = function(s){ return document.querySelector(s); };
+var money = function(n){ return "₺" + Number(n||0).toLocaleString("tr-TR", {maximumFractionDigits:0}); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
+/* Ay adları Türkçe küçük harfle — düz toLowerCase() "KASIM"ı "Kasim",
+   "NİSAN"ı "Ni̇san" yapıyordu (116. dosya). */
+var AYLAR = ["OCAK","ŞUBAT","MART","NİSAN","MAYIS","HAZİRAN","TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"]
+  .map(function(a){ return a[0] + a.slice(1).toLocaleLowerCase("tr"); });
+var sb = null;
+
+function table(el, cols, rows, empty){
+  if(!rows || !rows.length){ el.innerHTML = '<div class="note">' + empty + '</div>'; return; }
+  el.innerHTML = '<table><thead><tr>' + cols.map(function(c){ return '<th>' + c[0] + '</th>'; }).join("") +
+    '</tr></thead><tbody>' + rows.map(function(r){
+      return '<tr>' + cols.map(function(c){ return '<td>' + c[1](r) + '</td>'; }).join("") + '</tr>';
+    }).join("") + '</tbody></table>';
+}
+
+function donem(){
+  var y = Number($("#f-year").value), m = Number($("#f-month").value);
+  var iso = function(d){ return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+  return { y:y, m:m, from:iso(new Date(y, m-1, 1)), to:iso(new Date(y, m, 0)) };
+}
+
+function getir(){
+  var proj = $("#f-project").value;
+  /* Şantiye seçilmeden hiçbir şey çizilmiyor — ilk şantiyenin rakamları
+     kendiliğinden önüne düşmesin (59. ve 116. dosyaların kuralı). */
+  $("#secim-yok").hidden = !!proj;
+  $("#sonuc").hidden = !proj;
+  if(!proj) return;
+  var p = donem();
+  var ad = $("#f-project").options[$("#f-project").selectedIndex].textContent;
+  $("#p-baslik").textContent = ad;
+  $("#p-aralik").textContent = AYLAR[p.m-1] + " " + p.y;
+  $("#attendance").innerHTML = "";
+  $("#p-msg").innerHTML = '<div class="msg">Yükleniyor…</div>';
+  sb.rpc("dashboard", {p_project:proj, p_from:p.from, p_to:p.to}).then(function(r){
+    if(r.error){ $("#p-msg").innerHTML = '<div class="msg bad">' + esc(r.error.message) + '</div>'; return; }
+    $("#p-msg").innerHTML = "";
+    table($("#attendance"), [
+      ["Ad", function(r){ return esc(r.name); }],
+      ["Görev", function(r){ return esc(String(r.kind).replace(/_/g," ")); }],
+      ["Çalıştı", function(r){ return '<span class="num">' + r.calisti + '</span>'; }],
+      /* 71. dosya: gün sayısı yanında VARDİYA sayısı. Vardiyaya girmeden
+         çalışanlarda (şef, şoför, aşçı) sıfır — tam gün sayılıyorlar. */
+      ["Vardiya", function(r){ return '<span class="num">' + (Number(r.vardiya) ? r.vardiya : '—') + '</span>'; }],
+      ["İzin", function(r){ return '<span class="num">' + r.izin + '</span>'; }],
+      ["Rapor", function(r){ return '<span class="num">' + r.rapor + '</span>'; }],
+      ["Tek çalışma", function(r){ return '<span class="num">' + r.tek + '</span>'; }],
+      ["Avans", function(r){ return '<span class="num">' + (Number(r.avans) ? money(r.avans) : '—') + '</span>'; }]
+    ], (r.data && r.data.attendance) || [], "Bu dönemde puantaj kaydı yok.");
+  });
+}
+
+SP.boot({sayfa:"personel", baslik:"Puantaj", hazir:function(){
+  sb = SP.sb;
+  var simdi = new Date();
+  var ys = $("#f-year");
+  for(var y = simdi.getFullYear() + 1; y >= simdi.getFullYear() - 3; y--){
+    var o = document.createElement("option"); o.value = y; o.textContent = y; ys.appendChild(o); }
+  ys.value = simdi.getFullYear();
+  var ms = $("#f-month");
+  AYLAR.forEach(function(a, i){ var o = document.createElement("option"); o.value = i + 1; o.textContent = a; ms.appendChild(o); });
+  ms.value = simdi.getMonth() + 1;
+  sb.rpc("bootstrap_data").then(function(r){
+    var sel = $("#f-project");
+    ((r.data && r.data.projects) || []).forEach(function(p){
+      var o = document.createElement("option"); o.value = p.id; o.textContent = (p.site_name || p.name); sel.appendChild(o); });
+    /* Tek şantiyesi olan (ya da şantiyeye bağlı) kullanıcıya boş seçim
+       sordurmanın anlamı yok — o tek şantiye seçili geliyor. */
+    if(sel.options.length === 2){ sel.selectedIndex = 1; getir(); }
+  });
+  $("#btn-load").addEventListener("click", getir);
+  $("#f-project").addEventListener("change", getir);
+}});
+})();
+</script>
+</body>
+</html>

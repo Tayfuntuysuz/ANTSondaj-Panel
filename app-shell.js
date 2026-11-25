@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "65";
+var SURUM = "66";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -128,8 +128,7 @@ var SAYFALAR = [
      gibi durması yanlıştı. Puantaj, Personel ekranının içine
      giriyor (110. dosya §6); o ekran yazılana kadar bölüm Genel
      bakış sayfasında, şantiye seçilince görünüyor. */
-  {k:"puantaj",  d:"index.html#puantaj", dv:"panel.html#puantaj",
-                 roller:{site_chief:1}, yalniz:{site_chief:1},
+  {k:"puantaj",  d:"index.html#puantaj", yalniz:{site_chief:1},
                  ad:"Puantaj",          i:"takvim", g:"Günlük"},
   {k:"sefozet",  d:"panel.html",     ad:"Saha özetim",        i:"pano",   g:"Günlük"},
 
@@ -152,18 +151,42 @@ var SAYFALAR = [
      (kilitle → raporunu al → hakedişi hazırla) üçüncü adımının
      nerede olacağını söylüyor, yalan söylemiyor.
      Ekran yazılınca `yakinda` kalkacak (76. dosya B3). */
-  {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş",            i:"matkap", g:"Ay sonu",
+  /* 25 Kasım: ad "Hakediş"ten "Hakediş hazırla"ya döndü. 59. dosyanın
+     kuralı: aynı kelime iki yerde geçiyor — Ay sonu'nda FİİL (hazırla),
+     Finans'ta LİSTE (Hakedişler). Sürüm 65'te bunu atlamıştım. */
+  {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş hazırla",    i:"matkap", g:"Ay sonu",
                  yakinda:1},
 
   /* FİNANS — eski adı "Para". Hakedişler kayıt defteri: kesilmiş bütün
      hakedişler, durumlarıyla. Kendi yetki anahtarı (hakedisler) ekran
      yazıldığında page_access'e eklenecek. */
-  {k:"hakedisler", d:"hakedisler.html", ad:"Hakedişler",      i:"fatura", g:"Finans", yok:1},
+  /* 25 Kasım (115. dosya): Hakedişler GÖRÜNÜYOR ama basılamıyor —
+     hakediş → fatura → tahsilat takibinin yeri. Kendi yetki anahtarı
+     ekran yazılınca eklenecek; o zamana kadar hakediş HAZIRLAYABİLEN
+     herkes görüyor (yetki:"hakedis"). */
+  {k:"hakedisler", yetki:"hakedis", d:"hakedisler.html", ad:"Hakedişler", i:"fatura",
+                 g:"Finans", yakinda:1},
+  /* ⚠ PERSONEL (25 Kasım, 114. dosya §2). Puantaj ofis menüsünden
+     kalkınca ULAŞILAMAZ olmuştu — yalnız Genel bakış'ın dibinde,
+     şantiye seçilip aşağı kaydırılınca görünüyordu. Artık kendi
+     sayfası var (puantaj.html) ve Maaş tablosuyla tek satırda iki
+     sekme: Personel → [Puantaj | Maaş tablosu].
+     Yetki anahtarı "puantaj" (page_access'te var); menü anahtarı
+     farklı, çünkü "puantaj" şefin SAHA panelindeki giriş satırı.
+     Şef bu satırı görmüyor (haric): onun puantajı kendi ekranında. */
+  {k:"personel", yetki:"puantaj", d:"puantaj.html", ad:"Personel", i:"takvim",
+                 g:"Finans", haric:{site_chief:1},
+                 cift:"personel", bas:1, sekme:"Puantaj"},
+  {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"cuzdan", g:"Finans",
+                 cift:"personel", sekme:"Maaş tablosu"},
+  /* Muhasebe yöneticinin menüsünden kalkacak (115. dosya) — ama
+     Harcamalar ekranı gelmeden DEĞİL: bugün yöneticinin gidere
+     bakabildiği tek yer burası. Puantaj'da yaptığım hatayı
+     tekrarlamamak için ikisi aynı sürümde yer değiştirecek. */
   {k:"muhasebe", d:"muhasebe.html",  ad:"Muhasebe",           i:"para",   g:"Finans",
                  cift:"muhasebe", bas:1, sekme:"Muhasebe"},
   {k:"ofis",     d:"ofis.html",      ad:"Merkez ofis",        i:"ofis",   g:"Finans",
                  cift:"muhasebe", sekme:"Merkez ofis"},
-  {k:"maaslar",  d:"maaslar.html",   ad:"Maaş tablosu",       i:"cuzdan", g:"Finans"},
 
   /* TEKLİFLER — kendi grubu (59. dosya). Onaylanan teklif "işi aktif et"
      ile fiyat listesini üretiyor, hakediş oradan okuyor. */
@@ -174,15 +197,21 @@ var SAYFALAR = [
      HİÇBİR role verilmemişti; sayfa çalışıyordu ama kimse açamıyordu
      (32. dosya, 1. sorun). */
   {k:"santiyeler", d:"santiyeler.html", ad:"Analiz",          i:"grafik", g:"Analizler",
-                 cift:"analiz", bas:1, sekme:"Şantiyeler"},
+                 /* Sekme adı, açılan sayfanın başlığıyla aynı (25 Kasım,
+                    menü yürüyüşü sınaması yakaladı: sekme "Şantiyeler",
+                    sayfa "Şantiye karşılaştırma" diyordu). */
+                 cift:"analiz", bas:1, sekme:"Şantiye karşılaştırma"},
   {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"grafik", g:"Analizler",
                  cift:"analiz", sekme:"Şirket performansı"},
 
   /* PROJE YÖNETİMİ VE TANIMLAMALAR — eskiden analiz grubunun içindeydi;
      Tayfun ayırdı. Şantiye şefi ve sözleşme tarihleri de burada. */
-  {k:"anaveri",  d:"yonetim.html",   ad:"Projeler ve tanımlamalar", i:"ofis", g:"Projeler ve tanımlamalar"},
+  /* 25 Kasım · Tayfun: "Projeler diye bir ana başlık altında Proje
+     tanımlamaları alt başlık olsun." Yeni proje buradan açılıyor,
+     mevcut projelerin tanımlamaları buradan değişiyor. */
+  {k:"anaveri",  d:"yonetim.html",   ad:"Proje tanımlamaları", i:"ofis", g:"Projeler"},
   {k:"kullanicilar", d:"kullanicilar.html", ad:"Kullanıcılar", i:"kisi",
-                 g:"Projeler ve tanımlamalar", yok:1},
+                 g:"Projeler", yok:1},
 
   /* AYARLAR — YENİ SATIR, ad değişikliği değil. Bugüne kadar ayarlara
      yalnız üst çubuktaki kullanıcı adına basarak giriliyordu; menüde
@@ -193,7 +222,7 @@ var SAYFALAR = [
   {k:"isveren",  d:"isveren.html",   ad:"İşveren Paneli",     i:"kalkan", g:"İşveren Paneli"}
 ];
 var GRUP_SIRA = ["Günlük","Ay sonu","Finans","Teklifler","Analizler",
-                 "Projeler ve tanımlamalar","Ayarlar","Raporlarım"];
+                 "Projeler","Ayarlar","Raporlarım"];
 
 /* ---------- durum ---------- */
 var sb = null, erisim = null, cfg = {url:"", key:""}, AYAR = {};
@@ -448,7 +477,7 @@ function girisEkrani(hata){
    (39. dosya), herkesi oraya yollamak ikinci bir duvara carptiriyordu. */
 function ilkSayfa(){
   var izin = (erisim && erisim.sayfalar) || {};
-  var s = SAYFALAR.filter(function(x){ return izin[x.k]; })[0];
+  var s = SAYFALAR.filter(function(x){ return !x.yok && !x.yakinda && izin[yetkiAnahtari(x)]; })[0];
   return s ? sayfaHedef(s) : "index.html";
 }
 /* Reddetme ekrani HANGI HESAPLA girildigini soylemek ZORUNDA.
@@ -488,6 +517,13 @@ function uyariEkrani(baslik, metin, cikisla){
 /* ---------- menü ---------- */
 /* Menu satirinin hedefi. Satirda "roller" varsa ve oturumun rolu o listede
    DEGILSE, "dv" (varsayilan hedef) kullanilir. Yoksa her zaman "d". */
+/* Satırın yetki anahtarı. Çoğunda menü anahtarıyla aynı; ama aynı
+   yetkiyle iki ayrı satır olabiliyor (25 Kasım: şefin saha panelindeki
+   Puantaj girişi ve ofisteki Personel → Puantaj, ikisi de "puantaj"
+   yetkisiyle). O zaman satır `yetki:` taşıyor. */
+function yetkiAnahtari(s){ return (s && s.yetki) || (s && s.k); }
+function yetkisi(s){ return ((erisim && erisim.sayfalar) || {})[yetkiAnahtari(s)]; }
+
 function sayfaHedef(s){
   if(s.dv && s.roller && !s.roller[erisim.rol]) return s.dv;
   return s.d;
@@ -503,9 +539,12 @@ function menuSatirlari(){
     /* "yalniz": satir yalnizca bu rollerde menude duruyor. Puantaj
        bunun tek ornegi — sef girer, ofis Personel ekranindan bakar. */
     if(s.yalniz && !s.yalniz[erisim.rol]) return;
+    /* "haric": satır bu rollerde menüde YOK (Personel şefte yok — onun
+       puantajı kendi saha panelinde). */
+    if(s.haric && s.haric[erisim.rol]) return;
     /* "herkes" satirinin yetki anahtari yok: Ayarlar oturumu olan
        herkesin kendi ayarlari, page_access'te karsiligi aranmaz. */
-    var y = s.herkes ? "gor" : izin[s.k];
+    var y = s.herkes ? "gor" : izin[yetkiAnahtari(s)];
     if(!y) return;                    /* yetkisi yok */
     if(!s.cift){ satirlar.push({ad:s.ad, i:s.i, g:s.g, yakinda:s.yakinda,
                                 uyeler:[{s:s, y:y}]}); return; }
@@ -552,7 +591,10 @@ function menuKur(){
     return a.toLocaleLowerCase("tr") === b.toLocaleLowerCase("tr"); };
   var html = acikGruplar.map(function(g){
     var tekrar = gruplar[g].length === 1 && ayniMi(gruplar[g][0].ad, g);
-    return '<div class="sp-grp' + (tekrar ? ' tek' : '') + '">' +
+    /* Ayarlar grubu yan barın DİBİNE sabit (25 Kasım, Tayfun: "Ayarlar
+       kısmı sol tarafta aşağıda olsun"). Yer CSS'te: margin-top:auto. */
+    return '<div class="sp-grp' + (tekrar ? ' tek' : '') +
+           (g === "Ayarlar" ? ' sp-grp-ayarlar' : '') + '">' +
       (basliklar && !tekrar ? '<div class="lbl">'+esc(g)+'</div>' : '') + '<nav class="sp-nav">' +
       gruplar[g].map(function(r){
         var aktif = r.anahtarlar.indexOf(AYAR.sayfa) >= 0;
@@ -599,7 +641,8 @@ function esSeridiKur(){
   if(!bu || !bu.cift) return;
   var izin = erisim.sayfalar || {};
   var uyeler = SAYFALAR.filter(function(s){
-    return s.cift === bu.cift && !s.yok && izin[s.k]; });
+    return s.cift === bu.cift && !s.yok && izin[yetkiAnahtari(s)] &&
+           !(s.haric && s.haric[erisim.rol]); });
   if(uyeler.length < 2) return;
   var d = document.createElement("div");
   d.className = "sp-serit"; d.id = "sp-serit";
@@ -623,9 +666,21 @@ function ustKur(){
       ? (erisim.isveren_ad || "İşveren")
       : [erisim.firma, erisim.rol_adi].filter(Boolean).join(" · ");
   $("#sp-av").textContent    = bashrf(erisim.kullanici);
-  $("#sp-baslik").textContent = AYAR.baslik || "";
+  /* Bastığın satırın adıyla açılan sayfanın adı tutmalı (25 Kasım,
+     menü yürüyüşü sınaması): şef "Saha özetim"e basıyor, panel.html
+     açılıyor — başlık "Genel bakış" değil "Saha özetim" olmalı. Sayfa
+     kendi anahtarıyla değil eş anahtarla açıldıysa o satırın adı. */
+  var acan = (AYAR.anaSayfa && AYAR.sayfa !== AYAR.anaSayfa)
+    ? SAYFALAR.filter(function(x){ return x.k === AYAR.sayfa; })[0] : null;
+  $("#sp-baslik").textContent = (acan && acan.ad) || AYAR.baslik || "";
   var s = SAYFALAR.filter(function(x){ return x.k === AYAR.sayfa; })[0];
-  $("#sp-yol").textContent = s ? (s.g + " / " + s.ad) : "";
+  /* Yol satırı MENÜDE nerede olduğunu söyler (grup / satır), büyük
+     başlık hangi SEKMEDE olduğunu. Eş sayfalarda satırın adı "bas"
+     üyeden: Puantaj da Maaş tablosu da "Finans / Personel" (25 Kasım —
+     önce biri "Personel", öteki "Maaş tablosu" diyordu). */
+  var bas = (s && s.cift)
+    ? SAYFALAR.filter(function(x){ return x.cift === s.cift && x.bas; })[0] : null;
+  $("#sp-yol").textContent = s ? (s.g + " / " + ((bas || s).ad)) : "";
   /* Kiracı logosu artık yan bara basılmıyor — orası ürünün.
      Basılı evrakta duruyor (antet). Beyaz etiket istenirse buraya
      ayar olarak döner. */
@@ -649,7 +704,12 @@ function yetkiAl(){
        diyor. 22 Ekim'de düzenek yakaladı.
        Eşleşen anahtar AYAR.sayfa'ya yazılıyor ki menüde doğru satır
        işaretli kalsın. */
+    AYAR.anaSayfa = AYAR.sayfa;
     var izin = (erisim.sayfalar || {})[AYAR.sayfa];
+    if(!izin){
+      var buSayfa = SAYFALAR.filter(function(x){ return x.k === AYAR.sayfa; })[0];
+      if(buSayfa && buSayfa.yetki) izin = (erisim.sayfalar || {})[buSayfa.yetki];
+    }
     if(!izin && AYAR.esanahtar){
       [].concat(AYAR.esanahtar).some(function(k){
         var y = (erisim.sayfalar || {})[k];
