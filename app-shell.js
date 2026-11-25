@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "63";
+var SURUM = "64";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -202,24 +202,34 @@ function kabukKur(){
   s.className = "sp-shell"; s.id = "sp-shell"; s.hidden = true;
   s.innerHTML =
     '<aside class="sp-side">' +
-      '<div class="sp-brand"><span class="mk"><img src="logo-mark.png" alt="" ' +
-        'onerror="this.onerror=null;this.src=\'icon.svg\'"></span>' +
-        '<span class="txt"><span class="t" id="sp-firma">Sondaj Panel</span>' +
-        '<span class="s" id="sp-rol">—</span></span></div>' +
-      '<div id="sp-menu"></div>' +
-      /* Ürün markası yan barın altında (2 Kasım 2026). Üstteki marka
-         alanı MÜŞTERİNİN firma adı ve logosu — orası kiracıya ait,
-         dokunulmuyor. Collarlog ürünün adı; sekme ikonunda, giriş
-         ekranında ve burada görünüyor. */
-      /* ⚠ HER ZAMAN BEYAZ SÜRÜM. Önce temaya göre değiştiriyordum;
-         ekran görüntüsü aldığımda yazının kaybolduğu görüldü — yan bar
-         temadan bağımsız HER ZAMAN koyu lacivert, açık temada bile.
-         Sınamalar "açık temada açık sürüm görünüyor" diye geçiyordu;
-         doğru olan soru zeminin rengiydi. */
-      '<div class="foot">' +
+      /* ⚠ SOL ÜST KÖŞE ÜRÜNÜN KİMLİĞİ (24 Kasım 2026)
+         2 Kasım'da (74. dosya) burası MÜŞTERİNİN adına ayrılmıştı,
+         Collarlog yan barın altına konmuştu. O karar panel Anatolia'nın
+         iç aracı iken doğruydu. Satılan bir üründe sol üst ürünün
+         yeridir: her ekran görüntüsünde, her demoda, her yeni
+         müşteride orada durur — altta kimsenin bakmadığı şeritte
+         değil. Tayfun'un kararı.
+
+         Müşterinin adı kaybolmadı, SAĞ ÜSTTEKİ kullanıcı kartına
+         taşındı (ustKur): "hangi firmanın verisindeyim" sorusunun
+         yeri başlık değil, kullanıcının yanı — çok kiracılı sistemde
+         bu bir güvenlik sorusu.
+
+         Müşteri logosu (erisim.logo) basılı evrakta duruyor
+         (bkz. antet()); beyaz etiket istenirse buraya AYAR olarak
+         dönebilir, varsayılan olarak değil.
+
+         Yan bar temadan bağımsız koyu lacivert → her zaman beyaz
+         sürüm (aynı kural yan barın altında da geçerliydi). */
+      '<div class="sp-brand">' +
         '<img class="urun" src="logo/collarlog-logo-beyaz.svg" alt="Collarlog" ' +
-          'onerror="this.onerror=null;this.remove()">' +
-        '<span>Sürüm ' + SURUM + '</span></div>' +
+          'onerror="this.onerror=null;this.src=\'logo.png\'">' +
+      '</div>' +
+      '<div id="sp-menu"></div>' +
+      /* Ürün logosu 24 Kasım'da yukarı, sol üst köşeye taşındı.
+         Burada iki kere görünmesi gerekmiyor; altta yalnız sürüm
+         kalıyor. */
+      '<div class="foot"><span>Sürüm ' + SURUM + '</span></div>' +
     '</aside>' +
     '<div class="sp-main">' +
       '<div class="sp-top">' +
@@ -561,18 +571,21 @@ function esSeridiKur(){
 }
 
 function ustKur(){
-  $("#sp-firma").textContent = erisim.firma || "Sondaj Panel";
-  $("#sp-rol").textContent   = erisim.rol_adi || "";
   $("#sp-ad").textContent    = erisim.kullanici || "";
+  /* Firma adı 24 Kasım'da yan barın üstünden buraya taşındı; sol üst
+     artık ürünün yeri. İŞVEREN hesabında firma adı YAZILMIYOR: ona
+     görünmesi gereken kendi şirketidir, panelin sahibi olan kiracı
+     değil. */
   $("#sp-rol2").textContent  = erisim.isveren
-      ? (erisim.isveren_ad || "İşveren") : (erisim.rol_adi || "");
+      ? (erisim.isveren_ad || "İşveren")
+      : [erisim.firma, erisim.rol_adi].filter(Boolean).join(" · ");
   $("#sp-av").textContent    = bashrf(erisim.kullanici);
   $("#sp-baslik").textContent = AYAR.baslik || "";
   var s = SAYFALAR.filter(function(x){ return x.k === AYAR.sayfa; })[0];
   $("#sp-yol").textContent = s ? (s.g + " / " + s.ad) : "";
-  if(erisim.logo){
-    var im = $(".sp-brand img"); if(im) im.src = erisim.logo;
-  }
+  /* Kiracı logosu artık yan bara basılmıyor — orası ürünün.
+     Basılı evrakta duruyor (antet). Beyaz etiket istenirse buraya
+     ayar olarak döner. */
 }
 
 /* ---------- açılış zinciri ---------- */
