@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "64";
+var SURUM = "65";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -73,6 +73,10 @@ var IC = {
   fatura:'<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2V3z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   teklif:'<path d="M4 3h10l6 6v12H4V3z"/><path d="M14 3v6h6"/><path d="M9 17l2 2 4-5"/>'
 };
+/* ⚠ 25 Kasım 2026'dan beri KULLANILMIYOR: menü ikonları kalktı.
+   Silinmedi — ikon haritası (IC) yeniden gerekirse hazır dursun,
+   SAYFALAR satırlarındaki `i:` alanları da yerinde. Bir daha
+   kullanılmayacağına karar verilirse ikisi birlikte kalkar. */
 function ikon(k){
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '+
          'stroke-linecap="round" stroke-linejoin="round">'+(IC[k]||IC.pano)+'</svg>';
@@ -106,17 +110,27 @@ function ikon(k){
 var SAYFALAR = [
   {k:"panel",    d:"panel.html",     ad:"Genel bakış",        i:"pano",   g:"Günlük"},
   {k:"saha",     d:"index.html",     ad:"Vardiya girişi",     i:"kule",   g:"Günlük"},
+  /* ⚠ KUYULAR SATIRI KALKTI (25 Kasım 2026, Tayfun: "Solda neden hâlâ
+     kuyular var? kaldıralım dedik.")
+     Satır zaten ayrı bir sayfaya gitmiyordu — `panel.html#kuyular`,
+     yani aynı sayfanın bir bölümü. Menüde ayrı bir satır olarak
+     durması olmayan bir ekranın varmış gibi görünmesiydi. Bölüm
+     yerinde duruyor; Operasyonlar ekranı yazılınca (110. dosya §4)
+     oraya taşınacak. */
   /* Puantaj tek sayfa anahtari ama iki ayri hedef (39. dosya karari):
      saha sefi kendi PWA'sinda girer, digerleri panel.html'deki salt okunur
      ozete gider. Yoneticinin kendi puantaj sayfasi (puantaj.html, 32. dosya)
      yapilinca "dv" oraya cevrilecek. */
-  {k:"kuyular",  d:"panel.html#kuyular", ad:"Kuyular",        i:"kuyu",   g:"Günlük"},
-  /* Puantaj tek sayfa anahtari ama iki ayri hedef (39. dosya karari):
-     saha sefi kendi PWA'sinda girer, digerleri panel.html'deki salt okunur
-     ozete gider. Yoneticinin kendi puantaj sayfasi (puantaj.html, 32. dosya)
-     yapilinca "dv" oraya cevrilecek. */
+  /* ⚠ PUANTAJ MENÜDE YALNIZ SAHA ŞEFİNDE (25 Kasım 2026)
+     Şef puantajı kendi PWA'sında GİRİYOR — onun için menü satırı
+     bir iş. Ofis tarafında ise satır `panel.html#puantaj`e, yani
+     aynı sayfanın bir bölümüne gidiyordu; orada ayrı bir ana başlık
+     gibi durması yanlıştı. Puantaj, Personel ekranının içine
+     giriyor (110. dosya §6); o ekran yazılana kadar bölüm Genel
+     bakış sayfasında, şantiye seçilince görünüyor. */
   {k:"puantaj",  d:"index.html#puantaj", dv:"panel.html#puantaj",
-                 roller:{site_chief:1}, ad:"Puantaj",          i:"takvim", g:"Günlük"},
+                 roller:{site_chief:1}, yalniz:{site_chief:1},
+                 ad:"Puantaj",          i:"takvim", g:"Günlük"},
   {k:"sefozet",  d:"panel.html",     ad:"Saha özetim",        i:"pano",   g:"Günlük"},
 
   /* AY SONU — yöneticinin ay sonunda yaptığı işler, SIRASIYLA:
@@ -129,7 +143,17 @@ var SAYFALAR = [
      tabloda duruyordu ama hiçbir ekran onları çağırmıyordu. */
   {k:"aykilidi", d:"aykilidi.html",  ad:"Ay kilidi",          i:"kilit",  g:"Ay sonu"},
   {k:"rapor",    d:"rapor.html",     ad:"Aylık rapor",        i:"rapor",  g:"Ay sonu"},
-  {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş hazırla",    i:"matkap", g:"Ay sonu", yok:1},
+  /* ⚠ EKRANI YOK AMA SATIR GÖRÜNÜYOR (25 Kasım 2026, Tayfun:
+     "Ay sonu ana başlığının altına Hakediş alt başlığı ekleyelim.")
+     Kuralımız "ekranı olmayan satır gösterilmiyor"du; gerekçesi
+     şefin sessizce çalışmayan kaydet düğmesiydi (32. dosya) —
+     yani BASILINCA HİÇBİR ŞEY OLMAMASI. Burada satır basılabilir
+     değil ve yanında "yakında" yazıyor: ay sonu sırasının
+     (kilitle → raporunu al → hakedişi hazırla) üçüncü adımının
+     nerede olacağını söylüyor, yalan söylemiyor.
+     Ekran yazılınca `yakinda` kalkacak (76. dosya B3). */
+  {k:"hakedis",  d:"hakedis.html",   ad:"Hakediş",            i:"matkap", g:"Ay sonu",
+                 yakinda:1},
 
   /* FİNANS — eski adı "Para". Hakedişler kayıt defteri: kesilmiş bütün
      hakedişler, durumlarıyla. Kendi yetki anahtarı (hakedisler) ekran
@@ -156,9 +180,9 @@ var SAYFALAR = [
 
   /* PROJE YÖNETİMİ VE TANIMLAMALAR — eskiden analiz grubunun içindeydi;
      Tayfun ayırdı. Şantiye şefi ve sözleşme tarihleri de burada. */
-  {k:"anaveri",  d:"yonetim.html",   ad:"Projeler ve tanımlar", i:"ofis", g:"Proje yönetimi ve Tanımlamalar"},
+  {k:"anaveri",  d:"yonetim.html",   ad:"Projeler ve tanımlamalar", i:"ofis", g:"Projeler ve tanımlamalar"},
   {k:"kullanicilar", d:"kullanicilar.html", ad:"Kullanıcılar", i:"kisi",
-                 g:"Proje yönetimi ve Tanımlamalar", yok:1},
+                 g:"Projeler ve tanımlamalar", yok:1},
 
   /* AYARLAR — YENİ SATIR, ad değişikliği değil. Bugüne kadar ayarlara
      yalnız üst çubuktaki kullanıcı adına basarak giriliyordu; menüde
@@ -169,7 +193,7 @@ var SAYFALAR = [
   {k:"isveren",  d:"isveren.html",   ad:"İşveren Paneli",     i:"kalkan", g:"İşveren Paneli"}
 ];
 var GRUP_SIRA = ["Günlük","Ay sonu","Finans","Teklifler","Analizler",
-                 "Proje yönetimi ve Tanımlamalar","Ayarlar","Raporlarım"];
+                 "Projeler ve tanımlamalar","Ayarlar","Raporlarım"];
 
 /* ---------- durum ---------- */
 var sb = null, erisim = null, cfg = {url:"", key:""}, AYAR = {};
@@ -476,11 +500,15 @@ function menuSatirlari(){
   var ciftler = {}, satirlar = [];
   SAYFALAR.forEach(function(s){
     if(s.yok) return;                 /* ekrani henuz yok */
+    /* "yalniz": satir yalnizca bu rollerde menude duruyor. Puantaj
+       bunun tek ornegi — sef girer, ofis Personel ekranindan bakar. */
+    if(s.yalniz && !s.yalniz[erisim.rol]) return;
     /* "herkes" satirinin yetki anahtari yok: Ayarlar oturumu olan
        herkesin kendi ayarlari, page_access'te karsiligi aranmaz. */
     var y = s.herkes ? "gor" : izin[s.k];
     if(!y) return;                    /* yetkisi yok */
-    if(!s.cift){ satirlar.push({ad:s.ad, i:s.i, g:s.g, uyeler:[{s:s, y:y}]}); return; }
+    if(!s.cift){ satirlar.push({ad:s.ad, i:s.i, g:s.g, yakinda:s.yakinda,
+                                uyeler:[{s:s, y:y}]}); return; }
     /* Es kume: menude TEK satir. Satirin adini "bas" tasiyor ama hedefi
        kullanicinin acabildigi ILK uye belirliyor — patron santiyeler'i
        goremeyip sirket'i gorebiliyor, satir yine calismali. */
@@ -496,6 +524,7 @@ function menuSatirlari(){
     return {
       k: ilk.s.k,
       ad: r.ad, i: r.i, g: r.g,
+      yakinda: !!r.yakinda,
       hedef: sayfaHedef(ilk.s),
       eylem: ilk.s.eylem || "",
       /* Satir, kumedeki herhangi bir sayfa acikken isaretli kalmali;
@@ -516,17 +545,31 @@ function menuKur(){
      AYARLAR bu sayima girmiyor: herkeste var, tek basina baslik
      acmasi sefin temiz listesini bozardi. */
   var basliklar = acikGruplar.filter(function(g){ return g !== "Ayarlar"; }).length > 1;
+  /* Tek satırlı grubun başlığı satırın adıyla aynıysa yazılmıyor:
+     "PROJELER VE TANIMLAMALAR / Projeler ve tanımlamalar" aynı şeyi
+     iki kere söylüyor. Aynı kural AYARLAR / Ayarlar için de geçerli. */
+  var ayniMi = function(a, b){
+    return a.toLocaleLowerCase("tr") === b.toLocaleLowerCase("tr"); };
   var html = acikGruplar.map(function(g){
-    return '<div class="sp-grp">' +
-      (basliklar ? '<div class="lbl">'+esc(g)+'</div>' : '') + '<nav class="sp-nav">' +
+    var tekrar = gruplar[g].length === 1 && ayniMi(gruplar[g][0].ad, g);
+    return '<div class="sp-grp' + (tekrar ? ' tek' : '') + '">' +
+      (basliklar && !tekrar ? '<div class="lbl">'+esc(g)+'</div>' : '') + '<nav class="sp-nav">' +
       gruplar[g].map(function(r){
         var aktif = r.anahtarlar.indexOf(AYAR.sayfa) >= 0;
+        /* ⚠ İKON VE "giriş" ETİKETİ KALKTI (25 Kasım 2026, Tayfun'un
+           isteği). İkonlar dokuz satırda birbirine benziyordu ve
+           hiçbiri adın söylemediğini söylemiyordu; "giriş" etiketi
+           de satırın yarısında duran, okunmayan bir tekrardı.
+           Grup başlıkları zaten neyin ne olduğunu söylüyor. */
+        if(r.yakinda){
+          /* Basılamaz satır: nereye geleceğini söylüyor, tıklayınca
+             hiçbir şey olmayan bir bağlantı değil. */
+          return '<span class="yakinda"><span>'+esc(r.ad)+'</span>' +
+                 '<span class="tag">yakında</span></span>';
+        }
         return '<a href="'+r.hedef+'" class="'+(aktif?"on":"")+'"' +
-               (r.eylem ? ' data-eylem="'+esc(r.eylem)+'"' : '') + '>' + ikon(r.i) +
-               '<span>'+esc(r.ad)+'</span>' +
-               /* Eylem satirinda "giris" etiketi anlamsiz: sayfaya
-                  gitmiyor, bir pencere aciyor. */
-               (r.y === "gir" && !r.eylem ? '<span class="tag">giriş</span>' : '') + '</a>';
+               (r.eylem ? ' data-eylem="'+esc(r.eylem)+'"' : '') + '>' +
+               '<span>'+esc(r.ad)+'</span></a>';
       }).join("") + '</nav></div>';
   }).join("");
   $("#sp-menu").innerHTML = html || '<div class="sp-grp"><div class="lbl">Menü boş</div></div>';
