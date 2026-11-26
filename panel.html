@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=67">
+<link rel="stylesheet" href="app.css?v=68">
 </head>
 <body>
 
@@ -69,7 +69,14 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          yanıp sönerse hiçbiri görünmez. -->
     <!-- 119. dosya: tarih başlığın kendisi; "N şantiye · N vardiya · X m"
          alt satırı kalktı, aynı bilgiyi artık üstteki kutular veriyor. -->
-    <div class="sechead" style="margin-top:0"><h2 id="gunluk-basl">Yükleniyor…</h2></div>
+    <div class="sechead go-ust" style="margin-top:0"><h2 id="gunluk-basl">Yükleniyor…</h2>
+      <div class="go-gez" id="go-gez" hidden>
+        <button class="btn ghost sm" id="go-onceki" type="button" title="Kayıt girilmiş önceki gün">‹ Önceki</button>
+        <input type="date" id="go-tarih" aria-label="Gösterilecek gün">
+        <button class="btn ghost sm" id="go-sonraki" type="button" title="Kayıt girilmiş sonraki gün">Sonraki ›</button>
+        <button class="btn ghost sm" id="go-son" type="button" title="Kayıt girilmiş son gün">Son gün</button>
+      </div></div>
+    <div class="note" id="go-not" hidden></div>
     <div id="gunluk">Yükleniyor…</div>
 
     <!-- ⚠ "Tek şantiye" başlığı kalktı (25 Kasım 2026, Tayfun'un
@@ -209,9 +216,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=67"></script>
+<script src="app-shell.js?v=68"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=67"></script>
+<script src="kart.js?v=68"></script>
 <script>
 (function(){
 "use strict";
@@ -660,11 +667,99 @@ function vardiyaRozeti(k){
 /* Ekrandaki satırların arkasındaki veri — düğmelere metin değil sıra
    numarası yazılıyor, kart buradan açılıyor. */
 var GUNLUK = [];
+/* Gösterilen gün. null = kayıt girilmiş son gün (sayfanın açılış hâli).
+   GUN_KOMSU: merkezin söylediği önceki / sonraki kayıtlı gün. */
+var GUN_SEC = null, GUN_KOMSU = {onceki:null, sonraki:null}, GUN_ISTEK = 0;
+
+function gunSec(gun){ GUN_SEC = gun || null; gunlukYukle(); }
+
+/* Tarih gezme çubuğu. 71. adım kurulu değilse (onceki/sonraki gelmiyorsa)
+   iki ok gizlenir; tarih kutusu eski merkezle de çalışır. */
+function gezmeYaz(d, istenen){
+  var kutu = $("#go-gez"); if(!kutu) return;
+  kutu.hidden = !d.gun;
+  var yeni = ("seri" in d);
+  /* Seçilen gün kayıtsızsa merkez ondan önceki son kayıtlı günü döndürür */
+  var n = $("#go-not");
+  if(istenen && d.gun && istenen !== d.gun){
+    n.hidden = false;
+    n.textContent = tarihYaz(istenen) + " için kayıt yok — ondan önceki son kayıtlı gün gösteriliyor.";
+    /* Gösterilen gün zaten son kayıtlı günse "geçmişe bakıyor" sayılmaz */
+    if(yeni && !d.sonraki) GUN_SEC = null;
+  } else { n.hidden = true; n.textContent = ""; }
+  GUN_KOMSU = {onceki:d.onceki || null, sonraki:d.sonraki || null};
+  var t = $("#go-tarih"); t.value = d.gun || ""; if(d.bugun) t.max = d.bugun;
+  var o = $("#go-onceki"), s = $("#go-sonraki"), son = $("#go-son");
+  o.hidden = s.hidden = !yeni;
+  o.disabled = !d.onceki; s.disabled = !d.sonraki;
+  son.hidden = !(GUN_SEC && (!yeni || d.sonraki));
+}
+
+/* Son 7 günün grafiği: gündüz + gece yığılı, gösterilen gün vurgulu.
+   Kayıtlı güne basınca o gün açılır. */
+function seriBlogu(d){
+  var seri = d.seri || [];
+  var top = seri.map(function(g){ return Number(g.gunduz || 0) + Number(g.gece || 0); });
+  var enb = Math.max.apply(null, top.concat([0]));
+  if(!seri.length || enb <= 0) return "";
+  var ort = top.reduce(function(a, c){ return a + c; }, 0) / top.length;
+  var sutun = seri.map(function(g, i){
+    var secili = g.gun === d.gun, m = top[i];
+    var gunAd = new Date(g.gun + "T12:00:00").toLocaleDateString("tr-TR", {weekday:"long"});
+    var alt = g.gun.slice(8, 10) + "." + g.gun.slice(5, 7) + (g.gun === d.bugun ? " · bugün" : "");
+    var gunKisa = new Date(g.gun + "T12:00:00").toLocaleDateString("tr-TR", {weekday:"short"});
+    /* Çubuk alanının %86'sı en yüksek güne ayrılıyor; üstü rakamın yeri */
+    var ic = '<span class="cb"><em>' + (m > 0 ? '<span class="uz">' + tl(m) + ' m</span><span class="ks">' + tl(m, 0) + '</span>' : '—') + '</em>' +
+      '<u style="height:' + (Number(g.gunduz || 0) / enb * 86) + '%"></u>' +
+      '<s style="height:' + (Number(g.gece || 0) / enb * 86) + '%"></s></span>' +
+      '<span class="ad"><span class="uz">' + esc(gunAd) + '</span><span class="ks">' + esc(gunKisa) + '</span><small>' + esc(alt) + '</small></span>';
+    return (m > 0 && !secili)
+      ? '<button type="button" class="c" data-gun="' + esc(g.gun) + '" title="' + esc(tarihYaz(g.gun)) + ' gününü aç">' + ic + '</button>'
+      : '<div class="c' + (secili ? ' secili' : '') + '">' + ic + '</div>';
+  }).join("");
+  return '<div class="go-seri"><h3>Son 7 gün · delinen metre <i>' +
+      '<span class="le"><span class="lj g"></span>gündüz</span><span class="le"><span class="lj c"></span>gece</span>' +
+      '<span class="le"><span class="lj s"></span>gösterilen gün</span>' +
+      '<span class="le"><span class="lj o"></span>ortalama ' + tl(ort) + ' m</span></i></h3>' +
+    '<div class="go-cub" style="--ort:' + (ort / enb).toFixed(4) + '">' + sutun + '</div></div>';
+}
+
+/* Vardiya saatlerinin dökümü. Delginin kendi saati manevra
+   aralıklarından gelir; manevralar saatsiz girilmişse kalan süre
+   delgiye sayılır (program hep böyle sayıyor). */
+function saatDokumu(vardiyalar){
+  var t = {sure:0, delgi:0, durus:0, diger:0};
+  (vardiyalar || []).forEach(function(k){
+    var sure = Number(k.sure || 12), delgi = null, durus = 0, diger = 0;
+    (k.dilimler || []).forEach(function(x){
+      var s = Number(x.saat || 0);
+      if(x.tur === "delgi") delgi = (delgi || 0) + s;
+      else if(x.tur === "bekleme" || x.tur === "ariza") durus += s;
+      else diger += s;
+    });
+    durus = Math.min(durus, sure); diger = Math.min(diger, sure - durus);
+    if(delgi == null) delgi = Number(k.metraj || 0) > 0 ? sure - durus - diger : 0;
+    delgi = Math.max(Math.min(delgi, sure - durus - diger), 0);
+    t.sure += sure; t.delgi += delgi; t.durus += durus; t.diger += diger;
+  });
+  return t;
+}
+function saatCubugu(t){
+  if(!t.sure) return "";
+  var y = function(n){ return (n / t.sure * 100) + "%"; };
+  return '<span class="sb" role="img" aria-label="Delgi ' + tl(t.delgi, 1) + ' saat, duruş ' + tl(t.durus, 1) +
+    ' saat, diğer ' + tl(t.diger, 1) + ' saat"><i style="width:' + y(t.delgi) + '"></i><b style="width:' + y(t.durus) +
+    '"></b><u style="width:' + y(t.diger) + '"></u></span>';
+}
 
 function gunlukYukle(){
   var el = $("#gunluk"); if(!el) return;
   var yaz = function(baslik){ var h = $("#gunluk-basl"); if(h) h.textContent = baslik; };
-  sb.rpc("yonetici_gunluk", {p_gun:null}).then(function(r){
+  /* Art arda iki istek giderse (hızlı tıklama) yalnız SONUNCUNUN cevabı
+     çizilir; eski cevap yeni günün üstüne yazmasın. */
+  var istekNo = ++GUN_ISTEK, istenen = GUN_SEC;
+  sb.rpc("yonetici_gunluk", {p_gun:istenen}).then(function(r){
+    if(istekNo !== GUN_ISTEK) return;
     if(r.error){
       yaz("Günlük rapor");
       el.innerHTML = '<div class="msg bad">' + esc(r.error.message) + '</div>'; return; }
@@ -681,7 +776,10 @@ function gunlukYukle(){
     }
     /* Başlık tarihin KENDİSİ (117. dosya). */
     yaz(tarihYaz(d.gun));
-    rozetYaz(d.uyari || 0);
+    /* Menüdeki uyarı sayısı BUGÜNÜN durumu; geçmiş bir güne bakarken
+       değişmesin. */
+    gezmeYaz(d, istenen);
+    if(!GUN_SEC) rozetYaz(d.uyari || 0);
 
     var G = 0, C = 0, nG = 0, nC = 0;
     sahalar.forEach(function(s){ (s.kuleler || []).forEach(function(k){
@@ -699,7 +797,7 @@ function gunlukYukle(){
       '<div class="go-k"><span>Çalışan şantiye</span><b id="go-santiye">' + calisan + ' / ' + sahalar.length +
         '</b><i>&nbsp;</i></div></div>';
 
-    el.innerHTML = ozet + sahalar.map(santiyeBlogu).join("");
+    el.innerHTML = ozet + seriBlogu(d) + sahalar.map(santiyeBlogu).join("");
   });
 }
 
@@ -716,7 +814,7 @@ function santiyeBlogu(s){
     var a = kuyuSira[k.kuyu];
     if(a == null){
       a = kuyuSira[k.kuyu] = kuyular.length;
-      kuyular.push({kuyu:k.kuyu, derinlik:k.derinlik, makine:[], v:[], m:0, ariza:null, uyg:0});
+      kuyular.push({kuyu:k.kuyu, derinlik:k.derinlik, plan:k.plan, makine:[], v:[], m:0, ariza:null, uyg:0});
     }
     var y = kuyular[a];
     if(y.makine.indexOf(k.makine) < 0) y.makine.push(k.makine);
@@ -724,6 +822,7 @@ function santiyeBlogu(s){
     if(k.ariza) y.ariza = k.ariza;
     y.uyg += (k.uygunsuz || []).length;
     if(Number(k.derinlik) > Number(y.derinlik || 0)) y.derinlik = k.derinlik;
+    if(k.plan != null) y.plan = k.plan;
   });
 
   /* Başlıktaki uyarılar: şantiye kapalıyken de görünsün */
@@ -738,15 +837,27 @@ function santiyeBlogu(s){
 
   var satirlar = kuyular.map(function(y){
     var no = GUNLUK.push(y) - 1;
+    /* Kuyu ilerlemesi: derinlik / planlanan. O gün delinen kısım ayrı
+       renkte. Planlanan derinlik girilmemişse çubuk çıkmaz. */
+    var plan = Number(y.plan || 0), der = Number(y.derinlik || 0), dr;
+    if(plan > 0 && der > 0){
+      var son = Math.min(der / plan * 100, 100), bug = Math.min(y.m / plan * 100, son);
+      dr = tl(der) + ' <em>/ ' + tl(plan, 0) + ' m</em>' +
+        '<span class="ib" role="img" aria-label="Planlanan ' + tl(plan, 0) + ' metrenin ' + tl(der) +
+        ' metresi delindi"><i style="width:' + (son - bug) + '%"></i><b style="left:' + (son - bug) +
+        '%;width:' + bug + '%"></b></span>';
+    } else dr = der ? tl(der) + ' m' : '—';
+    var st = saatDokumu(y.v);
     return '<button class="ky" type="button" aria-expanded="false" data-no="' + no + '">' +
+      '<span class="ok2" aria-hidden="true">▸</span>' +
       '<span class="kd">' + esc(y.kuyu || '—') + '</span>' +
       '<span class="mk">' + esc(y.makine.join(' · ')) + '</span>' +
-      '<span class="dr">' + (y.derinlik ? tl(y.derinlik) + ' m' : '—') + '</span>' +
+      '<span class="dr">' + dr + '</span>' +
       '<span class="vd">' + y.v.map(vardiyaRozeti).join('') +
         (y.ariza ? arizaEtiketi(y.ariza, 1) : '') +
         (y.uyg ? '<span class="p s">⚑ ' + y.uyg + '</span>' : '') + '</span>' +
-      '<span class="m">' + (y.m > 0 ? tl(y.m) + ' m' : '<span class="yok">metraj yok</span>') + '</span>' +
-      '<span class="ok2" aria-hidden="true">›</span></button>' +
+      '<span class="st">' + (st.sure ? 'delgi ' + tl(st.delgi, 1) + ' / ' + tl(st.sure, 0) + ' sa' + saatCubugu(st) : '') + '</span>' +
+      '<span class="m">' + (y.m > 0 ? tl(y.m) + ' m' : '<span class="yok">metraj yok</span>') + '</span></button>' +
       '<div class="ky-kart" hidden></div>';
   }).join("");
 
@@ -775,8 +886,20 @@ function santiyeBlogu(s){
 
 /* Tıklamalar: şantiye başlığı aç/kapa, kuyu satırı kart aç/kapa,
    "aylık ayrıntı" aşağıdaki seçiciyi doldurup getirir. */
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "go-tarih" && e.target.value) gunSec(e.target.value);
+});
 document.addEventListener("click", function(e){
   if(!e.target.closest) return;
+  /* Tarih gezme: önceki / sonraki kayıtlı gün, son gün, grafikteki gün */
+  var gez = e.target.closest("#go-onceki,#go-sonraki,#go-son,.go-cub .c[data-gun]");
+  if(gez){
+    if(gez.id === "go-onceki"){ if(GUN_KOMSU.onceki) gunSec(GUN_KOMSU.onceki); }
+    else if(gez.id === "go-sonraki"){ if(GUN_KOMSU.sonraki) gunSec(GUN_KOMSU.sonraki); }
+    else if(gez.id === "go-son") gunSec(null);
+    else gunSec(gez.getAttribute("data-gun"));
+    return;
+  }
   var bas = e.target.closest(".sk-bas");
   if(bas){
     var sk = bas.parentElement, acik = !sk.classList.contains("acik");

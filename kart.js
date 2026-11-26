@@ -224,24 +224,59 @@ function ciz(d){
   /* ---- düzeltme izi ---- */
   var dz = izIc(d), izNot = izNotu(d);
 
-  var govde = satirlar([
-    bolum("Ekip", ekip),
-    bolum("Motor", motor),
-    bolum("Manevra", mv),
-    /* Merkezde 70. adım yoksa eski "Bekleme" bölümü */
-    d.operasyonlar ? bolum("Operasyonlar", operasyonIc(d)) : "",
-    iy ? bolum("İlerleme", iy) : "",
-    bolum("Mazot", d.mazot == null ? "" : tl(d.mazot, 0) + " lt"),
-    bolum("Kuyu durumu", KUYU_DURUM[d.kuyu_durumu] || ""),
-    bolum("Arıza", ar),
-    d.operasyonlar ? "" : bolum("Bekleme", bk),
-    bolum("Malzeme", ml),
-    bolum("O günün ölçümleri", ol),
-    bolum("O günün giderleri", gd),
-    bolum("Vardiya öncesi kontrol", kn),
-    bolum("Not", d["not"] ? esc(d["not"]) : ""),
-    bolum("Düzeltme izi", dz ? dz + izNot : "")
-  ]);
+  /* ---- saat özeti (sürüm 68): delgi · duruş · diğer ----
+     Delgi saati manevra aralıklarından; manevralar saatsizse ve metraj
+     varsa kalan süre delgiye sayılır. Vardiya 12 saat kabul edilir;
+     kayıtlı saatler onu aşıyorsa çubuk toplamı esas alır. */
+  var dkS = function(x){ var p = String(x || "").split(":"); return p.length < 2 ? null : Number(p[0]) * 60 + Number(p[1]); };
+  var sDelgi = null, sDurus = 0, sDiger = 0;
+  (d.manevralar || []).forEach(function(r){
+    var a = dkS(r.bas), z = dkS(r.bit); if(a == null || z == null) return;
+    sDelgi = (sDelgi || 0) + ((z - a + (z < a ? 1440 : 0)) / 60);
+  });
+  (d.operasyonlar || []).forEach(function(o){
+    var s = Number(o.saat || 0); if(!s || o.tur === "delgi") return;
+    if(o.tur === "bekleme" || o.tur === "ariza") sDurus += s; else sDiger += s;
+  });
+  if(sDelgi == null) sDelgi = Number(d.metraj || 0) > 0 ? Math.max(12 - sDurus - sDiger, 0) : 0;
+  var sTop = Math.max(12, sDelgi + sDurus + sDiger);
+  var ozet = (d.operasyonlar && (sDelgi + sDurus + sDiger) > 0)
+    ? '<div class="vk-ozet"><div class="vk-sb"><i style="width:' + (sDelgi / sTop * 100) + '%"></i><b style="width:' +
+        (sDurus / sTop * 100) + '%"></b><u style="width:' + (sDiger / sTop * 100) + '%"></u></div>' +
+      '<span class="d">Delgi ' + tl(sDelgi, 1) + ' sa</span><span class="r">Duruş ' + tl(sDurus, 1) +
+      ' sa</span><span class="g">Diğer ' + tl(sDiger, 1) + ' sa</span></div>'
+    : "";
+
+  /* ---- iki sütun (sürüm 68) ----
+     Geniş yerde solda işin kendisi (manevra, operasyonlar, ilerleme,
+     arıza), sağda geri kalanı. Dar yerde (telefon, yan kart) tek sütun
+     ve ESKİ sıra: her bölüm sıra numarasını taşıyor. */
+  var SOL = {"Manevra":1, "Operasyonlar":1, "İlerleme":1, "Arıza":1, "Bekleme":1};
+  var sol = [], sag = [], sira = 0;
+  var koy = function(baslik, ic){
+    if(!ic) return;
+    sira++;
+    var h = bolum(baslik, ic).replace('<div class="vk-bol">', '<div class="vk-bol" style="order:' + sira + '">');
+    (SOL[baslik] ? sol : sag).push(h);
+  };
+  koy("Ekip", ekip);
+  koy("Motor", motor);
+  koy("Manevra", mv);
+  /* Merkezde 70. adım yoksa eski "Bekleme" bölümü */
+  if(d.operasyonlar) koy("Operasyonlar", operasyonIc(d));
+  if(iy) koy("İlerleme", iy);
+  koy("Mazot", d.mazot == null ? "" : tl(d.mazot, 0) + " lt");
+  koy("Kuyu durumu", KUYU_DURUM[d.kuyu_durumu] || "");
+  koy("Arıza", ar);
+  if(!d.operasyonlar) koy("Bekleme", bk);
+  koy("Malzeme", ml);
+  koy("O günün ölçümleri", ol);
+  koy("O günün giderleri", gd);
+  koy("Vardiya öncesi kontrol", kn);
+  koy("Not", d["not"] ? esc(d["not"]) : "");
+  koy("Düzeltme izi", dz ? dz + izNot : "");
+  var govde = ozet + '<div class="vk-iki"><div class="vk-sol">' + sol.join("") +
+              '</div><div class="vk-sag">' + sag.join("") + '</div></div>';
 
   var alt = '<div class="vk-alt">Girildi ' + anTarih(d.girildi) +
     ((d.duzeltmeler || []).length
@@ -327,7 +362,24 @@ function stil(){
     ".vk-bos{opacity:.6;padding:10px 0}" +
     ".vk-yan{padding:10px 12px;border-radius:10px;" +
       "border:1px solid rgba(128,128,128,.3)}" +
-    ".vk-yan .vk-ust{border-bottom-width:1px;padding-bottom:5px}";
+    ".vk-yan .vk-ust{border-bottom-width:1px;padding-bottom:5px}" +
+    /* Sürüm 68 · iki sütun: kart 720 pikselden genişse. Dar yerde
+       sütunlar çözülür, bölümler eski sırasıyla alt alta dizilir. */
+    ".vk-kart{container-type:inline-size}" +
+    ".vk-iki{display:flex;flex-direction:column}" +
+    ".vk-sol,.vk-sag{display:contents}" +
+    ".vk-iki .vk-bol:last-of-type{border-bottom:1px solid rgba(128,128,128,.22)}" +
+    "@container (min-width:720px){" +
+      ".vk-iki{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:0 34px;align-items:start}" +
+      ".vk-sol,.vk-sag{display:block;min-width:0}" +
+      ".vk-iki .vk-bol:last-of-type{border-bottom:0}}" +
+    ".vk-ozet{padding:10px 0 11px;border-bottom:1px solid rgba(128,128,128,.22);font-size:13px}" +
+    ".vk-sb{display:flex;height:10px;border-radius:5px;overflow:hidden;background:rgba(128,128,128,.2);margin-bottom:7px}" +
+    ".vk-sb i{background:var(--cubuk,#5f7f9b)}.vk-sb b{background:var(--bad,#b3261e)}.vk-sb u{background:var(--cubuk-soluk,#a9bccb)}" +
+    ".vk-ozet span{margin-right:16px;white-space:nowrap;opacity:.85}" +
+    ".vk-ozet span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}" +
+    ".vk-ozet .d::before{background:var(--cubuk,#5f7f9b)}.vk-ozet .r::before{background:var(--bad,#b3261e)}" +
+    ".vk-ozet .g::before{background:var(--cubuk-soluk,#a9bccb)}";
   document.head.appendChild(s);
 }
 
