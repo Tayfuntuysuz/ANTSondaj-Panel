@@ -90,6 +90,26 @@ a{color:inherit;text-decoration:none}
 .sag{margin-inline-start:auto}
 
 /* ---------- kabuk ---------- */
+/* Sürüm 73 · 146. dosya · Tayfun: "Tıklayınca eski arayüz gözüküyor,
+   sonra hızlıca yeni arayüze geliyor." Sayfanın içeriği HTML'de hazır,
+   çerçeve (sol menü + üst çubuk) betikle sonradan kuruluyor; tarayıcı o
+   arada içeriği çerçevesiz boyuyordu. Çerçeve kurulana kadar içerik
+   gizli, lacivert sütun ve üst çubuk boş iskelet olarak görünür.
+   ⚠ Betik hiç yüklenmezse içerik gizli KALMAZ: 5 saniye sonra kendi
+   kendine görünür, iskelet kalkar (yalnız CSS; betiğe güvenmiyor). */
+body > #sp-icerik{visibility:hidden;animation:sp-gec-gor 0s linear 5s forwards}
+@keyframes sp-gec-gor{to{visibility:visible}}
+@keyframes sp-gec-git{to{visibility:hidden}}
+body:not(:has(> .sp-shell:not([hidden]))):not(:has(> .sp-tam)):not(:has(> #sp-fatal))::before,
+body:not(:has(> .sp-shell:not([hidden]))):not(:has(> .sp-tam)):not(:has(> #sp-fatal))::after{
+  content:"";position:fixed;background:var(--nav);z-index:0;animation:sp-gec-git 0s linear 5s forwards}
+body:not(:has(> .sp-shell:not([hidden])))::before{left:0;top:0;bottom:0;width:var(--yan)}
+body:not(:has(> .sp-shell:not([hidden])))::after{left:var(--yan);right:0;top:0;height:56px}
+@media (max-width:900px){
+  body:not(:has(> .sp-shell:not([hidden])))::before{width:auto;right:0;bottom:auto;height:46px}
+  body:not(:has(> .sp-shell:not([hidden])))::after{left:0;top:46px;height:52px}
+}
+@media print{ body::before,body::after{display:none !important} body > #sp-icerik{visibility:visible} }
 .sp-shell{display:grid;grid-template-columns:var(--yan) 1fr;min-height:100vh}
 .sp-side{background:var(--nav);color:var(--nav-ink);display:flex;flex-direction:column;
   position:sticky;top:0;height:100vh;overflow-y:auto}
@@ -163,6 +183,13 @@ a{color:inherit;text-decoration:none}
 .ust-liste div.us .ub{color:var(--ink-2)}
 .ust-liste .ut{flex:none;font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;margin-top:1px;background:var(--warn-soft);color:var(--warn);white-space:nowrap}
 .ust-liste .ut.ariza,.ust-liste .ut.sessiz{background:var(--bad-soft);color:var(--bad)}
+/* Sürüm 73 · 141: haberler */
+.ust-liste .ut.ariza_yeni{background:var(--bad-soft);color:var(--bad)}
+.ust-liste .ut.ariza_bitti{background:var(--good-soft);color:var(--good)}
+.ust-liste .ut.bildirim{background:var(--warn-soft);color:var(--warn)}
+.ust-liste a.us.yeni .ub{font-weight:600}
+.ust-liste a.us.yeni .ub small{font-weight:400}
+.ust-liste a.us.yeni::after{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--accent-2);margin:6px 2px 0 auto}
 
 .sp-kisi{display:flex;align-items:center;gap:9px;padding-block:4px;padding-inline:4px 11px;
   border:1px solid rgba(255,255,255,.16);border-radius:24px;background:rgba(255,255,255,.06);
@@ -676,9 +703,19 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .go-cub::after{content:"";position:absolute;left:0;right:0;pointer-events:none;border-top:1.5px dashed var(--ink-3);
   bottom:calc(var(--alt) + var(--yuk) * .86 * var(--ort))}
 .go-cub .c{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;min-width:0}
-.go-cub button.c{cursor:pointer;border-radius:8px}
-.go-cub button.c:hover{background:var(--card-2)}
-.go-cub button.c:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* Sürüm 73 · 144: panel.html iki sayfa gösteriyor — Günlük rapor ve Şantiye ayrıntısı */
+.bolum-gunluk .ay-bolum,.bolum-ayrinti .gun-bolum{display:none}
+.bolum-ayrinti .ay-bolum > .filters:first-of-type{margin-top:0}
+/* Sürüm 73 · 142: sütunlar tıklanmaz; gün gezme grafiğin iki yanındaki oklarla */
+.go-gov{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+.go-gov .go-cub{flex:1;min-width:0;margin-top:0}
+.go-ok{all:unset;box-sizing:border-box;flex:none;width:38px;display:flex;align-items:center;justify-content:center;
+  font-size:30px;line-height:1;color:var(--ink-2);border-radius:8px;cursor:pointer;margin-bottom:var(--alt,40px);
+  border:1px solid var(--line);background:var(--card-2)}
+.go-ok:hover{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-2)}
+.go-ok:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.go-ok:disabled{opacity:.3;cursor:default;background:none}
+.go-ok:disabled:hover{background:none;color:var(--ink-2);border-color:var(--line)}
 .go-cub .cb{height:var(--yuk);width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
 .go-cub .cb u,.go-cub .cb s{display:block;width:min(64px,62%);flex:none}
 .go-cub .cb u{background:var(--seri-gunduz);border-radius:4px 4px 0 0}

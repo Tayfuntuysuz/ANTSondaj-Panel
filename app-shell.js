@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "72";
+var SURUM = "73";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -207,6 +207,11 @@ var SAYFALAR = [
                  cift:"analiz", bas:1, sekme:"Şantiye karşılaştırma"},
   {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"grafik", g:"Analizler",
                  cift:"analiz", sekme:"Şirket performansı"},
+  /* Sürüm 73 · 144. dosya: Günlük rapor'un altındaki şantiye seçici ve
+     aylık bölümler buraya taşındı. Aynı dosya (panel.html), ayrı kip.
+     Yetkisi Günlük rapor'unkiyle aynı: orayı gören burayı da görür. */
+  {k:"ayrinti",  d:"panel.html?bolum=ayrinti", ad:"Şantiye ayrıntısı", i:"grafik", g:"Analizler",
+                 cift:"analiz", sekme:"Şantiye ayrıntısı", yetki:"panel"},
 
   /* PROJE YÖNETİMİ VE TANIMLAMALAR — eskiden analiz grubunun içindeydi;
      Tayfun ayırdı. Şantiye şefi ve sözleşme tarihleri de burada. */
@@ -666,7 +671,8 @@ function esSeridiKur(){
 var UST_ROL = {manager:1, tenant_admin:1, owner:1, platform_admin:1, accountant:1};
 var UST_GOREV = {sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı", yardimci:"Yardımcı personel",
   sofor:"Şoför", santiye_sefi:"Şantiye şefi", formen:"Formen", alt_eleman:"İşçi", isci:"İşçi"};
-var UST_TUR = {ariza:"Arıza", sessiz:"Kayıt yok", kontrol:"Kontrol", bakim:"Bakım", belge:"Belge", onay:"Onay"};
+var UST_TUR = {ariza:"Arıza", sessiz:"Kayıt yok", kontrol:"Kontrol", bakim:"Bakım", belge:"Belge", onay:"Onay",
+  ariza_yeni:"Arıza", ariza_bitti:"Çalışıyor", bildirim:"Sahadan"};
 /* Sürüm 72 · dil "Onay bekliyor / Onaylı" oldu. İki metin merkezden
    (73. ve 76. adım) eski sözle geliyor; SQL'li ilk pakette orada
    düzeltilecek, o güne kadar burada çevriliyor. */
@@ -681,27 +687,59 @@ function ustAraclarKur(){
     var a = $("#ust-sonuc"), u = $("#ust-uyari"), z = $("#ust-zil");
     if(a) a.hidden = true; if(u) u.hidden = true; if(z) z.setAttribute("aria-expanded", "false"); };
 
-  /* Zil — sayfa açılırken bir kez sorulur */
+  /* Zil — sayfa açılırken bir kez sorulur.
+     Sürüm 73 · 141. dosya (78. adım) · Tayfun: "Orada durmalarının bir
+     anlamı yok; makinanın arızası vs. olmaması gerekiyor." Zil iki
+     grup gösterir:
+       Yapılacaklar — tarihi olan işler (bakım, belge); çözülene kadar kalır
+       Haberler     — bakmıyorken olanlar (arıza açıldı / giderildi,
+                      sahadan bildirim); zil AÇILINCA görüldü sayılır,
+                      sayıdan düşer
+     Sayı = yapılacaklar + görülmemiş haberler. 78. adım kurulu değilse
+     (liste 'grup' taşımıyor) hepsi tek liste hâlinde, eskisi gibi. */
   sb.rpc("uyarilar").then(function(r){
     if(r.error || !r.data) return;
     var l = r.data.liste || [];
+    var yeniBicim = l.some(function(x){ return x.grup; }) || ("yeni" in r.data);
+    var isler = l.filter(function(x){ return x.grup !== "haber"; });
+    var haber = l.filter(function(x){ return x.grup === "haber"; });
+    var sayi = yeniBicim ? Number(r.data.sayi || 0) : l.length;
+    var satir = function(x){
+      return '<a class="us' + (x.yeni ? ' yeni' : '') + '" href="' + esc(x.hedef || "panel.html") + '"><span class="ut ' + esc(x.tur) + '">' +
+        esc(UST_TUR[x.tur] || x.tur) + '</span><span class="ub">' + esc(x.baslik || "") +
+        '<small>' + esc(onayDili(x.ayrinti)) + '</small></span></a>'; };
     var z = document.createElement("span"); z.className = "ust-zil";
     z.innerHTML = '<button type="button" id="ust-zil" aria-expanded="false" aria-label="Uyarılar' +
-      (l.length ? ": " + l.length : "") + '"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" ' +
+      (sayi ? ": " + sayi : "") + '"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" ' +
       'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' +
-      (l.length ? '<b id="ust-zil-n">' + l.length + '</b>' : '') + '</button>' +
+      (sayi ? '<b id="ust-zil-n">' + sayi + '</b>' : '') + '</button>' +
       '<div class="ust-liste sag" id="ust-uyari" hidden>' +
-      (l.length ? l.map(function(x){
-          return '<a class="us" href="' + esc(x.hedef || "panel.html") + '"><span class="ut ' + esc(x.tur) + '">' +
-            esc(UST_TUR[x.tur] || x.tur) + '</span><span class="ub">' + esc(x.baslik || "") +
-            '<small>' + esc(onayDili(x.ayrinti)) + '</small></span></a>'; }).join("")
+      (l.length
+        ? (yeniBicim
+            ? (isler.length ? '<div class="ug">Yapılacaklar</div>' + isler.map(satir).join("") : '') +
+              (haber.length ? '<div class="ug">Haberler</div>' + haber.map(satir).join("") : '')
+            : l.map(satir).join(""))
         : '<div class="us bos">Dikkat isteyen bir şey yok.</div>') + '</div>';
     k.appendChild(z);
+    var gorulduMu = !haber.some(function(x){ return x.yeni; });
     $("#ust-zil").addEventListener("click", function(e){
       e.stopPropagation();
       var u = $("#ust-uyari"), ac = u.hidden; kapat(); u.hidden = !ac;
-      this.setAttribute("aria-expanded", ac ? "true" : "false"); });
+      this.setAttribute("aria-expanded", ac ? "true" : "false");
+      /* Açıldı: haberler görüldü. Sayı yapılacaklara iner; listedeki
+         "yeni" işareti bu açılışta kalır ki neyin yeni olduğu okunsun. */
+      if(ac && yeniBicim && !gorulduMu){
+        gorulduMu = true;
+        var dugme = this;
+        sb.rpc("uyarilar_goruldu").then(function(g){
+          if(g.error) return;
+          var n = $("#ust-zil-n");
+          if(n){ if(isler.length) n.textContent = isler.length; else n.remove(); }
+          dugme.setAttribute("aria-label", "Uyarılar" + (isler.length ? ": " + isler.length : ""));
+        });
+      }
+    });
   });
 
   /* Arama */

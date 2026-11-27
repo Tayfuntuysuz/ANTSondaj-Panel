@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=72">
+<link rel="stylesheet" href="app.css?v=73">
 </head>
 <body>
 
@@ -24,6 +24,17 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <div id="sp-icerik">
 
   <div id="scr-panel">
+    <!-- Sürüm 73 · 144. dosya · Tayfun: "Günlük raporun altındaki proje
+         seçme / filtreleme kısmını kaldıralım. O, Günlük rapor
+         sayfasında olmasın. Onu Analizler'e almamız gerekiyor."
+         Bu dosya artık İKİ sayfa gösteriyor:
+           panel.html                → Günlük rapor   (.gun-bolum)
+           panel.html?bolum=ayrinti  → Analizler › Şantiye ayrıntısı (.ay-bolum)
+         Seçici ve aylık bölümler silinmedi, taşındı ("çalışan özellik,
+         yerine geleni hazır olmadan kaldırılmaz"). Aynı dosyada
+         durmaları geçici: Analizler'in grafikli düzeni (145) gelince
+         .ay-bolum kendi sayfalarına dağılacak. -->
+    <div class="gun-bolum">
 
     <!-- SAHALARDAN GELENLER — 22 Ekim · Tayfun: "Yönetici sayfası ilk
          açıldığında ilk görmek isteyeceği veriler şantiyelerden gelen
@@ -71,9 +82,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          alt satırı kalktı, aynı bilgiyi artık üstteki kutular veriyor. -->
     <div class="sechead go-ust" style="margin-top:0"><h2 id="gunluk-basl">Yükleniyor…</h2>
       <div class="go-gez" id="go-gez" hidden>
-        <button class="btn ghost sm" id="go-onceki" type="button" title="Kayıt girilmiş önceki gün">‹ Önceki</button>
         <input type="date" id="go-tarih" aria-label="Gösterilecek gün">
-        <button class="btn ghost sm" id="go-sonraki" type="button" title="Kayıt girilmiş sonraki gün">Sonraki ›</button>
         <button class="btn ghost sm" id="go-yazdir" type="button" title="Bu günü yazdır ya da PDF olarak kaydet">Yazdır</button>
         <button class="btn ghost sm" id="go-csv" type="button" title="Bu günün dökümünü CSV olarak indir">CSV</button>
       </div></div>
@@ -81,6 +90,8 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     <div class="note go-tamam" id="go-duzeltildi" hidden>Düzeltme kaydedildi. Aşağıda vardiyanın yeni hâli görünüyor.</div>
     <div id="gunluk">Yükleniyor…</div>
 
+    </div><!-- /.gun-bolum -->
+    <div class="ay-bolum">
     <!-- ⚠ "Tek şantiye" başlığı kalktı (25 Kasım 2026, Tayfun'un
          isteği). Aşağıdaki bölümlerin her birinin kendi başlığı
          zaten var ("Bu ay ne kadar deldik?", "Kuyular nerede?"…);
@@ -213,13 +224,14 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
          (puantaj.html). Burada kalsaydı aynı tablo iki yerde dururdu. -->
 
     <p class="foot">Bütün rakamlar sahadaki günlük vardiya kayıtlarından türetilir. İptal edilen kuyu metrajı delgi toplamına girer; sondör metrajına, teslim edilen metraja ve prime girmez.</p>
+    </div><!-- /.ay-bolum -->
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=72"></script>
+<script src="app-shell.js?v=73"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=72"></script>
+<script src="kart.js?v=73"></script>
 <script>
 (function(){
 "use strict";
@@ -233,7 +245,12 @@ function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){return
 
 var sb=null, MASTER=null;
 
-SP.boot({sayfa:"panel", esanahtar:["sefozet","kuyular"], baslik:"Günlük rapor", hazir:function(){
+/* 144. dosya: hangi sayfa? Sınıf hemen konuyor ki öbür bölüm hiç boyanmasın. */
+var AYRINTI = /[?&]bolum=ayrinti(&|$)/.test(location.search);
+document.body.classList.add(AYRINTI ? "bolum-ayrinti" : "bolum-gunluk");
+if(AYRINTI) document.title = "Collarlog · Şantiye ayrıntısı";
+SP.boot({sayfa:AYRINTI ? "ayrinti" : "panel", esanahtar:["panel","sefozet","kuyular"],
+         baslik:AYRINTI ? "Şantiye ayrıntısı" : "Günlük rapor", hazir:function(){
   sb = SP.sb;
   boot();
   $("#k-sec").addEventListener("change", kuyuCiz);
@@ -267,11 +284,18 @@ function boot(){
     var o0=document.createElement("option"); o0.value=""; o0.textContent="Tüm yıl"; ms.appendChild(o0);
     AYLAR.forEach(function(a,i){ var o=document.createElement("option"); o.value=i+1; o.textContent=a; ms.appendChild(o); });
     ms.value = now.getMonth()+1;
-    kuyuListesi();
-    /* Sahalardan gelenler proje seçiminden bağımsız: bir kere, açılışta. */
-    gunlukYukle();
-    bildirimleriYukle();
-    load();          /* seçim boş olduğu için tek cümleyle açılıyor */
+    /* 144. dosya: her sayfa yalnız kendi bölümünü yükler */
+    if(AYRINTI){
+      kuyuListesi();
+      /* Başka sayfadan gelen bağlantı şantiyeyi seçili getirebilir:
+         panel.html?bolum=ayrinti&proje=<id> */
+      var qp = new URLSearchParams(location.search).get("proje");
+      if(qp && (MASTER.projects || []).some(function(p){ return p.id === qp; })){ sel.value = qp; kuyuListesi(); }
+      load();          /* seçim boşsa tek cümleyle açılıyor */
+    } else {
+      gunlukYukle();
+      bildirimleriYukle();
+    }
   });
 }
 /* Düğmeye basan kullanıcı bir şey bekliyor: sessiz kapı yerine neden
@@ -767,21 +791,19 @@ function gezmeYaz(d, istenen){
   } else { n.hidden = true; n.textContent = ""; }
   GUN_KOMSU = {onceki:d.onceki || null, sonraki:d.sonraki || null};
   var t = $("#go-tarih"); t.value = d.gun || ""; if(d.bugun) t.max = d.bugun;
-  /* Sürüm 72 · "Son gün" düğmesi kalktı (Tayfun: "gereksiz yerde
-     gereksiz buttonlar olmasın"). Son güne Sonraki ›, tarih kutusu ya
-     da menüdeki Günlük rapor ile dönülür. */
-  var o = $("#go-onceki"), s = $("#go-sonraki");
-  o.hidden = s.hidden = !yeni;
-  o.disabled = !d.onceki; s.disabled = !d.sonraki;
+  /* Sürüm 73 · 142. dosya: gün gezme okları grafiğin iki yanına taşındı
+     (seriBlogu çiziyor); burada yalnız tarih kutusu kaldı. */
 }
 
-/* Son 7 günün grafiği: gündüz + gece yığılı, gösterilen gün vurgulu.
-   Kayıtlı güne basınca o gün açılır. */
+/* Son 7 günün grafiği: gündüz + gece yığılı, gösterilen gün vurgulu. */
 function seriBlogu(d){
   var seri = d.seri || [];
   var top = seri.map(function(g){ return Number(g.gunduz || 0) + Number(g.gece || 0); });
   var enb = Math.max.apply(null, top.concat([0]));
-  if(!seri.length || enb <= 0) return "";
+  if(!seri.length) return "";
+  /* Yedi günün hepsi sıfır metre olsa da çerçeve ve oklar çizilir:
+     gün gezmenin tek yolu artık oklar ve tarih kutusu. */
+  if(enb <= 0) enb = 1;
   var ort = top.reduce(function(a, c){ return a + c; }, 0) / top.length;
   var sutun = seri.map(function(g, i){
     var secili = g.gun === d.gun, m = top[i];
@@ -793,15 +815,23 @@ function seriBlogu(d){
       '<u style="height:' + (Number(g.gunduz || 0) / enb * 86) + '%"></u>' +
       '<s style="height:' + (Number(g.gece || 0) / enb * 86) + '%"></s></span>' +
       '<span class="ad"><span class="uz">' + esc(gunAd) + '</span><span class="ks">' + esc(gunKisa) + '</span><small>' + esc(alt) + '</small></span>';
-    return (m > 0 && !secili)
-      ? '<button type="button" class="c" data-gun="' + esc(g.gun) + '" title="' + esc(tarihYaz(g.gun)) + ' gününü aç">' + ic + '</button>'
-      : '<div class="c' + (secili ? ' secili' : '') + '">' + ic + '</div>';
+    return '<div class="c' + (secili ? ' secili' : '') + '" data-gun="' + esc(g.gun) + '">' + ic + '</div>';
   }).join("");
+  /* Sürüm 73 · 142. dosya · Tayfun: "Grafiğe tıklanınca saçma sapan geri
+     tarihe gidiyor, sonra ileri hiç gitmiyor. Gidecekse sağında ve
+     solunda oklara tıklanıp gitsin. Sona geldiğinde soluk olsun."
+     Sütunlar artık yalnız gösterir. Oklar bir KAYITLI gün geri / ileri
+     gider (merkezin verdiği onceki / sonraki); yoksa soluk ve basılmaz. */
+  var ok = function(id, gun, isaret, ad){
+    return '<button type="button" class="go-ok" id="' + id + '"' + (gun ? '' : ' disabled') +
+      ' aria-label="' + ad + '" title="' + (gun ? esc(tarihYaz(gun)) : ad + ' yok') + '">' + isaret + '</button>'; };
   return '<div class="go-seri"><h3>Son 7 gün · delinen metre <i>' +
       '<span class="le"><span class="lj g"></span>gündüz</span><span class="le"><span class="lj c"></span>gece</span>' +
       '<span class="le"><span class="lj s"></span>gösterilen gün</span>' +
       '<span class="le"><span class="lj o"></span>ortalama ' + tl(ort) + ' m</span></i></h3>' +
-    '<div class="go-cub" style="--ort:' + (ort / enb).toFixed(4) + '">' + sutun + '</div></div>';
+    '<div class="go-gov">' + ok("go-onceki", d.onceki, "‹", "Önceki kayıtlı gün") +
+    '<div class="go-cub" style="--ort:' + (ort / enb).toFixed(4) + '">' + sutun + '</div>' +
+    ok("go-sonraki", d.sonraki, "›", "Sonraki kayıtlı gün") + '</div></div>';
 }
 
 /* Vardiya saatlerinin dökümü. Delginin kendi saati manevra
@@ -1062,11 +1092,10 @@ document.addEventListener("click", function(e){
   }
   if(e.target.closest("#go-yazdir")){ gunYazdir(); return; }
   if(e.target.closest("#go-csv")){ gunCsv(); return; }
-  var gez = e.target.closest("#go-onceki,#go-sonraki,.go-cub .c[data-gun]");
+  var gez = e.target.closest("#go-onceki,#go-sonraki");
   if(gez){
     if(gez.id === "go-onceki"){ if(GUN_KOMSU.onceki) gunSec(GUN_KOMSU.onceki); }
-    else if(gez.id === "go-sonraki"){ if(GUN_KOMSU.sonraki) gunSec(GUN_KOMSU.sonraki); }
-    else gunSec(gez.getAttribute("data-gun"));
+    else if(GUN_KOMSU.sonraki) gunSec(GUN_KOMSU.sonraki);
     return;
   }
   var bas = e.target.closest(".sk-bas");

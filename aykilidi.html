@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=72">
+<link rel="stylesheet" href="app.css?v=73">
 <style>
 /* Denetim ayrıntısı: uzun olabilir, kendi içinde kayıyor. */
 .liste{margin:6px 0 0;padding-inline-start:18px;font-size:12.5px;color:var(--ink-2);
@@ -24,6 +24,40 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 .liste li{margin:3px 0}
 .liste li a{margin-left:8px;font-weight:600;color:var(--accent);text-decoration:none;white-space:nowrap}
 .liste li a:hover{text-decoration:underline}
+/* Sürüm 73 · 147: gözden geçirme satırları ve ay özeti */
+.dn-bas{margin:18px 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.dn-bas:empty{display:none}
+.dn-liste{margin-top:8px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.dn-sat{display:flex;align-items:center;gap:12px;padding:0 12px 0 0;border-top:1px solid var(--line-soft);font-size:13.5px}
+.dn-sat:first-child{border-top:0}
+.dn-sat.hist{padding:8px 12px}
+.dn-ac{all:unset;box-sizing:border-box;flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:9px 0 9px 12px;cursor:pointer}
+.dn-ac.duz{cursor:default}
+.dn-ac .ok{flex:none;width:12px;color:var(--ink-3);font-size:11px;transition:transform .12s}
+.dn-ac.acik .ok{transform:rotate(90deg)}
+.dn-ac:hover:not(.duz){background:var(--card-2)}
+.dn-ac:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.dn-ne{font-variant-numeric:tabular-nums}
+.dn-sorun{font-size:11.5px;border-radius:999px;padding:2px 8px;font-weight:600;white-space:nowrap;background:var(--warn-soft);color:var(--warn)}
+.dn-sorun:empty{display:none}
+.dn-sat a{flex:none;font-weight:600;color:var(--accent);text-decoration:none;white-space:nowrap;font-size:13px}
+.dn-sat a:hover{text-decoration:underline}
+.dn-kart{padding:6px 14px 14px 34px;background:var(--card-2);border-top:1px solid var(--line-soft)}
+.oz-kutu{grid-template-columns:1.5fr 1fr 1fr 1fr;margin-bottom:12px !important}
+.oz-kutu .tile.ana{background:var(--nav);border-color:var(--nav)}
+.oz-kutu .tile.ana .k{color:var(--nav-ink-2)} .oz-kutu .tile.ana .v{color:#fff} .oz-kutu .tile.ana .v small{color:var(--nav-ink)}
+.oz-kutu .tile.ana .s{color:var(--nav-ink)}
+.oz-kutu .iyi{color:var(--good);font-weight:600} .oz-kutu .kotu{color:var(--bad);font-weight:600}
+.oz-kutu .tile.ana .iyi{color:#7fd6ad} .oz-kutu .tile.ana .kotu{color:#f0a195}
+.oz-iki{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.oz-blok{border:1px solid var(--line);border-radius:10px;padding:10px 14px 12px}
+.oz-blok h4{margin:0 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.oz-sat{display:grid;grid-template-columns:minmax(80px,120px) 1fr 96px;gap:10px;align-items:center;font-size:13px;margin:6px 0}
+.oz-sat .ad{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oz-sat .cb{height:12px;background:var(--line-soft);border-radius:4px;position:relative}
+.oz-sat .cb i{position:absolute;left:0;top:0;bottom:0;background:var(--cubuk,#5f7f9b);border-radius:0 4px 4px 0}
+.oz-sat .de{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+@media (max-width:760px){ .oz-kutu{grid-template-columns:1fr 1fr} .oz-iki{grid-template-columns:1fr} .dn-sat{flex-wrap:wrap} .dn-kart{padding-left:14px} }
 /* Ay sonu sırası (130. dosya): kapanış → rapor → hakediş */
 .ay-sira{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;margin:0 0 14px;padding:0;list-style:none;font-size:13.5px}
 .ay-sira li{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;
@@ -78,10 +112,11 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     <div class="card" id="kart-denetim" hidden>
       <h3 id="denetim-bas">Gözden geçirme</h3>
       <div class="note">
-        Hiçbiri kapatmayı engellemez — eksik olabilecek yerleri gösterir.
-        Ekip ve yakıt denetimi yalnız sahadan girilen vardiyaları sayar;
-        aktarımdan gelen eski aylarda bu kayıtlar hiç yok.
+        Önce ayın kendisi, altında eksik görünen kayıtlar. Satıra basınca
+        vardiyanın kartı açılır; <b>Düzenle</b> o vardiyanın formunu açar,
+        kaydedince buraya dönersiniz. Hiçbiri kapatmayı engellemez.
       </div>
+      <div id="ay-ozet"></div>
       <div id="denetim"></div>
       <div id="eylem"></div>
     </div>
@@ -90,7 +125,8 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=72"></script>
+<script src="app-shell.js?v=73"></script>
+<script src="kart.js?v=73"></script>
 <script>
 (function(){
 "use strict";
@@ -242,26 +278,96 @@ function satirBag(d, x){
     return '<a class="gr" href="panel.html?gun=' + esc(x.tarih) + '">Günlük rapor\'da aç</a>';
   return "";
 }
+/* Sürüm 73 · 147. dosya · Tayfun: "Bunu bu şekilde mi gözden geçirip
+   kapatacağım? Sorunları göremiyorum." Satır artık düz yazı değil:
+   sorunun adı satırda, satıra basınca vardiyanın kartı yerinde açılır
+   (Günlük rapor'daki kart), Düzenle satırın sonunda. "1. vardiya /
+   2. vardiya" yerine Gündüz / Gece. */
+var SORUN_KISA = { ekipsiz_vardiya:"ekip girilmemiş", yakitsiz_vardiya:"yakıt kaydı yok",
+  evraksiz_vardiya:"form no boş", onaysiz_vardiya:"onay bekliyor", acik_ariza:"arıza açık",
+  kapanmamis_kuyu:"kuyu kapatılmadı", vardiyasiz_gun:"vardiya girilmemiş" };
 function satirYaz(d){
   var a = d.ayrinti || [];
   if(!a.length) return "";
-  var html = '<ul class="liste">';
+  var html = '<div class="dn-liste">';
   a.slice(0, 20).forEach(function(x){
     var t = [];
     if(x.tarih) t.push(x.tarih.split("-").reverse().join("."));
     if(x.adet != null) t.push(x.adet + " vardiya");
-    if(x.vardiya) t.push(x.vardiya + ". vardiya");
+    if(x.vardiya) t.push(String(x.vardiya) === "2" ? "Gece" : String(x.vardiya) === "1" ? "Gündüz" : x.vardiya + ". vardiya");
     if(x.kuyu) t.push(x.kuyu);
     if(x.makine) t.push(x.makine);
     if(x.tur) t.push(x.tur);
     if(x.baslangic) t.push(zaman(x.baslangic));
     if(x.program != null) t.push("program " + x.program + " m");
     if(x.derinlik != null) t.push("derinlik " + x.derinlik + " m");
-    html += '<li>'+esc(t.join(" · "))+satirBag(d, x)+'</li>';
+    var ic = '<span class="dn-ne">' + esc(t.join(" · ")) + '</span>' +
+             '<span class="dn-sorun">' + esc(SORUN_KISA[d.kod] || "") + '</span>';
+    html += '<div class="dn-sat">' +
+      (x.id ? '<button type="button" class="dn-ac" data-vid="' + esc(x.id) + '" aria-expanded="false">' +
+                '<span class="ok" aria-hidden="true">▸</span>' + ic + '</button>'
+            : '<span class="dn-ac duz"><span class="ok"></span>' + ic + '</span>') +
+      satirBag(d, x) + '</div>' +
+      (x.id ? '<div class="dn-kart" hidden></div>' : '');
   });
-  if(a.length > 20) html += '<li class="hist">… ve ' + (a.length - 20) + ' tane daha</li>';
-  return html + '</ul>';
+  if(a.length > 20) html += '<div class="dn-sat hist">… ve ' + (a.length - 20) + ' tane daha</div>';
+  return html + '</div>';
 }
+
+/* Ayın özeti: kapatılan şeyin ne olduğu görünsün. Dönemin vardiya
+   listesinden (vardiya_listesi) burada toplanıyor; önceki ayla fark
+   aynı çağrının bir ay öncesinden. */
+function tl(x, n){ return Number(x || 0).toLocaleString("tr-TR", {minimumFractionDigits:n == null ? 2 : n, maximumFractionDigits:n == null ? 2 : n}); }
+function ayAralik(ay, kay){
+  var d = new Date(String(ay).slice(0, 10) + "T12:00:00"); d.setMonth(d.getMonth() + (kay || 0));
+  var y = d.getFullYear(), m = d.getMonth(), son = new Date(y, m + 1, 0).getDate(), iki = function(n){ return (n < 10 ? "0" : "") + n; };
+  return { from: y + "-" + iki(m + 1) + "-01", to: y + "-" + iki(m + 1) + "-" + iki(son) };
+}
+function ozetCiz(s){
+  var kutu = $("#ay-ozet"), proje = $("#f-project").value, bu = ayAralik(s.ay, 0), once = ayAralik(s.ay, -1);
+  kutu.innerHTML = '<div class="note">Ayın özeti yükleniyor…</div>';
+  Promise.all([
+    sb.rpc("vardiya_listesi", {p_project:proje, p_from:bu.from, p_to:bu.to}),
+    sb.rpc("vardiya_listesi", {p_project:proje, p_from:once.from, p_to:once.to})
+  ]).then(function(r){
+    if(SECILI !== s.ay) return;
+    if(r[0].error){ kutu.innerHTML = '<div class="msg err">Ayın özeti okunamadı: ' + esc(r[0].error.message) + '</div>'; return; }
+    var v = r[0].data || [], o = (r[1] && !r[1].error && r[1].data) || [];
+    var top = function(l, k){ return l.reduce(function(a, x){ return a + Number(x[k] || 0); }, 0); };
+    var m = top(v, "metraj"), mo = top(o, "metraj"), gun = {}, kule = {}, kuyu = {};
+    v.forEach(function(x){ gun[x.gun] = 1;
+      kule[x.makine || "—"] = (kule[x.makine || "—"] || 0) + Number(x.metraj || 0);
+      kuyu[x.kuyu || "—"] = (kuyu[x.kuyu || "—"] || 0) + Number(x.metraj || 0); });
+    var fark = mo > 0 ? (m - mo) / mo * 100 : null;
+    var farkYazi = fark == null ? (o.length ? "" : "önceki ayda kayıt yok")
+      : '<span class="' + (fark >= 0 ? "iyi" : "kotu") + '">' + (fark >= 0 ? "▲" : "▼") + " %" + tl(Math.abs(fark), 0) + '</span> önceki aya göre (' + tl(mo) + ' m)';
+    var cubuk = function(baslik, nesne){
+      var l = Object.keys(nesne).map(function(k){ return [k, nesne[k]]; }).sort(function(a, b){ return b[1] - a[1]; });
+      var enb = l.length ? Math.max(l[0][1], 1) : 1;
+      return '<div class="oz-blok"><h4>' + baslik + '</h4>' + (l.length ? l.slice(0, 12).map(function(x){
+        return '<div class="oz-sat"><span class="ad">' + esc(x[0]) + '</span><span class="cb"><i style="width:' + (x[1] / enb * 100).toFixed(1) +
+               '%"></i></span><span class="de">' + tl(x[1]) + ' m</span></div>'; }).join("") +
+        (l.length > 12 ? '<div class="hist">… ve ' + (l.length - 12) + ' tane daha</div>' : '')
+        : '<div class="note">Bu ayda metraj yok.</div>') + '</div>';
+    };
+    kutu.innerHTML =
+      '<div class="tiles oz-kutu">' +
+        '<div class="tile ana"><div class="k">Ayın metresi</div><div class="v num" id="oz-metre">' + tl(m) + ' <small>m</small></div><div class="s">' + farkYazi + '</div></div>' +
+        '<div class="tile"><div class="k">Vardiya</div><div class="v num" id="oz-vardiya">' + v.length + '</div><div class="s">' + (v.length ? tl(m / v.length, 1) + ' m / vardiya' : '') + '</div></div>' +
+        '<div class="tile"><div class="k">Çalışılan gün</div><div class="v num" id="oz-gun">' + Object.keys(gun).length + '</div></div>' +
+        '<div class="tile"><div class="k">Mazot</div><div class="v num" id="oz-mazot">' + tl(top(v, "mazot"), 0) + ' <small>lt</small></div></div>' +
+      '</div><div class="oz-iki">' + cubuk("Kulelere göre metre", kule) + cubuk("Kuyulara göre metre", kuyu) + '</div>';
+  });
+}
+
+document.addEventListener("click", function(e){
+  var ac = e.target.closest && e.target.closest(".dn-ac[data-vid]");
+  if(!ac) return;
+  var kart = ac.parentElement.nextElementSibling, acik = kart.hidden;
+  ac.setAttribute("aria-expanded", acik ? "true" : "false");
+  ac.classList.toggle("acik", acik); kart.hidden = !acik;
+  if(acik && !kart.dataset.dolu){ kart.dataset.dolu = "1"; VKART.ac(sb, ac.getAttribute("data-vid"), kart); }
+});
 
 function denetimAc(s){
   SECILI = s.ay;
@@ -269,6 +375,7 @@ function denetimAc(s){
   $("#denetim-bas").textContent = ayAdi(s.ay) + " · gözden geçirme";
   $("#denetim").innerHTML = '<div class="note">Yükleniyor…</div>';
   $("#eylem").innerHTML = "";
+  ozetCiz(s);
   $("#kart-denetim").scrollIntoView({behavior:"smooth", block:"nearest"});
   sb.rpc("ay_gozden_gecir", {p_project:$("#f-project").value, p_period:s.ay}).then(function(r){
     if(r.error){ $("#denetim").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
@@ -280,7 +387,11 @@ function denetimAc(s){
        şey söylüyor: o ay vardiya girilmemiş. */
     var dolu = d.filter(function(x){ return Number(x.adet) > 0; });
     var toplam = dolu.length;
-    var html = '<div class="tiles">' + d.map(function(x){
+    /* Sürüm 73 · sıfır olan denetim kutusu çizilmiyor: yalnız sorun
+       olanlar. (Formdan girilen vardiya ekipsiz olamaz; "ekibi
+       girilmemiş" yalnız dışarıdan aktarılan veride çıkar — sıfırken
+       yer kaplamasın.) */
+    var html = '<h4 class="dn-bas">' + (toplam ? 'Eksik görünenler' : '') + '</h4><div class="tiles">' + dolu.map(function(x){
       return '<div class="tile"><div class="k">'+esc(x.baslik)+'</div>' +
              '<div class="v num">'+(x.adet || 0)+'</div></div>';
     }).join("") + '</div>';

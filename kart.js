@@ -84,8 +84,50 @@ var OP_AD = {delgi:"Delgi", muhafaza:"Muhafaza borusu", bekleme:"Bekleme",
   manevra:"Manevra", kuyu_hazirlik:"Kuyu hazırlık", bakim:"Bakım", diger:"Diğer"};
 var OP_SEBEP = {operasyonel:"operasyonel", operasyonel_degil:"operasyonel değil",
   kuyu_sonu:"kuyu sonu", kuyu_iptali:"kuyu iptali"};
+/* Sürüm 73 · 143. dosya · Tayfun: "Her operasyonun karşısında zaman
+   aralığı yazıyor, delgi hariç. Delginin de yazması gerekiyor."
+   Delginin kendi saati yok; manevralardan çıkar. Bir delgi satırına,
+   kendinden önceki saatli operasyonun bitişi ile sonraki saatli
+   operasyonun başlangıcı arasına düşen manevralar yazılır; aralık
+   ilkinin başı – sonuncunun sonu. Gece vardiyası gece yarısını
+   geçtiği için saatler vardiyanın ilk saatine göre sıralanır.
+   Manevralar saatsizse (sürüm 62 öncesi) satır eskisi gibi kalır. */
+function delgiAraliklari(d){
+  var ops = d.operasyonlar || [], mv = (d.manevralar || []).filter(function(r){ return r.bas && r.bit; });
+  if(!mv.length) return {};
+  var dk = function(s){ var m = /^(\d{1,2}):(\d{2})/.exec(String(s || "")); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+  var hepsi = [];
+  ops.forEach(function(o){ if(o.bas) hepsi.push(dk(o.bas)); });
+  mv.forEach(function(r){ hepsi.push(dk(r.bas)); });
+  hepsi = hepsi.filter(function(x){ return x != null; });
+  if(!hepsi.length) return {};
+  /* Vardiyanın başı: gündüzse en küçük saat; gece ise 12:00'den sonraki
+     en küçük saat (20:00 … 08:00). Ondan küçük saatler ertesi güne sayılır. */
+  var ogleSonra = hepsi.filter(function(x){ return x >= 720; }), sabah = hepsi.filter(function(x){ return x < 720; });
+  var vd = String(d.vardiya || "").toLocaleLowerCase("tr");
+  var gece = ogleSonra.length && sabah.length &&
+    (vd ? (vd.indexOf("gece") >= 0 || vd === "2") : Math.min.apply(null, ogleSonra) >= 960);
+  var taban = gece ? Math.min.apply(null, ogleSonra) : Math.min.apply(null, hepsi);
+  var g = function(s){ var x = dk(s); return x == null ? null : (x < taban ? x + 1440 : x); };
+  var sonuc = {};
+  ops.forEach(function(o, i){
+    if(o.tur !== "delgi" || (o.bas && o.bit)) return;
+    var alt = null, ust = null, j;
+    for(j = i - 1; j >= 0; j--) if(ops[j].tur !== "delgi" && ops[j].bit){ alt = g(ops[j].bit); break; }
+    for(j = i + 1; j < ops.length; j++) if(ops[j].tur !== "delgi" && ops[j].bas){ ust = g(ops[j].bas); break; }
+    var ic = mv.filter(function(r){ var b = g(r.bas), s = g(r.bit);
+      return (alt == null || b >= alt) && (ust == null || s <= ust); });
+    if(!ic.length) return;
+    var bas = ic[0], son = ic[0];
+    ic.forEach(function(r){ if(g(r.bas) < g(bas.bas)) bas = r; if(g(r.bit) > g(son.bit)) son = r; });
+    sonuc[i] = {bas: bas.bas, bit: son.bit, saat: (g(son.bit) - g(bas.bas)) / 60};
+  });
+  return sonuc;
+}
 function operasyonIc(d){
-  return (d.operasyonlar || []).map(function(o){
+  var DA = delgiAraliklari(d);
+  return (d.operasyonlar || []).map(function(o, oi){
+    if(DA[oi]) o = Object.assign({}, o, DA[oi]);
     var ek = [];
     if(o.sebep) ek.push(OP_SEBEP[o.sebep] || BEKLEME_AD[o.sebep] || o.sebep);
     if(o.from_m != null || o.to_m != null)
