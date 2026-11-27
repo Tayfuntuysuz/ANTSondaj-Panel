@@ -751,6 +751,24 @@ details.acilir[open] > summary::after{content:"\2212"}
 .kserit .ks-ad{font-size:12.5px;font-weight:600;display:block}
 .kserit .ks-alt{font-size:11.5px;opacity:.85;display:block}
 .kserit[data-durum="bekliyor"]{background:#FFF3E3;color:#7A3F06}
+.kserit[data-durum="bilgi"]{background:#EAF1F7;color:#1F3B57}
+/* Yönetici düzeltmesi: öbür sekmeler yok, üstte dönüş bağlantısı */
+body.ydz #tabs{display:none}
+body.ydz-malzeme #sabit-liste{display:none}
+/* Vardiya açılana kadar (ya da açılamazsa) boş form görünmez: yönetici
+   yanlışlıkla YENİ vardiya girmesin. */
+body.ydz:not(.ydz-acik) #bantlar,body.ydz:not(.ydz-acik) .sekme-bas{display:none}
+.ydz-serit{margin:12px 0 4px;padding:12px 14px;border-radius:12px;background:#EAF1F7;color:#1F3B57;
+  border:1px solid #C9D9E8}
+.ydz-serit .ydz-don{display:inline-block;font-size:13px;font-weight:600;color:inherit;margin-bottom:6px;
+  text-decoration:none;padding:4px 0}
+.ydz-serit .ydz-bas{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:15px}
+.ydz-serit .ydz-bas span{font-size:13px;opacity:.9}
+.ydz-serit .ydz-acik{font-size:12.5px;margin-top:4px;opacity:.9}
+.ydz-serit #ydz-msg .msg{margin-top:8px}
+/* Düzeltmedeki "diğer kayıtlar" kutusu koyu zeminde koyu yazıyla
+   okunmuyordu; form panelleri gibi açık zemine alındı. */
+#duzelt-yan .vk-yan{background:var(--kart-ic-acik);color:var(--ink)}
 .kserit[data-durum="takildi"]{background:#FDE8E6;color:#9B1C14}
 .kserit[data-durum="kilit"]{background:#FDE8E6;color:#9B1C14}
 
@@ -948,6 +966,15 @@ details.acilir[open] > summary::after{content:"\2212"}
            kartın sırası anlamlı ve beşi doldurulmak zorunda. Öteki
            sekmelerde "3/5 tamam" diye bir şey yok — oradaki kartlar
            sıra değil konum gösteriyor. -->
+      <!-- Yönetici düzeltmesi (131. dosya): yalnız ?duzenle=… ile ve
+           yönetici rolüyle görünür. -->
+      <div class="ydz-serit" id="ydz-serit" hidden>
+        <a class="ydz-don" id="ydz-don" href="panel.html">‹ Günlük rapor</a>
+        <div class="ydz-bas"><b>Yönetici düzeltmesi</b><span id="ydz-ne"></span></div>
+        <div class="ydz-acik">Şefin girdiği vardiyayı düzeltiyorsunuz. Kaydedince eski kayıt
+          güncellenir, değişikliğin izi tutulur.</div>
+        <div id="ydz-msg"></div>
+      </div>
       <div class="sekme-bas"><span class="sb-ad">İş akışı</span>
         <span class="sb-sayac" id="vardiya-sayac"></span></div>
       <div class="adimlar" id="bantlar">
@@ -2314,7 +2341,7 @@ details.acilir[open] > summary::after{content:"\2212"}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=68"></script>
+<script src="kart.js?v=70"></script>
 <script>
 (function(){
 "use strict";
@@ -2471,9 +2498,85 @@ function rolu(){
   var p = (MASTER && MASTER.profile) || {};
   return p.role || "";
 }
+/* ============================================================
+   YÖNETİCİ DÜZELTMESİ (131. dosya · sürüm 70)
+   ============================================================
+   Tayfun: "Yönetici … düzenleme yapabilmeli, istediği şekilde. İşini
+   zorlaştırmamalıyız." Günlük rapor'daki vardiya kartında "Düzenle"
+   bu sayfayı `?duzenle=<vardiya kimliği>` ile açar. İkinci bir
+   düzeltme ekranı YAZILMADI: şefin formunun aynısı o vardiya için
+   açılır, aynı denetimler çalışır, aynı iz tutulur.
+   · Yalnız yönetici, firma yöneticisi ve platform yöneticisi.
+     (Veritabanındaki `duzeltilebilir()` ile aynı liste.)
+   · Öbür sekmeler görünmez; kaydedince Günlük rapor'a dönülür.
+   · Kimlik adresten geliyor ama yetkiyi adres vermiyor: satırı
+     RLS okutur, yazmayı `duzeltilebilir()` denetler.
+   ============================================================ */
+var YDUZ = (function(){
+  try{
+    var q = new URLSearchParams(location.search), id = q.get("duzenle");
+    /* `don` adresi adresten ALINMAZ: yalnız "ay" sözcüğü tanınır ve
+       dönüş yeri burada kurulur (açık yönlendirme olmasın). */
+    return (id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+      ? {id:id, don:"panel.html", sat:null, ay:(q.get("don") === "ay")} : null;
+  }catch(e){ return null; }
+})();
+var YON_ROLLERI = {manager:1, tenant_admin:1, platform_admin:1};
+function ydzMi(){ return !!(YDUZ && YON_ROLLERI[rolu()]); }
+function ydzYaz(metin, tur){
+  var m = $("#ydz-msg"); if(!m) return;
+  m.innerHTML = metin ? '<div class="msg ' + (tur || "") + '">' + metin + '</div>' : "";
+}
+function ydzDon(ek){
+  var u = YDUZ.don + (ek ? (YDUZ.don.indexOf("?") > -1 ? "&" : "?") + ek : "");
+  try{ location.replace(u); }catch(e){ location.href = u; }
+}
+function ydzBaslat(){
+  document.body.classList.add("ydz");
+  $("#ydz-serit").hidden = false;
+  if(!navigator.onLine || !sb){ ydzYaz("Düzeltme için bağlantı gerekiyor.", "err"); return; }
+  ydzYaz("Vardiya açılıyor…");
+  return Promise.resolve(sb.from("shifts")
+      .select("id,client_uuid,work_date,shift,shift_slot,fuel_liters,well_id," +
+              "machine_id,project_id,paper_no,end_state,status,deleted_at")
+      .eq("id", YDUZ.id)).then(function(r){
+    var sat = (r && r.data && r.data[0]) || null;
+    if(r.error || !sat){
+      ydzYaz("Vardiya bulunamadı" + (r.error ? ": " + hataTr(r.error.message) : "."), "err"); return; }
+    if(sat.deleted_at){ ydzYaz("Bu vardiya silinmiş; düzeltilemez.", "err"); return; }
+    YDUZ.sat = sat;
+    var mk = (MASTER.machines || []).filter(function(x){ return x.id === sat.machine_id; })[0];
+    YDUZ.don = "panel.html?gun=" + sat.work_date + (mk ? "&ac=" + encodeURIComponent(mk.code) : "");
+    /* Ay kapanışı'ndan gelindiyse oraya, aynı ayın denetimine dönülür */
+    if(YDUZ.ay){
+      YDUZ.don = "aykilidi.html?proje=" + sat.project_id + "&ay=" + sat.work_date.slice(0, 7);
+      $("#ydz-don").textContent = "‹ Ay kapanışı";
+    }
+    $("#ydz-don").setAttribute("href", YDUZ.don);
+    var w = (MASTER.wells || []).filter(function(x){ return x.id === sat.well_id; })[0];
+    var vd = slotBilgi(sat.project_id, sat.shift_slot || (sat.shift === "gece" ? 2 : 1));
+    $("#ydz-ne").textContent = [sat.work_date.split("-").reverse().join("."),
+      (vd ? vd.label : sat.shift), (mk ? mk.code : ""), (w ? w.code : "")].filter(Boolean).join(" · ");
+    vardiyaDuzelt(sat, null);
+  }).catch(function(e){ ydzYaz(hataTr((e && e.message) || String(e)), "err"); });
+}
+/* Kaydın merkeze gittiği görülmeden dönülmez: kuyruk boşalınca Günlük
+   rapor'a geçilir. Takılan kayıt varsa sayfada kalınır, sebebi yazar. */
+function ydzDonusBekle(){
+  var n = 0;
+  (function bak(){
+    obAll().then(function(items){
+      if(!items.length){ ydzDon("duzeltildi=1"); return; }
+      if(items.some(function(x){ return !!x.hata; })) return;
+      if(++n < 40) setTimeout(bak, 500);
+    }).catch(function(){});
+  })();
+}
+
 function kapiKontrol(){
   var r = rolu();
   if(!r || SAHA_ROLLERI[r]) return true;
+  if(YDUZ && YON_ROLLERI[r]) return true;
   var ad = rolAdi((MASTER && MASTER.profile) || {});
   var ev = ROL_EV[r];
   if(ev){
@@ -2728,7 +2831,10 @@ function projeAdi(id){
 function projeMakineleri(pid){
   var ma = (MASTER && MASTER.machines) || [];
   if(!pid) return [];
-  return ma.filter(function(m){ return m.project_id === pid; });
+  /* Düzeltmeye açılan kaydın KENDİ makinesi listede kalır: makine o
+     günden sonra başka şantiyeye geçmiş olabilir (sürüm 70). */
+  return ma.filter(function(m){
+    return m.project_id === pid || (DUZELT_KAYIT && m.id === DUZELT_KAYIT.makine); });
 }
 /* Proje seçilmemişken aynı kod birkaç şantiyede geçiyor (ANT-2500 üçe kadar).
    Etikete şantiye adı eklenmezse ayırt edilemiyor. */
@@ -3056,24 +3162,40 @@ function ekipAdayi(p){
    listesi var. Eski kayıtlarda `alt_eleman`/`sondor_yardimcisi` kalmış
    olabilir — 62. adım hepsini `yardimci`ye çevirdi, yine de burada
    eskileri de kabul ediyoruz ki veri gecikmeli gelirse liste boş kalmasın. */
+/* Sürüm 70 · düzeltmeye açılan kaydın KENDİ ekibi her zaman listede.
+   Kişi o günden sonra başka şantiyeye geçmiş ya da görevi değişmiş
+   olabilir; kayıtta hangi görevle yazıldıysa o listede görünür. Yoksa
+   alan boş gelir, form "eksik" der ve geçmiş kayıt düzeltilemezdi. */
+var DUZELT_KAYIT = null;   /* {makine:id, kisiler:{personel_id: görev}, bas: ilk manevranın başı} */
 function gorevli(p, turler){
+  if(p && DUZELT_KAYIT && DUZELT_KAYIT.kisiler[p.id] &&
+     turler.indexOf(DUZELT_KAYIT.kisiler[p.id]) >= 0 &&
+     $("#f-project") && $("#f-project").value) return true;
   return p && turler.indexOf(p.kind) >= 0 && ekipAdayi(p);
 }
+/* Şefin listesi yalnız kendi şantiyesini taşıyor; düzeltilen kaydın
+   ekibinden biri o listede yoksa şirket listesinden eklenir. */
+function kisiHavuzu(){
+  var l = ((MASTER && MASTER.personnel) || []).slice();
+  if(DUZELT_KAYIT && MASTER && MASTER.personnel_all){
+    var varMi = {};
+    l.forEach(function(p){ varMi[p.id] = 1; });
+    MASTER.personnel_all.forEach(function(p){
+      if(DUZELT_KAYIT.kisiler[p.id] && !varMi[p.id]) l.push(p); });
+  }
+  return l;
+}
 function yardimcilar(){
-  return ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return gorevli(p, ["yardimci","alt_eleman","sondor_yardimcisi"]); });
+  return kisiHavuzu().filter(function(p){ return gorevli(p, ["yardimci","alt_eleman","sondor_yardimcisi"]); });
 }
 function sondorler(){
-  return ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return gorevli(p, ["sondor"]); });
+  return kisiHavuzu().filter(function(p){ return gorevli(p, ["sondor"]); });
 }
 function formenler(){
-  return ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return gorevli(p, ["formen"]); });
+  return kisiHavuzu().filter(function(p){ return gorevli(p, ["formen"]); });
 }
 function soforler(){
-  return ((MASTER && MASTER.personnel) || [])
-    .filter(function(p){ return gorevli(p, ["sofor"]); });
+  return kisiHavuzu().filter(function(p){ return gorevli(p, ["sofor"]); });
 }
 /* Ekip bandının altındaki açıklama satırı. */
 function ekipNotuCiz(){
@@ -4510,7 +4632,14 @@ function malzemeBul(ad){
   return malzemeler().filter(function(m){
     return (m.name || "").toLocaleLowerCase("tr") === ad.toLocaleLowerCase("tr"); })[0] || null;
 }
+/* Yönetici düzeltmesinde (sürüm 70) vardiyanın malzeme satırları
+   DEĞİŞTİRİLEBİLİR: kayıttaki bütün satırlar tek listede gelir, sabit
+   kutular (kimyasal · hidrolik yağ · karot kasası) gizlenir. Böylece
+   bir vardiyada iki kimyasal da varsa ikisi de görünür ve aynı kalem
+   iki yerden yazılmaz. */
+function malzemeDuzeltMi(){ return !!(DUZELT_KAYIT && DUZELT_KAYIT.malzeme); }
 function kullanilanMalzemeler(){
+  if(malzemeDuzeltMi()) return malzemeler();
   /* Muhafaza borusu ve tij bu listeden çıktı; onlar kuyu sonunda yazılıyor.
      Sabit satırı olan kalemler de düşüyor (101. dosya). */
   return malzemeler().filter(function(m){
@@ -4540,6 +4669,7 @@ function sabitBirimCiz(){
    serbest satırların arkasına ekliyor. */
 function sabitSatirlar(){
   var out = [];
+  if(malzemeDuzeltMi()) return out;      /* sabit kutular gizli; liste tek kaynak */
   function ekle(id, miktar){
     var q = Number(String(miktar).replace(",", "."));
     if(id && isFinite(q) && q > 0) out.push({material_id:id, qty:q});
@@ -4671,7 +4801,14 @@ function personName(id){
   var p = (MASTER && MASTER.personnel || []).filter(function(x){ return x.id === id; })[0];
   return p ? p.full_name.split(" ")[0] : "—";
 }
-function baseDepth(){ var w = currentWell(); return w ? Number(w.current_depth||0) : 0; }
+/* Düzeltmede vardiya başı, kuyunun BUGÜNKÜ derinliği değil kaydın ilk
+   manevrasının başladığı metredir (sürüm 70): kuyunun bugünkü derinliği
+   düzeltilen vardiyanın metresini de içeriyor; eski bir vardiyada
+   "vardiya başı 53,20 · metraj 17,00" gibi tutmayan üç kutu çıkıyordu. */
+function baseDepth(){
+  if(DUZELT_KAYIT && DUZELT_KAYIT.bas != null) return DUZELT_KAYIT.bas;
+  var w = currentWell(); return w ? Number(w.current_depth||0) : 0;
+}
 function depth(){ return runs.length ? runs[runs.length-1].to_m : baseDepth(); }
 function totalM(){ return runs.reduce(function(s,r){ return s + (r.to_m - r.from_m); }, 0); }
 function syncDepth(){
@@ -5947,13 +6084,16 @@ function duzeltYanTemizle(){
 
 function duzeltSeridi(){
   var el = $("#duzelt-serit");
-  if(!DUZELT){ el.hidden = true; el.innerHTML = ""; duzeltYanTemizle(); return; }
+  if(!DUZELT){ el.hidden = true; el.innerHTML = ""; duzeltYanTemizle(); DUZELT_KAYIT = null;
+               document.body.classList.remove("ydz-malzeme"); return; }
   el.hidden = false;
   el.innerHTML = "<b>Düzeltme:</b> " + DUZELT.etiket +
     " · kaydedince mevcut kayıt güncellenecek, yenisi açılmayacak. ";
   var v = document.createElement("button");
   v.type = "button"; v.className = "btn ghost sm"; v.textContent = "Vazgeç";
-  v.addEventListener("click", function(){ DUZELT = null; duzeltSeridi(); resetForm();
+  v.addEventListener("click", function(){
+    if(ydzMi()){ ydzDon(""); return; }
+    DUZELT = null; duzeltSeridi(); resetForm();
     msg($("#shift-msg"), "Düzeltmeden vazgeçildi.", "ok"); });
   el.appendChild(v);
 }
@@ -5962,6 +6102,7 @@ function vardiyaDuzelt(sat, satirEl){
   /* Cevap hem satırın altına hem de eski yere yazılıyor. */
   function dur(metin, tur){
     msg($("#recent-msg"), metin, tur);
+    if(ydzMi()) ydzYaz(metin, tur);
     if(!satirEl) return;
     var e = satirEl.querySelector(".duzelt-cevap");
     if(!e){ e = document.createElement("div"); e.className = "duzelt-cevap";
@@ -6004,12 +6145,22 @@ function vardiyaDuzelt(sat, satirEl){
          operasyonlar silinir — sessiz veri kaybı. */
       sb.from("shift_activities")
         .select("kind,sira,bas_saat,bit_saat,from_m,to_m,diameter,sebep,note,otomatik")
-        .eq("shift_id", sat.id).order("sira", {ascending:true})
+        .eq("shift_id", sat.id).order("sira", {ascending:true}),
+      /* Sürüm 70 · yönetici düzeltmesinde malzeme satırları da geliyor.
+         Şefin düzeltmesinde gelmiyor: orada malzeme değişmiyor. */
+      ydzMi() ? sb.from("shift_materials").select("material_id,qty,lost_in_hole").eq("shift_id", sat.id)
+              : Promise.resolve(null)
     ]).then(function(res){
       if(res[0].error) throw res[0].error;
       var kart = (res[2] && !res[2].error) ? (res[2].data || null) : null;
       var kartHata = (res[2] && res[2].error) ? res[2].error.message : null;
       DUZELT_YUKLENIYOR = true;
+      /* Kaydın kendi makinesi ve ekibi listelerde kalsın (yukarıda). */
+      DUZELT_KAYIT = {makine: sat.machine_id || null, kisiler: {}};
+      (res[1].data || []).forEach(function(c){
+        var g = c.crew_role;
+        if(g === "alt_eleman" || g === "sondor_yardimcisi") g = "yardimci";
+        DUZELT_KAYIT.kisiler[c.personnel_id] = g; });
       /* formu kayıtla doldur */
       $("#f-project").value = sat.project_id || "";
       fillVardiya(); fillMachines();
@@ -6024,6 +6175,9 @@ function vardiyaDuzelt(sat, satirEl){
       $("#f-end").value     = sat.end_state || "";
       kuyuSonuGoster();
 
+      /* Listeler ÖNCE kurulur: kaydın ekibi seçeneklerde yoksa
+         değer atanamaz ve alan boş kalırdı. */
+      sondorListesiCiz(); formenListesiCiz();
       ekipDagit(res[1].data || []);
       vardiyaEkibiCiz();
 
@@ -6050,6 +6204,7 @@ function vardiyaDuzelt(sat, satirEl){
                 to_m:Number(x.to_m), personnel_id:x.personnel_id,
                 bas_saat:x.bas_saat || null, bit_saat:x.bit_saat || null,
                 basDk:saatiDkYap(_va, x.bas_saat), bitDk:saatiDkYap(_va, x.bit_saat)}; });
+      if(runs.length && DUZELT_KAYIT) DUZELT_KAYIT.bas = runs[0].from_m;
       renderRuns();
 
       /* ---- 84. dosya · 7. madde · makine saat sayacı ----
@@ -6116,8 +6271,22 @@ function vardiyaDuzelt(sat, satirEl){
       }
       ilerlemeYokCiz();
 
+      /* ---- sürüm 70 · yönetici: kullanılan malzeme düzeltilebilir ----
+         Satırlar okunamadıysa (hata) eski davranış: malzemeye dokunulmaz. */
+      var mz = res[4];
+      if(mz && !mz.error && DUZELT_KAYIT){
+        DUZELT_KAYIT.malzeme = true;
+        ["#f-kimyasal", "#f-kimyasal-qty", "#f-yag", "#f-kasa"].forEach(function(id){ if($(id)) $(id).value = ""; });
+        KULLANILAN = (mz.data || []).filter(function(x){ return !x.lost_in_hole; })
+          .map(function(x){ return {material_id:x.material_id, qty:String(Number(x.qty))}; });
+        document.body.classList.add("ydz-malzeme");
+        kullanilanCiz();
+      }
+
       /* ---- A2 · değiştirilemeyen yan kayıtlar görünür oluyor ---- */
-      duzeltYanCiz(kart, kartHata);
+      duzeltYanCiz(malzemeDuzeltMi() && kart
+        ? Object.assign({}, kart, {malzeme:(kart.malzeme || []).filter(function(m){ return m.kuyuda_kaldi; })})
+        : kart, kartHata);
 
       var vdz = slotBilgi(sat.project_id, sat.shift_slot || (sat.shift === "gece" ? 2 : 1));
       DUZELT = { shift_id: sat.id, client_uuid: sat.client_uuid,
@@ -6138,6 +6307,7 @@ function vardiyaDuzelt(sat, satirEl){
       window.scrollTo(0, 0);
       refreshState(); syncDepth();
       dur("");
+      if(ydzMi()) document.body.classList.add("ydz-acik");
       /* Şefe NE geri geldiğini söylüyoruz. "Kayıt açıldı" yetmiyordu:
          şef motor saatinin kayıttan mı yoksa varsayılandan mı geldiğini
          bilemiyordu. */
@@ -6223,7 +6393,11 @@ function seritCiz(){
   var app = document.getElementById("scr-app");
   if(!app || app.hidden){ el.hidden = true; return; }
   var ad, alt, durum;
-  if(AY_KILIT){
+  if(AY_KILIT === "kapali" && ydzMi()){
+    durum = "bilgi";
+    ad = "Bu ay kapatılmış";
+    alt = "Yönetici olarak düzeltebilirsiniz; ay kilidi açılmadan da kaydedilir.";
+  } else if(AY_KILIT){
     durum = "kilit";
     ad = (AY_KILIT === "kesin") ? "Bu ayın hakedişi kesildi"
                                 : "Seçtiğiniz ay kapatıldı";
@@ -6575,8 +6749,12 @@ $("#btn-save-shift").addEventListener("click", function(){
        yönetici düzeltiyor. */
     /* 101. dosya · sabit satırlar (kimyasal · hidrolik yağ · karot kasası)
        serbest satırlarla aynı dizide gidiyor; sunucu tarafı değişmedi. */
-    used: DUZELT ? [] : KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; })
-                                  .concat(sabitSatirlar()),
+    used: (DUZELT && !malzemeDuzeltMi()) ? []
+            : KULLANILAN.filter(function(r){ return r.material_id && Number(r.qty) > 0; })
+                        .concat(sabitSatirlar()),
+    /* Yönetici düzeltmesi: satırlar eklenmez, DEĞİŞTİRİLİR (boş liste
+       "hepsi silindi" demektir). */
+    usedDegistir: malzemeDuzeltMi(),
     /* Kuyu sonu: kuyuda kalan muhafaza/tij ve kuyu ölçümleri.
        Aynı sebeple düzeltmede gönderilmiyor — `kuyu_sonu_kaydet` de
        ekliyor, değiştirmiyor. */
@@ -6667,6 +6845,12 @@ $("#btn-save-shift").addEventListener("click", function(){
     if(sayiUyari.length)
       msg($("#done-uyari"), "<b>Dikkat:</b><br>• " + sayiUyari.join("<br>• "), "err");
     if(duzeltmeMi) msg($("#shift-msg"), "Düzeltme kaydedildi. Eski kayıt güncellendi.", "ok");
+    if(ydzMi()){
+      /* Sayı uyarısı varsa yönetici onu okusun; yoksa kayıt merkeze
+         gidince kendiliğinden Günlük rapor'a dönülür. */
+      if(!sayiUyari.length) ydzDonusBekle();
+      return;
+    }
     if(navigator.onLine) setTimeout(loadRecent, 1200);
   });
 });
@@ -6694,6 +6878,14 @@ function showDone(wellCode, metraj, fuel, date, slot){
   b.className = "btn"; b.type = "button"; b.textContent = "Yeni vardiya gir";
   c.appendChild(b);
   wrap.appendChild(c);
+  if(ydzMi()){
+    /* Yönetici yeni vardiya girmez; düğme Günlük rapor'a götürür. */
+    c.querySelector("b").textContent = "Düzeltme kaydedildi";
+    b.textContent = YDUZ.ay ? "Ay kapanışı'na dön" : "Günlük rapor'a dön"; b.id = "ydz-bitti";
+    b.addEventListener("click", function(){ ydzDon("duzeltildi=1"); });
+    obAll().then(takilanUyar).catch(function(){});
+    return;
+  }
   b.addEventListener("click", resetForm);
   /* Kuyruk bu ekrandan ÖNCE gönderilmiş olabilir (enqueue → syncAll →
      showDone sırası). O yüzden takılan kayıt sorusunu burada bir daha
@@ -7478,8 +7670,37 @@ function sendItem(it, tenant){
           if(!it.crew.length) return null;
           return sb.from("shift_crew").upsert(it.crew.map(function(c){
             return {shift_id:sid, personnel_id:c.personnel_id, crew_role:c.crew_role}; }), {onConflict:"shift_id,personnel_id"})
-            .then(bak("Ekip kaydedilemedi"));
+            .then(bak("Ekip kaydedilemedi"))
+            /* Sürüm 70 · DÜZELTMEDE EKİPTEN ÇIKARILAN KİŞİ MERKEZDE
+               KALIYORDU. Yukarıdaki yazma yalnız ekliyor ve görevi
+               güncelliyor; listeden çıkarılanı silen yoktu. Puantaj
+               vardiya ekibinden sayıldığı için yanlış yazılan kişi
+               düzeltilse de o gün çalışmış görünüyordu. Artık merkezdeki
+               ekip okunuyor, yeni listede olmayanlar siliniyor. Yeni
+               vardiyada silinecek kimse yok; adım boş geçiyor. */
+            .then(function(){
+              return sb.from("shift_crew").select("personnel_id").eq("shift_id", sid);
+            }).then(bak("Ekip okunamadı")).then(function(er){
+              var yeni = {};
+              it.crew.forEach(function(c){ yeni[c.personnel_id] = 1; });
+              var fazla = ((er && er.data) || []).map(function(x){ return x.personnel_id; })
+                            .filter(function(id){ return !yeni[id]; });
+              if(!fazla.length) return null;
+              return sb.from("shift_crew").delete().eq("shift_id", sid).in("personnel_id", fazla)
+                .then(bak("Ekipten çıkarılan kişi silinemedi"));
+            });
         }).then(function(){
+          /* Yönetici düzeltmesi (sürüm 70): malzeme satırları tek
+             fonksiyonla değiştirilir, fark ize düşer. */
+          if(it.usedDegistir){
+            return Promise.resolve(sb.rpc("vardiya_malzeme_degistir", {p_shift:sid,
+                p_rows:(it.used || []).map(function(u){ return {material_id:u.material_id, qty:Number(u.qty)}; })}))
+              .then(function(mr){
+                if(mr && mr.error && /vardiya_malzeme_degistir|schema cache|does not exist/i.test(mr.error.message || ""))
+                  throw new Error("Malzeme düzeltmesi için merkezde 76. adımın (092-…) kurulu olması gerekiyor.");
+                return bak("Malzeme düzeltilemedi")(mr);
+              });
+          }
           /* Kuyuda kullanılan malzeme — çoklu satır, kuyuda kalan değil */
           if(!it.used || !it.used.length) return null;
           return sb.from("shift_materials").insert(it.used.map(function(u){
@@ -9062,7 +9283,7 @@ $$("#tabs button").forEach(function(b){
    Para birimi, hafta sonu günleri, bakım aralığı gibi FİRMA ayarları
    yönetici ekranında kalır; şef firmanın ayarını değiştiremez.
    ============================================================ */
-var SURUM = "68";
+var SURUM = "70";
 var ROL_AD = {site_chief:"Şantiye şefi", manager:"Yönetici", tenant_admin:"Firma yöneticisi",
   owner:"Patron", accountant:"Muhasebe", employer:"İşveren", platform_admin:"Platform yöneticisi"};
 function rolAdi(p){ p = p || {}; return p.rol_adi || ROL_AD[p.role] || p.role || "—"; }
@@ -9196,6 +9417,7 @@ function start(){
   /* Onbellekte rol varsa ekrani hic acmadan karar ver; yoksa bootstrap
      dondukten sonra tekrar bakilir (asagida). */
   if(!kapiKontrol()) return;
+  if(ydzMi()) document.body.classList.add("ydz");
   show("scr-app");
   seritHizala();
   /* Firma para birimi geldiyse ekran etiketleri ona göre yazılır. */
@@ -9208,6 +9430,7 @@ function start(){
   loadMaster(false)
     .then(function(){ return kapiKontrol() ? refreshQueue() : Promise.reject("kapi"); })
     .then(function(){ if(navigator.onLine){ syncAll(); loadRecent(); } })
+    .then(function(){ if(ydzMi()) return ydzBaslat(); })
     .catch(function(e){ if(e !== "kapi") console.warn(e); });
 }
 /* Yakıt cinsi listesi TEK KAYNAKTAN. Daha önce iki ayrı yerde elle

@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=68">
+<link rel="stylesheet" href="app.css?v=70">
 </head>
 <body>
 
@@ -95,12 +95,22 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <h4 style="margin-top:18px">İşveren Paneli dili</h4>
       <div class="note">İşveren kullanıcıları paneli bu dilde görür. Şefin sahadan yazdığı notlar çevrilmez.</div>
       <div class="scroll" id="iv-dil" style="margin-top:8px"></div>
+
+      <!-- Sürüm 70 · 121. dosya K3 · işverene hangi başlıklar açık -->
+      <h4 style="margin-top:22px">İşverene açık başlıklar</h4>
+      <div class="note">İşveren yalnız burada açık bıraktığınız başlıkları görür; kapalı başlığın verisi işverenin
+        ekranına hiç gönderilmez. Değişiklik basar basmaz geçerli olur. İşveren her durumda yalnız
+        <b>yöneticinin onayladığı vardiyaları</b> görür.</div>
+      <div id="iv-pay-msg"></div>
+      <div id="iv-pay" style="margin-top:10px"></div>
+      <div class="note" style="margin-top:10px"><b>İşverene hiçbir zaman gitmeyenler</b> (ayarı yok): fiyat, tutar, hakediş,
+        maliyet, maaş, puantaj, gider, mazot, malzeme, sondör ve ekip isimleri, operasyon notu.</div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=68"></script>
+<script src="app-shell.js?v=70"></script>
 <script>
 (function(){
 "use strict";
@@ -143,7 +153,7 @@ function boot(){
         o.textContent = p.full_name + " (" + (GOREV[p.kind]||p.kind) + ")"; sel.appendChild(o); });
     }
     load();
-    loadEmployerUsers(); loadEmployerLangs();
+    loadEmployerUsers(); loadEmployerLangs(); loadEmployerShares();
   });
 }
 
@@ -276,6 +286,53 @@ function loadEmployerLangs(){
       : '<div class="hint">Tanımlı işveren yok.</div>';
   });
 }
+/* ---- İşverene açık başlıklar (121. dosya K3) ---- */
+var PAY_BASLIK = [
+  ["kuyular",  "Kuyu listesi, durumu, derinliği", "Kapalıyken Kuyular sekmesi hiç görünmez."],
+  ["gunluk",   "Günlük rapor: kule, kuyu, vardiya metresi", "Kapalıyken Günlük rapor sekmesi hiç görünmez."],
+  ["manevra",  "Günlük rapor: manevra dökümü", "Metre aralığı ve çap, manevra manevra."],
+  ["motor",    "Motor çalışma saatleri", ""],
+  ["durus",    "Duruş ve arıza: süre ve sebep", ""],
+  ["ortalama", "Delgi ortalamaları", "Vardiya, hafta ve ay ortalamaları."],
+  ["tahmin",   "Öngörülen bitiş tarihi", ""],
+  ["grafik",   "Derinlik grafiği ve kuyu kesiti", ""],
+  ["olcum",    "Azimut / eğim ölçümleri", ""]
+];
+function loadEmployerShares(){
+  var kutu=$("#iv-pay"); if(!kutu) return;
+  Promise.resolve(sb.rpc("employer_paylasimlar")).then(function(r){
+    if(r.error){
+      /* Merkezde 75. adım kurulu değilse bölüm sessizce açıklama yazar */
+      kutu.innerHTML='<div class="hint">'+(/employer_paylasimlar|schema cache|does not exist/i.test(r.error.message||"")
+        ? "Bu ayar için merkezde 75. adımın (091-…) kurulması gerekiyor." : esc(r.error.message))+'</div>'; return; }
+    var L=r.data||[];
+    kutu.innerHTML = L.length ? L.map(function(e){
+      var p=e.paylasim||{}, n=PAY_BASLIK.filter(function(b){ return p[b[0]]; }).length + 1;
+      return '<details class="pay-kart" data-pay-isveren="'+esc(e.id)+'"><summary><b>'+esc(e.ad)+'</b>'+
+        '<span class="hint pay-ozet">'+n+' / '+(PAY_BASLIK.length+1)+' başlık açık</span></summary>'+
+        '<label class="pay-sat sabit"><input type="checkbox" checked disabled>'+
+          '<span><b>Delinen ve teslim edilen metre</b><small>Her zaman açık.</small></span></label>'+
+        PAY_BASLIK.map(function(b){
+          return '<label class="pay-sat"><input type="checkbox" data-pay="'+b[0]+'"'+(p[b[0]]?' checked':'')+'>'+
+            '<span><b>'+b[1]+'</b>'+(b[2]?'<small>'+b[2]+'</small>':'')+'</span></label>'; }).join("")+
+        '</details>'; }).join("")
+      : '<div class="hint">Tanımlı işveren yok.</div>';
+  });
+}
+$("#iv-pay").addEventListener("change", function(ev){
+  var c=ev.target.closest("input[data-pay]"); if(!c) return;
+  var kart=c.closest("[data-pay-isveren]"), ad=kart.querySelector("summary b").textContent;
+  var etiket=PAY_BASLIK.filter(function(b){ return b[0]===c.dataset.pay; })[0][1];
+  c.disabled=true;
+  Promise.resolve(sb.rpc("employer_paylasim_ayarla",
+      {p_employer:kart.dataset.payIsveren, p_baslik:c.dataset.pay, p_acik:c.checked})).then(function(r){
+    c.disabled=false;
+    if(r.error){ c.checked=!c.checked; msg($("#iv-pay-msg"), esc(r.error.message), "err"); return; }
+    var p=r.data||{}, n=PAY_BASLIK.filter(function(b){ return p[b[0]]; }).length + 1;
+    kart.querySelector(".pay-ozet").textContent=n+' / '+(PAY_BASLIK.length+1)+' başlık açık';
+    msg($("#iv-pay-msg"), esc(ad)+' · "'+esc(etiket)+'" '+(c.checked?"işverene açıldı.":"işverene kapatıldı."), "ok");
+  });
+});
 $("#iv-dil").addEventListener("change", function(ev){
   var s=ev.target.closest("[data-iv-dil]"); if(!s) return;
   sb.rpc("employer_dil_ayarla", {p_employer:s.dataset.ivDil, p_dil:s.value}).then(function(r){

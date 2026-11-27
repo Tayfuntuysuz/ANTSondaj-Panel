@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "68";
+var SURUM = "70";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -140,7 +140,11 @@ var SAYFALAR = [
   /* 4 Kasım · ekran yazıldı, `yok:1` kalktı. 23 Ekim'den beri satır
      duruyordu ama gizliydi; kilit fonksiyonları 30. adımdan beri
      tabloda duruyordu ama hiçbir ekran onları çağırmıyordu. */
-  {k:"aykilidi", d:"aykilidi.html",  ad:"Ay kilidi",          i:"kilit",  g:"Ay sonu"},
+  /* 27 Kasım (130. dosya): ad "Ay kilidi"nden "Ay kapanışı"na döndü.
+     Vardiyalar gün gün onaylandığı için sayfanın işi artık kilit
+     koymaktan çok ayı gözden geçirip kapatmak. Anahtar ve dosya adı
+     değişmedi (yetki tablosu ve yer imleri bozulmasın). */
+  {k:"aykilidi", d:"aykilidi.html",  ad:"Ay kapanışı",        i:"kilit",  g:"Ay sonu"},
   {k:"rapor",    d:"rapor.html",     ad:"Aylık rapor",        i:"rapor",  g:"Ay sonu"},
   /* ⚠ EKRANI YOK AMA SATIR GÖRÜNÜYOR (25 Kasım 2026, Tayfun:
      "Ay sonu ana başlığının altına Hakediş alt başlığı ekleyelim.")
@@ -287,7 +291,7 @@ function kabukKur(){
     '<div class="sp-main">' +
       '<div class="sp-top">' +
         '<div><div class="yol" id="sp-yol"></div><h1 id="sp-baslik"></h1></div>' +
-        '<div class="sp"><span id="sp-arac"></span>' +
+        '<div class="sp"><span id="sp-ust"></span><span id="sp-arac"></span>' +
           '<button class="sp-kisi" id="sp-kisi" type="button" ' +
             'aria-label="Ayarlar"><span class="av" id="sp-av"></span>' +
           '<span><span class="ad" id="sp-ad"></span><br>' +
@@ -656,7 +660,91 @@ function esSeridiKur(){
   if(ic && ic.parentNode) ic.parentNode.insertBefore(d, ic);
 }
 
+/* ---- Üst şerit: arama kutusu ve uyarı zili (sürüm 69 · 73. adım) ----
+   Yalnız ofis rollerinde. Merkezde 73. adım kurulu değilse ikisi de
+   sessizce gizli kalır (fonksiyon bulunamaz → hiçbir şey çizilmez). */
+var UST_ROL = {manager:1, tenant_admin:1, owner:1, platform_admin:1, accountant:1};
+var UST_GOREV = {sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı", yardimci:"Yardımcı personel",
+  sofor:"Şoför", santiye_sefi:"Şantiye şefi", formen:"Formen", alt_eleman:"İşçi", isci:"İşçi"};
+var UST_TUR = {ariza:"Arıza", sessiz:"Kayıt yok", kontrol:"Kontrol", bakim:"Bakım", belge:"Belge"};
+function ustTarih(g){ return g ? g.slice(8, 10) + "." + g.slice(5, 7) + "." + g.slice(0, 4) : ""; }
+function ustAraclarKur(){
+  var k = $("#sp-ust"); if(!k || !erisim || !UST_ROL[erisim.rol] || !sb) return;
+  var kapat = function(){
+    var a = $("#ust-sonuc"), u = $("#ust-uyari"), z = $("#ust-zil");
+    if(a) a.hidden = true; if(u) u.hidden = true; if(z) z.setAttribute("aria-expanded", "false"); };
+
+  /* Zil — sayfa açılırken bir kez sorulur */
+  sb.rpc("uyarilar").then(function(r){
+    if(r.error || !r.data) return;
+    var l = r.data.liste || [];
+    var z = document.createElement("span"); z.className = "ust-zil";
+    z.innerHTML = '<button type="button" id="ust-zil" aria-expanded="false" aria-label="Uyarılar' +
+      (l.length ? ": " + l.length : "") + '"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" ' +
+      'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' +
+      (l.length ? '<b id="ust-zil-n">' + l.length + '</b>' : '') + '</button>' +
+      '<div class="ust-liste sag" id="ust-uyari" hidden>' +
+      (l.length ? l.map(function(x){
+          return '<a class="us" href="' + esc(x.hedef || "panel.html") + '"><span class="ut ' + esc(x.tur) + '">' +
+            esc(UST_TUR[x.tur] || x.tur) + '</span><span class="ub">' + esc(x.baslik || "") +
+            '<small>' + esc(x.ayrinti || "") + '</small></span></a>'; }).join("")
+        : '<div class="us bos">Dikkat isteyen bir şey yok.</div>') + '</div>';
+    k.appendChild(z);
+    $("#ust-zil").addEventListener("click", function(e){
+      e.stopPropagation();
+      var u = $("#ust-uyari"), ac = u.hidden; kapat(); u.hidden = !ac;
+      this.setAttribute("aria-expanded", ac ? "true" : "false"); });
+  });
+
+  /* Arama */
+  var a = document.createElement("span"); a.className = "ust-ara";
+  a.innerHTML = '<input id="ust-q" type="search" placeholder="Kuyu, kule ya da kişi ara" autocomplete="off" ' +
+    'aria-label="Kuyu, kule ya da kişi ara"><div class="ust-liste" id="ust-sonuc" hidden></div>';
+  k.insertBefore(a, k.firstChild);
+  var q = $("#ust-q"), kutu = $("#ust-sonuc"), sayac = 0, bekle = null;
+  var ciz = function(d, metin){
+    var h = "";
+    var grup = function(ad, liste, satir){ if(liste && liste.length) h += '<div class="ug">' + ad + '</div>' + liste.map(satir).join(""); };
+    var bag = function(x, ac, alt){
+      return x.gun
+        ? '<a class="us" href="panel.html?gun=' + encodeURIComponent(x.gun) + (ac ? '&ac=' + encodeURIComponent(ac) : '') +
+          '"><span class="ub">' + esc(x.ad) + '<small>' + esc(alt) + '</small></span></a>'
+        : '<div class="us"><span class="ub">' + esc(x.ad) + '<small>' + esc(alt) + '</small></span></div>'; };
+    grup("Kuyular", d.kuyu, function(x){
+      return bag(x, x.ad, [x.saha, x.derinlik != null ? tl(x.derinlik) + (x.plan ? " / " + tl(x.plan, 0) : "") + " m" : "",
+        x.gun ? "son vardiya " + ustTarih(x.gun) : "vardiyası yok"].filter(Boolean).join(" · ")); });
+    grup("Kuleler", d.kule, function(x){
+      return bag(x, x.ad, [x.saha || "şantiyesiz", x.arizali ? "arızada" : "",
+        x.gun ? "son vardiya " + ustTarih(x.gun) : "vardiyası yok"].filter(Boolean).join(" · ")); });
+    grup("Kişiler", d.kisi, function(x){
+      return bag(x, null, [UST_GOREV[x.gorev] || x.gorev || "", x.aktif ? "" : "ayrıldı",
+        x.gun ? "son vardiya " + ustTarih(x.gun) + (x.saha ? " · " + x.saha : "") : "vardiyada adı geçmiyor"].filter(Boolean).join(" · ")); });
+    kutu.innerHTML = h || '<div class="us bos">“' + esc(metin) + '” için sonuç yok.</div>';
+    kutu.hidden = false;
+  };
+  q.addEventListener("input", function(){
+    var metin = q.value.trim(); clearTimeout(bekle);
+    if(metin.length < 2){ kutu.hidden = true; kutu.innerHTML = ""; return; }
+    bekle = setTimeout(function(){
+      var no = ++sayac;
+      sb.rpc("ara", {p_q:metin}).then(function(r){
+        if(no !== sayac) return;
+        if(r.error){ kutu.hidden = true; return; }
+        ciz(r.data || {}, metin);
+      });
+    }, 220);
+  });
+  q.addEventListener("focus", function(){ if(kutu.innerHTML && q.value.trim().length >= 2){ var u = $("#ust-uyari"); if(u) u.hidden = true; kutu.hidden = false; } });
+  q.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){ kapat(); q.blur(); }
+    if(e.key === "Enter"){ var ilk = kutu.querySelector("a.us"); if(ilk){ e.preventDefault(); location.href = ilk.href; } }
+  });
+  document.addEventListener("click", function(e){ if(!e.target.closest || !e.target.closest("#sp-ust")) kapat(); });
+}
+
 function ustKur(){
+  ustAraclarKur();
   $("#sp-ad").textContent    = erisim.kullanici || "";
   /* Firma adı 24 Kasım'da yan barın üstünden buraya taşındı; sol üst
      artık ürünün yeri. İŞVEREN hesabında firma adı YAZILMIYOR: ona

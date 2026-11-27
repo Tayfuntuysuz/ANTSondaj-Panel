@@ -7,7 +7,7 @@ try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
 if(_t)document.documentElement.setAttribute("data-tema",_t);
 if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Collarlog · Ay Kilidi</title>
+<title>Collarlog · Ay Kapanışı</title>
 <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="logo/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
@@ -16,12 +16,26 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=68">
+<link rel="stylesheet" href="app.css?v=70">
 <style>
 /* Denetim ayrıntısı: uzun olabilir, kendi içinde kayıyor. */
 .liste{margin:6px 0 0;padding-inline-start:18px;font-size:12.5px;color:var(--ink-2);
   max-height:220px;overflow-y:auto}
-.liste li{margin:2px 0}
+.liste li{margin:3px 0}
+.liste li a{margin-left:8px;font-weight:600;color:var(--accent);text-decoration:none;white-space:nowrap}
+.liste li a:hover{text-decoration:underline}
+/* Ay sonu sırası (130. dosya): kapanış → rapor → hakediş */
+.ay-sira{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;margin:0 0 14px;padding:0;list-style:none;font-size:13.5px}
+.ay-sira li{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;
+  background:var(--card);color:var(--ink-2)}
+.ay-sira li.on{border-color:var(--accent);color:var(--ink);font-weight:600}
+.ay-sira li.yakinda{opacity:.6}
+.ay-sira li i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
+  background:var(--line);font-size:12px;font-weight:600;color:var(--ink)}
+.ay-sira li.on i{background:var(--accent);color:var(--dolu-yazi,#fff)}
+.ay-sira li a{color:inherit;text-decoration:none}
+.ay-sira li a:hover{text-decoration:underline}
+.ay-sira li.ok{border:0;background:none;color:var(--ink-3);padding:0 2px}
 </style>
 </head>
 <body>
@@ -29,13 +43,20 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <div id="sp-icerik">
   <div id="scr-main">
 
+    <ol class="ay-sira" id="ay-sira" aria-label="Ay sonu sırası">
+      <li class="on"><i>1</i>Ay kapanışı</li><li class="ok" aria-hidden="true">→</li>
+      <li><i>2</i><a href="rapor.html" id="sira-rapor">Aylık rapor</a></li><li class="ok" aria-hidden="true">→</li>
+      <li class="yakinda"><i>3</i>Hakediş <span class="hist">(yakında)</span></li>
+    </ol>
+
     <div class="card">
-      <h3>Ay kilidi</h3>
+      <h3>Ay kapanışı</h3>
       <div class="note">
-        Bir şantiyenin bir ayı kapatıldığında şantiye şefi o aya ait vardiya,
-        metraj, yakıt ve gider kaydını <b>değiştiremez</b> — ama görmeye devam
-        eder. Yönetici kapalı ayda hâlâ düzeltme yapabilir.
-        Kapatmadan önce ekranın altındaki denetime bakın.
+        Vardiyalar gün gün onaylandığı için ay sonunda iş küçük: aşağıda ayı seçip
+        <b>gözden geçirin</b> — onaylanmamış gün, eksik kayıt kaldı mı — ve kapatın.
+        Kapatılan ayda şantiye şefi vardiya, metraj, yakıt ve gider kaydını
+        <b>değiştiremez</b>, ama görmeye devam eder. Yönetici kapalı ayda da
+        düzeltme yapabilir.
       </div>
       <div class="row">
         <div class="field" id="alan-proje"><label for="f-project">Şantiye</label><select id="f-project"></select></div>
@@ -69,7 +90,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=68"></script>
+<script src="app-shell.js?v=70"></script>
 <script>
 (function(){
 "use strict";
@@ -90,9 +111,9 @@ function zaman(t){
   return d.toLocaleDateString("tr-TR") + " " + d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
 }
 
-var sb=null, SATIR=[], YAZABILIR=false, SECILI="";
+var sb=null, SATIR=[], YAZABILIR=false, SECILI="", AC_AY=null;
 
-SP.boot({sayfa:"aykilidi", baslik:"Ay kilidi", hazir:function(){
+SP.boot({sayfa:"aykilidi", baslik:"Ay kapanışı", hazir:function(){
   sb = SP.sb;
   YAZABILIR = SP.girebilir();
   boot();
@@ -122,6 +143,13 @@ function boot(){
       if(istek && pr.some(function(p){ return p.id === istek; })) sel.value = istek;
     }catch(e){}
     if(!pr.length){ msg($("#msg"), "Görebileceğiniz şantiye yok.", "warn"); return; }
+    /* Düzeltmeden dönüş (131. dosya): hangi ayın gözden geçirildiği
+       adreste yazıyor; liste gelince o ay kendiliğinden açılır. */
+    try{
+      var q = new URLSearchParams(location.search), ia = q.get("ay");
+      if(ia && /^\d{4}-\d{2}$/.test(ia)) AC_AY = ia;
+      if(q.get("duzeltildi") === "1") msg($("#msg"), "Düzeltme kaydedildi. Denetim yeniden çalıştırıldı.", "ok");
+    }catch(e){}
     listele();
   });
 }
@@ -141,6 +169,11 @@ function listele(){
     if(r.error){ $("#tablo").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
     SATIR = r.data || [];
     ciz();
+    if(AC_AY){
+      var hedef = SATIR.filter(function(s){ return String(s.ay).slice(0,7) === AC_AY; })[0];
+      AC_AY = null;
+      if(hedef) denetimAc(hedef);
+    }
   });
 }
 
@@ -194,9 +227,21 @@ var BASLIK_IPUCU = {
   yakitsiz_vardiya: "Vardiya var, o makineye o gün yakıt kaydı yok.",
   acik_ariza:       "Ay kapanıyor, arıza hâlâ açık görünüyor.",
   kapanmamis_kuyu:  "Program derinliğine gelmiş, hâlâ “deliniyor” durumunda.",
-  evraksiz_vardiya: "Kâğıt form numarası boş."
+  evraksiz_vardiya: "Kâğıt form numarası boş.",
+  onaysiz_vardiya:  "Yönetici bu vardiyaları işverene açmadı; işveren bu günleri görmüyor. " +
+                    "Günlük rapor'da günü açıp “Bu günü işverene aç” deyin."
 };
 
+/* Satırın yanındaki bağlantı (131. dosya): vardiyaya bakan denetimde
+   "Düzenle" — şefin formu o vardiyayla açılır, kaydedince BU sayfaya,
+   aynı ayın denetimine dönülür. Güne bakan denetimde Günlük rapor. */
+function satirBag(d, x){
+  if(x.id && YAZABILIR)
+    return '<a class="dz" href="index.html?duzenle=' + esc(x.id) + '&don=ay">Düzenle</a>';
+  if(x.tarih && (d.kod === "onaysiz_vardiya" || d.kod === "vardiyasiz_gun"))
+    return '<a class="gr" href="panel.html?gun=' + esc(x.tarih) + '">Günlük rapor\'da aç</a>';
+  return "";
+}
 function satirYaz(d){
   var a = d.ayrinti || [];
   if(!a.length) return "";
@@ -204,6 +249,7 @@ function satirYaz(d){
   a.slice(0, 20).forEach(function(x){
     var t = [];
     if(x.tarih) t.push(x.tarih.split("-").reverse().join("."));
+    if(x.adet != null) t.push(x.adet + " vardiya");
     if(x.vardiya) t.push(x.vardiya + ". vardiya");
     if(x.kuyu) t.push(x.kuyu);
     if(x.makine) t.push(x.makine);
@@ -211,7 +257,7 @@ function satirYaz(d){
     if(x.baslangic) t.push(zaman(x.baslangic));
     if(x.program != null) t.push("program " + x.program + " m");
     if(x.derinlik != null) t.push("derinlik " + x.derinlik + " m");
-    html += '<li>'+esc(t.join(" · "))+'</li>';
+    html += '<li>'+esc(t.join(" · "))+satirBag(d, x)+'</li>';
   });
   if(a.length > 20) html += '<li class="hist">… ve ' + (a.length - 20) + ' tane daha</li>';
   return html + '</ul>';
@@ -273,7 +319,10 @@ function kapatmaFormu(s, dolu){
                           p_kind:"kapali", p_reason:sebep}).then(function(r){
       $("#btn-kapat").disabled = false;
       if(r.error){ msg($("#eylem-msg"), esc(r.error.message), "err"); return; }
-      msg($("#msg"), ayAdi(s.ay) + " kapatıldı. Şef artık bu ayı değiştiremez.", "ok");
+      var ayP = String(s.ay).slice(0, 7).split("-");
+      msg($("#msg"), ayAdi(s.ay) + ' kapatıldı. Şef artık bu ayı değiştiremez. ' +
+        '<a id="rapora-gec" href="rapor.html#' + encodeURIComponent($("#f-project").value + "|" + ayP[0] + "|" + Number(ayP[1])) +
+        '">Sıradaki adım: ' + ayAdi(s.ay) + ' aylık raporu →</a>', "ok");
       $("#kart-denetim").hidden = true;
       listele();
     });

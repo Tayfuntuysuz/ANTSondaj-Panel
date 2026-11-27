@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=68">
+<link rel="stylesheet" href="app.css?v=70">
 </head>
 <body>
 
@@ -75,8 +75,11 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
         <input type="date" id="go-tarih" aria-label="Gösterilecek gün">
         <button class="btn ghost sm" id="go-sonraki" type="button" title="Kayıt girilmiş sonraki gün">Sonraki ›</button>
         <button class="btn ghost sm" id="go-son" type="button" title="Kayıt girilmiş son gün">Son gün</button>
+        <button class="btn ghost sm" id="go-yazdir" type="button" title="Bu günü yazdır ya da PDF olarak kaydet">Yazdır</button>
+        <button class="btn ghost sm" id="go-csv" type="button" title="Bu günün dökümünü CSV olarak indir">CSV</button>
       </div></div>
     <div class="note" id="go-not" hidden></div>
+    <div class="note go-tamam" id="go-duzeltildi" hidden>Düzeltme kaydedildi. Aşağıda vardiyanın yeni hâli görünüyor.</div>
     <div id="gunluk">Yükleniyor…</div>
 
     <!-- ⚠ "Tek şantiye" başlığı kalktı (25 Kasım 2026, Tayfun'un
@@ -216,9 +219,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=68"></script>
+<script src="app-shell.js?v=70"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=68"></script>
+<script src="kart.js?v=70"></script>
 <script>
 (function(){
 "use strict";
@@ -429,7 +432,13 @@ function vardiyalariCiz(liste, hata){
       if(!kart.hidden){ kart.hidden = true; kart.firstChild.innerHTML = "";
                         ACIK_VARDIYA = null; return; }
       kart.hidden = false; ACIK_VARDIYA = id;
-      VKART.ac(sb, id, kart.firstChild);
+      VKART.ac(sb, id, kart.firstChild, function(){
+        /* 131. dosya · dönem dökümündeki kartta da "Düzenle" */
+        if(!onayYetkisi()) return;
+        var d = document.createElement("div"); d.className = "vk-duzenle-alt";
+        d.innerHTML = '<a class="btn ghost sm vk-duzenle" href="index.html?duzenle=' + esc(id) + '">Düzenle</a>';
+        kart.firstChild.appendChild(d);
+      });
     });
   });
 }
@@ -670,6 +679,72 @@ var GUNLUK = [];
 /* Gösterilen gün. null = kayıt girilmiş son gün (sayfanın açılış hâli).
    GUN_KOMSU: merkezin söylediği önceki / sonraki kayıtlı gün. */
 var GUN_SEC = null, GUN_KOMSU = {onceki:null, sonraki:null}, GUN_ISTEK = 0;
+/* Arama kutusundan ve uyarı zilinden gelen bağlantı: ?gun=2026-11-24&ac=ANT 2500-3
+   → o gün açılır, adı geçen kuyu ya da kule bulunup açılır (bir kez). */
+var GUN_VERI = null, AC_HEDEF = null, ACIK_SAHA = null;
+/* Yönetici onayı (sürüm 70 · 74. adım). Onaylayabilen: yönetici ve firma
+   yöneticisi. Patron ve muhasebe durumu görür, düğmeyi görmez. */
+function onayYetkisi(){
+  var r = SP.erisim && SP.erisim.rol;
+  return r === "manager" || r === "tenant_admin" || r === "platform_admin";
+}
+(function(){
+  try{
+    var u = new URLSearchParams(location.search), g = u.get("gun"), a = u.get("ac");
+    if(g && /^\d{4}-\d{2}-\d{2}$/.test(g)) GUN_SEC = g;
+    if(a) AC_HEDEF = a.trim();
+    /* Yönetici düzeltmesinden dönüş (131. dosya): bir kez haber verilir,
+       işaret adresten silinir ki sayfa yenilenince yeniden yazmasın. */
+    if(u.get("duzeltildi") === "1"){
+      var dn = document.getElementById("go-duzeltildi"); if(dn) dn.hidden = false;
+      u.delete("duzeltildi");
+      var q = u.toString();
+      if(history.replaceState) history.replaceState(null, "", location.pathname + (q ? "?" + q : ""));
+    }
+  }catch(e){}
+})();
+function hedefiAc(){
+  if(!AC_HEDEF) return;
+  var ad = AC_HEDEF; AC_HEDEF = null;
+  var satir = null, blok = null;
+  Array.prototype.some.call(document.querySelectorAll("#gunluk .ky"), function(k){
+    var kuyu = k.querySelector(".kd").textContent.trim(), kule = k.querySelector(".mk").textContent.split(" · ");
+    if(kuyu === ad || kule.indexOf(ad) > -1){ satir = k; return true; }
+    return false; });
+  if(!satir) Array.prototype.some.call(document.querySelectorAll("#gunluk .sk"), function(s){
+    var c = s.querySelector(".cl"); if(c && c.textContent.indexOf(ad) > -1){ blok = s; return true; } return false; });
+  var sk = satir ? satir.closest(".sk") : blok; if(!sk) return;
+  ACIK_SAHA = null;
+  if(!sk.classList.contains("acik")) sk.querySelector(".sk-bas").click();
+  if(satir && !satir.classList.contains("acik")) satir.click();
+  var e = satir || sk;
+  setTimeout(function(){ if(e.scrollIntoView) e.scrollIntoView({block:"start"}); window.scrollBy(0, -80); }, 60);
+}
+
+/* Günün dökümü CSV olarak: bir satır = bir vardiya. Türkçe Excel
+   noktalı virgül ve ondalık virgül bekler; başa BOM konur. */
+function gunCsv(){
+  var d = GUN_VERI; if(!d || !d.gun) return;
+  var s = function(n, k){ return n == null || n === "" ? "" : Number(n).toLocaleString("tr-TR", {minimumFractionDigits:k, maximumFractionDigits:k, useGrouping:false}); };
+  var h = function(x){ x = x == null ? "" : String(x); return /[";\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; };
+  var sat = [["Tarih","Şantiye","İşveren","Kuyu","Kule","Vardiya","Metre","Kuyu derinliği","Planlanan","Delgi saati","Duruş saati","Diğer saat","Arıza"]];
+  (d.santiyeler || []).forEach(function(sa){ (sa.kuleler || []).forEach(function(k){
+    var t = k.vardiya ? saatDokumu([k]) : null;
+    sat.push([d.gun, sa.saha, sa.musteri || "", k.kuyu || "", k.makine, k.vardiya ? (geceMi(k) ? "Gece" : "Gündüz") : "vardiya yok",
+      k.vardiya ? s(k.metraj, 2) : "", s(k.derinlik, 2), s(k.plan, 0), t ? s(t.delgi, 1) : "", t ? s(t.durus, 1) : "", t ? s(t.diger, 1) : "",
+      k.ariza ? (k.ariza.tur || "arıza") + " · " + (k.ariza.gun || 0) + " gün" : ""]);
+  }); });
+  var blob = new Blob(["\ufeff" + sat.map(function(r){ return r.map(h).join(";"); }).join("\r\n")], {type:"text/csv;charset=utf-8"});
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "gunluk-rapor-" + d.gun + ".csv";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+}
+/* Günü yazdır: bütün şantiyeler açık basılır, alttaki aylık seçici basılmaz */
+function gunYazdir(){
+  document.body.classList.add("gunluk-yazdir");
+  var bitti = function(){ document.body.classList.remove("gunluk-yazdir"); window.removeEventListener("afterprint", bitti); };
+  window.addEventListener("afterprint", bitti);
+  window.print();
+}
 
 function gunSec(gun){ GUN_SEC = gun || null; gunlukYukle(); }
 
@@ -797,7 +872,63 @@ function gunlukYukle(){
       '<div class="go-k"><span>Çalışan şantiye</span><b id="go-santiye">' + calisan + ' / ' + sahalar.length +
         '</b><i>&nbsp;</i></div></div>';
 
+    GUN_VERI = d;
     el.innerHTML = ozet + seriBlogu(d) + sahalar.map(santiyeBlogu).join("");
+    denetimYukle(d.gun);
+    /* Onaydan sonra sayfa yeniden çiziliyor; açık olan şantiye açık kalsın */
+    if(ACIK_SAHA && !AC_HEDEF){
+      var ac = document.querySelector('#gunluk .sk[data-proje="' + ACIK_SAHA + '"] .sk-bas');
+      if(ac) ac.click();
+    }
+    hedefiAc();
+    ACIK_SAHA = null;
+  });
+}
+
+/* ============================================================
+   GÜNLÜK KURAL DENETİMİ (sürüm 70 · 76. adım · 122. dosya 6)
+   Ay sonunda ilk kez çalışan denetimler artık her gün çalışıyor:
+   eksik kaydı olan vardiya işaretlenir, yönetici günü işverene
+   açmadan önce görür. Merkezde 76. adım yoksa hiçbir işaret çıkmaz.
+   DENETIM: {vardiya kimliği: [{kod, ad}]}
+   ============================================================ */
+var DENETIM = {};
+function eksikYazi(vid){
+  var l = DENETIM[vid] || [];
+  return l.length ? '⚠ ' + l.map(function(e){ return e.ad; }).join(' · ') : '';
+}
+function denetimIsle(){
+  Array.prototype.forEach.call(document.querySelectorAll("#gunluk .ky[data-no]"), function(ky){
+    var y = GUNLUK[Number(ky.dataset.no)], adlar = [];
+    (y.v || []).forEach(function(k){ (DENETIM[k.vardiya_id] || []).forEach(function(e){
+      if(adlar.indexOf(e.ad) < 0) adlar.push(e.ad); }); });
+    var vd = ky.querySelector(".vd"), eski = vd.querySelector(".dn");
+    if(eski) eski.remove();
+    if(adlar.length) vd.insertAdjacentHTML("beforeend",
+      '<span class="p s dn" title="' + esc(adlar.join(" · ")) + '">⚠ eksik kayıt</span>');
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#gunluk .sk"), function(sk){
+    var n = sk.querySelectorAll(".ky .dn").length, uy = sk.querySelector(".sk-bas .uy");
+    var eski = uy.querySelector(".dn-s"); if(eski) eski.remove();
+    if(n) uy.insertAdjacentHTML("beforeend", '<span class="p s dn-s">⚠ ' + n + ' kuyuda eksik kayıt</span>');
+    var os = sk.querySelector(".onay-serit .oy");
+    if(os){
+      var e2 = os.querySelector(".dn-o"); if(e2) e2.remove();
+      if(n) os.insertAdjacentHTML("beforeend", ' <span class="dn-o">⚠ işaretli ' + n +
+        ' kuyuda eksik kayıt var; satırı açıp bakabilirsiniz.</span>');
+    }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#gunluk .ky-kart .vk-eksik[data-vid]"), function(e){
+    e.textContent = eksikYazi(e.getAttribute("data-vid"));
+  });
+}
+function denetimYukle(gun){
+  DENETIM = {};
+  if(!gun) return;
+  Promise.resolve(sb.rpc("gunluk_denetim", {p_gun: gun})).then(function(r){
+    if(r.error || !r.data || typeof r.data !== "object") return;
+    if(!GUN_VERI || GUN_VERI.gun !== gun) return;      /* arada gün değişti */
+    DENETIM = r.data; denetimIsle();
   });
 }
 
@@ -831,6 +962,21 @@ function santiyeBlogu(s){
     (uyg ? '<span class="p s">⚑ ' + uyg + ' madde uygun değil</span>' : '') +
     (s.sessiz ? (s.son_kayit ? '<span class="p k">' + gunYaz(s.sessiz_gun) + ' sessiz</span>'
                              : '<span class="p k">hiç kayıt girilmemiş</span>') : '');
+  /* Yönetici onayı: 74. adım kuruluysa şantiyede 'onaysiz' gelir */
+  var onayVar = ("onaysiz" in s) && (nsG + nsC) > 0, nOnaysiz = Number(s.onaysiz || 0);
+  if(onayVar) uyari += nOnaysiz
+    ? '<span class="p s">' + (nOnaysiz === nsG + nsC ? 'işverene açılmadı' : nOnaysiz + ' vardiya işverene açılmadı') + '</span>'
+    : '<span class="p o">işverene açık</span>';
+  var onaySerit = !onayVar ? '' :
+    '<div class="onay-serit" data-proje="' + esc(s.proje) + '">' +
+      '<span class="oy">' + (nOnaysiz
+        ? 'Bu günün ' + (nsG + nsC) + ' vardiyasından <b>' + nOnaysiz + '</b> tanesi işverene açılmadı. Açılmayan vardiyayı işveren görmez.'
+        : 'Bu günün ' + (nsG + nsC) + ' vardiyası işverene açık. Şef bu günü artık değiştiremez; düzeltmeyi yönetici yapar.') + '</span>' +
+      (onayYetkisi()
+        ? (nOnaysiz ? '<button class="btn sm" type="button" data-onay="1">Bu günü işverene aç</button>' : '') +
+          (nOnaysiz < nsG + nsC ? '<button class="btn ghost sm" type="button" data-onay="0">Onayı geri al</button>' : '')
+        : '') +
+      '<span class="onay-msg" role="status"></span></div>';
   var mt = s.sessiz ? '' :
     '<b>' + tl(s.metraj) + ' m</b><small>Gündüz ' + (nsG ? tl(sG) : '—') +
     ' · Gece ' + (nsC ? tl(sC) : '—') + '</small>';
@@ -866,7 +1012,7 @@ function santiyeBlogu(s){
       return esc(k.makine) + (k.kuyu ? ' <span class="soluk">(' + esc(k.kuyu) + ')</span>' : '') +
              (k.ariza ? ' ' + arizaEtiketi(k.ariza, 1) : '');
     }).join(' · ') + '</div>' : '';
-  var ic = (satirlar + bosSatir) ||
+  var ic = (onaySerit + satirlar + bosSatir) ||
     '<div class="cl">Bu şantiyeye atanmış kule yok — şef vardiya giremez.</div>';
   /* Eski "şantiye adına bas → aşağıda aylık ayrıntı" yolu korunuyor:
      kuyuların kesit ve ilerleme bölümüne Operasyonlar gelene kadar
@@ -874,7 +1020,7 @@ function santiyeBlogu(s){
   ic += '<div class="sk-alt"><button class="lnk sk-ayrinti" type="button" data-proje="' + esc(s.proje) +
         '">Bu şantiyenin aylık ayrıntısı ↓</button></div>';
 
-  return '<section class="sk' + (s.sessiz ? ' sessiz' : '') + '">' +
+  return '<section class="sk' + (s.sessiz ? ' sessiz' : '') + '" data-proje="' + esc(s.proje) + '">' +
     '<button class="sk-bas" type="button" aria-expanded="false">' +
       '<span class="ok" aria-hidden="true">▸</span>' +
       '<span class="ad-k"><span class="ad">' + esc(s.saha) + '</span>' +
@@ -892,6 +1038,25 @@ document.addEventListener("change", function(e){
 document.addEventListener("click", function(e){
   if(!e.target.closest) return;
   /* Tarih gezme: önceki / sonraki kayıtlı gün, son gün, grafikteki gün */
+  /* Yönetici onayı: günün tamamı ya da tek vardiya */
+  var og = e.target.closest(".onay-serit button[data-onay]"), ot = e.target.closest(".onay-tek");
+  if(og || ot){
+    var serit = (og || ot).closest(".sk").querySelector(".onay-serit"), msg = serit.querySelector(".onay-msg");
+    var proje = serit.getAttribute("data-proje"), dugme = og || ot;
+    dugme.disabled = true; msg.textContent = "";
+    var istek = og
+      ? sb.rpc("gun_onayla", {p_project:proje, p_gun:GUN_VERI.gun, p_ac:og.getAttribute("data-onay") === "1"})
+      : sb.rpc("vardiya_onayla", {p_shift:ot.getAttribute("data-vid"), p_ac:ot.getAttribute("data-ac") === "1"});
+    istek.then(function(r){
+      if(r.error){ dugme.disabled = false; msg.textContent = r.error.message; msg.className = "onay-msg bad"; return; }
+      ACIK_SAHA = proje;
+      if(ot && ot.getAttribute("data-kuyu")) AC_HEDEF = ot.getAttribute("data-kuyu");
+      gunlukYukle();
+    });
+    return;
+  }
+  if(e.target.closest("#go-yazdir")){ gunYazdir(); return; }
+  if(e.target.closest("#go-csv")){ gunCsv(); return; }
   var gez = e.target.closest("#go-onceki,#go-sonraki,#go-son,.go-cub .c[data-gun]");
   if(gez){
     if(gez.id === "go-onceki"){ if(GUN_KOMSU.onceki) gunSec(GUN_KOMSU.onceki); }
@@ -918,7 +1083,19 @@ document.addEventListener("click", function(e){
       kart.dataset.dolu = "1";
       var y = GUNLUK[Number(ky.dataset.no)];
       kart.innerHTML = y.v.map(function(k, i){
-        return '<h4>' + (geceMi(k) ? 'Gece' : 'Gündüz') + ' vardiyası · ' + esc(k.makine) + '</h4>' +
+        var oy = ("onayli" in k)
+          ? (k.onayli ? ' <span class="p o">işverene açık</span>' : ' <span class="p s">işverene açılmadı</span>') +
+            (onayYetkisi() && k.vardiya_id
+              ? ' <button class="lnk onay-tek" type="button" data-vid="' + esc(k.vardiya_id) + '" data-ac="' + (k.onayli ? '0' : '1') +
+                '" data-kuyu="' + esc(y.kuyu || '') + '">' + (k.onayli ? 'geri al' : 'işverene aç') + '</button>' : '')
+          : '';
+        /* 131. dosya · yönetici vardiyayı kendi ekranından düzeltir:
+           şefin formu o vardiya için açılır, kaydedince buraya dönülür. */
+        var dz = (onayYetkisi() && k.vardiya_id)
+          ? ' <a class="lnk vk-duzenle" href="index.html?duzenle=' + esc(k.vardiya_id) + '">Düzenle</a>' : '';
+        var ek = k.vardiya_id
+          ? ' <span class="vk-eksik" data-vid="' + esc(k.vardiya_id) + '">' + esc(eksikYazi(k.vardiya_id)) + '</span>' : '';
+        return '<h4>' + (geceMi(k) ? 'Gece' : 'Gündüz') + ' vardiyası · ' + esc(k.makine) + oy + dz + ek + '</h4>' +
                '<div class="ky-vk" data-i="' + i + '"></div>';
       }).join("");
       y.v.forEach(function(k, i){
