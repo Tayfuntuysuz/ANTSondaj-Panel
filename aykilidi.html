@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=71">
+<link rel="stylesheet" href="app.css?v=72">
 <style>
 /* Denetim ayrıntısı: uzun olabilir, kendi içinde kayıyor. */
 .liste{margin:6px 0 0;padding-inline-start:18px;font-size:12.5px;color:var(--ink-2);
@@ -90,7 +90,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=71"></script>
+<script src="app-shell.js?v=72"></script>
 <script>
 (function(){
 "use strict";
@@ -228,8 +228,8 @@ var BASLIK_IPUCU = {
   acik_ariza:       "Ay kapanıyor, arıza hâlâ açık görünüyor.",
   kapanmamis_kuyu:  "Program derinliğine gelmiş, hâlâ “deliniyor” durumunda.",
   evraksiz_vardiya: "Kâğıt form numarası boş.",
-  onaysiz_vardiya:  "Yönetici bu vardiyaları işverene açmadı; işveren bu günleri görmüyor. " +
-                    "Günlük rapor'da günü açıp “Bu günü işverene aç” deyin."
+  onaysiz_vardiya:  "Bu vardiyalar onay bekliyor; işveren onları görmüyor. " +
+                    "Günlük rapor'da vardiya kartını açıp “Onayla” deyin."
 };
 
 /* Satırın yanındaki bağlantı (131. dosya): vardiyaya bakan denetimde
@@ -273,6 +273,8 @@ function denetimAc(s){
   sb.rpc("ay_gozden_gecir", {p_project:$("#f-project").value, p_period:s.ay}).then(function(r){
     if(r.error){ $("#denetim").innerHTML = '<div class="msg err">'+esc(r.error.message)+'</div>'; return; }
     var d = r.data || [];
+    /* Sürüm 72 · "İşverene açılmamış vardiya" → "Onay bekleyen vardiya" */
+    d.forEach(function(x){ if(SP.onayDili) x.baslik = SP.onayDili(x.baslik); });
     /* Uyarıyı BAŞLIK sayısıyla anlatıyoruz, satır sayısıyla değil.
        Hiç çalışılmamış bir ayda "31 uyarı" yazıyordu; aslında tek bir
        şey söylüyor: o ay vardiya girilmemiş. */

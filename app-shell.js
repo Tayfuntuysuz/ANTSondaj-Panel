@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "71";
+var SURUM = "72";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -666,7 +666,14 @@ function esSeridiKur(){
 var UST_ROL = {manager:1, tenant_admin:1, owner:1, platform_admin:1, accountant:1};
 var UST_GOREV = {sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı", yardimci:"Yardımcı personel",
   sofor:"Şoför", santiye_sefi:"Şantiye şefi", formen:"Formen", alt_eleman:"İşçi", isci:"İşçi"};
-var UST_TUR = {ariza:"Arıza", sessiz:"Kayıt yok", kontrol:"Kontrol", bakim:"Bakım", belge:"Belge"};
+var UST_TUR = {ariza:"Arıza", sessiz:"Kayıt yok", kontrol:"Kontrol", bakim:"Bakım", belge:"Belge", onay:"Onay"};
+/* Sürüm 72 · dil "Onay bekliyor / Onaylı" oldu. İki metin merkezden
+   (73. ve 76. adım) eski sözle geliyor; SQL'li ilk pakette orada
+   düzeltilecek, o güne kadar burada çevriliyor. */
+function onayDili(s){
+  return String(s || "").replace("günün vardiyaları işverene açılmadı", "günün vardiyaları onay bekliyor")
+                        .replace("İşverene açılmamış vardiya", "Onay bekleyen vardiya");
+}
 function ustTarih(g){ return g ? g.slice(8, 10) + "." + g.slice(5, 7) + "." + g.slice(0, 4) : ""; }
 function ustAraclarKur(){
   var k = $("#sp-ust"); if(!k || !erisim || !UST_ROL[erisim.rol] || !sb) return;
@@ -688,7 +695,7 @@ function ustAraclarKur(){
       (l.length ? l.map(function(x){
           return '<a class="us" href="' + esc(x.hedef || "panel.html") + '"><span class="ut ' + esc(x.tur) + '">' +
             esc(UST_TUR[x.tur] || x.tur) + '</span><span class="ub">' + esc(x.baslik || "") +
-            '<small>' + esc(x.ayrinti || "") + '</small></span></a>'; }).join("")
+            '<small>' + esc(onayDili(x.ayrinti)) + '</small></span></a>'; }).join("")
         : '<div class="us bos">Dikkat isteyen bir şey yok.</div>') + '</div>';
     k.appendChild(z);
     $("#ust-zil").addEventListener("click", function(e){
@@ -1048,7 +1055,7 @@ var API = {
   $:$, $$:$$, esc:esc, tl:tl, money:money, iso:iso, trd:trd, msg:msg, bashrf:bashrf,
   AYLAR:AYLAR, ikon:ikon, kutular:kutular, tablo:tablo, cubuklar:cubuklar,
   kuleKart:kuleKart, kuyuKesiti:kuyuKesiti, aktiviteSeridi:aktiviteSeridi,
-  AKT_AD:AKT_AD, AKT_RENK:AKT_RENK, CAP_RENK:CAP_RENK, antet:antet
+  AKT_AD:AKT_AD, AKT_RENK:AKT_RENK, CAP_RENK:CAP_RENK, antet:antet, onayDili:onayDili
 };
 return API;
 })();

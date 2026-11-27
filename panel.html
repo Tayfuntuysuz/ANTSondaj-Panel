@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=71">
+<link rel="stylesheet" href="app.css?v=72">
 </head>
 <body>
 
@@ -74,7 +74,6 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
         <button class="btn ghost sm" id="go-onceki" type="button" title="Kayıt girilmiş önceki gün">‹ Önceki</button>
         <input type="date" id="go-tarih" aria-label="Gösterilecek gün">
         <button class="btn ghost sm" id="go-sonraki" type="button" title="Kayıt girilmiş sonraki gün">Sonraki ›</button>
-        <button class="btn ghost sm" id="go-son" type="button" title="Kayıt girilmiş son gün">Son gün</button>
         <button class="btn ghost sm" id="go-yazdir" type="button" title="Bu günü yazdır ya da PDF olarak kaydet">Yazdır</button>
         <button class="btn ghost sm" id="go-csv" type="button" title="Bu günün dökümünü CSV olarak indir">CSV</button>
       </div></div>
@@ -97,7 +96,6 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
       <div class="field"><label for="f-year">Yıl</label><select id="f-year"></select></div>
       <div class="field"><label for="f-month">Ay</label><select id="f-month"></select></div>
       <button class="btn" id="btn-load" type="button">Getir</button>
-      <a class="btn ghost" id="btn-rapor" href="rapor.html" style="text-decoration:none;display:inline-flex;align-items:center">Aylık rapor</a>
       <span class="note" id="range-label" style="font-size:12px;color:var(--ink-3);margin-left:4px"></span>
     </div>
     <div id="msg" style="margin-top:12px"></div>
@@ -219,9 +217,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=71"></script>
+<script src="app-shell.js?v=72"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=71"></script>
+<script src="kart.js?v=72"></script>
 <script>
 (function(){
 "use strict";
@@ -462,7 +460,6 @@ function secimYok(){
 function load(){
   if(secimYok()) return;
   var p = period(), proj = $("#f-project").value;
-  $("#btn-rapor").href = "rapor.html#" + [proj, p.y, p.m || ""].join("|");
   $("#range-label").textContent = (p.m ? AYLAR[p.m-1] + " " + p.y : p.y + " yılı tamamı") + " · " + p.from + " → " + p.to;
   msg("Yükleniyor…");
   Promise.all([
@@ -669,8 +666,14 @@ function arizaEtiketi(a, adet){
   return '<span class="p k yanip">' + (on || 'arızada · ') + 'bugün</span>';
 }
 function geceMi(k){ return k.vardiya === "gece"; }
+/* Sürüm 72 · rozet onay durumunu da söyler: onaylı vardiyada ✓.
+   Hangi kartın onay beklediği kuyu açılmadan görünür. Düğme değil,
+   bilgi. 'onayli' gelmiyorsa (74. adım kurulu değil) rozet eskisi gibi. */
 function vardiyaRozeti(k){
-  return geceMi(k) ? '<span class="pv c">Gece</span>' : '<span class="pv g">Gündüz</span>';
+  var bilgi = ("onayli" in k), tamam = bilgi && k.onayli;
+  return '<span class="pv ' + (geceMi(k) ? 'c' : 'g') + (tamam ? ' ok' : '') + '"' +
+    (bilgi ? ' title="' + (tamam ? 'Onaylı' : 'Onay bekliyor') + '"' : '') + '>' +
+    (geceMi(k) ? 'Gece' : 'Gündüz') + (tamam ? ' ✓' : '') + '</span>';
 }
 
 /* Ekrandaki satırların arkasındaki veri — düğmelere metin değil sıra
@@ -764,10 +767,12 @@ function gezmeYaz(d, istenen){
   } else { n.hidden = true; n.textContent = ""; }
   GUN_KOMSU = {onceki:d.onceki || null, sonraki:d.sonraki || null};
   var t = $("#go-tarih"); t.value = d.gun || ""; if(d.bugun) t.max = d.bugun;
-  var o = $("#go-onceki"), s = $("#go-sonraki"), son = $("#go-son");
+  /* Sürüm 72 · "Son gün" düğmesi kalktı (Tayfun: "gereksiz yerde
+     gereksiz buttonlar olmasın"). Son güne Sonraki ›, tarih kutusu ya
+     da menüdeki Günlük rapor ile dönülür. */
+  var o = $("#go-onceki"), s = $("#go-sonraki");
   o.hidden = s.hidden = !yeni;
   o.disabled = !d.onceki; s.disabled = !d.sonraki;
-  son.hidden = !(GUN_SEC && (!yeni || d.sonraki));
 }
 
 /* Son 7 günün grafiği: gündüz + gece yığılı, gösterilen gün vurgulu.
@@ -908,15 +913,9 @@ function denetimIsle(){
       '<span class="p s dn" title="' + esc(adlar.join(" · ")) + '">⚠ eksik kayıt</span>');
   });
   Array.prototype.forEach.call(document.querySelectorAll("#gunluk .sk"), function(sk){
-    var n = sk.querySelectorAll(".ky .dn").length, uy = sk.querySelector(".sk-bas .uy");
+    var n = sk.querySelectorAll(".ky .dn").length, uy = sk.querySelector(".sk-bas .uy .kap");
     var eski = uy.querySelector(".dn-s"); if(eski) eski.remove();
     if(n) uy.insertAdjacentHTML("beforeend", '<span class="p s dn-s">⚠ ' + n + ' kuyuda eksik kayıt</span>');
-    var os = sk.querySelector(".onay-serit .oy");
-    if(os){
-      var e2 = os.querySelector(".dn-o"); if(e2) e2.remove();
-      if(n) os.insertAdjacentHTML("beforeend", ' <span class="dn-o">⚠ işaretli ' + n +
-        ' kuyuda eksik kayıt var; satırı açıp bakabilirsiniz.</span>');
-    }
   });
   Array.prototype.forEach.call(document.querySelectorAll("#gunluk .ky-kart .vk-eksik[data-vid]"), function(e){
     e.textContent = eksikYazi(e.getAttribute("data-vid"));
@@ -958,25 +957,20 @@ function santiyeBlogu(s){
 
   /* Başlıktaki uyarılar: şantiye kapalıyken de görünsün */
   arizalar.sort(function(x, y){ return Number(y.gun || 0) - Number(x.gun || 0); });
-  var uyari = (arizalar.length ? arizaEtiketi(arizalar[0], arizalar.length) : '') +
+  /* Sürüm 72 · Tayfun: "Hem ana başlıkta hem alttaki arızalı kuyu
+     başlığında aynı şey yanıp sönüyor." Başlıktaki özet (.kap) yalnız
+     şantiye KAPALIYKEN görünür; açılınca aynı bilgi kuyu satırında ve
+     vardiya kartında durduğu için başlıktan kalkar. "Sessiz" içeride
+     tekrarlanmıyor, o hep görünür.
+     "İşverene açık" rozeti ve toplu onay şeridi kalktı: onay vardiya
+     kartında, tek tek verilir ("ne onayladığını bilmen gerekiyor"). */
+  var nOnaysiz = (("onaysiz" in s) && (nsG + nsC) > 0) ? Number(s.onaysiz || 0) : 0;
+  var uyari = '<span class="kap">' +
+    (arizalar.length ? arizaEtiketi(arizalar[0], arizalar.length) : '') +
     (uyg ? '<span class="p s">⚑ ' + uyg + ' madde uygun değil</span>' : '') +
+    (nOnaysiz ? '<span class="p s onb">' + nOnaysiz + ' vardiya onay bekliyor</span>' : '') + '</span>' +
     (s.sessiz ? (s.son_kayit ? '<span class="p k">' + gunYaz(s.sessiz_gun) + ' sessiz</span>'
                              : '<span class="p k">hiç kayıt girilmemiş</span>') : '');
-  /* Yönetici onayı: 74. adım kuruluysa şantiyede 'onaysiz' gelir */
-  var onayVar = ("onaysiz" in s) && (nsG + nsC) > 0, nOnaysiz = Number(s.onaysiz || 0);
-  if(onayVar) uyari += nOnaysiz
-    ? '<span class="p s">' + (nOnaysiz === nsG + nsC ? 'işverene açılmadı' : nOnaysiz + ' vardiya işverene açılmadı') + '</span>'
-    : '<span class="p o">işverene açık</span>';
-  var onaySerit = !onayVar ? '' :
-    '<div class="onay-serit" data-proje="' + esc(s.proje) + '">' +
-      '<span class="oy">' + (nOnaysiz
-        ? 'Bu günün ' + (nsG + nsC) + ' vardiyasından <b>' + nOnaysiz + '</b> tanesi işverene açılmadı. Açılmayan vardiyayı işveren görmez.'
-        : 'Bu günün ' + (nsG + nsC) + ' vardiyası işverene açık. Şef bu günü artık değiştiremez; düzeltmeyi yönetici yapar.') + '</span>' +
-      (onayYetkisi()
-        ? (nOnaysiz ? '<button class="btn sm" type="button" data-onay="1">Bu günü işverene aç</button>' : '') +
-          (nOnaysiz < nsG + nsC ? '<button class="btn ghost sm" type="button" data-onay="0">Onayı geri al</button>' : '')
-        : '') +
-      '<span class="onay-msg" role="status"></span></div>';
   var mt = s.sessiz ? '' :
     '<b>' + tl(s.metraj) + ' m</b><small>Gündüz ' + (nsG ? tl(sG) : '—') +
     ' · Gece ' + (nsC ? tl(sC) : '—') + '</small>';
@@ -1022,7 +1016,7 @@ function santiyeBlogu(s){
     '<div class="ky-bas" aria-hidden="true"><span></span><span>Kuyu</span><span>Kule</span>' +
     '<span>Derinlik / planlanan</span><span>Vardiya</span><span>Uyarı</span>' +
     '<span>Çalışma saati</span><span class="m">Günün metresi</span></div>';
-  var ic = (onaySerit + baslik + satirlar + bosSatir) ||
+  var ic = (baslik + satirlar + bosSatir) ||
     '<div class="cl">Bu şantiyeye atanmış kule yok — şef vardiya giremez.</div>';
   /* Sürüm 71 · Tayfun: "Neden aylık ayrıntı konuluyor buraya, burası
      günlük rapor ekranı. Kaldıralım." Şantiyenin dibindeki "aylık
@@ -1046,30 +1040,32 @@ document.addEventListener("change", function(e){
 document.addEventListener("click", function(e){
   if(!e.target.closest) return;
   /* Tarih gezme: önceki / sonraki kayıtlı gün, son gün, grafikteki gün */
-  /* Yönetici onayı: günün tamamı ya da tek vardiya */
-  var og = e.target.closest(".onay-serit button[data-onay]"), ot = e.target.closest(".onay-tek");
-  if(og || ot){
-    var serit = (og || ot).closest(".sk").querySelector(".onay-serit"), msg = serit.querySelector(".onay-msg");
-    var proje = serit.getAttribute("data-proje"), dugme = og || ot;
-    dugme.disabled = true; msg.textContent = "";
-    var istek = og
-      ? sb.rpc("gun_onayla", {p_project:proje, p_gun:GUN_VERI.gun, p_ac:og.getAttribute("data-onay") === "1"})
-      : sb.rpc("vardiya_onayla", {p_shift:ot.getAttribute("data-vid"), p_ac:ot.getAttribute("data-ac") === "1"});
-    istek.then(function(r){
-      if(r.error){ dugme.disabled = false; msg.textContent = r.error.message; msg.className = "onay-msg bad"; return; }
-      ACIK_SAHA = proje;
-      if(ot && ot.getAttribute("data-kuyu")) AC_HEDEF = ot.getAttribute("data-kuyu");
-      gunlukYukle();
+  /* Yönetici onayı: yalnız tek vardiya, vardiya kartının başından.
+     Sürüm 72 · sayfa yeniden yüklenmiyor: yönetici kartları sırayla
+     okuyup onaylıyor, her onayda açık kuyuların kapanması okuduğu
+     yeri kaybettirirdi. Kart başı, satırdaki rozet ve şantiye
+     başlığındaki sayı yerinde güncellenir. */
+  var ot = e.target.closest(".onay-tek");
+  if(ot){
+    var vk = ot.closest(".ky-vk"), kyKart = ot.closest(".ky-kart"), ky0 = kyKart.previousElementSibling;
+    var y0 = GUNLUK[Number(ky0.dataset.no)], k0 = y0.v[Number(vk.dataset.i)];
+    var msg = vk.querySelector(".onay-msg"), ac0 = ot.getAttribute("data-ac") === "1";
+    ot.disabled = true; msg.textContent = ""; msg.className = "onay-msg";
+    sb.rpc("vardiya_onayla", {p_shift:k0.vardiya_id, p_ac:ac0}).then(function(r){
+      if(r.error){ ot.disabled = false; msg.textContent = r.error.message; msg.className = "onay-msg bad"; return; }
+      k0.onayli = ac0;
+      kartBasi(vk, k0);
+      ky0.querySelector(".vd").innerHTML = y0.v.map(vardiyaRozeti).join('');
+      onayOzeti(ot.closest(".sk") || ky0.closest(".sk"));
     });
     return;
   }
   if(e.target.closest("#go-yazdir")){ gunYazdir(); return; }
   if(e.target.closest("#go-csv")){ gunCsv(); return; }
-  var gez = e.target.closest("#go-onceki,#go-sonraki,#go-son,.go-cub .c[data-gun]");
+  var gez = e.target.closest("#go-onceki,#go-sonraki,.go-cub .c[data-gun]");
   if(gez){
     if(gez.id === "go-onceki"){ if(GUN_KOMSU.onceki) gunSec(GUN_KOMSU.onceki); }
     else if(gez.id === "go-sonraki"){ if(GUN_KOMSU.sonraki) gunSec(GUN_KOMSU.sonraki); }
-    else if(gez.id === "go-son") gunSec(null);
     else gunSec(gez.getAttribute("data-gun"));
     return;
   }
@@ -1090,31 +1086,52 @@ document.addEventListener("click", function(e){
     if(ac && !kart.dataset.dolu){
       kart.dataset.dolu = "1";
       var y = GUNLUK[Number(ky.dataset.no)];
-      kart.innerHTML = y.v.map(function(k, i){
-        var oy = ("onayli" in k)
-          ? (k.onayli ? ' <span class="p o">işverene açık</span>' : ' <span class="p s">işverene açılmadı</span>') +
-            (onayYetkisi() && k.vardiya_id
-              ? ' <button class="lnk onay-tek" type="button" data-vid="' + esc(k.vardiya_id) + '" data-ac="' + (k.onayli ? '0' : '1') +
-                '" data-kuyu="' + esc(y.kuyu || '') + '">' + (k.onayli ? 'geri al' : 'işverene aç') + '</button>' : '')
-          : '';
-        /* 131. dosya · yönetici vardiyayı kendi ekranından düzeltir:
-           şefin formu o vardiya için açılır, kaydedince buraya dönülür. */
-        var dz = (onayYetkisi() && k.vardiya_id)
-          ? ' <a class="lnk vk-duzenle" href="index.html?duzenle=' + esc(k.vardiya_id) + '">Düzenle</a>' : '';
-        var ek = k.vardiya_id
-          ? ' <span class="vk-eksik" data-vid="' + esc(k.vardiya_id) + '">' + esc(eksikYazi(k.vardiya_id)) + '</span>' : '';
-        return '<h4>' + (geceMi(k) ? 'Gece' : 'Gündüz') + ' vardiyası · ' + esc(k.makine) + oy + dz + ek + '</h4>' +
-               '<div class="ky-vk" data-i="' + i + '"></div>';
-      }).join("");
+      /* Sürüm 72 · Tayfun: "Vardiya kartı olarak düşünelim bu verileri.
+         Her vardiyanın bir kartı var." Eski "GÜNDÜZ VARDİYASI · kule"
+         satırı kartın kendi baş satırıyla aynı şeyi söylüyordu; kalktı.
+         Onay durumu, Onayla ve Düzenle kartın baş satırına giriyor. */
+      kart.innerHTML = y.v.map(function(k, i){ return '<div class="ky-vk" data-i="' + i + '"></div>'; }).join("");
       y.v.forEach(function(k, i){
         var hedef = kart.querySelector('.ky-vk[data-i="' + i + '"]');
-        if(k.vardiya_id) VKART.ac(sb, k.vardiya_id, hedef);
+        if(k.vardiya_id) VKART.ac(sb, k.vardiya_id, hedef).then(function(){ kartBasi(hedef, k); });
         else hedef.innerHTML = '<div class="note">Vardiya kimliği gelmedi — merkezde 69. adım kurulu değil.</div>';
       });
     }
     return;
   }
 });
+
+/* Vardiya kartının baş satırı: [kimlik] [durum · Onayla · Düzenle] [metraj].
+   Onaylayabilen (yönetici) düğmeleri görür; patron ve muhasebe yalnız
+   durumu. Kart okunamadıysa (baş satır yok) aynı şerit kartın üstüne
+   konur — onay düğmesi kartsız kalmasın diye değil, Düzenle kaybolmasın
+   diye. 131. dosya: Düzenle şefin formunu o vardiya için açar. */
+function kartBasi(hedef, k){
+  var eski = hedef.querySelector(".vk-onay"); if(eski) eski.remove();
+  var id = esc(k.vardiya_id), yetki = onayYetkisi(), h = '';
+  if("onayli" in k){
+    h += k.onayli ? '<span class="p o">Onaylı</span>' : '<span class="p s">Onay bekliyor</span>';
+    if(yetki) h += k.onayli
+      ? '<button class="lnk onay-tek" type="button" data-ac="0">onayı geri al</button>'
+      : '<button class="btn sm onay-tek" type="button" data-ac="1">Onayla</button>';
+  }
+  if(yetki) h += '<a class="lnk vk-duzenle" href="index.html?duzenle=' + id + '">Düzenle</a>';
+  h += '<span class="vk-eksik" data-vid="' + id + '">' + esc(eksikYazi(k.vardiya_id)) + '</span>' +
+       '<span class="onay-msg" role="status"></span>';
+  var d = document.createElement("div"); d.className = "vk-onay"; d.innerHTML = h;
+  var ust = hedef.querySelector(".vk-ust");
+  if(ust) ust.insertBefore(d, ust.children[1] || null); else hedef.insertBefore(d, hedef.firstChild);
+}
+/* Şantiye başlığındaki "N vardiya onay bekliyor" (yalnız kapalıyken görünür) */
+function onayOzeti(sk){
+  if(!sk) return;
+  var n = 0;
+  Array.prototype.forEach.call(sk.querySelectorAll(".ky[data-no]"), function(ky){
+    (GUNLUK[Number(ky.dataset.no)].v || []).forEach(function(k){ if(("onayli" in k) && !k.onayli) n++; }); });
+  var kap = sk.querySelector(".sk-bas .uy .kap"), eski = kap.querySelector(".onb");
+  if(eski) eski.remove();
+  if(n) kap.insertAdjacentHTML("beforeend", '<span class="p s onb">' + n + ' vardiya onay bekliyor</span>');
+}
 
 /* Sol menüdeki turuncu sayı. Yedi şantiyede altıncıdaki arıza
    kaydırmadan görünmez; "aşağıda bir şey var" demenin tek yolu bu. */
