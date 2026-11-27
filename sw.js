@@ -13,7 +13,7 @@
    imkânsız, çevrimdışı da aynen çalışıyor.
    Sürüm numarası TEK YERDE: aşağıdaki CACHE. Değiştirmek için
    `araclar/surum-yukselt.sh` — elle değil. */
-var CACHE = "collarlog-v74";
+var CACHE = "collarlog-v75";
 var V = CACHE.replace(/^.*-v/, "");
 /* 57. dosya: yonetim.html ("Ana veri ve projeler") listede HİÇ yoktu —
    bağlantı zayıfken o sayfa doğrudan şefin ekranına düşüyordu.

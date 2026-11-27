@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "74";
+var SURUM = "75";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -218,9 +218,15 @@ var SAYFALAR = [
   /* 25 Kasım · Tayfun: "Projeler diye bir ana başlık altında Proje
      tanımlamaları alt başlık olsun." Yeni proje buradan açılıyor,
      mevcut projelerin tanımlamaları buradan değişiyor. */
-  {k:"anaveri",  d:"yonetim.html",   ad:"Proje tanımlamaları", i:"ofis", g:"Projeler"},
+  /* Sürüm 75 · 129. dosya · Tayfun: "Önce bu programı kullanacak olan
+     şirketin bilgileri tanımlanacak, sonra müşteri tanımlamaları, proje
+     tanımlamaları, sözleşme vs. 2 bölüm var." Başlık "Tanımlamalar",
+     iki satır; ikisi de yonetim.html, ayrı kip (?bolum=sirket).
+     Şirket tanımlarına muhasebe de girer — alış fiyatlarını o yazar. */
+  {k:"tanimlar", d:"yonetim.html?bolum=sirket", ad:"Şirket tanımları", i:"ofis", g:"Tanımlamalar"},
+  {k:"anaveri",  d:"yonetim.html",   ad:"Proje tanımları",    i:"ofis", g:"Tanımlamalar"},
   {k:"kullanicilar", d:"kullanicilar.html", ad:"Kullanıcılar", i:"kisi",
-                 g:"Projeler", yok:1},
+                 g:"Tanımlamalar", yok:1},
 
   /* AYARLAR — YENİ SATIR, ad değişikliği değil. Bugüne kadar ayarlara
      yalnız üst çubuktaki kullanıcı adına basarak giriliyordu; menüde
@@ -231,7 +237,7 @@ var SAYFALAR = [
   {k:"isveren",  d:"isveren.html",   ad:"İşveren Paneli",     i:"kalkan", g:"İşveren Paneli"}
 ];
 var GRUP_SIRA = ["Günlük","Ay sonu","Finans","Teklifler","Analizler",
-                 "Projeler","Ayarlar","Raporlarım"];
+                 "Tanımlamalar","Ayarlar","Raporlarım"];
 
 /* ---------- durum ---------- */
 var sb = null, erisim = null, cfg = {url:"", key:""}, AYAR = {};
@@ -825,6 +831,10 @@ function yetkiAl(){
   sb.rpc("my_access").then(function(r){
     if(r.error){ girisEkrani("Yetki okunamadı: " + r.error.message); return; }
     erisim = r.data || {};
+    /* Sürüm 75 · 132. dosya: stok takibi kapalı firmada stokla ilgili
+       bölümler (app.css'te body.stoksuz) görünmez. Bilgi yoksa (79. adım
+       kurulu değil) açık sayılır — bugünkü davranış. */
+    if(document.body) document.body.classList.toggle("stoksuz", erisim.stok === false);
     if(!erisim.kullanici && !erisim.rol){
       uyariEkrani("Hesap tanımlı değil",
         "Bu kullanıcı için firma profili oluşturulmamış. Yöneticinizden hesabınızı tanımlamasını isteyin.");

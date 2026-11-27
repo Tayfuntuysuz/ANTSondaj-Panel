@@ -871,3 +871,11 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .pay-sat.sabit{cursor:default;opacity:.75}
 
 /* Günlük kural denetimi (sürüm 70) — kart başındaki yazı .vk-onay .vk-eksik */
+
+/* Sürüm 75 · 132. dosya · stok takibi kapalı firmada gizlenenler:
+   Şantiye ayrıntısı'ndaki Stok durumu, şefin formundaki stok bantları,
+   Şirket tanımları'ndaki asgari stok sütunu. Kayıtlar silinmez. */
+body.stoksuz .card:has(> #stock),
+body.stoksuz .adim-bant[data-kart="malzeme-4"],
+body.stoksuz .adim-bant[data-kart="malzeme-5"],
+body.stoksuz .stok-yalniz{display:none !important}

@@ -7,7 +7,7 @@ try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
 if(_t)document.documentElement.setAttribute("data-tema",_t);
 if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Collarlog · Proje tanımlamaları</title>
+<title>Collarlog · Tanımlamalar</title>
 <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="logo/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
@@ -16,7 +16,8 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=74">
+<link rel="stylesheet" href="app.css?v=75">
+<style>
 <style>
 .sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .sekmeler button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);
@@ -48,141 +49,159 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 .kv:last-child{border-bottom:0}
 .kv span:first-child{color:var(--ink-3);font-size:13px}
 .not{font-size:12px;color:var(--ink-3);max-width:78ch;margin-top:6px}
+/* ---------- sürüm 75 · Tanımlamalar ---------- */
+.field.genis{flex:2 1 260px}
+.anahtar{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;
+  color:var(--ink);margin:6px 0 10px;cursor:pointer}
+.anahtar input{width:18px;height:18px;min-height:0;margin:0;accent-color:var(--accent)}
+.sb-logo{display:flex;align-items:center;gap:14px;margin:10px 0 12px;flex-wrap:wrap}
+.sb-logo-kutu{width:150px;height:72px;border:1px dashed var(--line);border-radius:10px;display:flex;align-items:center;
+  justify-content:center;background:#fff;overflow:hidden}
+.sb-logo-kutu img{max-width:140px;max-height:64px;object-fit:contain}
+.sb-logo .btn{margin:0 6px 4px 0}
+.sb-logo label.btn{text-transform:none;letter-spacing:0;font-size:12.5px;display:inline-flex}
+table.mf{width:100%;border-collapse:collapse;font-size:13.5px}
+table.mf th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;
+  padding:6px 8px;border-bottom:1px solid var(--line)}
+table.mf td{padding:7px 8px;border-bottom:1px solid var(--line-soft);vertical-align:middle;text-align:left}
+table.mf input{min-height:0;padding:6px 8px;max-width:140px}
+table.mf input[type=date]{max-width:150px}
+table.mf td.num{text-align:right;white-space:nowrap}
+table.mt .mt-guncel{font-size:12.5px;font-variant-numeric:tabular-nums;margin-bottom:4px;white-space:nowrap}
+table.mt input{max-width:110px}
+.pj-ust{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.pj-isveren{margin-bottom:14px}
+.pj-isveren > .pj-bas h3{margin:0}
+.pj-bas{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.pj-is{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.pj-is .pj-ad{font-size:15.5px}
+.pj-dug{display:flex;gap:6px;flex-wrap:wrap}
+.pj-dug .btn{margin:0}
+.pj-is .scroll,.pj-is table{margin-top:8px}
+.card.duzen{border:2px solid var(--accent);margin:12px 0}
+.alt-bas{margin:14px 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.lnk{all:unset;cursor:pointer;color:var(--accent);font-weight:600}
+.lnk:hover{text-decoration:underline}
+.fe-blok{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px}
+.fe-blok h4{margin:0 0 4px;font-size:14px}
+.fe-blok h4 span{font-weight:400;color:var(--ink-3);font-size:12px;margin-left:6px}
+table.fe-tbl{border-collapse:collapse;font-size:13.5px;margin-top:6px}
+table.fe-tbl th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;
+  padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.fe-tbl td{padding:4px 6px;border-bottom:1px solid var(--line-soft)}
+table.fe-tbl input,table.fe-tbl select{min-height:0;padding:6px 8px}
+table.fe-tbl select{min-width:150px}
+.fe-bek .field:first-child{flex:0 0 190px}.fe-bek select{min-width:0;width:100%}
+table.fe-tbl input:not([type=number]),.fe-bek input:not([type=number]){text-align:left}
+table.fe-tbl input[type=number]{width:110px}
+table.fe-tbl .fe-n{width:180px}
+tr.fe-pasif td,.fe-bek.fe-pasif .field{opacity:.6}
+.fe-ara{align-items:center;margin-top:8px}
+.fe-ara select{min-height:0;padding:5px 8px;width:auto}
+.fe-ara .btn{margin:0}
+.fe > .satir{max-width:520px}
+@media (max-width:700px){ .pj-dug{width:100%} table.fe-tbl input[type=number]{width:84px} table.fe-tbl .fe-n{width:120px} }
 </style>
 </head>
 <body>
-
+<!-- ============================================================
+     TANIMLAMALAR — sürüm 75 (129, 123, 132, 154. dosyalar)
+     ============================================================
+     Tayfun, 27 Kasım: "Önce bu programı kullanacak olan şirketin
+     bilgileri tanımlanacak, sonra müşteri tanımlamaları, proje
+     tanımlamaları, sözleşme vs. … 2 bölüm var."
+     Bu dosya İKİ sayfa gösteriyor (panel.html'deki gibi kip):
+       yonetim.html?bolum=sirket → Şirket tanımları (yetki: tanimlar)
+           Şirket bilgileri · Personel · Makineler · Araç ve ekipman ·
+           Malzeme (alış fiyatı) · Matkap (alış fiyatı) · Seçim listeleri
+       yonetim.html               → Proje tanımları (yetki: anaveri)
+           Projeler (işveren → proje → şantiye) · Yeni proje · Fiyatlar
+     Eski "Şantiye şefi ve sözleşme" kartı kalktı (Tayfun, 26 Kasım):
+     şef şantiyenin, sözleşme tarihleri projenin düzenleme formunda.
+     ============================================================ -->
 <div id="sp-icerik">
-  <div class="sekmeler" id="sekmeler">
-    <button type="button" data-s="projeler" aria-pressed="true">Projeler</button>
-    <button type="button" data-s="yeni" aria-pressed="false">Yeni proje</button>
-    <button type="button" data-s="makineler" aria-pressed="false">Makineler</button>
-    <!-- Rozet: sekmeye GİRMEDEN de uyarı görünsün. Tayfun: "süresi
-         dolunca uyarı versin" — tıklanması gereken uyarı, uyarı
-         değil. -->
-    <button type="button" data-s="araclar" aria-pressed="false">Araç ve ekipman
-      <span class="pill bad" id="belge-rozet" hidden style="margin-inline-start:6px"></span></button>
-    <button type="button" data-s="personel" aria-pressed="false">Personel</button>
-    <button type="button" data-s="malzeme" aria-pressed="false">Malzeme</button>
-    <button type="button" data-s="musteri" aria-pressed="false">Müşteriler</button>
-  </div>
+  <div class="sekmeler" id="sekmeler"></div>
   <div id="msg"></div>
   <!-- Süresi geçmiş araç belgesi uyarısı. #msg ile aynı yere yazılmıyor:
        yukle() orayı temizliyor ve ikisi yarışıyordu. -->
   <div id="belge-bant"></div>
 
-  <!-- PROJELER -->
-  <section data-bol="projeler">
-    <div class="card"><div id="proje-tablo"></div></div>
-
-    <!-- ŞANTİYE ŞEFİ VE SÖZLEŞME (54. ve 59. dosya)
-         Şef vardiyaya değil projeye bağlı: yönetici buradan değiştirene
-         kadar her gün aynı kişi, saha uygulamasında sabit satır olarak
-         görünüyor ve ekip listelerinde çıkmıyor.
-         Sözleşme tarihleri kuyu bitiş tahmininin ileri/geri kıyası için;
-         girilmemişse o satır analizde hiç çıkmıyor. -->
-    <div class="card" style="margin-top:12px">
-      <h3>Şantiye şefi ve sözleşme</h3>
-      <div class="not">Şef kuleye çıkmaz: ekip listelerinde görünmez, vardiya ekibine
-        yazılmaz, prim hesabına girmez. Sözleşme tarihleri boş bırakılabilir —
-        o zaman analizde "sözleşmeye göre ileri/geri" satırı çıkmaz.</div>
-      <div class="satir">
-        <div class="field"><label for="sf-proje">Şantiye</label>
-          <select id="sf-proje"></select></div>
-        <div class="field"><label for="sf-sef">Şantiye şefi</label>
-          <select id="sf-sef"></select></div>
+  <!-- =================== ŞİRKET TANIMLARI =================== -->
+  <section data-bol="sirket" hidden>
+    <div class="card">
+      <h3>Şirket bilgileri</h3>
+      <div class="not">Programı kullanan şirketin kendi bilgileri. Hakediş, aylık rapor ve
+        işveren panelinin başlığında bunlar ve logo çıkar.</div>
+      <div class="sb-logo">
+        <div class="sb-logo-kutu" id="sb-logo-kutu"><span class="hint">Logo yok</span></div>
+        <div>
+          <label class="btn gh sm" for="sb-logo" style="cursor:pointer">Logo seç</label>
+          <input type="file" id="sb-logo" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
+          <button class="btn gh sm" id="btn-logo-kaldir" type="button">Logoyu kaldır</button>
+          <div class="hint">PNG, JPG, SVG ya da WEBP · en çok 300 KB</div>
+        </div>
       </div>
       <div class="satir">
-        <div class="field"><label for="sf-bas">Sözleşme başlangıcı</label>
-          <input id="sf-bas" type="date"></div>
-        <div class="field"><label for="sf-bit">Sözleşme bitişi</label>
-          <input id="sf-bit" type="date"></div>
-      </div>
-      <div class="hint" id="sf-durum"></div>
-      <button class="btn" id="btn-sf-kaydet" type="button" style="margin-top:10px">Kaydet</button>
-      <div id="sf-msg"></div>
-    </div>
-
-    <div class="not">Bir projeyi açmak için Yeni proje sekmesini kullanın; mevcut projenin
-      kuyusunu, makinesini ve ekibini de oradan ekleyebilirsiniz.</div>
-  </section>
-
-  <!-- YENİ PROJE SİHİRBAZI -->
-  <section data-bol="yeni" hidden>
-    <div class="adimlar" id="adimlar"></div>
-
-    <div class="card" data-adim="1">
-      <h3>1 · Müşteri ve proje</h3>
-      <div class="not">Bir müşterinin birden fazla şantiyesi olabilir; her şantiye ayrı proje
-        olarak açılır. Metraj, hakediş ve prim proje bazlı hesaplanır.</div>
-      <div class="field"><label for="p-musteri">Müşteri</label>
-        <select id="p-musteri"></select></div>
-      <div class="satir">
-        <div class="field"><label for="p-yenimusteri">Yeni müşteri adı</label>
-          <input id="p-yenimusteri" placeholder="listede yoksa buraya yazın"></div>
-        <div class="field"><label for="p-vergi">Vergi no</label><input id="p-vergi"></div>
+        <div class="field genis"><label for="sb-unvan">Unvan *</label><input id="sb-unvan" placeholder="Anatolia Sondaj Tic. San. Ltd. Şti."></div>
+        <div class="field"><label for="sb-kisa_ad">Kısa ad</label><input id="sb-kisa_ad" placeholder="Anatolia Sondaj"></div>
       </div>
       <div class="satir">
-        <div class="field"><label for="p-ad">Proje adı *</label>
-          <input id="p-ad" placeholder="Ardeşen Sahası Karotlu Sondaj"></div>
-        <div class="field"><label for="p-saha">Şantiye adı</label>
-          <input id="p-saha" placeholder="Hanönü Şantiyesi"></div>
+        <div class="field"><label for="sb-vergi_dairesi">Vergi dairesi</label><input id="sb-vergi_dairesi"></div>
+        <div class="field"><label for="sb-vergi_no">Vergi no</label><input id="sb-vergi_no" inputmode="numeric"></div>
+        <div class="field"><label for="sb-mersis">MERSİS no</label><input id="sb-mersis" inputmode="numeric"></div>
       </div>
       <div class="satir">
-        <div class="field"><label for="p-il">İl</label><input id="p-il"></div>
-        <div class="field"><label for="p-ilce">İlçe</label><input id="p-ilce"></div>
+        <div class="field genis"><label for="sb-adres">Adres</label><input id="sb-adres"></div>
+        <div class="field"><label for="sb-ilce">İlçe</label><input id="sb-ilce"></div>
+        <div class="field"><label for="sb-il">İl</label><input id="sb-il"></div>
       </div>
+      <div class="satir">
+        <div class="field"><label for="sb-telefon">Telefon</label><input id="sb-telefon" type="tel"></div>
+        <div class="field"><label for="sb-eposta">E-posta</label><input id="sb-eposta" type="email"></div>
+        <div class="field"><label for="sb-web">Web</label><input id="sb-web"></div>
+      </div>
+      <div class="satir">
+        <div class="field"><label for="sb-yetkili">Yetkili</label><input id="sb-yetkili"></div>
+        <div class="field"><label for="sb-yetkili_unvan">Yetkilinin unvanı</label><input id="sb-yetkili_unvan" placeholder="Genel müdür"></div>
+      </div>
+      <button class="btn" id="btn-sb-kaydet" type="button" style="margin-top:6px">Kaydet</button>
+      <div id="sb-msg"></div>
     </div>
-
-    <div class="card" data-adim="2" hidden>
-      <h3>2 · Vardiya düzeni</h3>
-      <div class="not">Vardiya sayısı ve saatleri projeye göre değişir. Gece yarısını geçen
-        vardiyayı program saatlerden kendisi anlar, gerekirse işareti değiştirin.
-        <b>Rapor her zaman vardiyanın başladığı güne yazılır</b> — gece vardiyası da
-        o günün raporuna girer.</div>
-      <div class="field" style="max-width:220px"><label for="p-vsayi">Vardiya sayısı</label>
-        <select id="p-vsayi"><option value="2">2 vardiya</option><option value="3">3 vardiya</option></select></div>
-      <div id="vardiya-satirlar"></div>
-    </div>
-
-    <div class="card" data-adim="3" hidden>
-      <h3>3 · Kuyular</h3>
-      <div class="not">Eğim ve azimut yalnız burada girilir; vardiya formunda bir daha sorulmaz
-        ve kuyu açıldıktan sonra değişmez. Planlanan derinliği işveren verir.</div>
-      <div id="kuyu-satirlar"></div>
-      <button class="btn gh" id="btn-kuyu-ekle" type="button">Kuyu ekle</button>
-    </div>
-
-    <div class="card" data-adim="4" hidden>
-      <h3>4 · Makineler</h3>
-      <div class="not">Bu projede çalışacak kuleler. Makine başka şantiyedeyse buraya alındığında
-        oradaki görevi kapanır — motor saati ve bakım takibi tek makinede birikir.</div>
-      <div class="secimler" id="makine-sec"></div>
-    </div>
-
-    <div class="card" data-adim="5" hidden>
-      <h3>5 · Ekip</h3>
-      <div class="not">Sondörler, yardımcılar, işçiler ve şoförler. Seçilen kişiler bugünden
-        itibaren bu şantiyeye atanır; başka şantiyedeyse oradaki görevi kapanır.</div>
-      <div class="secimler" id="personel-sec"></div>
-    </div>
-
-    <div class="card" data-adim="6" hidden>
-      <h3>6 · Araç ve ekipman</h3>
-      <div class="not">Binek araçlar, pompa ve saha ekipmanı. Şantiyeye bağlanmayan araç
-        her sahada görünür ve yakıtı araç gideri sayılır.</div>
-      <div class="secimler" id="arac-sec"></div>
-      <div id="ozet-kutu" style="margin-top:14px"></div>
-      <button class="btn" id="btn-proje-kur" type="button" style="margin-top:12px">Projeyi oluştur</button>
-      <div id="kur-msg"></div>
-    </div>
-
-    <div class="satir" style="margin-top:12px">
-      <button class="btn gh" id="btn-geri" type="button">← Geri</button>
-      <button class="btn" id="btn-ileri" type="button">İleri →</button>
+    <div class="card" style="margin-top:14px">
+      <h3>Stok takibi</h3>
+      <div class="not">Açıkken şantiyeye gelen malzeme girilir, vardiyada yazılan sarf stoktan düşer,
+        asgari stok izlenir. Kapalıyken yalnız tüketim ve maliyet tutulur; şefe stokla ilgili alan
+        çıkmaz. Kapatınca kayıtlar silinmez, gizlenir; yeniden açınca sayım girmeniz gerekir.</div>
+      <label class="anahtar"><input type="checkbox" id="sb-stok"> Stok takibi açık</label>
+      <button class="btn gh" id="btn-stok-kaydet" type="button">Kaydet</button>
+      <div id="stok-msg"></div>
     </div>
   </section>
 
+  <!-- PERSONEL -->
+  <section data-bol="personel" hidden>
+    <div class="card">
+      <h3>Personel tanımı</h3>
+      <div class="satir">
+        <div class="field"><label for="pe-ad">Ad soyad *</label><input id="pe-ad"></div>
+        <div class="field"><label for="pe-gorev">Görev</label>
+          <select id="pe-gorev">
+            <option value="sondor">Sondör</option>
+            <option value="formen">Formen</option>
+            <option value="yardimci">Yardımcı personel</option>
+            <option value="sofor">Şoför</option>
+            <option value="santiye_sefi">Şantiye şefi</option>
+            <option value="destek">Destek</option>
+            <option value="diger">Diğer</option>
+          </select></div>
+        <button class="btn" id="btn-personel-kaydet" type="button">Kaydet</button>
+      </div>
+      <div class="not">Kişiyi şantiyeye almak için Proje tanımları › Yeni proje sihirbazının 7. adımını ya da
+        şefin panelindeki saha ekibi kartını kullanın.</div>
+      <div id="personel-msg"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div id="personel-tablo"></div></div>
+  </section>
   <!-- MAKİNELER -->
   <section data-bol="makineler" hidden>
     <div class="card">
@@ -248,32 +267,6 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     <div class="card" style="margin-top:14px"><div id="arac-tablo"></div></div>
   </section>
 
-  <!-- PERSONEL -->
-  <section data-bol="personel" hidden>
-    <div class="card">
-      <h3>Personel tanımı</h3>
-      <div class="satir">
-        <div class="field"><label for="pe-ad">Ad soyad *</label><input id="pe-ad"></div>
-        <div class="field"><label for="pe-gorev">Görev</label>
-          <select id="pe-gorev">
-            <option value="sondor">Sondör</option>
-            <option value="formen">Formen</option>
-            <option value="yardimci">Yardımcı personel</option>
-            <option value="sofor">Şoför</option>
-            <option value="santiye_sefi">Şantiye şefi</option>
-            <option value="destek">Destek</option>
-            <option value="diger">Diğer</option>
-          </select></div>
-        <button class="btn" id="btn-personel-kaydet" type="button">Kaydet</button>
-      </div>
-      <div class="not">Kişiyi şantiyeye almak için Yeni proje sihirbazının 5. adımını ya da
-        şefin panelindeki saha ekibi kartını kullanın.</div>
-      <div id="personel-msg"></div>
-    </div>
-    <div class="card" style="margin-top:14px"><div id="personel-tablo"></div></div>
-  </section>
-
-  <!-- MALZEME -->
   <section data-bol="malzeme" hidden>
     <div class="card">
       <h3>Malzeme tanımı</h3>
@@ -281,14 +274,40 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
         <div class="field"><label for="ml-ad">Malzeme adı *</label><input id="ml-ad"></div>
         <div class="field"><label for="ml-birim">Birim</label>
           <select id="ml-birim"><option>adet</option><option>metre</option><option>litre</option>
-            <option>kg</option><option>torba</option><option>takım</option></select></div>
+            <option>kg</option><option>torba</option><option>bidon</option><option>takım</option></select></div>
         <div class="field"><label for="ml-kat">Kategori</label><input id="ml-kat" placeholder="sarf / ekipman"></div>
         <button class="btn" id="btn-malzeme-kaydet" type="button">Kaydet</button>
       </div>
       <div id="malzeme-msg"></div>
     </div>
-    <div class="card" style="margin-top:14px"><div id="malzeme-tablo"></div></div>
+    <div class="card" style="margin-top:14px">
+      <h3>Malzeme alış fiyatları</h3>
+      <div class="not">Malzeme hakedişe girmez, işverene hiç gösterilmez: bu fiyat yalnız kendi
+        maliyetimiz için. Fiyat değişince eskisi silinmez — yeni tarihle girin; tüketim o günün
+        fiyatıyla maliyetlenir. Şef fiyatı görmez.</div>
+      <div id="mf-uyari"></div>
+      <div class="scroll"><div id="malzeme-tablo">Yükleniyor…</div></div>
+      <div id="mf-msg"></div>
+    </div>
+  </section>
 
+  <section data-bol="matkap" hidden>
+    <div class="card">
+      <h3>Matkap alış fiyatları</h3>
+      <div class="not">Marka ve çap başına adet fiyatı. Şef matkap takarken fiyat görmez, girmez.
+        Fiyat değişince eskisi silinmez: geçerlilik tarihini yazıp yeni fiyatı girin. Marka eklemek
+        ya da düzeltmek için <b>Seçim listeleri</b> sekmesi.</div>
+      <div class="satir" style="max-width:420px">
+        <div class="field"><label for="mt-gecerli">Yeni fiyatların geçerlilik başlangıcı</label>
+          <input id="mt-gecerli" type="date"></div>
+      </div>
+      <div class="scroll"><div id="matkap-tablo">Yükleniyor…</div></div>
+      <button class="btn" id="btn-matkap-kaydet" type="button" data-fiyat="1" style="margin-top:10px">Yazılan fiyatları kaydet</button>
+      <div id="mt-msg"></div>
+    </div>
+  </section>
+
+  <section data-bol="listeler" hidden>
     <div class="card" style="margin-top:14px">
       <h3>Kuyu programları</h3>
       <div class="not">Kuyu açılırken seçilen program listesi. Maden arama ve maden planlama
@@ -329,42 +348,193 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
     </div>
   </section>
 
-  <!-- MÜŞTERİLER -->
-  <section data-bol="musteri" hidden>
-    <div class="card">
-      <h3>Müşteri (işveren) tanımı</h3>
-      <div class="satir">
-        <div class="field"><label for="mu-ad">Müşteri adı *</label><input id="mu-ad"></div>
-        <div class="field"><label for="mu-vergi">Vergi no</label><input id="mu-vergi"></div>
-        <button class="btn" id="btn-musteri-kaydet" type="button">Kaydet</button>
-      </div>
-      <div id="musteri-msg"></div>
+  <!-- =================== PROJE TANIMLARI =================== -->
+  <section data-bol="projeler" hidden>
+    <div class="pj-ust">
+      <div class="not" style="margin:0">İşveren → proje (sözleşme, fiyatlar) → şantiye (kuyu, kule,
+        ekip). Bir işverenin birden çok projesi, bir projenin birden çok şantiyesi olabilir.</div>
+      <button class="btn" id="btn-yeni-proje" type="button">+ Yeni proje</button>
     </div>
-    <div class="card" style="margin-top:14px"><div id="musteri-tablo"></div></div>
+    <div id="agac"><div class="card"><div class="hint">Yükleniyor…</div></div></div>
+    <div class="card duzen" id="duzen" hidden>
+      <h3 id="duzen-bas"></h3>
+      <div id="duzen-govde"></div>
+      <div class="satir" style="margin-top:8px">
+        <button class="btn" id="btn-duzen-kaydet" type="button">Kaydet</button>
+        <button class="btn gh" id="btn-duzen-vazgec" type="button">Vazgeç</button>
+      </div>
+      <div id="duzen-msg"></div>
+    </div>
+  </section>
+
+  <section data-bol="yeni" hidden>
+    <div class="adimlar" id="adimlar"></div>
+    <div class="card" data-adim="1">
+      <h3>1 · İşveren</h3>
+      <div class="not">İşi veren firma. Listede yoksa yeni işveren açın; aynı işverenin sonraki
+        projeleri bu kaydın altına girer.</div>
+      <div class="field" style="max-width:520px"><label for="y-isveren">İşveren</label>
+        <select id="y-isveren"></select></div>
+      <div id="y-yeni-isveren"></div>
+    </div>
+    <div class="card" data-adim="2" hidden>
+      <h3>2 · Proje ve sözleşme</h3>
+      <div class="not">Sözleşme bilgileri projenin bütün şantiyelerine geçer. Sözleşme bitişi
+        girilmezse kuyu analizinde "sözleşmeye göre ileri / geri" satırı çıkmaz.</div>
+      <div id="y-proje"></div>
+    </div>
+    <div class="card" data-adim="3" hidden>
+      <h3>3 · Sözleşme fiyatları</h3>
+      <div class="not">Hakediş bu fiyatlardan çıkar. Her kalem için sözleşmede ne yazıyorsa onu
+        seçin: <b>ayrı ödenir</b> (fiyatıyla), <b>fiyata dahil</b> ya da <b>sözleşmede yok</b>.</div>
+      <label class="anahtar"><input type="checkbox" id="y-fiyat-sonra"> Fiyatları sonra gireceğim
+        (Proje tanımları › Fiyatlar)</label>
+      <div id="y-fiyat"></div>
+    </div>
+    <div class="card" data-adim="4" hidden>
+      <h3>4 · Şantiye</h3>
+      <div class="not">Sahadaki çalışma yeri. Kuyu, kule ve ekip şantiyeye bağlanır; şef sahada bu
+        şantiyeyi görür. <b>Rapor her zaman vardiyanın başladığı güne yazılır</b> — gece vardiyası
+        da o günün raporuna girer.</div>
+      <div id="y-santiye"></div>
+    </div>
+    <div class="card" data-adim="5" hidden>
+      <h3>5 · Kuyular</h3>
+      <div class="not">Eğim ve azimut yalnız burada girilir; vardiya formunda bir daha sorulmaz
+        ve kuyu açıldıktan sonra değişmez. Planlanan derinliği işveren verir.</div>
+      <div id="kuyu-satirlar"></div>
+      <button class="btn gh" id="btn-kuyu-ekle" type="button">Kuyu ekle</button>
+    </div>
+    <div class="card" data-adim="6" hidden>
+      <h3>6 · Makineler</h3>
+      <div class="not">Bu şantiyede çalışacak kuleler (Şirket tanımları'ndaki listeden). Makine başka
+        şantiyedeyse buraya alındığında oradaki görevi kapanır.</div>
+      <div class="secimler" id="makine-sec"></div>
+    </div>
+    <div class="card" data-adim="7" hidden>
+      <h3>7 · Ekip</h3>
+      <div class="not">Sondörler, yardımcılar, işçiler ve şoförler. Seçilen kişiler bugünden
+        itibaren bu şantiyeye atanır; başka şantiyedeyse oradaki görevi kapanır.</div>
+      <div class="secimler" id="personel-sec"></div>
+    </div>
+    <div class="card" data-adim="8" hidden>
+      <h3>8 · Araç ve ekipman</h3>
+      <div class="not">Binek araçlar, pompa ve saha ekipmanı. Şantiyeye bağlanmayan araç
+        her sahada görünür ve yakıtı araç gideri sayılır.</div>
+      <div class="secimler" id="arac-sec"></div>
+      <div id="ozet-kutu" style="margin-top:14px"></div>
+      <button class="btn" id="btn-proje-kur" type="button" style="margin-top:12px">Projeyi oluştur</button>
+      <div id="kur-msg"></div>
+    </div>
+    <div class="satir" style="margin-top:12px">
+      <button class="btn gh" id="btn-geri" type="button">← Geri</button>
+      <button class="btn" id="btn-ileri" type="button">İleri →</button>
+    </div>
+  </section>
+
+  <section data-bol="fiyatlar" hidden>
+    <div class="card">
+      <h3>Sözleşme fiyatları</h3>
+      <div class="not">Bir projenin bütün sözleşme fiyatları tek ekranda. Hakediş bu fiyatlardan
+        çıkar. Fiyat değişince eski liste düzeltilmez: <b>geçerlilik tarihini değiştirip
+        kaydedin</b>, yeni liste açılır; geçmiş hakedişler eski fiyatla kalır. Aynı tarihle
+        kaydetmek o listeyi düzeltir. İşveren ve şef fiyatları görmez.</div>
+      <div class="satir">
+        <div class="field genis"><label for="f-is">Proje</label><select id="f-is"></select></div>
+        <div class="field"><label for="f-liste">Liste</label><select id="f-liste"></select></div>
+      </div>
+    </div>
+    <div id="f-editor"></div>
+    <div class="satir" style="margin-top:12px">
+      <button class="btn" id="btn-fiyat-kaydet" type="button">Fiyatları kaydet</button>
+    </div>
+    <div id="fiyat-msg"></div>
   </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=74"></script>
+<script src="app-shell.js?v=75"></script>
 <script>
 (function(){
 "use strict";
 var $ = SP.$, $$ = SP.$$, esc = SP.esc, tl = SP.tl, msg = SP.msg, tablo = SP.tablo,
     trd = SP.trd;
 var sb = null, D = null;                  /* D: anaveri() sonucu */
-var KUYULAR = [], ADIM = 1, YENI_PROJE = null;
+var AGAC = null, SIRKET = null, MF = null, MT = null;
+var KUYULAR = [], ADIM = 1, SIHIRBAZ_IS = null, YENI_FE = null, FIYAT_FE = null;
+var LOGO_YENI;                            /* undefined: değişmedi · null: kaldır · metin: yeni */
+/* 144. dosyadaki panel.html gibi: aynı dosya iki sayfa */
+var KIP = /[?&]bolum=sirket(&|$)/.test(location.search) ? "sirket" : "proje";
+var SEKMELER = {
+  sirket: [["sirket","Şirket bilgileri"],["personel","Personel"],["makineler","Makineler"],
+           ["araclar","Araç ve ekipman"],["malzeme","Malzeme"],["matkap","Matkap"],["listeler","Seçim listeleri"]],
+  proje:  [["projeler","Projeler"],["yeni","Yeni proje"],["fiyatlar","Fiyatlar"]]
+};
+var ROL = "", YAZAR = false, FIYAT_YAZAR = false;
+document.title = "Collarlog · " + (KIP === "sirket" ? "Şirket tanımları" : "Proje tanımları");
+document.body.classList.add("kip-" + KIP);
 
-SP.boot({ sayfa:"anaveri", baslik:"Proje tanımlamaları", hazir:function(){
+SP.boot({ sayfa: KIP === "sirket" ? "tanimlar" : "anaveri",
+          baslik: KIP === "sirket" ? "Şirket tanımları" : "Proje tanımları", hazir:function(){
   sb = SP.sb;
+  ROL = (SP.erisim && SP.erisim.rol) || "";
+  YAZAR = SP.girebilir() && ["manager","tenant_admin","platform_admin"].indexOf(ROL) > -1;
+  FIYAT_YAZAR = SP.girebilir() && (YAZAR || ROL === "accountant");
+  sekmeleriCiz();
   if(!SP.girebilir()){
-    /* Patron salt okunur görür: kaydetme düğmeleri hiç basılmasın. */
-    $$("#sp-icerik button.btn").forEach(function(b){ b.disabled = true; });
     msg($("#msg"), "Bu sayfayı yalnız görüntüleyebilirsiniz; tanım değiştirme yetkiniz yok.", "warn");
+  } else if(!YAZAR){
+    /* Muhasebe: yalnız alış fiyatlarını yazar (123). Öbür kayıtları
+       sunucu da reddediyor; düğme baştan basılmasın. */
+    msg($("#msg"), "Malzeme ve matkap alış fiyatlarını girebilirsiniz; öbür tanımları yalnız görüntüleyebilirsiniz.", "warn");
   }
-  vardiyaSatirlari(); kuyuEkle();
-  yukle();
-  belgeRozet();
+  if(KIP === "sirket"){
+    sirketYukle();
+    yukle();
+    belgeRozet();
+  } else {
+    YENI_FE = FiyatEditor($("#y-fiyat"));
+    FIYAT_FE = FiyatEditor($("#f-editor"));
+    kuyuEkle();
+    yukle();
+    agacYukle().then(function(){ sihirbazSifirla(null); fiyatIsDoldur(); });
+  }
+  kilitle();
 }});
+
+/* Yetkisi olmayan düğmeler baştan basılmasın. */
+function kilitle(){
+  $$("#sp-icerik button.btn, #sp-icerik label.btn").forEach(function(b){
+    var fiyat = b.hasAttribute("data-fiyat");
+    if(!(fiyat ? FIYAT_YAZAR : YAZAR)){
+      if(b.tagName === "LABEL"){ b.style.pointerEvents = "none"; b.style.opacity = ".5"; }
+      else b.disabled = true;
+    }
+  });
+  if(!YAZAR) $$("#sb-logo, #sb-stok").forEach(function(i){ i.disabled = true; });
+}
+
+/* ---------------- sekmeler ---------------- */
+function sekmeleriCiz(){
+  $("#sekmeler").innerHTML = SEKMELER[KIP].map(function(s, i){
+    return '<button type="button" data-s="' + s[0] + '" aria-pressed="' + (i === 0) + '">' + esc(s[1]) +
+      (s[0] === "araclar" ? ' <span class="pill bad" id="belge-rozet" hidden style="margin-inline-start:6px"></span>' : '') +
+      '</button>'; }).join("");
+  sekmeAc(SEKMELER[KIP][0][0]);
+  $$("#sekmeler button").forEach(function(b){
+    b.addEventListener("click", function(){ sekmeAc(b.dataset.s); window.scrollTo(0, 0); });
+  });
+}
+function sekmeAc(s){
+  $$("#sekmeler button").forEach(function(o){ o.setAttribute("aria-pressed", String(o.dataset.s === s)); });
+  $$("[data-bol]").forEach(function(x){ x.hidden = (x.dataset.bol !== s); });
+  /* Sekmeye girildiğinde o sekmenin kendi verisi okunuyor. */
+  if(s === "araclar") belgeYukle();
+  if(s === "listeler" && !MARKALAR.length) markaYukle();
+  if(s === "malzeme" && !MF) malzemeFiyatYukle();
+  if(s === "matkap" && !MT) matkapYukle();
+  if(s === "fiyatlar") fiyatSekmesi();
+}
 
 /* Sekme rozeti: tek sayı, açılışta soruluyor. Tam liste sekmeye
    girildiğinde okunuyor. */
@@ -385,145 +555,42 @@ function belgeRozet(){
 }
 
 function yukle(){
-  msg($("#msg"), "Yükleniyor…");
   return sb.rpc("anaveri").then(function(r){
     if(r.error){ msg($("#msg"), esc(r.error.message), "err"); return; }
     D = r.data || {};
-    msg($("#msg"), "");
     ciz();
   });
 }
 
-/* ---------------- sekmeler ---------------- */
-$$("#sekmeler button").forEach(function(b){
-  b.addEventListener("click", function(){
-    $$("#sekmeler button").forEach(function(o){ o.setAttribute("aria-pressed", String(o===b)); });
-    $$("[data-bol]").forEach(function(s){ s.hidden = (s.dataset.bol !== b.dataset.s); });
-    /* Sekmeye girildiğinde o sekmenin kendi verisi okunuyor. Açılışta
-       hepsini okumak sayfayı yavaşlatıyordu; belge durumu ve marka
-       listesi `anaveri()` içinde değil. */
-    if(b.dataset.s === "araclar") belgeYukle();
-    if(b.dataset.s === "malzeme" && !MARKALAR.length) markaYukle();
-    window.scrollTo(0,0);
-  });
-});
-
-/* ---------------- listeler ---------------- */
-function ciz(){
-  $("#proje-tablo").innerHTML = tablo([
-    ["Müşteri",  function(r){ return esc(r.musteri || "—"); }],
-    ["Proje",    function(r){ return "<b>"+esc(r.name)+"</b>"; }],
-    ["Şantiye",  function(r){ return esc(r.site_name || "—"); }],
-    ["Yer",      function(r){ return esc([r.city, r.district].filter(Boolean).join(" / ") || "—"); }],
-    ["Vardiya",  function(r){ return (r.vardiyalar||[]).map(function(v){
-        return '<div class="hint">'+v.slot+". "+esc(v.label)+" · "+String(v.starts).slice(0,5)+
-               "–"+String(v.ends).slice(0,5)+(v.next_day?" · gece yarısını geçer":"")+"</div>"; }).join("")
-        || '<span class="hint">tanımsız</span>'; }],
-    ["Kuyu",     function(r){ return '<span class="num">'+(r.kuyu||0)+'</span>'; }],
-    ["Makine",   function(r){ return '<span class="num">'+(r.makine||0)+'</span>'; }],
-    /* Şef tabloda da görünüyor: yöneticinin "hangi sahanın şefi kim"
-       sorusunu tek bakışta cevaplaması gerekiyor (54. dosya). */
-    ["Şef",      function(r){ return r.sef ? esc(r.sef)
-                     : '<span class="hint">atanmadı</span>'; }],
-    ["Sözleşme", function(r){ return (r.contract_start || r.contract_end)
-                     ? '<span class="hint">'+trd(r.contract_start)+" – "+trd(r.contract_end)+'</span>'
-                     : '<span class="hint">girilmedi</span>'; }],
-    ["Durum",    function(r){ return esc(r.status); }]
-  ], D.projects, "Henüz proje açılmamış.");
-
-  $("#makine-tablo").innerHTML = tablo([
-    ["Kod",     function(r){ return "<b>"+esc(r.code)+"</b>"; }],
-    ["Model",   function(r){ return esc(r.model || "—"); }],
-    ["Seri no", function(r){ return esc(r.serial_no || "—"); }],
-    ["Şantiye", function(r){ return esc(r.santiye || "—"); }],
-    ["Bakım",   function(r){ return '<span class="num">'+(r.maint_days||10)+'</span> gün / ' +
-                  '<span class="num">'+tl(r.maint_hours||250,0)+'</span> saat'; }]
-  ], D.machines, "Makine tanımlanmamış.");
-
-  $("#arac-tablo").innerHTML = tablo([
-    ["Plaka / ad", function(r){ return "<b>"+esc(r.plate)+"</b>"; }],
-    ["Tür",        function(r){ return esc(TUR_AD[r.fuel_class] || r.fuel_class || "—"); }],
-    ["Şantiye",    function(r){ return r.santiye ? esc(r.santiye) :
-                      '<span class="hint">bağlı değil — her sahada görünür</span>'; }]
-  ], D.vehicles, "Araç tanımlanmamış.");
-
-  $("#personel-tablo").innerHTML = tablo([
-    ["Ad soyad", function(r){ return "<b>"+esc(r.full_name)+"</b>"; }],
-    ["Görev",    function(r){ return esc(GOREV_AD[r.kind] || r.kind || "—"); }],
-    ["Şantiye",  function(r){ return r.santiye ? esc(r.santiye) :
-                    '<span class="hint">atanmamış</span>'; }]
-  ], D.personnel, "Personel tanımlanmamış.");
-
-  $("#malzeme-tablo").innerHTML = tablo([
-    ["Malzeme",  function(r){ return "<b>"+esc(r.name)+"</b>"; }],
-    ["Birim",    function(r){ return esc(r.unit); }],
-    ["Kategori", function(r){ return esc(r.category || "—"); }]
-  ], D.materials, "Malzeme tanımlanmamış.");
-
-  $("#musteri-tablo").innerHTML = tablo([
-    ["Müşteri", function(r){ return "<b>"+esc(r.name)+"</b>"; }],
-    ["Vergi no", function(r){ return esc(r.tax_no || "—"); }],
-    ["Projesi", function(r){
-       var n = (D.projects||[]).filter(function(p){ return p.employer_id === r.id; }).length;
-       return '<span class="num">'+n+'</span>'; }]
-  ], D.employers, "Müşteri tanımlanmamış.");
-
-  $("#program-liste").innerHTML = (D.programs||[]).map(function(p){
-    return '<span class="sahaetiket" style="display:inline-block;margin:2px 4px 2px 0;' +
-      'border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px">' +
-      esc(p.name) + '</span>'; }).join("") || '<div class="hint">Program tanımlanmamış.</div>';
-
-  /* seçiciler */
-  secDoldur("#p-musteri", D.employers, "name", "— yeni müşteri gireceğim —");
-  secDoldur("#a-proje", D.projects, "ad2", "— şantiyeye bağlı değil —");
-  /* Şef seçimi: yalnız görevi "şantiye şefi" olan personel. Listede
-     sondör çıkmıyor — sunucu zaten reddediyor, ama reddedilecek bir şeyi
-     seçtirmek hata değil tuzak olur. */
-  secDoldur("#sf-proje", (D.projects||[]).filter(function(p){ return p.status === "active"; }),
-            "ad2", "— şantiye seçin —");
-  secDoldur("#sf-sef", (D.personnel||[]).filter(function(p){ return p.kind === "santiye_sefi"; }),
-            "full_name", "— şef atanmadı —");
-  sefFormDoldur();
-  kutuCiz("#makine-sec", D.machines, function(m){
-    return m.code + (m.santiye ? " · " + m.santiye : ""); }, "makine");
-  kutuCiz("#personel-sec", D.personnel, function(p){
-    return p.full_name + " · " + (GOREV_AD[p.kind] || p.kind) +
-           (p.santiye ? " · " + p.santiye : ""); }, "personel");
-  kutuCiz("#arac-sec", D.vehicles, function(v){
-    return v.plate + " · " + (TUR_AD[v.fuel_class] || ""); }, "arac");
-}
-/* ---------------- şantiye şefi ve sözleşme (54. · 59. dosya) ---------------- */
-function sefFormDoldur(){
-  var pid = $("#sf-proje") ? $("#sf-proje").value : "";
-  var p = (D.projects||[]).filter(function(x){ return x.id === pid; })[0];
-  $("#sf-sef").value = (p && p.chief_personnel_id) || "";
-  $("#sf-bas").value = (p && p.contract_start) || "";
-  $("#sf-bit").value = (p && p.contract_end)    || "";
-  var d = [];
-  if(!pid) d.push("Değiştirmek istediğiniz şantiyeyi seçin.");
-  else {
-    d.push(p && p.sef ? "Şu anki şef: " + esc(p.sef) : "Bu şantiyede şef atanmamış.");
-    if(!(p && p.contract_end))
-      d.push("Sözleşme bitişi girilmediği için analizde ileri/geri satırı çıkmıyor.");
-  }
-  $("#sf-durum").innerHTML = d.join(" ");
-}
+/* ---------------- yardımcılar ---------------- */
 var TUR_AD = {kule_destek:"Saha ekipmanı", pickup:"Pikap", kamyon:"Kamyon",
               servis:"Servis", bilinmiyor:"Bilinmiyor", gider_notu:"Gider notu"};
 var GOREV_AD = {formen:"Formen", yardimci:"Yardımcı personel", sondor:"Sondör", sondor_yardimcisi:"Sondör yardımcısı", alt_eleman:"İşçi",
                 sofor:"Şoför", santiye_sefi:"Şantiye şefi", destek:"Destek", diger:"Diğer"};
-
-function secDoldur(sel, liste, alan, bos){
+function bugun(){ return new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function v(id){ var e = $("#" + id); return e ? String(e.value || "").trim() : ""; }
+function alan(id, etiket, deger, tur, ek, sinif){
+  return '<div class="field' + (sinif ? ' ' + sinif : '') + '"><label for="' + id + '">' + etiket + '</label>' +
+    '<input id="' + id + '"' + (tur ? ' type="' + tur + '"' : '') +
+    ' value="' + esc(deger == null ? "" : deger) + '"' + (ek || "") + '></div>';
+}
+function secim(id, etiket, secenekler, deger, sinif){
+  return '<div class="field' + (sinif ? ' ' + sinif : '') + '"><label for="' + id + '">' + etiket + '</label>' +
+    '<select id="' + id + '">' + secenekler.map(function(s){
+      return '<option value="' + esc(s[0]) + '"' + (String(s[0]) === String(deger == null ? "" : deger) ? " selected" : "") + '>' +
+        esc(s[1]) + '</option>'; }).join("") + '</select></div>';
+}
+function secDoldur(sel, liste, alanAd, bos){
   var el = $(sel); if(!el) return;
   var cur = el.value;
   el.innerHTML = '<option value="">'+esc(bos)+'</option>' + (liste||[]).map(function(x){
-    var ad = (alan === "ad2") ? ((x.site_name || x.name)) : x[alan];
+    var ad = (alanAd === "ad2") ? ((x.site_name || x.name)) : x[alanAd];
     return '<option value="'+x.id+'">'+esc(ad)+'</option>'; }).join("");
   if(cur) el.value = cur;
 }
 function kutuCiz(sel, liste, etiket, ad){
   var el = $(sel); if(!el) return;
-  if(!liste || !liste.length){ el.innerHTML = '<div class="hint">Önce '+ad+' tanımlayın.</div>'; return; }
+  if(!liste || !liste.length){ el.innerHTML = '<div class="hint">Önce '+ad+' tanımlayın (Şirket tanımları).</div>'; return; }
   el.innerHTML = liste.map(function(x){
     return '<label><input type="checkbox" value="'+x.id+'"> '+esc(etiket(x))+'</label>'; }).join("");
   el.querySelectorAll("input").forEach(function(i){
@@ -534,45 +601,783 @@ function kutuCiz(sel, liste, etiket, ad){
 function secilen(sel){
   return $$(sel + " input:checked").map(function(i){ return i.value; });
 }
+function hataYaz(sel, e){ msg($(sel), esc((e && e.message) || String(e)), "err"); }
 
-/* ---------------- vardiya düzeni ---------------- */
+/* ---------------- listeler (anaveri) ---------------- */
+function ciz(){
+  if(KIP === "sirket"){
+    $("#makine-tablo").innerHTML = tablo([
+      ["Kod",     function(r){ return "<b>"+esc(r.code)+"</b>"; }],
+      ["Model",   function(r){ return esc(r.model || "—"); }],
+      ["Seri no", function(r){ return esc(r.serial_no || "—"); }],
+      ["Şantiye", function(r){ return esc(r.santiye || "—"); }],
+      ["Bakım",   function(r){ return '<span class="num">'+(r.maint_days||10)+'</span> gün / ' +
+                    '<span class="num">'+tl(r.maint_hours||250,0)+'</span> saat'; }]
+    ], D.machines, "Makine tanımlanmamış.");
+    $("#arac-tablo").innerHTML = tablo([
+      ["Plaka / ad", function(r){ return "<b>"+esc(r.plate)+"</b>"; }],
+      ["Tür",        function(r){ return esc(TUR_AD[r.fuel_class] || r.fuel_class || "—"); }],
+      ["Şantiye",    function(r){ return r.santiye ? esc(r.santiye) :
+                        '<span class="hint">bağlı değil — her sahada görünür</span>'; }]
+    ], D.vehicles, "Araç tanımlanmamış.");
+    $("#personel-tablo").innerHTML = tablo([
+      ["Ad soyad", function(r){ return "<b>"+esc(r.full_name)+"</b>"; }],
+      ["Görev",    function(r){ return esc(GOREV_AD[r.kind] || r.kind || "—"); }],
+      ["Şantiye",  function(r){ return r.santiye ? esc(r.santiye) :
+                      '<span class="hint">atanmamış</span>'; }]
+    ], D.personnel, "Personel tanımlanmamış.");
+    $("#program-liste").innerHTML = (D.programs||[]).map(function(p){
+      return '<span class="sahaetiket" style="display:inline-block;margin:2px 4px 2px 0;' +
+        'border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px">' +
+        esc(p.name) + '</span>'; }).join("") || '<div class="hint">Program tanımlanmamış.</div>';
+    secDoldur("#a-proje", D.projects, "ad2", "— şantiyeye bağlı değil —");
+    return;
+  }
+  kutuCiz("#makine-sec", D.machines, function(m){
+    return m.code + (m.santiye ? " · " + m.santiye : ""); }, "makine");
+  kutuCiz("#personel-sec", (D.personnel || []).filter(function(p){ return p.kind !== "santiye_sefi"; }), function(p){
+    return p.full_name + " · " + (GOREV_AD[p.kind] || p.kind) +
+           (p.santiye ? " · " + p.santiye : ""); }, "personel");
+  kutuCiz("#arac-sec", D.vehicles, function(x){
+    return x.plate + " · " + (TUR_AD[x.fuel_class] || ""); }, "araç");
+  kuyuCiz();
+}
+
+/* ============================================================
+   ŞİRKET BİLGİLERİ · STOK AYARI
+   ============================================================ */
+var KIMLIK_ALAN = ["kisa_ad","vergi_dairesi","vergi_no","mersis","adres","il","ilce",
+                   "telefon","eposta","web","yetkili","yetkili_unvan"];
+function sirketYukle(){
+  return sb.rpc("tanim_sirket").then(function(r){
+    if(r.error){ msg($("#sb-msg"), esc(r.error.message), "err"); return; }
+    SIRKET = r.data || {};
+    var k = SIRKET.kimlik || {};
+    $("#sb-unvan").value = SIRKET.unvan || "";
+    KIMLIK_ALAN.forEach(function(a){ $("#sb-" + a).value = k[a] || ""; });
+    $("#sb-stok").checked = !!SIRKET.stok;
+    LOGO_YENI = undefined;
+    logoCiz(SIRKET.logo);
+  });
+}
+function logoCiz(src){
+  $("#sb-logo-kutu").innerHTML = src ? '<img src="' + esc(src) + '" alt="Şirket logosu">'
+                                     : '<span class="hint">Logo yok</span>';
+}
+$("#sb-logo").addEventListener("change", function(){
+  var f = this.files && this.files[0]; this.value = "";
+  if(!f) return;
+  if(!/^image\/(png|jpeg|svg\+xml|webp)$/.test(f.type)){ msg($("#sb-msg"), "Logo PNG, JPG, SVG ya da WEBP olmalı.", "err"); return; }
+  if(f.size > 300 * 1024){ msg($("#sb-msg"), "Logo 300 KB'ı geçmemeli (bu dosya " + Math.round(f.size / 1024) + " KB).", "err"); return; }
+  var okuyucu = new FileReader();
+  okuyucu.onload = function(){ LOGO_YENI = okuyucu.result; logoCiz(LOGO_YENI);
+    msg($("#sb-msg"), "Logo seçildi — kaydedince geçerli olur.", "warn"); };
+  okuyucu.readAsDataURL(f);
+});
+$("#btn-logo-kaldir").addEventListener("click", function(){
+  LOGO_YENI = null; logoCiz(null);
+  msg($("#sb-msg"), "Logo kaldırılacak — kaydedince geçerli olur.", "warn");
+});
+function sirketKaydet(stokDa, msgSel, btn){
+  var p = {unvan: v("sb-unvan")};
+  if(!p.unvan){ msg($("#sb-msg"), "Unvan zorunlu.", "err"); $("#sb-unvan").focus(); return; }
+  KIMLIK_ALAN.forEach(function(a){ p[a] = v("sb-" + a); });
+  if(LOGO_YENI !== undefined) p.logo = LOGO_YENI;
+  if(stokDa) p.stok = $("#sb-stok").checked;
+  btn.disabled = true; msg($(msgSel), "Kaydediliyor…");
+  sb.rpc("tanim_sirket_kaydet", {p:p}).then(function(r){
+    btn.disabled = false;
+    if(r.error){ msg($(msgSel), esc(r.error.message), "err"); return; }
+    SIRKET = r.data || {}; LOGO_YENI = undefined; logoCiz(SIRKET.logo);
+    msg($(msgSel), stokDa ? ("Stok takibi " + (SIRKET.stok ? "açık." : "kapalı.") +
+          " Sayfaları yenileyince geçerli olur.") : "Kaydedildi.", "ok");
+    document.body.classList.toggle("stoksuz", !SIRKET.stok);
+    if(stokDa && MF) malzemeFiyatYukle();
+  }, function(e){ btn.disabled = false; hataYaz(msgSel, e); });
+}
+$("#btn-sb-kaydet").addEventListener("click", function(){ sirketKaydet(false, "#sb-msg", this); });
+$("#btn-stok-kaydet").addEventListener("click", function(){ sirketKaydet(true, "#stok-msg", this); });
+
+/* ============================================================
+   MALZEME ALIŞ FİYATI (123) · asgari stok (132)
+   ============================================================ */
+function malzemeFiyatYukle(){
+  return sb.rpc("malzeme_fiyatlari_liste").then(function(r){
+    if(r.error){ $("#malzeme-tablo").innerHTML = '<div class="msg err">' + esc(r.error.message) + '</div>'; return; }
+    MF = r.data || {}; malzemeFiyatCiz();
+  });
+}
+function malzemeFiyatCiz(){
+  var s = MF.satirlar || [], stok = !!MF.stok, yaz = FIYAT_YAZAR && MF.yazabilir;
+  var fiyatsiz = s.filter(function(x){ return x.fiyat == null; }).length;
+  msg($("#mf-uyari"), fiyatsiz ? "<b>Fiyatı girilmemiş " + fiyatsiz + " malzeme var.</b> Bunların tüketimi maliyette görünmez." : "",
+      "warn");
+  $("#malzeme-tablo").innerHTML = s.length ? '<table class="mf"><thead><tr><th>Malzeme</th><th>Birim</th>' +
+    '<th class="num">Güncel alış fiyatı</th><th>Yeni fiyat</th><th>Geçerlilik</th>' +
+    (stok ? '<th class="stok-yalniz">Asgari stok</th>' : '') + '<th></th></tr></thead><tbody>' +
+    s.map(function(x){
+      var gecmis = (x.gecmis || []).length;
+      return '<tr data-id="' + x.id + '"><td><b>' + esc(x.ad) + '</b>' + (x.kategori ? '<div class="hint">' + esc(x.kategori) + '</div>' : '') + '</td>' +
+        '<td>' + esc(x.birim || "") + '</td>' +
+        '<td class="num">' + (x.fiyat != null ? '<b>' + tl(x.fiyat) + '</b><div class="hint">' + trd(x.gecerli) + "'den" +
+            (gecmis > 1 ? ' · ' + (gecmis - 1) + ' eski fiyat' : '') + '</div>' : '<span class="pill warn">girilmedi</span>') + '</td>' +
+        '<td><input class="mf-fiyat" type="number" step="0.01" min="0" inputmode="decimal" placeholder="₺ / ' + esc(x.birim || "birim") + '"' + (yaz ? '' : ' disabled') + '></td>' +
+        '<td><input class="mf-tarih" type="date" value="' + bugun() + '"' + (yaz ? '' : ' disabled') + '></td>' +
+        (stok ? '<td class="stok-yalniz"><input class="mf-asgari" type="number" step="0.01" min="0" value="' + esc(x.asgari_stok == null ? "" : x.asgari_stok) + '"' + (yaz ? '' : ' disabled') + '></td>' : '') +
+        '<td><button class="btn gh sm mf-kaydet" type="button" data-fiyat="1"' + (yaz ? '' : ' disabled') + '>Kaydet</button></td></tr>';
+    }).join("") + '</tbody></table>' : '<div class="hint">Malzeme tanımlanmamış.</div>';
+}
+$("#malzeme-tablo").addEventListener("click", function(e){
+  var b = e.target.closest(".mf-kaydet"); if(!b) return;
+  var tr = b.closest("tr"), x = (MF.satirlar || []).filter(function(s){ return s.id === tr.dataset.id; })[0] || {};
+  var f = tr.querySelector(".mf-fiyat").value, as = tr.querySelector(".mf-asgari");
+  var asgariDegisti = !!(as && String(as.value) !== String(x.asgari_stok == null ? "" : x.asgari_stok));
+  if(f === "" && !asgariDegisti){ msg($("#mf-msg"), "Önce yeni fiyatı yazın.", "err"); tr.querySelector(".mf-fiyat").focus(); return; }
+  if(f !== "" && Number(f) < 0){ msg($("#mf-msg"), "Fiyat eksi olamaz.", "err"); return; }
+  b.disabled = true; msg($("#mf-msg"), "Kaydediliyor…");
+  sb.rpc("malzeme_fiyat_kaydet", {p_malzeme:tr.dataset.id, p_fiyat:f === "" ? null : Number(f),
+    p_gecerli:tr.querySelector(".mf-tarih").value || null,
+    p_asgari:as && as.value !== "" ? Number(as.value) : null, p_asgari_yaz:asgariDegisti}).then(function(r){
+    b.disabled = false;
+    if(r.error){ msg($("#mf-msg"), esc(r.error.message), "err"); return; }
+    MF = r.data || {}; malzemeFiyatCiz();
+    msg($("#mf-msg"), "“" + esc(x.ad) + "” kaydedildi.", "ok");
+  }, function(err){ b.disabled = false; hataYaz("#mf-msg", err); });
+});
+
+/* ============================================================
+   MATKAP ALIŞ FİYATI
+   ============================================================ */
+function matkapYukle(){
+  if(!$("#mt-gecerli").value) $("#mt-gecerli").value = bugun();
+  return sb.rpc("matkap_fiyatlari_liste").then(function(r){
+    if(r.error){ $("#matkap-tablo").innerHTML = '<div class="msg err">' + esc(r.error.message) + '</div>'; return; }
+    MT = r.data || {}; matkapCiz();
+  });
+}
+function matkapCiz(){
+  var caplar = MT.caplar || [], m = (MT.markalar || []).filter(function(x){ return x.aktif || Object.keys(x.fiyatlar || {}).length; });
+  var yaz = FIYAT_YAZAR && MT.yazabilir;
+  $("#matkap-tablo").innerHTML = m.length ? '<table class="mf mt"><thead><tr><th>Marka</th>' +
+    caplar.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+    m.map(function(x){
+      return '<tr data-id="' + x.id + '"><td><b>' + esc(x.ad) + '</b>' + (x.aktif ? '' : ' <span class="pill warn">pasif</span>') + '</td>' +
+        caplar.map(function(c){ var f = (x.fiyatlar || {})[c];
+          return '<td><div class="mt-guncel">' + (f ? tl(f.fiyat) + ' <span class="hint">' + trd(f.gecerli) + '</span>' : '<span class="hint">—</span>') + '</div>' +
+            '<input class="mt-f" data-cap="' + esc(c) + '" type="number" step="0.01" min="0" inputmode="decimal" placeholder="yeni"' + (yaz ? '' : ' disabled') + '></td>'; }).join("") +
+        '</tr>'; }).join("") + '</tbody></table>' : '<div class="hint">Matkap markası tanımlanmamış (Seçim listeleri).</div>';
+}
+$("#btn-matkap-kaydet").addEventListener("click", function(){
+  var btn = this, isler = [];
+  $$("#matkap-tablo .mt-f").forEach(function(i){
+    if(i.value === "") return;
+    isler.push({p_marka:i.closest("tr").dataset.id, p_cap:i.dataset.cap, p_fiyat:Number(i.value),
+                p_gecerli:$("#mt-gecerli").value || null});
+  });
+  if(!isler.length){ msg($("#mt-msg"), "Yeni fiyat yazılmadı.", "err"); return; }
+  if(isler.some(function(x){ return x.p_fiyat < 0; })){ msg($("#mt-msg"), "Fiyat eksi olamaz.", "err"); return; }
+  btn.disabled = true; msg($("#mt-msg"), "Kaydediliyor…");
+  var hata = null, sira = Promise.resolve();
+  isler.forEach(function(x){ sira = sira.then(function(){ if(hata) return;
+    return sb.rpc("matkap_fiyat_kaydet", x).then(function(r){ if(r.error) hata = r.error; else MT = r.data || MT; }); }); });
+  sira.then(function(){
+    btn.disabled = false; matkapCiz();
+    if(hata) msg($("#mt-msg"), esc(hata.message), "err");
+    else msg($("#mt-msg"), isler.length + " fiyat kaydedildi.", "ok");
+  }, function(e){ btn.disabled = false; hataYaz("#mt-msg", e); });
+});
+
+/* ============================================================
+   SÖZLEŞME FİYAT EDİTÖRÜ (123) — sihirbazın 3. adımı ve Fiyatlar sekmesi
+   ============================================================
+   Dört blok: delgi metrajı (derinlik dilimi × çap), muhafaza borusu
+   (çap; fiyat, tavan), bekleme (saat; ücretli sebepler, ücretsiz ilk
+   saatler), diğer kalemler. Her kalem: ayrı ödenir / fiyata dahil /
+   sözleşmede yok. "Ayrı ödenir" fiyatsız kaydedilmez; "sözleşmede yok"
+   kalem sahada yapılırsa hakedişte "fiyatsız kalem" uyarısı çıkar.
+   ============================================================ */
+var FE_CAP = ["PQ","HQ","NQ"], FE_CAP_EK = ["BQ","PQ3","HQ3","NQ3"];
+var FE_MUH = ["PW","HW","NW","BW"];
+var FE_DIGER = [["olcum","Kuyu ölçümü","adet"],["mobilizasyon","Mobilizasyon","sefer"],
+                ["demobilizasyon","Demobilizasyon","sefer"],["tasima","Saha içi taşıma","sefer"],
+                ["egim_farki","Eğim fiyat farkı","metre"]];
+var FE_SEBEP = [["su","Su"],["musteri","Müşteri"],["malzeme","Malzeme / parça"],["hava","Hava"],
+                ["yol","Yol / erişim"],["diger","Diğer"]];
+var FE_DURUM = [["ayri","Ayrı ödenir"],["dahil","Fiyata dahil"],["yok","Sözleşmede yok"]];
+function FiyatEditor(kok){
+  var S = null;
+  function bos(gecerli){
+    return {gecerli:gecerli || bugun(), para:"TRY", caplar:FE_CAP.slice(),
+      dilim:[{bas:0,bit:100,f:{}},{bas:100,bit:200,f:{}},{bas:200,bit:300,f:{}},{bas:300,bit:"",f:{}}],
+      muh:FE_MUH.map(function(c){ return {cap:c, durum:"yok", fiyat:"", tavan:"", aciklama:""}; }),
+      bek:{durum:"yok", fiyat:"", ucretsiz:"", ucretli:["musteri","yol"], aciklama:""},
+      diger:FE_DIGER.map(function(d){ return {tur:d[0], etiket:d[1], birim:d[2], durum:"yok", fiyat:"", aciklama:"", sabit:true}; })};
+  }
+  function yukle(d, varsayilanTarih){
+    S = bos(varsayilanTarih);
+    if(!d || !d.liste){ ciz(); return; }
+    S.gecerli = d.liste.gecerli || S.gecerli; S.para = d.liste.para_birimi || "TRY";
+    var bek = d.liste.bekleme || {};
+    if(Array.isArray(bek.ucretli)) S.bek.ucretli = bek.ucretli.slice();
+    S.bek.ucretsiz = bek.ucretsiz_saat == null ? "" : bek.ucretsiz_saat;
+    var dil = {}, sira = [];
+    (d.kalemler || []).forEach(function(k){
+      var f = k.fiyat == null ? "" : Number(k.fiyat);
+      if(k.tur === "sondaj"){
+        var anah = Number(k.bas || 0) + "|" + (k.bit == null ? "" : Number(k.bit));
+        if(!dil[anah]){ dil[anah] = {bas:Number(k.bas || 0), bit:k.bit == null ? "" : Number(k.bit), f:{}}; sira.push(anah); }
+        var c = k.cap || "—";
+        if(S.caplar.indexOf(c) < 0) S.caplar.push(c);
+        dil[anah].f[c] = f;
+      } else if(k.tur === "muhafaza"){
+        var m = S.muh.filter(function(x){ return x.cap === k.cap; })[0];
+        if(!m){ m = {cap:k.cap}; S.muh.push(m); }
+        m.durum = k.durum; m.fiyat = f; m.tavan = k.tavan == null ? "" : Number(k.tavan); m.aciklama = k.aciklama || "";
+      } else if(k.tur === "bekleme"){
+        S.bek.durum = k.durum; S.bek.fiyat = f; S.bek.aciklama = k.aciklama || "";
+      } else {
+        var s = S.diger.filter(function(x){ return x.sabit && x.tur === k.tur && !x.dolu; })[0];
+        if(!s){ s = {tur:k.tur, etiket:k.etiket || k.tur, birim:k.birim || "adet", sabit:false}; S.diger.push(s); }
+        s.dolu = true; s.durum = k.durum; s.fiyat = f; s.aciklama = k.aciklama || "";
+        if(!s.sabit){ s.etiket = k.etiket || s.etiket; s.birim = k.birim || s.birim; }
+      }
+    });
+    if(sira.length) S.dilim = sira.map(function(a){ return dil[a]; })
+                                  .sort(function(a, b){ return a.bas - b.bas; });
+    ciz();
+  }
+  function durumSec(sinif, deger){
+    return '<select class="' + sinif + '">' + FE_DURUM.map(function(d){
+      return '<option value="' + d[0] + '"' + (d[0] === deger ? " selected" : "") + '>' + d[1] + '</option>'; }).join("") + '</select>';
+  }
+  function sayi(sinif, deger, ek){
+    return '<input class="' + sinif + '" type="number" step="0.01" min="0" inputmode="decimal" value="' +
+      esc(deger === "" || deger == null ? "" : deger) + '"' + (ek || "") + '>';
+  }
+  function ciz(){
+    var h = '<div class="fe">' +
+      '<div class="satir"><div class="field"><label>Geçerlilik başlangıcı *</label><input class="fe-gecerli" type="date" value="' + esc(S.gecerli) + '"></div>' +
+      '<div class="field"><label>Para birimi</label><select class="fe-para">' + ["TRY","USD","EUR"].map(function(p){
+        return '<option' + (p === S.para ? " selected" : "") + '>' + p + '</option>'; }).join("") + '</select></div></div>';
+    /* 1 · delgi */
+    h += '<div class="fe-blok"><h4>1 · Delgi metrajı <span>birim fiyat / metre</span></h4>' +
+      '<div class="not">Satır: derinlik dilimi · sütun: çap. Boş hücre = o çapta o derinlikte sözleşmede fiyat yok. ' +
+      'Son dilimin bitişi boşsa "ve üzeri".</div>' +
+      '<div class="scroll"><table class="fe-tbl"><thead><tr><th>Başlangıç (m)</th><th>Bitiş (m)</th>' +
+      S.caplar.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join("") + '<th></th></tr></thead><tbody>' +
+      S.dilim.map(function(d, i){
+        return '<tr data-i="' + i + '"><td>' + sayi("fe-bas", d.bas) + '</td><td>' + sayi("fe-bit", d.bit, ' placeholder="ve üzeri"') + '</td>' +
+          S.caplar.map(function(c){ return '<td>' + sayi("fe-c", d.f[c], ' data-cap="' + esc(c) + '" placeholder="—"') + '</td>'; }).join("") +
+          '<td><button class="btn gh sm fe-dsil" type="button" title="Dilimi sil">×</button></td></tr>'; }).join("") +
+      '</tbody></table></div>' +
+      '<div class="satir fe-ara"><button class="btn gh sm fe-dekle" type="button">+ Dilim</button>' +
+      '<select class="fe-yenicap">' + FE_CAP_EK.filter(function(c){ return S.caplar.indexOf(c) < 0; }).map(function(c){
+        return '<option>' + c + '</option>'; }).join("") + '</select>' +
+      '<button class="btn gh sm fe-cekle" type="button">+ Çap</button></div></div>';
+    /* 2 · muhafaza */
+    h += '<div class="fe-blok"><h4>2 · Muhafaza borusu <span>birim fiyat / metre</span></h4>' +
+      '<div class="not">Tavan: sözleşmenin "en çok bu metraj karşılanır" dediği metre; boşsa sınır yok.</div>' +
+      '<div class="scroll"><table class="fe-tbl"><thead><tr><th>Çap</th><th>Durum</th><th>Birim fiyat</th><th>Tavan (m)</th><th>Sözleşme maddesi</th></tr></thead><tbody>' +
+      S.muh.map(function(m, i){
+        return '<tr data-i="' + i + '"><td><b>' + esc(m.cap) + '</b></td><td>' + durumSec("fe-du", m.durum) + '</td>' +
+          '<td>' + sayi("fe-f", m.fiyat) + '</td><td>' + sayi("fe-t", m.tavan) + '</td>' +
+          '<td><input class="fe-n" value="' + esc(m.aciklama || "") + '" placeholder="madde 7.2"></td></tr>'; }).join("") +
+      '</tbody></table></div></div>';
+    /* 3 · bekleme */
+    h += '<div class="fe-blok fe-bek"><h4>3 · Bekleme <span>birim fiyat / saat</span></h4>' +
+      '<div class="satir"><div class="field"><label>Durum</label>' + durumSec("fe-du", S.bek.durum) + '</div>' +
+      '<div class="field"><label>Saat fiyatı</label>' + sayi("fe-f", S.bek.fiyat) + '</div>' +
+      '<div class="field"><label>Her vardiyada ücretsiz ilk</label>' + sayi("fe-bu", S.bek.ucretsiz, ' placeholder="saat"') + '</div>' +
+      '<div class="field genis"><label>Sözleşme maddesi</label><input class="fe-n" value="' + esc(S.bek.aciklama || "") + '"></div></div>' +
+      '<div class="hint" style="margin:2px 0 4px">Ücretli bekleme sebepleri (işaretsizler hakedişe girmez):</div>' +
+      '<div class="secimler">' + FE_SEBEP.map(function(s){
+        var on = S.bek.ucretli.indexOf(s[0]) > -1;
+        return '<label class="' + (on ? "sec" : "") + '"><input type="checkbox" class="fe-seb" value="' + s[0] + '"' + (on ? " checked" : "") + '> ' + s[1] + '</label>'; }).join("") +
+      '</div></div>';
+    /* 4 · diğer */
+    h += '<div class="fe-blok"><h4>4 · Diğer kalemler</h4>' +
+      '<div class="scroll"><table class="fe-tbl"><thead><tr><th>Kalem</th><th>Birim</th><th>Durum</th><th>Birim fiyat</th><th>Sözleşme maddesi</th><th></th></tr></thead><tbody>' +
+      S.diger.map(function(d, i){
+        return '<tr data-i="' + i + '"><td>' + (d.sabit ? '<b>' + esc(d.etiket) + '</b>' : '<input class="fe-ad" value="' + esc(d.etiket || "") + '" placeholder="kalem adı">') + '</td>' +
+          '<td>' + (d.sabit ? esc(d.birim) : '<input class="fe-birim" value="' + esc(d.birim || "") + '" style="max-width:90px">') + '</td>' +
+          '<td>' + durumSec("fe-du", d.durum) + '</td><td>' + sayi("fe-f", d.fiyat) + '</td>' +
+          '<td><input class="fe-n" value="' + esc(d.aciklama || "") + '"></td>' +
+          '<td>' + (d.sabit ? '' : '<button class="btn gh sm fe-gsil" type="button" title="Kalemi sil">×</button>') + '</td></tr>'; }).join("") +
+      '</tbody></table></div><button class="btn gh sm fe-gekle" type="button">+ Kalem ekle</button></div>';
+    kok.innerHTML = h + '</div>';
+    durumlar();
+    if(KILIT) kilit(true);
+  }
+  /* "ayrı ödenir" değilse fiyat alanı kapanır */
+  function durumlar(){
+    kok.querySelectorAll(".fe-du").forEach(function(s){
+      var satir = s.closest("tr") || s.closest(".fe-bek");
+      satir.querySelectorAll(".fe-f").forEach(function(f){
+        f.disabled = s.value !== "ayri" || KILIT; if(s.value !== "ayri") f.value = ""; });
+      satir.classList.toggle("fe-pasif", s.value === "yok");
+    });
+  }
+  function oku(){
+    if(!S) return;
+    S.gecerli = kok.querySelector(".fe-gecerli").value; S.para = kok.querySelector(".fe-para").value;
+    var bloklar = kok.querySelectorAll(".fe-blok");
+    S.dilim = Array.prototype.map.call(bloklar[0].querySelectorAll("tbody tr"), function(tr){
+      var f = {}; tr.querySelectorAll(".fe-c").forEach(function(c){ f[c.dataset.cap] = c.value; });
+      return {bas:tr.querySelector(".fe-bas").value, bit:tr.querySelector(".fe-bit").value, f:f}; });
+    bloklar[1].querySelectorAll("tbody tr").forEach(function(tr, i){
+      var m = S.muh[i]; m.durum = tr.querySelector(".fe-du").value; m.fiyat = tr.querySelector(".fe-f").value;
+      m.tavan = tr.querySelector(".fe-t").value; m.aciklama = tr.querySelector(".fe-n").value; });
+    var b = bloklar[2];
+    S.bek.durum = b.querySelector(".fe-du").value; S.bek.fiyat = b.querySelector(".fe-f").value;
+    S.bek.ucretsiz = b.querySelector(".fe-bu").value; S.bek.aciklama = b.querySelector(".fe-n").value;
+    S.bek.ucretli = Array.prototype.filter.call(b.querySelectorAll(".fe-seb"), function(c){ return c.checked; })
+                      .map(function(c){ return c.value; });
+    bloklar[3].querySelectorAll("tbody tr").forEach(function(tr, i){
+      var d = S.diger[i]; d.durum = tr.querySelector(".fe-du").value; d.fiyat = tr.querySelector(".fe-f").value;
+      d.aciklama = tr.querySelector(".fe-n").value;
+      if(!d.sabit){ d.etiket = tr.querySelector(".fe-ad").value; d.birim = tr.querySelector(".fe-birim").value; } });
+  }
+  kok.addEventListener("change", function(e){
+    if(e.target.classList.contains("fe-du")) durumlar();
+    if(e.target.classList.contains("fe-seb")) e.target.closest("label").classList.toggle("sec", e.target.checked);
+  });
+  kok.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b || KILIT) return;
+    if(b.classList.contains("fe-dekle")){ oku();
+      var son = S.dilim[S.dilim.length - 1];
+      S.dilim.push({bas:son && son.bit !== "" ? son.bit : "", bit:"", f:{}}); ciz(); }
+    else if(b.classList.contains("fe-dsil")){ oku(); S.dilim.splice(Number(b.closest("tr").dataset.i), 1);
+      if(!S.dilim.length) S.dilim.push({bas:0, bit:"", f:{}}); ciz(); }
+    else if(b.classList.contains("fe-cekle")){ oku(); var c = kok.querySelector(".fe-yenicap").value;
+      if(c && S.caplar.indexOf(c) < 0){ S.caplar.push(c); ciz(); } }
+    else if(b.classList.contains("fe-gekle")){ oku();
+      S.diger.push({tur:"diger", etiket:"", birim:"adet", durum:"ayri", fiyat:"", aciklama:"", sabit:false}); ciz();
+      var adlar = kok.querySelectorAll(".fe-ad"); if(adlar.length) adlar[adlar.length - 1].focus(); }
+    else if(b.classList.contains("fe-gsil")){ oku(); S.diger.splice(Number(b.closest("tr").dataset.i), 1); ciz(); }
+  });
+  function n(x){ return x === "" || x == null ? null : Number(String(x).replace(",", ".")); }
+  /* Sunucudaki doğrulamanın aynısı; hata erken, adım geçilmeden çıksın. */
+  function sorun(){
+    oku();
+    if(!S.gecerli) return "Geçerlilik başlangıcı zorunlu.";
+    var dolu = S.dilim.filter(function(d){ return S.caplar.some(function(c){ return n(d.f[c]) != null; }); });
+    for(var i = 0; i < dolu.length; i++){
+      var d = dolu[i];
+      if(n(d.bas) == null) return "Delgi fiyatında dilim başlangıcı eksik.";
+      if(n(d.bit) != null && n(d.bit) <= n(d.bas)) return "Derinlik dilimi ters: " + d.bas + " – " + d.bit + " m.";
+    }
+    for(var c = 0; c < S.caplar.length; c++){
+      var cap = S.caplar[c];
+      var ds = dolu.filter(function(d){ return n(d.f[cap]) != null; }).sort(function(a, b){ return n(a.bas) - n(b.bas); });
+      for(var j = 1; j < ds.length; j++){
+        if(n(ds[j - 1].bit) == null || n(ds[j - 1].bit) > n(ds[j].bas)) return "Derinlik dilimleri çakışıyor: " + cap + ".";
+      }
+    }
+    var tum = S.muh.map(function(m){ return [m, "Muhafaza " + m.cap]; })
+      .concat([[S.bek, "Bekleme"]]).concat(S.diger.map(function(d){ return [d, d.etiket || "Ek kalem"]; }));
+    for(var k = 0; k < tum.length; k++){
+      if(tum[k][0].durum === "ayri" && n(tum[k][0].fiyat) == null)
+        return "Fiyatı girilmemiş kalem: " + tum[k][1] + " — fiyatını yazın ya da \"fiyata dahil\" / \"sözleşmede yok\" seçin.";
+      if(n(tum[k][0].fiyat) != null && n(tum[k][0].fiyat) < 0) return "Fiyat eksi olamaz: " + tum[k][1] + ".";
+    }
+    if(S.diger.some(function(d){ return !d.sabit && !String(d.etiket || "").trim(); })) return "Ek kalemin adı eksik.";
+    return null;
+  }
+  function veri(){
+    oku();
+    var k = [];
+    S.dilim.forEach(function(d){ S.caplar.forEach(function(c){
+      if(n(d.f[c]) == null) return;
+      k.push({tur:"sondaj", cap:c, bas:n(d.bas), bit:n(d.bit), birim:"metre", fiyat:n(d.f[c]), durum:"ayri",
+              etiket:c + " " + n(d.bas) + (n(d.bit) == null ? " m üzeri" : "–" + n(d.bit) + " m")}); }); });
+    S.muh.forEach(function(m){
+      k.push({tur:"muhafaza", cap:m.cap, birim:"metre", durum:m.durum, fiyat:m.durum === "ayri" ? n(m.fiyat) : null,
+              tavan:n(m.tavan), etiket:"Muhafaza " + m.cap, aciklama:m.aciklama}); });
+    k.push({tur:"bekleme", birim:"saat", durum:S.bek.durum, fiyat:S.bek.durum === "ayri" ? n(S.bek.fiyat) : null,
+            etiket:"Bekleme", aciklama:S.bek.aciklama});
+    S.diger.forEach(function(d){
+      k.push({tur:d.tur, birim:d.birim || "adet", durum:d.durum, fiyat:d.durum === "ayri" ? n(d.fiyat) : null,
+              etiket:String(d.etiket || "").trim(), aciklama:d.aciklama}); });
+    return {gecerli:S.gecerli, para:S.para, bekleme:{ucretli:S.bek.ucretli, ucretsiz_saat:n(S.bek.ucretsiz)}, kalemler:k};
+  }
+  var KILIT = false;
+  function kilit(b){ KILIT = !!b;
+    kok.querySelectorAll("input, select, button").forEach(function(x){ x.disabled = KILIT; });
+    if(!KILIT) durumlar(); }
+  return {yukle:yukle, sorun:sorun, veri:veri, kilit:kilit, tarih:function(t){ if(S){ oku(); S.gecerli = t; ciz(); } }};
+}
+
+/* ============================================================
+   PROJE AĞACI — işveren → proje → şantiye
+   ============================================================ */
+var TEVKIFAT = [["","yok"],["2/10","2/10"],["3/10","3/10"],["4/10","4/10"],["5/10","5/10"],["7/10","7/10"],["9/10","9/10"],["10/10","tam"]];
+function agacYukle(){
+  return sb.rpc("proje_agaci").then(function(r){
+    if(r.error){ $("#agac").innerHTML = '<div class="msg err">' + esc(r.error.message) + '</div>'; return; }
+    AGAC = r.data || {}; agacCiz();
+  });
+}
+function tumIsler(){
+  var l = [];
+  (AGAC.isverenler || []).forEach(function(e){ (e.isler || []).forEach(function(i){ l.push([i, e.ad]); }); });
+  (AGAC.isvereni_yok || []).forEach(function(i){ l.push([i, null]); });
+  return l;
+}
+function isBul(id){ var x = tumIsler().filter(function(p){ return p[0].id === id; })[0]; return x ? x[0] : null; }
+function santiyeBul(id){
+  var s = null;
+  tumIsler().forEach(function(p){ (p[0].santiyeler || []).forEach(function(x){ if(x.id === id) s = x; }); });
+  return s;
+}
+function sablonAd(id){
+  var s = (AGAC.sablonlar || []).filter(function(x){ return x.id === id; })[0];
+  return s ? s.ad : "varsayılan";
+}
+function agacCiz(){
+  var duz = $("#duzen"); duz.hidden = true; $("#sp-icerik [data-bol=projeler]").appendChild(duz);
+  var h = (AGAC.isverenler || []).filter(function(e){ return (e.isler || []).length; }).map(isverenKart).join("");
+  if((AGAC.isvereni_yok || []).length) h += isverenKart({id:null, ad:"İşvereni girilmemiş projeler", isler:AGAC.isvereni_yok});
+  var bosIsveren = (AGAC.isverenler || []).filter(function(e){ return !(e.isler || []).length; });
+  if(bosIsveren.length) h += '<div class="card"><div class="hint">Projesi olmayan işverenler: ' +
+    bosIsveren.map(function(e){ return esc(e.ad) + (YAZAR ? ' <button class="lnk" type="button" data-duzen="isveren" data-id="' + e.id + '">düzenle</button>' : ''); }).join(" · ") + '</div></div>';
+  $("#agac").innerHTML = h || '<div class="card"><div class="hint">Henüz proje yok. "+ Yeni proje" ile başlayın.</div></div>';
+}
+function isverenKart(e){
+  return '<div class="card pj-isveren" data-isveren="' + (e.id || "") + '"><div class="pj-bas"><div><h3>' + esc(e.ad) + '</h3>' +
+    (e.id ? '<div class="hint">' + [e.vergi_no ? "Vergi no " + esc(e.vergi_no) : "", "Hakediş şablonu: " + esc(sablonAd(e.sablon_id))]
+      .filter(Boolean).join(" · ") + '</div>' : '') + '</div>' +
+    (e.id && YAZAR ? '<button class="btn gh sm" type="button" data-duzen="isveren" data-id="' + e.id + '">Düzenle</button>' : '') +
+    '</div>' + (e.isler || []).map(isBlok).join("") + '</div>';
+}
+function isBlok(i){
+  var ayr = [i.sozlesme_no ? "Sözleşme " + esc(i.sozlesme_no) : "sözleşme no girilmedi",
+             (i.baslangic || i.bitis) ? trd(i.baslangic) + " – " + trd(i.bitis) : "tarih girilmedi",
+             "KDV %" + tl(i.kdv == null ? 20 : i.kdv, 0) + (i.tevkifat ? " · tevkifat " + esc(i.tevkifat) : "")];
+  var fy = i.fiyat ? 'Fiyatlar: <b>' + i.fiyat.kalem + ' kalem</b> · ' + trd(i.fiyat.gecerli) + "'den"
+                   : '<span class="pill warn">sözleşme fiyatları girilmedi</span>';
+  return '<div class="pj-is" data-is="' + i.id + '"><div class="pj-bas"><div><b class="pj-ad">' + esc(i.ad) + '</b>' +
+    '<div class="hint">' + ayr.join(" · ") + '</div><div class="hint">' + fy + '</div></div>' +
+    '<div class="pj-dug">' + (YAZAR ? '<button class="btn gh sm" type="button" data-duzen="is" data-id="' + i.id + '">Düzenle</button>' : '') +
+    '<button class="btn gh sm" type="button" data-fiyat-ac="' + i.id + '">Fiyatlar</button>' +
+    (YAZAR ? '<button class="btn gh sm" type="button" data-santiye-ekle="' + i.id + '">+ Şantiye ekle</button>' : '') + '</div></div>' +
+    tablo([
+      ["Şantiye", function(s){ return '<b>' + esc(s.ad) + '</b>' + (s.durum !== "active" ? ' <span class="pill">' + esc(s.durum) + '</span>' : ''); }],
+      ["Yer",     function(s){ return esc([s.il, s.ilce].filter(Boolean).join(" / ") || "—"); }],
+      ["Vardiya", function(s){ return (s.vardiyalar || []).map(function(x){
+          return '<div class="hint">' + esc(x.label) + ' ' + esc(x.starts) + '–' + esc(x.ends) + '</div>'; }).join("") ||
+          '<span class="hint">tanımsız</span>'; }],
+      ["Kuyu",    function(s){ return '<span class="num">' + (s.kuyu || 0) + '</span>'; }],
+      ["Kule",    function(s){ return '<span class="num">' + (s.makine || 0) + '</span>'; }],
+      ["Ekip",    function(s){ return '<span class="num">' + (s.ekip || 0) + '</span>'; }],
+      ["Şef",     function(s){ return s.sef ? esc(s.sef) : '<span class="hint">atanmadı</span>'; }],
+      ["",        function(s){ return YAZAR ? '<button class="btn gh sm" type="button" data-duzen="santiye" data-id="' + s.id + '">Düzenle</button>' : ''; }]
+    ], i.santiyeler, "Bu projede şantiye yok.") + '</div>';
+}
+$("#agac").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.duzen) duzenAc(b.dataset.duzen, b.dataset.id, b.closest(".pj-is, .pj-isveren, .card, tr"));
+  else if(b.dataset.fiyatAc){ sekmeAc("fiyatlar"); $("#f-is").value = b.dataset.fiyatAc; fiyatSekmesi(true); window.scrollTo(0, 0); }
+  else if(b.dataset.santiyeEkle){ sihirbazSifirla(isBul(b.dataset.santiyeEkle)); sekmeAc("yeni"); window.scrollTo(0, 0); }
+});
+$("#btn-yeni-proje").addEventListener("click", function(){ sihirbazSifirla(null); sekmeAc("yeni"); window.scrollTo(0, 0); });
+
+/* ---------- ortak formlar: işveren · proje · şantiye ---------- */
+function sablonSecenek(){
+  return [["", "Varsayılan şablon"]].concat((AGAC.sablonlar || []).map(function(s){ return [s.id, s.ad]; }));
+}
+function isverenFormHtml(o, x){ x = x || {};
+  return '<div class="satir">' + alan(o + '-ad', 'İşveren adı *', x.ad, null, ' placeholder="Acacia Maden İşletmeleri A.Ş."', 'genis') +
+    alan(o + '-vergi', 'Vergi no', x.vergi_no) + '</div>' +
+    '<div class="satir">' + secim(o + '-sablon', 'Hakediş şablonu', sablonSecenek(), x.sablon_id || "") + '</div>' +
+    '<div class="not">Her müşterinin hakediş formatı farklı olabilir. Şablon yükleme Hakediş paketiyle geliyor; ' +
+    'o güne kadar varsayılan şablon kullanılır.</div>';
+}
+function isverenFormOku(o){ return {ad:v(o + "-ad"), vergi_no:v(o + "-vergi"), sablon_id:v(o + "-sablon") || null}; }
+function isFormHtml(o, x){ x = x || {};
+  return '<div class="satir">' + alan(o + '-ad', 'Proje adı *', x.ad, null, ' placeholder="Hanönü Bakır Sahası Karotlu Sondaj"', 'genis') +
+      alan(o + '-no', 'Sözleşme no', x.sozlesme_no) + alan(o + '-tarih', 'Sözleşme tarihi', x.sozlesme_tarihi, 'date') + '</div>' +
+    '<div class="satir">' + alan(o + '-bas', 'Başlangıç', x.baslangic, 'date') + alan(o + '-bit', 'Bitiş', x.bitis, 'date') +
+      alan(o + '-tutar', 'Sözleşme tutarı', x.tutar, 'number', ' step="0.01" min="0"') + '</div>' +
+    '<div class="satir">' + alan(o + '-kdv', 'KDV %', x.kdv == null ? 20 : x.kdv, 'number', ' step="1" min="0"') +
+      secim(o + '-tev', 'Tevkifat', TEVKIFAT, x.tevkifat || "") +
+      alan(o + '-tgun', 'Taahhüt (gün)', x.taahhut_gun, 'number', ' min="0"') +
+      alan(o + '-tmetre', 'Taahhüt (metre)', x.taahhut_metre, 'number', ' min="0"') + '</div>' +
+    '<div class="satir">' + alan(o + '-acik', 'Not', x.aciklama, null, ' placeholder="Amasya bu sözleşmenin diğer il ve ilçeler maddesiyle çalışıyor"', 'genis') + '</div>';
+}
+function isFormOku(o){
+  return {ad:v(o + "-ad"), sozlesme_no:v(o + "-no"), sozlesme_tarihi:v(o + "-tarih"), baslangic:v(o + "-bas"), bitis:v(o + "-bit"),
+          tutar:v(o + "-tutar"), kdv:v(o + "-kdv"), tevkifat:v(o + "-tev"), taahhut_gun:v(o + "-tgun"),
+          taahhut_metre:v(o + "-tmetre"), aciklama:v(o + "-acik")};
+}
+function isFormSorun(x){
+  if(!x.ad) return "Proje adı zorunlu.";
+  if(x.baslangic && x.bitis && x.bitis < x.baslangic) return "Sözleşme bitişi başlangıçtan önce olamaz.";
+  return null;
+}
 var VARSAYILAN = {
   2: [["Gündüz","08:00","20:00"],["Gece","20:00","08:00"]],
   3: [["1. vardiya","08:00","16:00"],["2. vardiya","16:00","00:00"],["3. vardiya","00:00","08:00"]]
 };
 function geceYarisiniGecer(bas, bit){ return bit < bas && bit !== "00:00"; }
-function vardiyaSatirlari(){
-  var n = Number($("#p-vsayi").value || 2);
-  $("#vardiya-satirlar").innerHTML = VARSAYILAN[n].map(function(v, i){
-    var ertesi = geceYarisiniGecer(v[1], v[2]);
-    return '<div class="satir" data-slot="'+(i+1)+'">' +
-      '<div class="field"><label>'+(i+1)+'. vardiya adı</label>' +
-        '<input class="v-ad" value="'+esc(v[0])+'"></div>' +
-      '<div class="field"><label>Başlangıç</label><input class="v-bas" type="time" value="'+v[1]+'"></div>' +
-      '<div class="field"><label>Bitiş</label><input class="v-bit" type="time" value="'+v[2]+'"></div>' +
+function santiyeFormHtml(o, x){ x = x || {};
+  var sefler = [["", "— şef atanmadı —"]].concat((AGAC.sefler || []).map(function(s){ return [s.id, s.ad]; }));
+  var n = (x.vardiyalar || []).length === 3 ? 3 : 2;
+  return '<div class="satir">' + alan(o + '-saha', 'Şantiye adı *', x.ad, null, ' placeholder="Hanönü Şantiyesi"', 'genis') +
+      alan(o + '-il', 'İl', x.il) + alan(o + '-ilce', 'İlçe', x.ilce) + '</div>' +
+    '<div class="satir">' + secim(o + '-sef', 'Şantiye şefi', sefler, x.sef_id || "") + '</div>' +
+    '<div class="not">Şef kuleye çıkmaz: ekip listelerinde görünmez, vardiya ekibine yazılmaz, prim hesabına girmez. ' +
+    'Listede yalnız görevi "şantiye şefi" olan personel var (Şirket tanımları › Personel).</div>' +
+    '<h4 class="alt-bas">Vardiya düzeni</h4>' +
+    '<div class="field" style="max-width:220px"><label for="' + o + '-vsayi">Vardiya sayısı</label>' +
+    '<select id="' + o + '-vsayi"><option value="2"' + (n === 2 ? " selected" : "") + '>2 vardiya</option>' +
+    '<option value="3"' + (n === 3 ? " selected" : "") + '>3 vardiya</option></select></div>' +
+    '<div id="' + o + '-vs">' + vardiyaSatirHtml(n, x.vardiyalar) + '</div>';
+}
+function vardiyaSatirHtml(n, liste){
+  var kaynak = (liste && liste.length === n) ? liste.map(function(x){ return [x.label, x.starts, x.ends, x.next_day]; }) : VARSAYILAN[n];
+  return kaynak.map(function(x, i){
+    var ertesi = x[3] == null ? geceYarisiniGecer(x[1], x[2]) : !!x[3];
+    return '<div class="satir v-satir" data-slot="' + (i + 1) + '">' +
+      '<div class="field"><label>' + (i + 1) + '. vardiya adı</label><input class="v-ad" value="' + esc(x[0]) + '"></div>' +
+      '<div class="field"><label>Başlangıç</label><input class="v-bas" type="time" value="' + esc(x[1]) + '"></div>' +
+      '<div class="field"><label>Bitiş</label><input class="v-bit" type="time" value="' + esc(x[2]) + '"></div>' +
       '<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding-bottom:10px">' +
-        '<input type="checkbox" class="v-ertesi"'+(ertesi?" checked":"")+'> gece yarısını geçer</label>' +
-      '</div>';
+        '<input type="checkbox" class="v-ertesi"' + (ertesi ? " checked" : "") + '> gece yarısını geçer</label></div>';
   }).join("");
-  $$("#vardiya-satirlar .v-bas, #vardiya-satirlar .v-bit").forEach(function(el){
-    el.addEventListener("change", function(){
-      var s = el.closest(".satir");
-      s.querySelector(".v-ertesi").checked =
-        geceYarisiniGecer(s.querySelector(".v-bas").value, s.querySelector(".v-bit").value);
-      ozetCiz();
+}
+function santiyeFormBagla(o){
+  $("#" + o + "-vsayi").addEventListener("change", function(){
+    $("#" + o + "-vs").innerHTML = vardiyaSatirHtml(Number(this.value)); ozetCiz(); });
+  $("#" + o + "-vs").addEventListener("change", function(e){
+    if(!e.target.matches(".v-bas, .v-bit")) return;
+    var s = e.target.closest(".v-satir");
+    s.querySelector(".v-ertesi").checked = geceYarisiniGecer(s.querySelector(".v-bas").value, s.querySelector(".v-bit").value);
+  });
+}
+function santiyeFormOku(o){
+  return {saha:v(o + "-saha"), il:v(o + "-il"), ilce:v(o + "-ilce"), sef_id:v(o + "-sef") || null,
+          vardiyalar:$$("#" + o + "-vs .v-satir").map(function(s){
+            return {slot:Number(s.dataset.slot), label:s.querySelector(".v-ad").value.trim() || (s.dataset.slot + ". vardiya"),
+                    starts:s.querySelector(".v-bas").value, ends:s.querySelector(".v-bit").value,
+                    next_day:s.querySelector(".v-ertesi").checked}; })};
+}
+function santiyeFormSorun(x){
+  if(!x.saha) return "Şantiye adı zorunlu.";
+  if(x.vardiyalar.some(function(y){ return !y.starts || !y.ends; })) return "Vardiya saatleri eksik.";
+  return null;
+}
+
+/* ---------- düzenleme kartı ---------- */
+var DUZEN = null;
+function duzenAc(tur, id, yer){
+  var d = $("#duzen"), g = $("#duzen-govde");
+  DUZEN = {tur:tur, id:id};
+  msg($("#duzen-msg"), "");
+  if(tur === "isveren"){
+    var e = (AGAC.isverenler || []).filter(function(x){ return x.id === id; })[0] || {};
+    $("#duzen-bas").textContent = "İşveren · " + (e.ad || "");
+    g.innerHTML = isverenFormHtml("de", e);
+  } else if(tur === "is"){
+    var i = isBul(id) || {};
+    $("#duzen-bas").textContent = "Proje · " + (i.ad || "");
+    g.innerHTML = '<div class="satir">' + secim("dp-isveren", "İşveren", (i.isveren_id ? [] : [["", "— işveren seçin —"]])
+        .concat((AGAC.isverenler || []).map(function(x){ return [x.id, x.ad]; })), i.isveren_id || "", "genis") + '</div>' +
+      isFormHtml("dp", i) +
+      '<div class="not">Sözleşme no, tarihler, KDV ve tevkifat bu projenin bütün şantiyelerine geçer.</div>';
+  } else {
+    var s = santiyeBul(id) || {}, sahip = tumIsler().filter(function(p){
+      return (p[0].santiyeler || []).some(function(x){ return x.id === id; }); })[0];
+    $("#duzen-bas").textContent = "Şantiye · " + (s.ad || "");
+    g.innerHTML = '<div class="satir">' + secim("ds-is", "Bağlı olduğu proje", tumIsler().map(function(p){
+        return [p[0].id, (p[1] ? p[1] + " › " : "") + p[0].ad]; }), sahip ? sahip[0].id : "", "genis") + '</div>' +
+      santiyeFormHtml("ds", s);
+    santiyeFormBagla("ds");
+  }
+  (yer || $("#agac")).insertAdjacentElement("afterend", d);
+  d.hidden = false;
+  d.scrollIntoView({behavior:"smooth", block:"nearest"});
+  var ilk = g.querySelector("input"); if(ilk) ilk.focus();
+}
+$("#btn-duzen-vazgec").addEventListener("click", function(){ $("#duzen").hidden = true; DUZEN = null; });
+$("#btn-duzen-kaydet").addEventListener("click", function(){
+  if(!DUZEN) return;
+  var btn = this, istek, sorun = null;
+  if(DUZEN.tur === "isveren"){
+    var e = isverenFormOku("de"); e.id = DUZEN.id;
+    if(!e.ad) sorun = "İşveren adı zorunlu.";
+    istek = function(){ return sb.rpc("isveren_kaydet", {p:e}); };
+  } else if(DUZEN.tur === "is"){
+    var i = isFormOku("dp"); i.id = DUZEN.id; i.isveren_id = v("dp-isveren") || null;
+    sorun = isFormSorun(i);
+    istek = function(){ return sb.rpc("is_kaydet", {p:i}); };
+  } else {
+    var s = santiyeFormOku("ds"); s.id = DUZEN.id; s.is_id = v("ds-is");
+    sorun = santiyeFormSorun(s);
+    istek = function(){ return sb.rpc("santiye_kaydet", {p:s}); };
+  }
+  if(sorun){ msg($("#duzen-msg"), esc(sorun), "err"); return; }
+  btn.disabled = true; msg($("#duzen-msg"), "Kaydediliyor…");
+  istek().then(function(r){
+    btn.disabled = false;
+    if(r.error){ msg($("#duzen-msg"), esc(r.error.message), "err"); return; }
+    var ne = DUZEN.tur;
+    return agacYukle().then(function(){
+      fiyatIsDoldur();
+      msg($("#msg"), (ne === "isveren" ? "İşveren" : ne === "is" ? "Proje" : "Şantiye") + " kaydedildi." +
+        (ne === "santiye" ? " Saha uygulaması bir sonraki açılışta görecek." : ""), "ok");
     });
-  });
+  }, function(err){ btn.disabled = false; hataYaz("#duzen-msg", err); });
+});
+
+/* ============================================================
+   YENİ PROJE SİHİRBAZI — 8 adım
+   ============================================================
+   1 İşveren · 2 Proje · 3 Fiyatlar · 4 Şantiye · 5 Kuyular ·
+   6 Makineler · 7 Ekip · 8 Araç. Mevcut projeye şantiye eklerken
+   ("+ Şantiye ekle") 1–3 geçilir, 4. adımdan başlar.
+   ============================================================ */
+var ADIM_AD = ["İşveren","Proje","Fiyatlar","Şantiye","Kuyular","Makineler","Ekip","Araçlar"];
+function sihirbazSifirla(is){
+  SIHIRBAZ_IS = is || null;
+  ADIM = SIHIRBAZ_IS ? 4 : 1;
+  var sec = $("#y-isveren");
+  sec.innerHTML = '<option value="">— yeni işveren gireceğim —</option>' + (AGAC.isverenler || []).map(function(e){
+    return '<option value="' + e.id + '">' + esc(e.ad) + '</option>'; }).join("");
+  $("#y-yeni-isveren").innerHTML = isverenFormHtml("yi", {});
+  $("#y-proje").innerHTML = isFormHtml("yp", {});
+  $("#y-santiye").innerHTML = santiyeFormHtml("ys", {});
+  santiyeFormBagla("ys");
+  $("#y-fiyat-sonra").checked = false;
+  YENI_FE.yukle(null, bugun());
+  KUYULAR = []; kuyuEkle();
+  $$("#makine-sec input, #personel-sec input, #arac-sec input").forEach(function(i){ i.checked = false; i.closest("label").classList.remove("sec"); });
+  msg($("#kur-msg"), "");
+  $("#btn-proje-kur").textContent = SIHIRBAZ_IS ? "Şantiyeyi oluştur" : "Projeyi oluştur";
+  $("#btn-proje-kur").disabled = !YAZAR;
+  isverenSecildi();
+  adimCiz();
 }
-$("#p-vsayi").addEventListener("change", function(){ vardiyaSatirlari(); ozetCiz(); });
-function vardiyaVerisi(){
-  return $$("#vardiya-satirlar .satir").map(function(s){
-    return { slot: Number(s.dataset.slot),
-             label: s.querySelector(".v-ad").value.trim() || (s.dataset.slot + ". vardiya"),
-             starts: s.querySelector(".v-bas").value,
-             ends: s.querySelector(".v-bit").value,
-             next_day: s.querySelector(".v-ertesi").checked };
-  });
+function isverenSecildi(){ $("#y-yeni-isveren").hidden = !!$("#y-isveren").value; }
+$("#y-isveren").addEventListener("change", function(){ isverenSecildi(); ozetCiz(); });
+$("#y-fiyat-sonra").addEventListener("change", function(){ YENI_FE.kilit(this.checked); });
+$("#y-proje").addEventListener("change", function(e){
+  /* Fiyat listesinin geçerliliği varsayılan olarak sözleşme başlangıcı */
+  if(e.target.id === "yp-bas" && e.target.value) YENI_FE.tarih(e.target.value);
+});
+function adimCiz(){
+  $("#adimlar").innerHTML = (SIHIRBAZ_IS ? '<div class="ok">Proje: ' + esc(SIHIRBAZ_IS.ad) + '</div>' : '') +
+    ADIM_AD.map(function(a, i){
+      var n = i + 1; if(SIHIRBAZ_IS && n < 4) return "";
+      return '<div class="' + (n === ADIM ? "on" : (n < ADIM ? "ok" : "")) + '">' + n + ' · ' + esc(a) + '</div>'; }).join("");
+  $$("[data-adim]").forEach(function(c){ c.hidden = (Number(c.dataset.adim) !== ADIM); });
+  $("#btn-geri").disabled = (ADIM === (SIHIRBAZ_IS ? 4 : 1));
+  $("#btn-ileri").hidden = (ADIM === 8);
+  if(ADIM === 8) ozetCiz();
 }
+function adimSorun(n){
+  if(n === 1 && !$("#y-isveren").value && !v("yi-ad")) return "İşveren seçin ya da yeni işverenin adını yazın.";
+  if(n === 2) return isFormSorun(isFormOku("yp"));
+  if(n === 3 && !$("#y-fiyat-sonra").checked) return YENI_FE.sorun();
+  if(n === 4) return santiyeFormSorun(santiyeFormOku("ys"));
+  if(n === 5 && !KUYULAR.some(function(k){ return k.kod.trim(); })) return "En az bir kuyu adı.";
+  return null;
+}
+$("#btn-ileri").addEventListener("click", function(){
+  var s = adimSorun(ADIM);
+  if(s){ msg($("#msg"), "Eksik: " + esc(s), "err"); window.scrollTo(0,0); return; }
+  msg($("#msg"), "");
+  ADIM = Math.min(8, ADIM + 1); adimCiz(); window.scrollTo(0,0);
+});
+$("#btn-geri").addEventListener("click", function(){
+  ADIM = Math.max(SIHIRBAZ_IS ? 4 : 1, ADIM - 1); adimCiz(); window.scrollTo(0,0);
+});
+function ozetCiz(){
+  if(!$("#ozet-kutu") || !AGAC) return;
+  var isveren = SIHIRBAZ_IS ? "—" : ($("#y-isveren").value ? ($("#y-isveren").selectedOptions[0] || {}).textContent : v("yi-ad") + " (yeni)");
+  var s = santiyeFormOku("ys");
+  var fiyat = SIHIRBAZ_IS ? "projenin listesi" : ($("#y-fiyat-sonra").checked ? "sonra girilecek" :
+    (function(){ var d = YENI_FE.veri(); return d.kalemler.filter(function(k){ return k.durum === "ayri"; }).length +
+      " ücretli kalem · " + trd(d.gecerli) + "'den"; })());
+  $("#ozet-kutu").innerHTML =
+    (SIHIRBAZ_IS ? '<div class="kv"><span>Proje</span><span>' + esc(SIHIRBAZ_IS.ad) + ' (mevcut)</span></div>'
+      : '<div class="kv"><span>İşveren</span><span>' + esc(isveren || "—") + '</span></div>' +
+        '<div class="kv"><span>Proje</span><span>' + esc(v("yp-ad") || "—") + '</span></div>') +
+    '<div class="kv"><span>Fiyatlar</span><span>' + esc(fiyat) + '</span></div>' +
+    '<div class="kv"><span>Şantiye</span><span>' + esc(s.saha || "—") + '</span></div>' +
+    '<div class="kv"><span>Vardiya</span><span>' + s.vardiyalar.map(function(x){
+        return esc(x.label) + " " + x.starts + "–" + x.ends; }).join(" · ") + '</span></div>' +
+    '<div class="kv"><span>Kuyu</span><span>' + (KUYULAR.filter(function(k){ return k.kod.trim(); })
+        .map(function(k){ return esc(k.kod); }).join(", ") || "—") + '</span></div>' +
+    '<div class="kv"><span>Makine</span><span>' + secilen("#makine-sec").length + ' seçildi</span></div>' +
+    '<div class="kv"><span>Ekip</span><span>' + secilen("#personel-sec").length + ' kişi</span></div>' +
+    '<div class="kv"><span>Araç</span><span>' + secilen("#arac-sec").length + ' araç</span></div>';
+}
+
+/* Kur: işveren → proje → fiyatlar → şantiye → kuyu, makine, ekip, araç */
+$("#btn-proje-kur").addEventListener("click", function(){
+  for(var n = (SIHIRBAZ_IS ? 4 : 1); n <= 5; n++){
+    var s = adimSorun(n);
+    if(s){ ADIM = n; adimCiz(); msg($("#msg"), "Eksik: " + esc(s), "err"); window.scrollTo(0,0); return; }
+  }
+  var btn = this; btn.disabled = true;
+  msg($("#kur-msg"), "Kuruluyor…");
+  var uyari = [], isId = null;
+  var adim1 = SIHIRBAZ_IS ? Promise.resolve(SIHIRBAZ_IS.isveren_id)
+    : ($("#y-isveren").value ? Promise.resolve($("#y-isveren").value)
+       : sb.rpc("isveren_kaydet", {p:isverenFormOku("yi")}).then(function(r){ if(r.error) throw r.error; return r.data; }));
+  adim1.then(function(isveren){
+    if(SIHIRBAZ_IS) return SIHIRBAZ_IS.id;
+    var p = isFormOku("yp"); p.isveren_id = isveren;
+    return sb.rpc("is_kaydet", {p:p}).then(function(r){ if(r.error) throw r.error; return r.data; });
+  }).then(function(id){
+    isId = id;
+    if(SIHIRBAZ_IS || $("#y-fiyat-sonra").checked) return;
+    var f = YENI_FE.veri();
+    return sb.rpc("fiyat_listesi_kaydet", {p_is:id, p_gecerli:f.gecerli, p_para:f.para, p_bekleme:f.bekleme,
+                                           p_kalemler:f.kalemler}).then(function(r){
+      if(r.error) uyari.push("fiyatlar kaydedilmedi (" + r.error.message + ") — Fiyatlar sekmesinden girin");
+    });
+  }).then(function(){
+    var s = santiyeFormOku("ys"); s.is_id = isId;
+    return sb.rpc("santiye_kaydet", {p:s}).then(function(r){ if(r.error) throw r.error; return r.data; });
+  }).then(function(pid){
+    var g = bugun(), isler = [];
+    KUYULAR.filter(function(k){ return k.kod.trim(); }).forEach(function(k){
+      isler.push(sb.rpc("create_well3", {p_project:pid, p_code:k.kod.trim(),
+        p_dip:Number(k.egim)||90, p_azimuth:k.azimut === "" ? null : Number(k.azimut),
+        p_program:k.program || null, p_planned:k.planlanan === "" ? null : Number(k.planlanan)}));
+    });
+    secilen("#makine-sec").forEach(function(mid){
+      isler.push(sb.rpc("assign_machine", {p_project:pid, p_machine:mid, p_date:g, p_note:"proje kurulumu"}));
+    });
+    secilen("#personel-sec").forEach(function(kid){
+      isler.push(sb.rpc("assign_personnel", {p_project:pid, p_personnel:kid, p_date:g, p_machine:null}));
+    });
+    secilen("#arac-sec").forEach(function(vid){
+      var a = (D.vehicles||[]).filter(function(x){ return x.id === vid; })[0] || {};
+      isler.push(sb.rpc("save_vehicle", {p_plate:a.plate, p_kind:a.kind || "arac",
+        p_fuel_class:a.fuel_class || "bilinmiyor", p_project:pid, p_id:vid}));
+    });
+    return Promise.all(isler);
+  }).then(function(sonuc){
+    var hata = (sonuc||[]).filter(function(x){ return x && x.error; });
+    if(hata.length) uyari.push(hata.length + " alt kayıt gitmedi: " + hata[0].error.message);
+    var ne = SIHIRBAZ_IS ? "Şantiye" : "Proje";
+    return Promise.all([yukle(), agacYukle()]).then(function(){
+      fiyatIsDoldur();
+      btn.disabled = false;
+      if(uyari.length) msg($("#kur-msg"), "<b>" + ne + " oluşturuldu</b> ama " + esc(uyari.join("; ")) + ".", "warn");
+      else msg($("#kur-msg"), "<b>" + ne + " oluşturuldu.</b> Şantiye şefi panelinde görebilir. " +
+        '<button class="lnk" type="button" id="btn-projelere">Projelere dön</button>', "ok");
+      var g = $("#btn-projelere"); if(g) g.addEventListener("click", function(){ sekmeAc("projeler"); window.scrollTo(0,0); });
+      btn.disabled = true;     /* aynı formla ikinci kez kurulmasın */
+    });
+  }).catch(function(e){
+    btn.disabled = false;
+    msg($("#kur-msg"), esc((e && e.message) || String(e)) + (isId ? " (Proje açıldı; eksik kalanı Projeler sekmesinden tamamlayın.)" : ""), "err");
+    if(isId) agacYukle();
+  });
+});
 
 /* ---------------- kuyular ---------------- */
 function kuyuEkle(){
@@ -580,6 +1385,7 @@ function kuyuEkle(){
   kuyuCiz();
 }
 function kuyuCiz(){
+  if(!$("#kuyu-satirlar")) return;
   var programlar = (D && D.programs || []).map(function(p){ return p.name; });
   if(!programlar.length) programlar = ["Maden arama","Maden planlama"];
   $("#kuyu-satirlar").innerHTML = KUYULAR.map(function(k, i){
@@ -606,119 +1412,70 @@ function kuyuCiz(){
 }
 $("#btn-kuyu-ekle").addEventListener("click", kuyuEkle);
 
-/* ---------------- sihirbaz ---------------- */
-function adimCiz(){
-  var adlar = ["Müşteri ve proje","Vardiya düzeni","Kuyular","Makineler","Ekip","Araçlar"];
-  $("#adimlar").innerHTML = adlar.map(function(a,i){
-    var n = i+1;
-    return '<div class="'+(n===ADIM?"on":(n<ADIM?"ok":""))+'">'+n+' · '+esc(a)+'</div>'; }).join("");
-  $$("[data-adim]").forEach(function(c){ c.hidden = (Number(c.dataset.adim) !== ADIM); });
-  $("#btn-geri").disabled = (ADIM === 1);
-  $("#btn-ileri").hidden = (ADIM === 6);
-  if(ADIM === 6) ozetCiz();
+/* ============================================================
+   FİYATLAR SEKMESİ
+   ============================================================ */
+var FIYAT_D = null;
+function fiyatIsDoldur(){
+  if(!AGAC) return;
+  var sec = $("#f-is"), cur = sec.value;
+  sec.innerHTML = '<option value="">— proje seçin —</option>' + tumIsler().map(function(p){
+    return '<option value="' + p[0].id + '">' + esc((p[1] ? p[1] + " › " : "") + p[0].ad) +
+      (p[0].fiyat ? "" : " · fiyat yok") + '</option>'; }).join("");
+  if(cur) sec.value = cur;
 }
-function adimSorun(n){
-  if(n === 1 && !$("#p-ad").value.trim() &&
-     !($("#p-musteri").value || $("#p-yenimusteri").value.trim())) return "Proje adı ve müşteri";
-  if(n === 1 && !$("#p-ad").value.trim()) return "Proje adı";
-  if(n === 1 && !$("#p-musteri").value && !$("#p-yenimusteri").value.trim()) return "Müşteri";
-  if(n === 2){
-    var v = vardiyaVerisi();
-    if(v.some(function(x){ return !x.starts || !x.ends; })) return "Vardiya saatleri";
+function fiyatSekmesi(zorla){
+  if(!AGAC) return;
+  if(!$("#f-is").value){
+    var l = tumIsler(); if(l.length === 1) $("#f-is").value = l[0][0].id;
   }
-  if(n === 3 && !KUYULAR.some(function(k){ return k.kod.trim(); })) return "En az bir kuyu adı";
-  return null;
+  if(zorla || !FIYAT_D || FIYAT_D.is.id !== $("#f-is").value) fiyatYukle(null);
 }
-$("#btn-ileri").addEventListener("click", function(){
-  var s = adimSorun(ADIM);
-  if(s){ msg($("#msg"), "Eksik: " + esc(s) + ".", "err"); window.scrollTo(0,0); return; }
-  msg($("#msg"), "");
-  ADIM = Math.min(6, ADIM + 1); adimCiz(); window.scrollTo(0,0);
-});
-$("#btn-geri").addEventListener("click", function(){
-  ADIM = Math.max(1, ADIM - 1); adimCiz(); window.scrollTo(0,0);
-});
-function ozetCiz(){
-  var musteri = $("#p-yenimusteri").value.trim() ||
-    (($("#p-musteri").selectedOptions[0]||{}).textContent || "—");
-  var v = vardiyaVerisi();
-  $("#ozet-kutu").innerHTML =
-    '<div class="kv"><span>Müşteri</span><span>'+esc(musteri)+'</span></div>' +
-    '<div class="kv"><span>Proje</span><span>'+esc($("#p-ad").value || "—")+'</span></div>' +
-    '<div class="kv"><span>Şantiye</span><span>'+esc($("#p-saha").value || "—")+'</span></div>' +
-    '<div class="kv"><span>Vardiya</span><span>'+ v.map(function(x){
-        return esc(x.label)+" "+x.starts+"–"+x.ends; }).join(" · ") +'</span></div>' +
-    '<div class="kv"><span>Kuyu</span><span>'+ (KUYULAR.filter(function(k){ return k.kod.trim(); })
-        .map(function(k){ return esc(k.kod); }).join(", ") || "—") +'</span></div>' +
-    '<div class="kv"><span>Makine</span><span>'+ secilen("#makine-sec").length +' seçildi</span></div>' +
-    '<div class="kv"><span>Ekip</span><span>'+ secilen("#personel-sec").length +' kişi</span></div>' +
-    '<div class="kv"><span>Araç</span><span>'+ secilen("#arac-sec").length +' araç</span></div>';
-}
-["#p-ad","#p-saha","#p-yenimusteri","#p-musteri"].forEach(function(s){
-  $(s).addEventListener("input", ozetCiz); $(s).addEventListener("change", ozetCiz);
-});
-
-/* Projeyi kur: müşteri → proje+vardiya → kuyular → makineler → ekip → araçlar */
-$("#btn-proje-kur").addEventListener("click", function(){
-  for(var n=1;n<=3;n++){
-    var s = adimSorun(n);
-    if(s){ ADIM = n; adimCiz(); msg($("#msg"), "Eksik: " + esc(s) + ".", "err"); window.scrollTo(0,0); return; }
-  }
-  var btn = $("#btn-proje-kur"); btn.disabled = true;
-  msg($("#kur-msg"), "Proje kuruluyor…");
-  var bugun = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
-
-  musteriBul().then(function(mid){
-    return sb.rpc("save_project2", {p_employer:mid, p_name:$("#p-ad").value.trim(),
-      p_site:$("#p-saha").value.trim(), p_city:$("#p-il").value.trim(),
-      p_district:$("#p-ilce").value.trim(), p_shifts:vardiyaVerisi()});
-  }).then(function(r){
-    if(r.error) throw r.error;
-    var pid = (r.data || {}).proje;
-    if(!pid) throw new Error("Proje kimliği dönmedi.");
-    YENI_PROJE = pid;
-    var isler = [];
-    KUYULAR.filter(function(k){ return k.kod.trim(); }).forEach(function(k){
-      isler.push(sb.rpc("create_well3", {p_project:pid, p_code:k.kod.trim(),
-        p_dip:Number(k.egim)||90, p_azimuth:k.azimut === "" ? null : Number(k.azimut),
-        p_program:k.program || null, p_planned:k.planlanan === "" ? null : Number(k.planlanan)}));
-    });
-    secilen("#makine-sec").forEach(function(mid){
-      isler.push(sb.rpc("assign_machine", {p_project:pid, p_machine:mid, p_date:bugun, p_note:"proje kurulumu"}));
-    });
-    secilen("#personel-sec").forEach(function(pid2){
-      isler.push(sb.rpc("assign_personnel", {p_project:pid, p_personnel:pid2, p_date:bugun, p_machine:null}));
-    });
-    secilen("#arac-sec").forEach(function(vid){
-      var v = (D.vehicles||[]).filter(function(x){ return x.id === vid; })[0] || {};
-      isler.push(sb.rpc("save_vehicle", {p_plate:v.plate, p_kind:v.kind || "arac",
-        p_fuel_class:v.fuel_class || "bilinmiyor", p_project:pid, p_id:vid}));
-    });
-    return Promise.all(isler);
-  }).then(function(sonuc){
-    var hata = (sonuc||[]).filter(function(x){ return x && x.error; });
-    return yukle().then(function(){
-      btn.disabled = false;
-      if(hata.length){
-        msg($("#kur-msg"), "Proje açıldı ama " + hata.length + " alt kayıt gitmedi: " +
-            esc(hata[0].error.message), "warn");
-      } else {
-        msg($("#kur-msg"), "<b>Proje oluşturuldu.</b> Şantiye şefi bu projeyi panelinde görebilir.", "ok");
-      }
-    });
-  }).catch(function(e){
-    btn.disabled = false;
-    msg($("#kur-msg"), esc((e && e.message) || String(e)), "err");
+function fiyatYukle(liste){
+  var id = $("#f-is").value;
+  msg($("#fiyat-msg"), "");
+  if(!id){ $("#f-editor").innerHTML = '<div class="card"><div class="hint">Fiyatlarına bakmak istediğiniz projeyi seçin.</div></div>';
+    $("#f-liste").innerHTML = ""; $("#btn-fiyat-kaydet").hidden = true; FIYAT_D = null; return; }
+  $("#f-editor").innerHTML = '<div class="card"><div class="hint">Yükleniyor…</div></div>';
+  sb.rpc("fiyat_listesi", {p_is:id, p_liste:liste || null}).then(function(r){
+    if(r.error){ $("#f-editor").innerHTML = '<div class="msg err">' + esc(r.error.message) + '</div>'; return; }
+    FIYAT_D = r.data || {};
+    var g = FIYAT_D.gecmis || [];
+    $("#f-liste").innerHTML = g.length ? g.map(function(x, i){
+      return '<option value="' + x.id + '">' + (i === 0 ? "Güncel · " : "Eski · ") + trd(x.gecerli) + "'den · " + x.kalem + ' kalem</option>'; }).join("")
+      : '<option value="">liste yok — ilk liste açılacak</option>';
+    if(FIYAT_D.liste) $("#f-liste").value = FIYAT_D.liste.id;
+    var i = isBul(id) || {};
+    FIYAT_FE.yukle(FIYAT_D, i.baslangic || bugun());
+    FIYAT_FE.kilit(!(YAZAR && FIYAT_D.yazabilir));
+    $("#btn-fiyat-kaydet").hidden = !(YAZAR && FIYAT_D.yazabilir);
+    if(!FIYAT_D.liste) msg($("#fiyat-msg"), "Bu projenin sözleşme fiyatları girilmemiş. Hakediş fiyatsız çıkamaz.", "warn");
   });
-});
-function musteriBul(){
-  var yeni = $("#p-yenimusteri").value.trim();
-  if(yeni) return sb.rpc("save_employer", {p_name:yeni, p_tax_no:$("#p-vergi").value.trim() || null})
-    .then(function(r){ if(r.error) throw r.error; return r.data; });
-  return Promise.resolve($("#p-musteri").value);
 }
+$("#f-is").addEventListener("change", function(){ fiyatYukle(null); });
+$("#f-liste").addEventListener("change", function(){ if(this.value) fiyatYukle(this.value); });
+$("#btn-fiyat-kaydet").addEventListener("click", function(){
+  var id = $("#f-is").value; if(!id) return;
+  var s = FIYAT_FE.sorun();
+  if(s){ msg($("#fiyat-msg"), esc(s), "err"); return; }
+  var f = FIYAT_FE.veri(), btn = this;
+  var ayni = FIYAT_D && FIYAT_D.liste && FIYAT_D.liste.gecerli === f.gecerli;
+  btn.disabled = true; msg($("#fiyat-msg"), "Kaydediliyor…");
+  sb.rpc("fiyat_listesi_kaydet", {p_is:id, p_gecerli:f.gecerli, p_para:f.para, p_bekleme:f.bekleme,
+                                  p_kalemler:f.kalemler}).then(function(r){
+    btn.disabled = false;
+    if(r.error){ msg($("#fiyat-msg"), esc(r.error.message), "err"); return; }
+    var n = (r.data || {}).kalem;
+    return agacYukle().then(function(){
+      fiyatIsDoldur(); $("#f-is").value = id;
+      fiyatYukle((r.data || {}).liste_id);
+      setTimeout(function(){ msg($("#fiyat-msg"), (ayni ? "Liste düzeltildi" : "Yeni liste açıldı (" + trd(f.gecerli) + "'den)") +
+        " · " + n + " kalem.", "ok"); }, 300);
+    });
+  }, function(e){ btn.disabled = false; hataYaz("#fiyat-msg", e); });
+});
 
-/* ---------------- ana veri kayıtları ---------------- */
+/* ---------------- ana veri kayıtları (Şirket tanımları) ---------------- */
 function kaydet(rpc, veri, msgSel, temizle){
   msg($(msgSel), "Kaydediliyor…");
   return sb.rpc(rpc, veri).then(function(r){
@@ -749,12 +1506,8 @@ $("#btn-personel-kaydet").addEventListener("click", function(){
 $("#btn-malzeme-kaydet").addEventListener("click", function(){
   if(!$("#ml-ad").value.trim()){ msg($("#malzeme-msg"), "Malzeme adı zorunlu.", "err"); return; }
   kaydet("save_material", {p_name:$("#ml-ad").value.trim(), p_unit:$("#ml-birim").value,
-    p_category:$("#ml-kat").value.trim() || null}, "#malzeme-msg", ["#ml-ad","#ml-kat"]);
-});
-$("#btn-musteri-kaydet").addEventListener("click", function(){
-  if(!$("#mu-ad").value.trim()){ msg($("#musteri-msg"), "Müşteri adı zorunlu.", "err"); return; }
-  kaydet("save_employer", {p_name:$("#mu-ad").value.trim(),
-    p_tax_no:$("#mu-vergi").value.trim() || null}, "#musteri-msg", ["#mu-ad","#mu-vergi"]);
+    p_category:$("#ml-kat").value.trim() || null}, "#malzeme-msg", ["#ml-ad","#ml-kat"]).then(function(){
+      MF = null; malzemeFiyatYukle(); });
 });
 $("#btn-program-kaydet").addEventListener("click", function(){
   var ad = $("#pr-ad").value.trim();
@@ -764,17 +1517,16 @@ $("#btn-program-kaydet").addEventListener("click", function(){
     if(r.error){ msg($("#program-msg"), esc(r.error.message), "err"); return; }
     $("#pr-ad").value = "";
     msg($("#program-msg"), "Program eklendi.", "ok");
-    yukle().then(kuyuCiz);
+    yukle();
   });
 });
 
 /* ============================================================
    ARAÇ BELGE UYARISI (62. dosya · 1 Kasım)
    ============================================================
-   Genel bakıştan kalkıp buraya geldi. `anaveri()` içine konmadı:
-   belge durumu dönemle değil BUGÜNLE ilgili ve sayfanın her
-   açılışında yeniden hesaplanması gerekiyor. O yüzden sekmeye
-   girildiğinde ayrıca sorulyor.
+   `anaveri()` içine konmadı: belge durumu dönemle değil BUGÜNLE
+   ilgili ve sayfanın her açılışında yeniden hesaplanması gerekiyor.
+   O yüzden sekmeye girildiğinde ayrıca soruluyor.
    ============================================================ */
 var BELGE_AD = {muayene:"Muayene", sigorta:"Trafik sigortası", kasko:"Kasko",
                 egzoz:"Egzoz", k_belgesi:"K belgesi", diger:"Diğer"};
@@ -925,34 +1677,6 @@ $("#btn-marka-kaydet").addEventListener("click", function(){
   });
 });
 
-/* ---------------- şantiye şefi ve sözleşme ---------------- */
-$("#sf-proje").addEventListener("change", sefFormDoldur);
-$("#btn-sf-kaydet").addEventListener("click", function(){
-  var pid = $("#sf-proje").value;
-  if(!pid){ msg($("#sf-msg"), "Önce şantiye seçin.", "err"); return; }
-  var bas = $("#sf-bas").value || null, bit = $("#sf-bit").value || null;
-  if(bas && bit && bit < bas){
-    msg($("#sf-msg"), "Sözleşme bitişi başlangıçtan önce olamaz.", "err"); return; }
-  var btn = $("#btn-sf-kaydet"); btn.disabled = true;
-  msg($("#sf-msg"), "Kaydediliyor…");
-  /* p_temizle: boş bırakılan alan "dokunma" değil "boşalt" demek.
-     Yönetici şefi kaldırmak isterse listeden "— şef atanmadı —"
-     seçiyor; bu silme işlemi sessizce yok sayılmamalı. */
-  sb.rpc("proje_sef_sozlesme_kaydet", {
-    p_project:pid, p_chief:$("#sf-sef").value || null,
-    p_start:bas, p_end:bit, p_temizle:true
-  }).then(function(r){
-    btn.disabled = false;
-    if(r.error){ msg($("#sf-msg"), esc(r.error.message), "err"); return; }
-    msg($("#sf-msg"), "Kaydedildi. Saha uygulaması bir sonraki açılışta görecek.", "ok");
-    yukle();          /* yukle() zaten ciz() → sefFormDoldur() çağırıyor */
-  }).catch(function(x){
-    btn.disabled = false;
-    msg($("#sf-msg"), esc(String(x && x.message || x)), "err");
-  });
-});
-
-adimCiz();
 })();
 </script>
 </body>
