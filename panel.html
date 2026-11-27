@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=73">
+<link rel="stylesheet" href="app.css?v=74">
 </head>
 <body>
 
@@ -229,9 +229,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=73"></script>
+<script src="app-shell.js?v=74"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=73"></script>
+<script src="kart.js?v=74"></script>
 <script>
 (function(){
 "use strict";
@@ -690,14 +690,16 @@ function arizaEtiketi(a, adet){
   return '<span class="p k yanip">' + (on || 'arızada · ') + 'bugün</span>';
 }
 function geceMi(k){ return k.vardiya === "gece"; }
-/* Sürüm 72 · rozet onay durumunu da söyler: onaylı vardiyada ✓.
-   Hangi kartın onay beklediği kuyu açılmadan görünür. Düğme değil,
-   bilgi. 'onayli' gelmiyorsa (74. adım kurulu değil) rozet eskisi gibi. */
+/* Sürüm 74 · 150. dosya · Tayfun: "Gece / gündüz yazıyor, yanında tik
+   koyulmuş. Yan yana yazsın, tik koymaya gerek yok." ✓ kalktı (rozeti
+   genişletip ikisini alt alta düşürüyordu). Onay durumu vardiya
+   kartında ve kapalı şantiye başlığında; rozetin üstüne gelince
+   "Onaylı / Onay bekliyor" ipucu duruyor. */
 function vardiyaRozeti(k){
   var bilgi = ("onayli" in k), tamam = bilgi && k.onayli;
   return '<span class="pv ' + (geceMi(k) ? 'c' : 'g') + (tamam ? ' ok' : '') + '"' +
     (bilgi ? ' title="' + (tamam ? 'Onaylı' : 'Onay bekliyor') + '"' : '') + '>' +
-    (geceMi(k) ? 'Gece' : 'Gündüz') + (tamam ? ' ✓' : '') + '</span>';
+    (geceMi(k) ? 'Gece' : 'Gündüz') + '</span>';
 }
 
 /* Ekrandaki satırların arkasındaki veri — düğmelere metin değil sıra
@@ -793,6 +795,45 @@ function gezmeYaz(d, istenen){
   var t = $("#go-tarih"); t.value = d.gun || ""; if(d.bugun) t.max = d.bugun;
   /* Sürüm 73 · 142. dosya: gün gezme okları grafiğin iki yanına taşındı
      (seriBlogu çiziyor); burada yalnız tarih kutusu kaldı. */
+}
+
+/* Günün dağılımı (152. dosya): ilk satır BÜTÜN ŞANTİYELER (gündüz
+   toplamı | gece toplamı, sağda ikisinin toplamı), altında her şantiye
+   bir çubuk. Çubuğun uzunluğu en çok delen şantiyeye göre; sarı parça
+   gündüz, lacivert parça gece, metre parçanın içinde (sığıyorsa).
+   Çoktan aza; kayıt girmeyen şantiye altta soluk. Tıklanmaz ("gereksiz
+   yerde gereksiz buttonlar olmasın") — şantiyenin kendisi hemen altta. */
+function gunBlogu(d, dag, G, C, nV, nKule){
+  var T = G + C;
+  var sirali = dag.slice().sort(function(a, b){ return (b.g + b.c) - (a.g + a.c) || String(a.ad).localeCompare(String(b.ad), "tr"); });
+  var enb = sirali.length ? Math.max(sirali[0].g + sirali[0].c, 0) : 0;
+  var parca = function(sinif, deger, olcek, yazi){
+    /* Etiket parçaya sığacak kadar genişse yazılır (çubuk alanının ~%9'u) */
+    if(deger <= 0) return '';
+    return '<' + sinif + ' style="flex:' + deger + '" title="' + esc(yazi) + '">' +
+      (olcek > 0 && deger / olcek >= 0.09 ? '<span class="uz">' + esc(yazi) + '</span>' : '') + '</' + sinif + '>';
+  };
+  var satir = sirali.map(function(x){
+    var t = x.g + x.c, nv = x.ng + x.nc;
+    if(!nv) return '<div class="gs-sat bos"><span class="ad">' + esc(x.ad) + '</span><span class="gs-yok">bu gün kayıt yok</span><span class="de">—</span></div>';
+    return '<div class="gs-sat"><span class="ad">' + esc(x.ad) + '<small>' + nv + ' vardiya · ' + x.nk + ' kule' +
+        '<span class="ks"> · G ' + tl(x.g) + ' · Gc ' + tl(x.c) + '</span></small></span>' +
+      (t > 0 ? '<span class="cb" style="width:' + (enb > 0 ? (t / enb * 100).toFixed(2) : 0) + '%">' +
+                 parca("u", x.g, enb, tl(x.g)) + parca("s", x.c, enb, tl(x.c)) + '</span>'
+             : '<span class="gs-yok">metraj yok</span>') +
+      '<span class="de"><b>' + tl(t) + ' m</b>' + (T > 0 ? ' <small>· %' + tl(t / T * 100, 0) + '</small>' : '') + '</span></div>';
+  }).join("");
+  var ilk = sirali[0], sonuc = (ilk && T > 0)
+    ? 'En çok delen: ' + esc(ilk.ad) + ' · ' + tl(ilk.g + ilk.c) + ' m (günün %' + tl((ilk.g + ilk.c) / T * 100, 0) + ')'
+    : 'Bu gün metraj yok';
+  return '<div class="go-seri go-gun"><h3>' + esc(d.gun.slice(8, 10) + "." + d.gun.slice(5, 7)) + ' · şantiyelere göre delinen metre <i>' +
+      '<span class="le"><span class="lj g"></span>gündüz</span><span class="le"><span class="lj c"></span>gece</span></i></h3>' +
+    '<p class="gs-sonuc">' + sonuc + '</p>' +
+    '<div class="gs-sat top" id="gs-toplam"><span class="ad">Bütün şantiyeler<small>' + nV + ' vardiya · ' + nKule + ' kule</small></span>' +
+      (T > 0 ? '<span class="cb" style="width:100%">' + parca("u", G, T, "Gündüz " + tl(G) + " m") + parca("s", C, T, "Gece " + tl(C) + " m") + '</span>'
+             : '<span class="gs-yok">metraj yok</span>') +
+      '<span class="de"><b>' + tl(T) + ' m</b> <small>· toplam</small></span></div>' +
+    '<div class="gs">' + satir + '</div></div>';
 }
 
 /* Son 7 günün grafiği: gündüz + gece yığılı, gösterilen gün vurgulu. */
@@ -891,21 +932,41 @@ function gunlukYukle(){
     gezmeYaz(d, istenen);
     if(!GUN_SEC) rozetYaz(d.uyari || 0);
 
-    var G = 0, C = 0, nG = 0, nC = 0;
-    sahalar.forEach(function(s){ (s.kuleler || []).forEach(function(k){
-      if(!k.vardiya) return;
-      if(geceMi(k)){ C += Number(k.metraj || 0); nC++; } else { G += Number(k.metraj || 0); nG++; }
-    }); });
+    /* Sürüm 74 · 152. dosya · Tayfun: "Başlık Günlük rapor ama seçilen
+       günün bütün şantiyelerinin toplam delgilerini gece ve gündüz olarak
+       ayrı ayrı göremiyorum; kaçı hangi şantiyeden, grafik göremiyorum.
+       Önce günlük verileri göster."
+       Sıra: kutular → GÜNÜN dağılımı (bütün şantiyeler + şantiye şantiye,
+       gündüz / gece) → son 7 gün → şantiyeler. */
+    var G = 0, C = 0, nG = 0, nC = 0, kuleSet = {};
+    var dag = sahalar.map(function(s){
+      var x = {ad:s.saha, g:0, c:0, ng:0, nc:0, kule:{}, sessiz:!!s.sessiz};
+      (s.kuleler || []).forEach(function(k){
+        if(!k.vardiya) return;
+        var m = Number(k.metraj || 0);
+        if(geceMi(k)){ x.c += m; x.nc++; C += m; nC++; } else { x.g += m; x.ng++; G += m; nG++; }
+        if(k.makine){ x.kule[k.makine] = 1; kuleSet[s.proje + "|" + k.makine] = 1; }
+      });
+      x.nk = Object.keys(x.kule).length;
+      return x;
+    });
     var calisan = sahalar.filter(function(s){ return !s.sessiz; }).length;
+    var nV = nG + nC, nKule = Object.keys(kuleSet).length, T = G + C;
+    var pay = function(x){ return T > 0 ? ' · günün %' + tl(x / T * 100, 0) : ''; };
+    var sessizAd = sahalar.filter(function(s){ return s.sessiz; }).map(function(s){ return String(s.saha).split(" ")[0]; });
 
     GUNLUK = [];
+    /* Tayfun 634 m'yi aylık toplam sanmıştı ("rakam çok büyük"): kutu
+       rakamın bir güne ait olduğunu ve neye bölündüğünü söylüyor. */
     var ozet = '<div class="go-kutular">' +
-      '<div class="go-k ana"><span>Toplam delinen</span><b id="go-toplam">' + tl(G + C) + ' m</b>' +
-        '<i>' + (nG + nC) + ' vardiya</i></div>' +
-      '<div class="go-k"><span>Gündüz</span><b id="go-gunduz">' + tl(G) + ' m</b><i>' + nG + ' vardiya</i></div>' +
-      '<div class="go-k"><span>Gece</span><b id="go-gece">' + tl(C) + ' m</b><i>' + nC + ' vardiya</i></div>' +
+      '<div class="go-k ana"><span>Günün toplamı</span><b id="go-toplam">' + tl(T) + ' m</b>' +
+        '<i id="go-toplam-alt">' + nV + ' vardiya · ' + nKule + ' kule' +
+        (nV ? ' · vardiya başına ' + tl(T / nV, 1) + ' m' : '') + '</i></div>' +
+      '<div class="go-k"><span><i class="go-nk g"></i>Gündüz</span><b id="go-gunduz">' + tl(G) + ' m</b><i>' + nG + ' vardiya' + pay(G) + '</i></div>' +
+      '<div class="go-k"><span><i class="go-nk c"></i>Gece</span><b id="go-gece">' + tl(C) + ' m</b><i>' + nC + ' vardiya' + pay(C) + '</i></div>' +
       '<div class="go-k"><span>Çalışan şantiye</span><b id="go-santiye">' + calisan + ' / ' + sahalar.length +
-        '</b><i>&nbsp;</i></div></div>';
+        '</b><i>' + (sessizAd.length && sessizAd.length <= 2 ? esc(sessizAd.join(", ")) + ' sessiz' : '&nbsp;') + '</i></div></div>';
+    ozet += gunBlogu(d, dag, G, C, nV, nKule);
 
     GUN_VERI = d;
     el.innerHTML = ozet + seriBlogu(d) + sahalar.map(santiyeBlogu).join("");

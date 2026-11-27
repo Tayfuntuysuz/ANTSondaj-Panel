@@ -648,13 +648,16 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
   font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .ky-bas .m{text-align:right}
 .ky-bas span{white-space:nowrap}
-.ky .uy2{display:flex;gap:5px;flex-wrap:wrap;align-items:center;min-width:0}
+.ky .uy2{display:flex;gap:5px;flex-wrap:wrap;align-items:center;min-width:0;justify-content:center}
+/* Sürüm 74 · 150: Uyarı sütununda başlık da rozetler de sütunun ortasında */
+.ky-bas span:nth-child(6){text-align:center}
 .ky:hover,.ky.acik{background:var(--card-2)}
 .ky:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .ky .kd{font-weight:600;overflow-wrap:anywhere}
 .ky .mk{color:var(--ink-2)}
 .ky .dr{color:var(--ink-2);font-variant-numeric:tabular-nums}
-.ky .vd{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+/* Sürüm 74 · 150: Gündüz ve Gece yan yana, tek satır */
+.ky .vd{display:flex;gap:5px;flex-wrap:nowrap;align-items:center}
 .ky .m{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
 .ky .m .yok{color:var(--bad)}
 /* Açılır oku SOLDA (sürüm 68): şantiye başlığındakiyle aynı hizada */
@@ -706,6 +709,36 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 /* Sürüm 73 · 144: panel.html iki sayfa gösteriyor — Günlük rapor ve Şantiye ayrıntısı */
 .bolum-gunluk .ay-bolum,.bolum-ayrinti .gun-bolum{display:none}
 .bolum-ayrinti .ay-bolum > .filters:first-of-type{margin-top:0}
+/* Sürüm 74 · 152: önce günün kendisi — şantiyelere göre gündüz / gece */
+.go-k .go-nk{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:0}
+.go-k .go-nk.g{background:var(--seri-gunduz)} .go-k .go-nk.c{background:var(--seri-gece)}
+.go-gun .gs-sonuc{margin:2px 0 12px;font-size:15px;font-weight:600;color:var(--ink)}
+.gs-sat{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) minmax(120px,190px);gap:12px;align-items:center;
+  font-size:13.5px;padding:5px 0}
+.gs-sat .ad{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gs-sat .ad small{display:block;font-weight:400;color:var(--ink-3);font-size:11.5px;white-space:nowrap}
+.gs-sat .ad small .ks{display:none}
+.gs-sat .cb{display:flex;gap:2px;height:26px;min-width:4px}
+.gs-sat .cb u,.gs-sat .cb s{display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;white-space:nowrap;
+  text-decoration:none;font-size:12px;font-variant-numeric:tabular-nums}
+.gs-sat .cb u{background:var(--seri-gunduz);color:#0d1f2b}
+.gs-sat .cb s{background:var(--seri-gece);color:#fff}
+.gs-sat .cb > :first-child{border-radius:4px 0 0 4px} .gs-sat .cb > :last-child{border-radius:0 4px 4px 0}
+.gs-sat .cb > :only-child{border-radius:4px}
+.gs-sat .de{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gs-sat .de small{color:var(--ink-2);font-size:12px}
+.gs-sat .gs-yok{color:var(--ink-3);font-size:12.5px}
+.gs-sat.bos .ad{color:var(--ink-3);font-weight:400}
+.gs-sat.top{padding-bottom:12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.gs-sat.top .cb{height:32px} .gs-sat.top .cb u,.gs-sat.top .cb s{font-size:13px;font-weight:600}
+.gs-sat.top .de b{font-size:16px}
+.go-gun + .go-seri .go-cub{--yuk:140px}
+@media (max-width:700px){
+  .gs-sat{grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}
+  .gs-sat .ad{grid-column:1} .gs-sat .de{grid-column:2;grid-row:1} .gs-sat .cb,.gs-sat .gs-yok{grid-column:1 / -1}
+  .gs-sat .cb .uz{display:none} .gs-sat .ad small .ks{display:inline}
+  .gs-sat.top .cb .uz{display:inline;font-size:11.5px}
+}
 /* Sürüm 73 · 142: sütunlar tıklanmaz; gün gezme grafiğin iki yanındaki oklarla */
 .go-gov{display:flex;align-items:stretch;gap:6px;margin-top:6px}
 .go-gov .go-cub{flex:1;min-width:0;margin-top:0}
@@ -803,7 +836,7 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
   .sk-bas .mus{display:block;margin-left:0}
   .ky{grid-template-columns:18px minmax(0,1fr) auto;
       grid-template-areas:"ok kd m" ". mk dr" ". vd vd" ". uy uy" ". st st";gap:4px 10px;padding:10px 14px}
-  .ky .uy2{grid-area:uy} .ky .uy2:empty{display:none}
+  .ky .uy2{grid-area:uy;justify-content:flex-start} .ky .uy2:empty{display:none}
   .ky-bas{display:none}
   .ky .kd{grid-area:kd} .ky .m{grid-area:m} .ky .ok2{grid-area:ok}
   .ky .mk{grid-area:mk} .ky .dr{grid-area:dr;text-align:right;min-width:128px} .ky .vd{grid-area:vd}
