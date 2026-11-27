@@ -613,8 +613,15 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 
 /* Kuyu satırı: kuyu · kule · derinlik · vardiya rozetleri · metraj */
 .ky{all:unset;box-sizing:border-box;width:100%;display:grid;cursor:pointer;
-  grid-template-columns:22px minmax(0,.8fr) 100px 150px minmax(0,1fr) 128px 96px;gap:12px;align-items:center;
+  grid-template-columns:22px minmax(0,.8fr) 100px 150px 124px minmax(0,1fr) 128px 112px;gap:12px;align-items:center;
   padding:11px 16px;border-bottom:1px solid var(--line-soft);font-size:14px}
+/* Sütun başlıkları (sürüm 71): satırlarla aynı ızgara */
+.ky-bas{display:grid;grid-template-columns:22px minmax(0,.8fr) 100px 150px 124px minmax(0,1fr) 128px 112px;gap:12px;
+  padding:8px 16px 7px;border-bottom:1px solid var(--line-soft);background:var(--card);
+  font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.ky-bas .m{text-align:right}
+.ky-bas span{white-space:nowrap}
+.ky .uy2{display:flex;gap:5px;flex-wrap:wrap;align-items:center;min-width:0}
 .ky:hover,.ky.acik{background:var(--card-2)}
 .ky:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .ky .kd{font-weight:600;overflow-wrap:anywhere}
@@ -652,7 +659,6 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
   body.gunluk-yazdir .go-gez,body.gunluk-yazdir #go-not{display:none !important}
   body.gunluk-yazdir .sk-ic[hidden]{display:block !important}
   body.gunluk-yazdir .sk{break-inside:avoid;box-shadow:none}
-  body.gunluk-yazdir .sk-alt{display:none !important}
 }
 
 /* Son 7 günün grafiği */
@@ -690,10 +696,6 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .cl{padding:10px 16px 12px 50px;font-size:13px;color:var(--ink-2);border-bottom:1px solid var(--line-soft)}
 .cl b{font-weight:600}
 .cl .soluk{color:var(--ink-3)}
-.sk-alt{padding:8px 16px 10px 50px}
-.sk-alt .lnk{all:unset;cursor:pointer;font-size:13px;color:var(--accent)}
-.sk-alt .lnk:hover{text-decoration:underline}
-.sk-alt .lnk:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 
 /* Vardiya rozetleri — gündüz sarı, gece lacivert */
 .pv{font-size:11.5px;border-radius:999px;padding:2px 8px;font-weight:600;white-space:nowrap}
@@ -758,7 +760,9 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
   .sk-bas .uy:empty{display:none}
   .sk-bas .mus{display:block;margin-left:0}
   .ky{grid-template-columns:18px minmax(0,1fr) auto;
-      grid-template-areas:"ok kd m" ". mk dr" ". vd vd" ". st st";gap:4px 10px;padding:10px 14px}
+      grid-template-areas:"ok kd m" ". mk dr" ". vd vd" ". uy uy" ". st st";gap:4px 10px;padding:10px 14px}
+  .ky .uy2{grid-area:uy} .ky .uy2:empty{display:none}
+  .ky-bas{display:none}
   .ky .kd{grid-area:kd} .ky .m{grid-area:m} .ky .ok2{grid-area:ok}
   .ky .mk{grid-area:mk} .ky .dr{grid-area:dr;text-align:right;min-width:128px} .ky .vd{grid-area:vd}
   .ky .st{grid-area:st} .ky .st:empty{display:none}
@@ -771,7 +775,7 @@ tbody tr.uyari td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
   .go-cub .uz{display:none} .go-cub .ks{display:inline}
   .go-cub .cb em{font-size:10.5px} .go-cub .c.secili .cb em{font-size:11.5px}
   .go-cub .cb u,.go-cub .cb s{width:68%}
-  .ky-kart,.cl,.sk-alt,.onay-serit{padding-left:14px;padding-right:14px}
+  .ky-kart,.cl,.onay-serit{padding-left:14px;padding-right:14px}
 }
 
 /* Merkez ofis › İşverene açık başlıklar (sürüm 70) */

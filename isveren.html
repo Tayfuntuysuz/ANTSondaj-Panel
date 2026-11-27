@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=70">
+<link rel="stylesheet" href="app.css?v=71">
 <style>
 /* ============================================================
    İŞVEREN PANELİ (93. dosya · 60. adım)
@@ -74,7 +74,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 .sr-sat .iz i{display:block;height:100%;border-radius:4px}
 .sr-sat .y{text-align:end;font-variant-numeric:tabular-nums;font-weight:600}
 .sr-alt{font-size:12px;color:var(--ink-3);margin-top:8px}
-.dv-sat{display:grid;grid-template-columns:minmax(120px,1.1fr) 70px minmax(160px,2fr) 96px;gap:12px;align-items:center;width:100%;
+.dv-sat{display:grid;grid-template-columns:minmax(120px,1.1fr) 70px minmax(160px,2fr) 112px;gap:12px;align-items:center;width:100%;
   background:none;border:0;border-top:1px solid var(--line-soft);padding:10px 2px;font:inherit;color:var(--ink);text-align:start;cursor:pointer}
 .dv-sat:first-of-type{border-top:0}
 .dv-sat:hover{background:var(--line-soft)}
@@ -111,9 +111,20 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 .gn-ust{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .gn-ust h3{font-family:"Barlow Condensed",sans-serif;font-size:24px;margin:0;margin-inline-end:auto}
 .gn-ust input[type=date]{width:auto;flex:none}
-.gn-sat{display:grid;grid-template-columns:18px minmax(110px,1.1fr) minmax(80px,.8fr) minmax(140px,1.6fr) minmax(120px,1.4fr) 92px;gap:12px;align-items:center;width:100%;
+/* Sütun başlıkları (sürüm 71): satırlarla aynı ızgara. Duruş kendi
+   sütununda: vardiya rozetleriyle aynı yerde durup karışmasın. */
+.gn-bas,.dv-bas{display:grid;gap:12px;padding:2px 4px 8px;border-bottom:1px solid var(--line-soft);
+  font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.gn-bas{grid-template-columns:18px minmax(110px,1.1fr) minmax(80px,.8fr) minmax(140px,1.6fr) 124px minmax(110px,1.3fr) 112px}
+.gn-bas.dar{grid-template-columns:18px minmax(110px,1.1fr) minmax(80px,.8fr) minmax(140px,1.6fr) 124px 112px}
+.dv-bas{grid-template-columns:minmax(120px,1.1fr) 70px minmax(160px,2fr) 112px;padding:0 2px 8px}
+.gn-bas .m,.dv-bas .m{text-align:end}
+.gn-bas span,.dv-bas span{white-space:nowrap}
+.gn-sat.dar{grid-template-columns:18px minmax(110px,1.1fr) minmax(80px,.8fr) minmax(140px,1.6fr) 124px 112px}
+.gn-sat .du{display:flex;gap:5px;flex-wrap:wrap;min-width:0}
+.gn-sat{display:grid;grid-template-columns:18px minmax(110px,1.1fr) minmax(80px,.8fr) minmax(140px,1.6fr) 124px minmax(110px,1.3fr) 112px;gap:12px;align-items:center;width:100%;
   background:none;border:0;border-top:1px solid var(--line-soft);padding:11px 4px;font:inherit;color:var(--ink);text-align:start;cursor:pointer}
-.gn-sat:first-child{border-top:0}
+.gn-sat:first-child,.gn-bas + .gn-sat,.dv-bas + .dv-sat{border-top:0}
 .gn-sat:hover{background:var(--line-soft)}
 .gn-sat .ok{color:var(--ink-3);font-size:12px;transition:transform .12s}
 .gn-sat.acildi .ok{transform:rotate(90deg);color:var(--accent)}
@@ -137,8 +148,10 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
   .dv-sat > span:nth-child(2){display:none}
   .dv-sat .m{order:2}
   .dv-sat .dr{grid-column:1 / -1;order:3}
-  .gn-sat{grid-template-columns:18px minmax(0,1fr) auto;row-gap:5px}
+  .gn-sat,.gn-sat.dar{grid-template-columns:18px minmax(0,1fr) auto;row-gap:5px}
   .gn-sat .mk{grid-column:2 / -1;order:3} .gn-sat .dr{grid-column:2 / -1;order:4} .gn-sat .vd{grid-column:2 / -1;order:5}
+  .gn-sat .du{grid-column:2 / -1;order:6} .gn-sat .du:empty{display:none}
+  .gn-bas,.dv-bas{display:none}
   .gn-ic{padding-inline-start:8px}
 }
 @media print{ .gn-ust button,.gn-ust input{display:none!important} .gn-ic[hidden]{display:block!important} }
@@ -368,7 +381,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=70"></script>
+<script src="app-shell.js?v=71"></script>
 <script>
 (function(){
 "use strict";
@@ -398,6 +411,7 @@ var T={
   kuyuAra:"Kuyu ara…", aramaBos:"Aramaya uyan kuyu yok.", tamamlandi:"%{y} tamamlandı", capK:"Çap", olcumK:"Ölçüm", adet:"adet",
   oGun:"O gün delinen", nVardiya:"{n} vardiya", sonrakiGun:"Sonraki gün", gunKapali:"Bu günün vardiyaları henüz onaylanmadı ya da kayıt yok.",
   gunRowNot:"Kuyuya basınca o günün vardiyaları açılır.",
+  hKuyu:"Kuyu", hKule:"Kule", hDerinlik:"Derinlik / planlanan", hVardiya:"Vardiya", hDurus:"Duruş", hMetre:"Günün metresi", hDurum:"Durum",
   dToplam:"Toplam delgi", dAcikSade:"Başlangıçtan bugüne birikimli metre.", tahminSade:"Kalan metreye ve bu kuyudaki ilerlemeye göre.",
   a:"Makine başı vardiya delgi ortalaması", b:"Haftalık delgi ortalaması", c:"Aylık delgi ortalaması",
   d:"Toplam delgi ortalaması", durus:"Duruş ve arıza",
@@ -461,6 +475,7 @@ var T={
   kuyuAra:"Search holes…", aramaBos:"No hole matches the search.", tamamlandi:"{y}% complete", capK:"Size", olcumK:"Surveys", adet:"",
   oGun:"Drilled that day", nVardiya:"{n} shifts", sonrakiGun:"Next day", gunKapali:"Shifts for this day are not approved yet, or there is no record.",
   gunRowNot:"Click a hole to see that day's shifts.",
+  hKuyu:"Hole", hKule:"Rig", hDerinlik:"Depth / planned", hVardiya:"Shift", hDurus:"Downtime", hMetre:"Metres that day", hDurum:"Status",
   dToplam:"Total drilled", dAcikSade:"Cumulative metres since the start.", tahminSade:"Based on the remaining metres and progress in this hole.",
   a:"Average metres per shift per rig", b:"Weekly drilling average", c:"Monthly drilling average",
   d:"Overall drilling average", durus:"Downtime and breakdowns",
@@ -776,7 +791,9 @@ function acilisCiz(){
   var dv=$("#ac-devam"), L=A.devam||[];
   dv.hidden=!acik("kuyular");
   if(acik("kuyular")){
-    dv.innerHTML='<div class="ac-bas"><span>'+t("acDevamBas")+'</span></div>'+(L.length?L.map(function(k){
+    dv.innerHTML='<div class="ac-bas"><span>'+t("acDevamBas")+'</span></div>'+(L.length?
+      '<div class="dv-bas" aria-hidden="true"><span>'+t("hKuyu")+' · '+t("hKule")+'</span><span>'+t("hDurum")+'</span><span>'+t("hDerinlik")+'</span><span class="m">'+t("hMetre")+'</span></div>'+
+      L.map(function(k){
       var p=Number(k.planlanan)||0, der=Number(k.derinlik)||0, gm=Number(k.gun_metre)||0, dr;
       if(p>0){ var son=Math.min(der/p*100,100), bug=Math.min(gm/p*100,son);
         dr=tl(der)+' <em>/ '+tl(p,0)+' m</em><span class="ibar"><i style="width:'+(son-bug)+'%"></i><b style="left:'+(son-bug)+'%;width:'+bug+'%"></b></span>'; }
@@ -1165,16 +1182,20 @@ function gunCiz(d){
     if(g.mk.indexOf(s.makine)<0) g.mk.push(s.makine);
     g.der=Math.max(g.der, Number(s.kuyu_derinlik)||0); });
   var plan={}; ((KUYULAR||{}).kuyular||[]).forEach(function(k){ plan[k.kod]=k.planlanan; });
-  h+='<div class="ac-kart" id="gn-liste">'+sira.map(function(g){
+  var durusAcik=acik("durus");
+  h+='<div class="ac-kart" id="gn-liste">'+
+    '<div class="gn-bas'+(durusAcik?'':' dar')+'" aria-hidden="true"><span></span><span>'+t("hKuyu")+'</span><span>'+t("hKule")+'</span><span>'+t("hDerinlik")+
+      '</span><span>'+t("hVardiya")+'</span>'+(durusAcik?'<span>'+t("hDurus")+'</span>':'')+'<span class="m">'+t("hMetre")+'</span></div>'+
+    sira.map(function(g){
     var p=acik("kuyular")?(Number(plan[g.kuyu])||0):0, dr, du=[];
     if(p>0 && g.der>0){ var son=Math.min(g.der/p*100,100), bug=Math.min(g.m/p*100,son);
       dr=tl(g.der)+' <em>/ '+tl(p,0)+' m</em><span class="ibar"><i style="width:'+(son-bug)+'%"></i><b style="left:'+(son-bug)+'%;width:'+bug+'%"></b></span>'; }
     else dr=g.der?tl(g.der)+' m':'—';
     g.v.forEach(function(s){ (s.durus||[]).forEach(function(k){ du.push(k); }); });
-    return '<button type="button" class="gn-sat" aria-expanded="false" data-kuyu="'+esc(g.kuyu)+'"><span class="ok" aria-hidden="true">▸</span>'+
+    return '<button type="button" class="gn-sat'+(durusAcik?'':' dar')+'" aria-expanded="false" data-kuyu="'+esc(g.kuyu)+'"><span class="ok" aria-hidden="true">▸</span>'+
       '<span class="kd">'+esc(g.kuyu)+'</span><span class="mk">'+esc(g.mk.join(" · "))+'</span><span class="dr num">'+dr+'</span>'+
-      '<span class="vd">'+g.v.map(function(s){ return '<span class="vr '+(s.vardiya==="gece"?"gece":"gunduz")+'">'+(S("VARD")[s.vardiya]||s.vardiya)+'</span>'; }).join("")+
-        du.map(durusRozet).join("")+'</span>'+
+      '<span class="vd">'+g.v.map(function(s){ return '<span class="vr '+(s.vardiya==="gece"?"gece":"gunduz")+'">'+(S("VARD")[s.vardiya]||s.vardiya)+'</span>'; }).join("")+'</span>'+
+      (durusAcik?'<span class="du">'+du.map(durusRozet).join("")+'</span>':'')+
       '<span class="m'+(g.m>0?'':' yok')+'">'+(g.m>0?tl(g.m)+' m':t("metrajYok"))+'</span></button>'+
       '<div class="gn-ic" hidden>'+g.v.map(vardiyaIc).join("")+'</div>'; }).join("")+'</div>'+
     '<div class="ip-not">'+t("gunRowNot")+' '+t("gunNot")+'</div>';

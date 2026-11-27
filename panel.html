@@ -16,7 +16,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=70">
+<link rel="stylesheet" href="app.css?v=71">
 </head>
 <body>
 
@@ -219,9 +219,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=70"></script>
+<script src="app-shell.js?v=71"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=70"></script>
+<script src="kart.js?v=71"></script>
 <script>
 (function(){
 "use strict";
@@ -902,7 +902,7 @@ function denetimIsle(){
     var y = GUNLUK[Number(ky.dataset.no)], adlar = [];
     (y.v || []).forEach(function(k){ (DENETIM[k.vardiya_id] || []).forEach(function(e){
       if(adlar.indexOf(e.ad) < 0) adlar.push(e.ad); }); });
-    var vd = ky.querySelector(".vd"), eski = vd.querySelector(".dn");
+    var vd = ky.querySelector(".uy2") || ky.querySelector(".vd"), eski = vd.querySelector(".dn");
     if(eski) eski.remove();
     if(adlar.length) vd.insertAdjacentHTML("beforeend",
       '<span class="p s dn" title="' + esc(adlar.join(" · ")) + '">⚠ eksik kayıt</span>');
@@ -999,9 +999,14 @@ function santiyeBlogu(s){
       '<span class="kd">' + esc(y.kuyu || '—') + '</span>' +
       '<span class="mk">' + esc(y.makine.join(' · ')) + '</span>' +
       '<span class="dr">' + dr + '</span>' +
-      '<span class="vd">' + y.v.map(vardiyaRozeti).join('') +
-        (y.ariza ? arizaEtiketi(y.ariza, 1) : '') +
-        (y.uyg ? '<span class="p s">⚑ ' + y.uyg + '</span>' : '') + '</span>' +
+      /* Sürüm 71 · Tayfun: "Üst satırda gündüz gece yazıyor, alttaki
+         kulede aynı yerde 'duruyor 4 gündür' yazıyor — karışıklık.
+         Uyarılar aynı yerde alt alta gözükmesi lazım." Vardiya rozetleri
+         ile uyarılar (arıza · uygun olmayan madde · eksik kayıt) artık
+         ayrı sütunda; her biri satırdan satıra aynı hizada. */
+      '<span class="vd">' + y.v.map(vardiyaRozeti).join('') + '</span>' +
+      '<span class="uy2">' + (y.ariza ? arizaEtiketi(y.ariza, 1) : '') +
+        (y.uyg ? '<span class="p s">⚑ ' + y.uyg + ' madde uygun değil</span>' : '') + '</span>' +
       '<span class="st">' + (st.sure ? 'delgi ' + tl(st.delgi, 1) + ' / ' + tl(st.sure, 0) + ' sa' + saatCubugu(st) : '') + '</span>' +
       '<span class="m">' + (y.m > 0 ? tl(y.m) + ' m' : '<span class="yok">metraj yok</span>') + '</span></button>' +
       '<div class="ky-kart" hidden></div>';
@@ -1012,13 +1017,17 @@ function santiyeBlogu(s){
       return esc(k.makine) + (k.kuyu ? ' <span class="soluk">(' + esc(k.kuyu) + ')</span>' : '') +
              (k.ariza ? ' ' + arizaEtiketi(k.ariza, 1) : '');
     }).join(' · ') + '</div>' : '';
-  var ic = (onaySerit + satirlar + bosSatir) ||
+  /* Sürüm 71 · sütun başlıkları: "Neyin ne olduğu belli olsun." */
+  var baslik = !kuyular.length ? '' :
+    '<div class="ky-bas" aria-hidden="true"><span></span><span>Kuyu</span><span>Kule</span>' +
+    '<span>Derinlik / planlanan</span><span>Vardiya</span><span>Uyarı</span>' +
+    '<span>Çalışma saati</span><span class="m">Günün metresi</span></div>';
+  var ic = (onaySerit + baslik + satirlar + bosSatir) ||
     '<div class="cl">Bu şantiyeye atanmış kule yok — şef vardiya giremez.</div>';
-  /* Eski "şantiye adına bas → aşağıda aylık ayrıntı" yolu korunuyor:
-     kuyuların kesit ve ilerleme bölümüne Operasyonlar gelene kadar
-     tek ulaşılan yer aşağısı. */
-  ic += '<div class="sk-alt"><button class="lnk sk-ayrinti" type="button" data-proje="' + esc(s.proje) +
-        '">Bu şantiyenin aylık ayrıntısı ↓</button></div>';
+  /* Sürüm 71 · Tayfun: "Neden aylık ayrıntı konuluyor buraya, burası
+     günlük rapor ekranı. Kaldıralım." Şantiyenin dibindeki "aylık
+     ayrıntı" bağlantısı kalktı. Aylık bölümün kendisi sayfanın altında,
+     kendi seçicisiyle duruyor (Operasyonlar ekranı gelene kadar). */
 
   return '<section class="sk' + (s.sessiz ? ' sessiz' : '') + '" data-proje="' + esc(s.proje) + '">' +
     '<button class="sk-bas" type="button" aria-expanded="false">' +
@@ -1030,8 +1039,7 @@ function santiyeBlogu(s){
     '</button><div class="sk-ic" hidden>' + ic + '</div></section>';
 }
 
-/* Tıklamalar: şantiye başlığı aç/kapa, kuyu satırı kart aç/kapa,
-   "aylık ayrıntı" aşağıdaki seçiciyi doldurup getirir. */
+/* Tıklamalar: şantiye başlığı aç/kapa, kuyu satırı kart aç/kapa. */
 document.addEventListener("change", function(e){
   if(e.target && e.target.id === "go-tarih" && e.target.value) gunSec(e.target.value);
 });
@@ -1105,15 +1113,6 @@ document.addEventListener("click", function(e){
       });
     }
     return;
-  }
-  var ay = e.target.closest(".sk-ayrinti[data-proje]");
-  if(ay){
-    var sel = $("#f-project"); if(!sel) return;
-    sel.value = ay.getAttribute("data-proje");
-    sel.dispatchEvent(new Event("change", {bubbles:true}));
-    var btn = $("#btn-load"); if(btn) btn.click();
-    var hedef = $("#tiles") || btn;
-    if(hedef && hedef.scrollIntoView) hedef.scrollIntoView({behavior:"smooth", block:"start"});
   }
 });
 
