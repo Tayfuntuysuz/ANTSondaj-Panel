@@ -13,7 +13,7 @@
    imkânsız, çevrimdışı da aynen çalışıyor.
    Sürüm numarası TEK YERDE: aşağıdaki CACHE. Değiştirmek için
    `araclar/surum-yukselt.sh` — elle değil. */
-var CACHE = "collarlog-v75";
+var CACHE = "collarlog-v76";
 var V = CACHE.replace(/^.*-v/, "");
 /* 57. dosya: yonetim.html ("Ana veri ve projeler") listede HİÇ yoktu —
    bağlantı zayıfken o sayfa doğrudan şefin ekranına düşüyordu.
@@ -22,7 +22,7 @@ var V = CACHE.replace(/^.*-v/, "");
 var SHELL = [
   "./", "./index.html", "./panel.html", "./rapor.html", "./santiyeler.html",
   "./sirket.html", "./maaslar.html", "./ofis.html", "./muhasebe.html", "./isveren.html",
-  "./yonetim.html", "./aykilidi.html", "./puantaj.html",
+  "./yonetim.html", "./aykilidi.html", "./puantaj.html", "./analiz.html",
   /* Kod sürümlü adresle — sayfaların çağırdığı adresin AYNISI olmalı,
      yoksa çevrimdışı önbellekte bulunmaz. */
   "./app.css?v=" + V, "./app-shell.js?v=" + V, "./kart.js?v=" + V,

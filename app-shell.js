@@ -14,7 +14,7 @@ window.SP = (function(){
 /* Ofis panellerinin sürümü, saha paneliyle AYNI diziden. Eskiden burada
    "2.0" yazıyordu, saha paneli 39'daydı; hangi dosyanın sunucuda olduğu
    anlaşılmıyordu (22 Ekim). Paket çıkarken ikisi birlikte artıyor. */
-var SURUM = "75";
+var SURUM = "76";
 
 /* ---------- yardımcılar ---------- */
 var $  = function(s, k){ return (k||document).querySelector(s); };
@@ -200,18 +200,25 @@ var SAYFALAR = [
      Kuyu bitiş tahmini de buraya giriyor. santiyeler.html bugüne kadar
      HİÇBİR role verilmemişti; sayfa çalışıyordu ama kimse açamıyordu
      (32. dosya, 1. sorun). */
-  {k:"santiyeler", d:"santiyeler.html", ad:"Analiz",          i:"grafik", g:"Analizler",
+  /* Sürüm 76 · 145. dosya: bol grafikli analiz sayfası — altı sekme
+     (Üretim · Zaman ve duruş · Ekip · Kuyular · Maliyet · Matkap ve
+     malzeme), üstte şantiye ve dönem. Şeridin ilk üyesi; yetkisi
+     Şantiye karşılaştırma'nınki ("santiyeler"). */
+  {k:"analiz", d:"analiz.html", ad:"Analiz", i:"grafik", g:"Analizler",
+                 cift:"analiz", bas:1, sekme:"Analiz", yetki:"santiyeler"},
+  {k:"santiyeler", d:"santiyeler.html", ad:"Şantiye karşılaştırma", i:"grafik", g:"Analizler",
                  /* Sekme adı, açılan sayfanın başlığıyla aynı (25 Kasım,
                     menü yürüyüşü sınaması yakaladı: sekme "Şantiyeler",
                     sayfa "Şantiye karşılaştırma" diyordu). */
-                 cift:"analiz", bas:1, sekme:"Şantiye karşılaştırma"},
+                 cift:"analiz", sekme:"Şantiye karşılaştırma"},
   {k:"sirket",   d:"sirket.html",    ad:"Şirket performansı", i:"grafik", g:"Analizler",
                  cift:"analiz", sekme:"Şirket performansı"},
-  /* Sürüm 73 · 144. dosya: Günlük rapor'un altındaki şantiye seçici ve
-     aylık bölümler buraya taşındı. Aynı dosya (panel.html), ayrı kip.
-     Yetkisi Günlük rapor'unkiyle aynı: orayı gören burayı da görür. */
-  {k:"ayrinti",  d:"panel.html?bolum=ayrinti", ad:"Şantiye ayrıntısı", i:"grafik", g:"Analizler",
-                 cift:"analiz", sekme:"Şantiye ayrıntısı", yetki:"panel"},
+  /* Sürüm 73 · 144. dosya: Günlük rapor'un altındaki bölümler
+     "Şantiye ayrıntısı" sekmesine taşınmıştı. Sürüm 76'da içeriği
+     Analiz'in sekmelerine dağıldı (vardiya dökümü → Üretim, kuyu kesiti
+     ve matkap zinciri → Kuyular, mazot ve harcama → Maliyet, stok ve
+     takılı matkaplar → Matkap ve malzeme). Eski adres analiz.html'e
+     yönlenir (panel.html). */
 
   /* PROJE YÖNETİMİ VE TANIMLAMALAR — eskiden analiz grubunun içindeydi;
      Tayfun ayırdı. Şantiye şefi ve sözleşme tarihleri de burada. */

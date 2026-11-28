@@ -2,6 +2,11 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
+<script>/* Sürüm 76: Şantiye ayrıntısı Analiz'in sekmelerine dağıldı; eski
+   adres (yer imi, paylaşılan bağlantı) oraya gider, şantiye seçimiyle. */
+(function(){ var q = new URLSearchParams(location.search);
+  if(q.get("bolum") === "ayrinti"){ var p = q.get("proje");
+    location.replace("analiz.html" + (p ? "?proje=" + encodeURIComponent(p) : "")); } })();</script>
 <script>/* tema: sayfa boyanmadan once uygulanir, yoksa koyu temada beyaz parlama olur */
 try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
 if(_t)document.documentElement.setAttribute("data-tema",_t);
@@ -16,7 +21,7 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=75">
+<link rel="stylesheet" href="app.css?v=76">
 </head>
 <body>
 
@@ -229,9 +234,9 @@ if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app-shell.js?v=75"></script>
+<script src="app-shell.js?v=76"></script>
 <!-- Vardiya kartı: saha ve yönetici aynı dosyayı yüklüyor (63. dosya). -->
-<script src="kart.js?v=75"></script>
+<script src="kart.js?v=76"></script>
 <script>
 (function(){
 "use strict";

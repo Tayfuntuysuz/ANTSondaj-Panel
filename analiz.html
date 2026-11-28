@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<script>/* tema: sayfa boyanmadan once uygulanir, yoksa koyu temada beyaz parlama olur */
+try{var _t=localStorage.getItem("sp_tema"),_y=localStorage.getItem("sp_yazi");
+if(_t)document.documentElement.setAttribute("data-tema",_t);
+if(_y)document.documentElement.setAttribute("data-yazi",_y);}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Collarlog · Analiz</title>
+<link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="logo/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="logo/png/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#16212A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css?v=76">
+<style>
+/* Sürüm 76 · 145. dosya: Günlük rapor'un görsel dili — sarı gündüz,
+   lacivert gece, turuncu vurgu, kesikli ortalama, her grafiğin üstünde
+   tek cümlelik sonuç. Bütün grafikler HTML/CSS: kütüphane yok. */
+.an-ust{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.an-ust .field{margin:0;min-width:200px}
+.an-ust .field.dar{min-width:170px}
+.an-ust .bos{flex:1}
+.an-ust .hint{font-size:12px;color:var(--ink-3);align-self:center}
+.sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.sekmeler button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  font:inherit;font-size:13.5px;padding:7px 14px;border-radius:999px;cursor:pointer}
+.sekmeler button[aria-pressed="true"]{background:var(--nav);border-color:var(--nav);color:#fff;font-weight:600}
+:root[data-tema="koyu"] .sekmeler button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#06141b}
+.an-kutular{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.an-k{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow);min-width:0}
+.an-k>span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.an-k b{display:block;font-size:26px;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.an-k b small{font-size:14px;font-weight:600;color:var(--ink-2)}
+.an-k i{font-style:normal;font-size:12.5px;color:var(--ink-2);display:block}
+.an-k.ana{background:var(--nav);border-color:var(--nav)}
+.an-k.ana>span{color:var(--nav-ink-2)} .an-k.ana b{color:#fff;font-size:30px} .an-k.ana b small{color:var(--nav-ink)}
+.an-k.ana i{color:var(--nav-ink)}
+.iyi{color:var(--good);font-weight:600} .kotu{color:var(--bad);font-weight:600}
+.an-k.ana .iyi{color:#7fd6ad} .an-k.ana .kotu{color:#ffb4a8}
+.an-iz{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.an-iz .tam{grid-column:1/-1}
+.an-g{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px 16px;box-shadow:var(--shadow);min-width:0}
+.an-g h3{margin:0 0 2px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600;
+  display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.an-g h3 em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink-2);font-weight:400;margin-left:auto}
+.an-g h3 em a{color:var(--accent)}
+.an-g .sonuc{margin:0 0 12px;font-size:15px;font-weight:600;color:var(--ink)}
+.an-g .not{font-size:12px;color:var(--ink-3);margin-top:10px}
+.lj{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 5px 0 10px;vertical-align:-1px}
+.lj.g{background:var(--seri-gunduz)} .lj.c{background:var(--seri-gece)} .lj.s{background:var(--vurgu-gun)}
+.lj.d{background:var(--cubuk)} .lj.r{background:var(--bad)} .lj.o{background:var(--cubuk-soluk)}
+.lj.k{background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 6px);border:1px solid var(--line)}
+/* dikey yığın (günlük metraj) */
+.dik{display:flex;align-items:flex-end;gap:3px;height:190px;position:relative;border-bottom:1px solid var(--line);padding-top:20px}
+.dik .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative;min-width:0}
+.dik .c u{display:block;background:var(--seri-gunduz);border-radius:3px 3px 0 0}
+.dik .c s{display:block;background:var(--seri-gece)}
+.dik .c u:last-child{border-radius:3px 3px 0 0}
+.dik .c.tek u{background:var(--cubuk)}
+.dik .c.sec u{background:var(--vurgu-gun)} .dik .c.sec s{background:var(--vurgu-gun);opacity:.7}
+.dik .c b{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;white-space:nowrap;color:var(--ink)}
+.dik .c:hover u,.dik .c:hover s{filter:brightness(1.08)}
+.dik .ort{position:absolute;left:0;right:0;border-top:1.5px dashed var(--ink-3);pointer-events:none}
+.dik .ort i{position:absolute;right:0;top:-17px;font-style:normal;font-size:11px;color:var(--ink-2);background:var(--card);padding-left:4px}
+.ek{display:flex;gap:3px;margin-top:5px;font-size:11px;color:var(--ink-2)}
+.ek span{flex:1;text-align:center;min-width:0;white-space:nowrap;overflow:hidden}
+/* yatay çubuk */
+.yat{display:grid;grid-template-columns:minmax(90px,140px) minmax(0,1fr) minmax(100px,auto);gap:8px 10px;align-items:center;font-size:13.5px}
+.yat .ad{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yat .ad small{display:block;color:var(--ink-3);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yat .de{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.yat .de small{color:var(--ink-2);font-size:12px}
+.cb{height:14px;background:var(--line-soft);border-radius:4px;position:relative}
+.cb i{position:absolute;left:0;top:0;bottom:0;background:var(--cubuk);border-radius:0 4px 4px 0;min-width:2px}
+.cb i.v{background:var(--vurgu-gun)} .cb i.r{background:var(--bad)} .cb i.y{background:var(--good)}
+.cb em{position:absolute;top:-3px;bottom:-3px;border-left:1.5px dashed var(--ink)}
+/* yüzdelik yığın */
+.yz{display:flex;height:14px;gap:2px;min-width:0}
+.yz i{background:var(--cubuk)} .yz b{background:var(--bad)} .yz u{background:var(--cubuk-soluk)}
+.yz s{background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 6px)}
+.yz > :first-child{border-radius:4px 0 0 4px} .yz > :last-child{border-radius:0 4px 4px 0}
+/* ısı ızgarası */
+.isi{display:grid;gap:2px;font-size:13px;align-items:stretch}
+.isi .h{font-size:11px;color:var(--ink-2);text-align:center;padding-bottom:4px;white-space:nowrap}
+.isi .ad{align-self:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}
+.isi .z{text-align:center;padding:7px 0;border-radius:4px;font-variant-numeric:tabular-nums;font-size:12.5px}
+.isi .t{text-align:right;align-self:center;font-weight:600;font-variant-numeric:tabular-nums}
+/* kuyular */
+.ky{display:grid;grid-template-columns:minmax(90px,120px) minmax(70px,96px) minmax(0,1fr) minmax(96px,auto) minmax(84px,auto);gap:9px 10px;align-items:center;font-size:13.5px}
+.ky .mk{color:var(--ink-2);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ky .de{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ky .de em{font-style:normal;color:var(--ink-3)}
+.ib{height:8px;background:var(--line-soft);border-radius:4px;position:relative;overflow:hidden}
+.ib i{position:absolute;left:0;top:0;bottom:0;background:var(--cubuk)}
+.ib b{position:absolute;top:0;bottom:0;background:var(--vurgu-gun)}
+.pp{font-size:11.5px;border-radius:999px;padding:2px 8px;font-weight:600;white-space:nowrap;justify-self:start}
+.pp.o{background:var(--good-soft);color:var(--good)} .pp.s{background:var(--warn-soft);color:var(--warn)} .pp.k{background:var(--bad-soft);color:var(--bad)}
+.pp.n{background:var(--line-soft);color:var(--ink-2)}
+.an-bos{padding:28px 18px;text-align:center;color:var(--ink-2)}
+.an-tablo table{font-size:13px}
+.an-tablo td.num,.an-tablo th.num{text-align:right}
+.an-dip{margin-top:16px;font-size:12px;color:var(--ink-3);max-width:90ch}
+.an-sekme[hidden]{display:none}
+.tumu{all:unset;cursor:pointer;color:var(--accent);font-size:12.5px;margin-top:8px;display:inline-block}
+.yukleniyor .an-iz,.yukleniyor .an-kutular{opacity:.45;transition:opacity .15s}
+@media (max-width:980px){ .an-kutular{grid-template-columns:1fr 1fr} .an-iz{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:560px){
+  .an-ust .field,.an-ust .field.dar{min-width:0;flex:1 1 140px}
+  .an-k b{font-size:22px} .an-k.ana b{font-size:24px}
+  .yat{grid-template-columns:minmax(70px,96px) minmax(0,1fr) auto;font-size:12.5px}
+  .ky{grid-template-columns:minmax(70px,1fr) minmax(0,1.2fr) auto;}
+  .ky .mk,.ky .gz{display:none}
+  .dik .c b{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="sp-icerik">
+  <div class="an-ust">
+    <div class="field"><label for="f-proje">Şantiye</label><select id="f-proje"></select></div>
+    <div class="field dar"><label for="f-donem">Dönem</label><select id="f-donem"></select></div>
+    <span class="hint" id="donem-yazi"></span>
+    <span class="bos"></span>
+  </div>
+  <div class="sekmeler" id="sekmeler" role="tablist"></div>
+  <div id="msg"></div>
+  <div id="govde">
+    <section class="an-sekme" data-sekme="uretim"></section>
+    <section class="an-sekme" data-sekme="zaman" hidden></section>
+    <section class="an-sekme" data-sekme="ekip" hidden></section>
+    <section class="an-sekme" data-sekme="kuyular" hidden></section>
+    <section class="an-sekme" data-sekme="maliyet" hidden></section>
+    <section class="an-sekme" data-sekme="matkap" hidden></section>
+  </div>
+  <p class="an-dip" id="dip"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app-shell.js?v=76"></script>
+<script src="kart.js?v=76"></script>
+<script>
+(function(){
+"use strict";
+var $ = function(s){ return document.querySelector(s); };
+var $$ = function(s, k){ return Array.prototype.slice.call((k || document).querySelectorAll(s)); };
+var esc = SP.esc;
+function tl(n, d){ return SP.tl(n, d === undefined ? 1 : d); }
+function tl0(n){ return SP.tl(n, 0); }
+function tlm(n){ return SP.money(n); }
+var AYLAR = SP.AYLAR, AY3 = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+var HG = ["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
+var SEKMELER = [["uretim","Üretim"],["zaman","Zaman ve duruş"],["ekip","Ekip"],
+                ["kuyular","Kuyular"],["maliyet","Maliyet"],["matkap","Matkap ve malzeme"]];
+var sb = null, MASTER = null, D = null, SEKME = "uretim", SIRA = 0;
+
+SP.boot({sayfa:"analiz", esanahtar:["santiyeler"], baslik:"Analiz", hazir:function(){
+  sb = SP.sb;
+  kur();
+}});
+
+/* ---------- adres: ?sekme=…&proje=…&donem=… (geri tuşu ve paylaşılan bağlantı) ---------- */
+function qp(k){ return new URLSearchParams(location.search).get(k); }
+function adresYaz(){
+  var q = new URLSearchParams();
+  if(SEKME !== "uretim") q.set("sekme", SEKME);
+  if($("#f-proje").value) q.set("proje", $("#f-proje").value);
+  if($("#f-donem").value !== DONEMLER[0].k) q.set("donem", $("#f-donem").value);
+  var s = q.toString();
+  history.replaceState(null, "", location.pathname + (s ? "?" + s : ""));
+}
+
+/* ---------- dönemler ---------- */
+var DONEMLER = [];
+function iso(d){ return SP.iso(d); }
+function donemleriKur(){
+  var bugun = new Date(), y = bugun.getFullYear(), m = bugun.getMonth();
+  DONEMLER = [];
+  for(var i = 0; i < 12; i++){
+    var a = new Date(y, m - i, 1), son = new Date(a.getFullYear(), a.getMonth() + 1, 0);
+    if(son > bugun) son = bugun;
+    DONEMLER.push({k: a.getFullYear() + "-" + String(a.getMonth() + 1).padStart(2, "0"),
+                   ad: AYLAR[a.getMonth()] + " " + a.getFullYear() + (i === 0 ? " (bu ay)" : ""),
+                   bas: iso(a), bit: iso(son)});
+  }
+  var g30 = new Date(bugun); g30.setDate(g30.getDate() - 29);
+  var g90 = new Date(bugun); g90.setDate(g90.getDate() - 89);
+  DONEMLER.splice(1, 0, {k:"son30", ad:"Son 30 gün", bas:iso(g30), bit:iso(bugun)});
+  DONEMLER.push({k:"son90", ad:"Son 90 gün", bas:iso(g90), bit:iso(bugun)});
+  DONEMLER.push({k:"yil", ad:y + " yılı (bugüne kadar)", bas:y + "-01-01", bit:iso(bugun)});
+  DONEMLER.push({k:"12ay", ad:"Son 12 ay", bas:iso(new Date(y, m - 11, 1)), bit:iso(bugun)});
+  $("#f-donem").innerHTML = DONEMLER.map(function(d){
+    return '<option value="' + d.k + '">' + esc(d.ad) + '</option>'; }).join("");
+}
+function donem(){ var k = $("#f-donem").value; return DONEMLER.filter(function(d){ return d.k === k; })[0] || DONEMLER[0]; }
+
+function kur(){
+  donemleriKur();
+  $("#sekmeler").innerHTML = SEKMELER.map(function(s){
+    return '<button type="button" role="tab" data-s="' + s[0] + '" aria-pressed="false">' + s[1] + '</button>'; }).join("");
+  $$("#sekmeler button").forEach(function(b){ b.addEventListener("click", function(){ sekmeAc(b.dataset.s); }); });
+  sb.rpc("bootstrap_data").then(function(r){
+    MASTER = (r && r.data) || {};
+    var ps = (MASTER.projects || []).slice().sort(function(a, b){
+      return String(a.site_name || a.name).localeCompare(String(b.site_name || b.name), "tr"); });
+    $("#f-proje").innerHTML = '<option value="">Bütün şantiyeler</option>' + ps.map(function(p){
+      return '<option value="' + p.id + '">' + esc(p.site_name || p.name) + '</option>'; }).join("");
+    var p = qp("proje"); if(p && ps.some(function(x){ return x.id === p; })) $("#f-proje").value = p;
+    var d = qp("donem"); if(d && DONEMLER.some(function(x){ return x.k === d; })) $("#f-donem").value = d;
+    var s = qp("sekme"); sekmeAc(SEKMELER.some(function(x){ return x[0] === s; }) ? s : "uretim", true);
+    yukle();
+  });
+  $("#f-proje").addEventListener("change", yukle);
+  $("#f-donem").addEventListener("change", yukle);
+}
+
+function sekmeAc(s, sessiz){
+  SEKME = s;
+  $$("#sekmeler button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.s === s)); });
+  $$(".an-sekme").forEach(function(x){ x.hidden = x.dataset.sekme !== s; });
+  if(!sessiz){ adresYaz(); if(D) ciz(); }
+}
+
+function yukle(){
+  var d = donem(), sira = ++SIRA;
+  adresYaz();
+  $("#donem-yazi").textContent = SP.trd(d.bas) + " – " + SP.trd(d.bit);
+  $("#govde").classList.add("yukleniyor");
+  SP.msg($("#msg"), D ? "" : "Hesaplanıyor…");
+  sb.rpc("analiz", {p_proje: $("#f-proje").value || null, p_bas: d.bas, p_bit: d.bit}).then(function(r){
+    if(sira !== SIRA) return;            /* arada seçim değişti: eski cevap çizilmez */
+    $("#govde").classList.remove("yukleniyor");
+    if(r.error){
+      SP.msg($("#msg"), /could not find|PGRST202/i.test(r.error.message + (r.error.code || ""))
+        ? "Analiz verisi henüz kurulmamış (80. adım / SQL 096)." : esc(r.error.message), "err");
+      return;
+    }
+    SP.msg($("#msg"), "");
+    D = r.data; CIZILDI = {};
+    ciz();
+  });
+}
+
+/* ---------- çizim yardımcıları ---------- */
+function kutu(baslik, deger, alt, ana){
+  return '<div class="an-k' + (ana ? ' ana' : '') + '"><span>' + baslik + '</span><b>' + deger + '</b>' +
+         (alt ? '<i>' + alt + '</i>' : '') + '</div>';
+}
+function kart(baslik, sonuc, govde, opt){
+  opt = opt || {};
+  return '<div class="an-g' + (opt.tam ? ' tam' : '') + '"' + (opt.id ? ' id="' + opt.id + '"' : '') + '><h3>' + baslik +
+         (opt.ek ? '<em>' + opt.ek + '</em>' : '') + '</h3>' +
+         (sonuc ? '<p class="sonuc">' + sonuc + '</p>' : '') + govde +
+         (opt.not ? '<div class="not">' + opt.not + '</div>' : '') + '</div>';
+}
+function bos(t){ return '<div class="an-bos">' + esc(t) + '</div>'; }
+/* önceki döneme göre değişim: "geçen dönem 8.713 m · %12 düşük" */
+function fark(simdi, once, birim, tersi){
+  if(once == null || Number(once) === 0) return "";
+  var y = (Number(simdi) - Number(once)) / Number(once) * 100;
+  if(Math.abs(y) < 0.5) return 'önceki dönemle aynı';
+  var iyi = tersi ? y < 0 : y > 0;
+  return 'önceki dönem ' + tl(once, birim === "m" ? 0 : 1) + (birim ? ' ' + birim : '') + ' · <span class="' + (iyi ? 'iyi' : 'kotu') + '">%' +
+         tl(Math.abs(y), 0) + (y > 0 ? ' fazla' : ' az') + '</span>';
+}
+/* yatay çubuklar. satirlar: {ad, alt, deger, de (sağ yazı), sinif} */
+function yatay(satirlar, opt){
+  opt = opt || {};
+  if(!satirlar.length) return bos(opt.bos || "Bu dönemde veri yok.");
+  var enb = opt.enb || Math.max.apply(null, satirlar.map(function(s){ return Number(s.deger) || 0; })) || 1;
+  var ort = opt.ort;
+  var sinir = opt.sinir || 0, fazla = sinir && satirlar.length > sinir;
+  var h = '<div class="yat">' + satirlar.map(function(s, i){
+    return '<div class="ad"' + (fazla && i >= sinir ? ' data-fazla hidden' : '') + ' title="' + esc(s.ad) + '">' + esc(s.ad) +
+             (s.alt ? '<small>' + esc(s.alt) + '</small>' : '') + '</div>' +
+           '<div class="cb"' + (fazla && i >= sinir ? ' data-fazla hidden' : '') + '><i class="' + (s.sinif || '') + '" style="width:' +
+             Math.max(0, Math.min(100, (Number(s.deger) || 0) / enb * 100)) + '%"></i>' +
+             (ort ? '<em style="left:' + Math.min(100, ort / enb * 100) + '%" title="ortalama"></em>' : '') + '</div>' +
+           '<div class="de"' + (fazla && i >= sinir ? ' data-fazla hidden' : '') + '>' + s.de + '</div>';
+  }).join("") + '</div>';
+  if(fazla) h += '<button class="tumu" type="button" data-tumu>Tümü (' + satirlar.length + ') →</button>';
+  return h;
+}
+/* gündüz / gece yığın dikey çubuklar */
+function dikey(seri, opt){
+  opt = opt || {};
+  var enb = Math.max.apply(null, seri.map(function(s){ return (s.g || 0) + (s.c || 0); })) || 1;
+  var dolu = seri.filter(function(s){ return (s.g || 0) + (s.c || 0) > 0; });
+  var ort = dolu.length ? dolu.reduce(function(t, s){ return t + s.g + s.c; }, 0) / dolu.length : 0;
+  var yaz = seri.length <= 16, sonDolu = -1;
+  seri.forEach(function(s, i){ if((s.g || 0) + (s.c || 0) > 0) sonDolu = i; });
+  var yuk = 168;
+  var h = '<div class="dik">' + seri.map(function(s, i){
+    var t = (s.g || 0) + (s.c || 0);
+    return '<div class="c' + (opt.tek ? ' tek' : '') + (i === sonDolu && opt.sonVurgu ? ' sec' : '') + '" title="' +
+             esc(s.uzun || s.e) + ': ' + tl(t) + ' m' + (opt.tek ? '' : ' (gündüz ' + tl(s.g) + ' · gece ' + tl(s.c) + ')') + '">' +
+           (yaz && t > 0 ? '<b style="top:' + (yuk - t / enb * yuk - 15) + 'px">' + tl0(t) + '</b>' : '') +
+           (s.c > 0 ? '<s style="height:' + (s.c / enb * yuk) + 'px"></s>' : '') +
+           (s.g > 0 ? '<u style="height:' + (s.g / enb * yuk) + 'px"></u>' : '') + '</div>';
+  }).join("") +
+    (ort > 0 ? '<div class="ort" style="bottom:' + (ort / enb * yuk) + 'px"><i>ort. ' + tl0(ort) + ' m</i></div>' : '') + '</div>';
+  var adim = Math.ceil(seri.length / 16);
+  h += '<div class="ek">' + seri.map(function(s, i){
+    return '<span>' + (i % adim === 0 ? esc(s.e) : '') + '</span>'; }).join("") + '</div>';
+  return h;
+}
+function oranRenk(o){   /* ısı ızgarası: 0 → açık, 1 → koyu lacivert */
+  var a = Math.max(0.06, Math.min(1, o));
+  return 'background:rgba(27,53,80,' + (0.1 + a * 0.85).toFixed(2) + ');color:' + (a > 0.5 ? '#fff' : 'var(--ink)');
+}
+function kayipRenk(o){
+  var a = Math.max(0, Math.min(1, o));
+  return 'background:rgba(169,58,47,' + (0.06 + a * 0.8).toFixed(2) + ');color:' + (a > 0.55 ? '#fff' : 'var(--ink)');
+}
+function gunAd(g){ return g.slice(8, 10) + "." + g.slice(5, 7); }
+function ayAd(g){ return AY3[Number(g.slice(5, 7)) - 1] + (g.slice(0, 4) !== String(new Date().getFullYear()) ? " " + g.slice(2, 4) : ""); }
+function saat(n){ return tl(n) + ' sa'; }
+function yuzde(n){ return n == null ? '—' : '%' + tl(n, 0); }
+/* SP.tablo + ilk N satır, gerisi "Tümü" ile (125: uzun liste ilk satırlarıyla) */
+function tabloS(cols, rows, bosYazi, sinir){
+  if(!rows || !rows.length) return bos(bosYazi || "Kayıt yok.");
+  sinir = sinir || 10;
+  return '<div class="scroll an-tablo"><table><thead><tr>' + cols.map(function(c){ return '<th>' + c[0] + '</th>'; }).join("") +
+    '</tr></thead><tbody>' + rows.map(function(r, i){ return '<tr' + (i >= sinir ? ' data-fazla hidden' : '') + '>' +
+      cols.map(function(c){ return '<td>' + c[1](r) + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table></div>' +
+    (rows.length > sinir ? '<button class="tumu" type="button" data-tumu>Tümü (' + rows.length + ') →</button>' : '');
+}
+function tumuBagla(kok){
+  $$("[data-tumu]", kok).forEach(function(b){ b.addEventListener("click", function(){
+    $$("[data-fazla]", b.parentNode).forEach(function(x){ x.hidden = false; }); b.remove(); }); });
+}
+
+/* ---------- çiz ---------- */
+var CIZILDI = {};
+function ciz(){
+  if(!D) return;
+  var kok = $('.an-sekme[data-sekme="' + SEKME + '"]');
+  if(CIZILDI[SEKME]) return;
+  CIZILDI[SEKME] = true;
+  var o = D.ozet || {};
+  if(!o.vardiya && SEKME !== "maliyet" && SEKME !== "kuyular"){
+    kok.innerHTML = '<div class="an-g">' + bos("Bu dönemde " + ($("#f-proje").value ? "bu şantiyede " : "") +
+      "vardiya kaydı yok. Başka bir dönem seçin.") + '</div>';
+    dipYaz(); return;
+  }
+  ({uretim:uretim, zaman:zaman, ekip:ekip, kuyular:kuyular, maliyet:maliyet, matkap:matkap})[SEKME](kok);
+  tumuBagla(kok);
+  dipYaz();
+}
+function dipYaz(){
+  var t = {
+    uretim: "Metre manevra kayıtlarından. İptal edilen kuyunun metresi üretime girer, sondör karnesine girmez. Delgi hızı = metre ÷ delgi saati.",
+    zaman: "Vardiya süresi şantiyenin vardiya düzeninden. Delgi saati manevra saatlerinden (saat yazılmamışsa vardiyadan öbür işler düşülür). Duruş = bekleme + arıza. Kayıtsız = hiçbir işe yazılmamış saat.",
+    ekip: "Sondör karnesi manevrayı yapan sondöre yazılır; iptal edilen kuyular hariç. Giriş gecikmesi: vardiyanın bitişinden kaydın girilmesine kadar geçen süre.",
+    kuyular: "Açık kuyular ve dönemde biten ya da çalışılan kuyular. \"Duruyor\": son 3 günde vardiyası yok.",
+    maliyet: "Maliyet = mazot + harcamalar + işçilik (puantaj × ücret) + merkez ofis payı — Şirket performansı'yla aynı hesap. Ay bölünürse merkez payı gününe göre bölünür.",
+    matkap: "Matkap ömrü o dönemde takılı ya da çıkmış matkapların bu kullanımdaki metresi. Malzeme değeri tüketim × alış fiyatı (Şirket tanımları › Malzeme); bilgi içindir, maliyete eklenmez — parası harcamalarda var."
+  };
+  $("#dip").textContent = t[SEKME] || "";
+}
+
+/* ===== ÜRETİM ===== */
+function gunSerisi(){
+  var g = D.gunluk || [];
+  if(g.length <= 45) return g.map(function(x){ return {e:gunAd(x.gun), uzun:SP.trd(x.gun), g:Number(x.gunduz), c:Number(x.gece)}; });
+  /* uzun dönem: haftalık topla */
+  var out = [];
+  for(var i = 0; i < g.length; i += 7){
+    var p = g.slice(i, i + 7);
+    out.push({e:gunAd(p[0].gun), uzun:SP.trd(p[0].gun) + " haftası", g:p.reduce(function(t, x){ return t + Number(x.gunduz); }, 0),
+              c:p.reduce(function(t, x){ return t + Number(x.gece); }, 0)});
+  }
+  return out;
+}
+function uretim(kok){
+  var o = D.ozet, ku = D.kuleler || [], d = D.donem;
+  var seri = gunSerisi(), haftalik = (D.gunluk || []).length > 45;
+  var enIyiGun = seri.slice().sort(function(a, b){ return (b.g + b.c) - (a.g + a.c); })[0];
+  var ortKule = ku.length ? ku.reduce(function(t, k){ return t + Number(k.metre); }, 0) / ku.length : 0;
+  var h = '<div class="an-kutular">' +
+    kutu("Delinen metre", tl0(o.metre) + '<small> m</small>', (fark(o.metre, o.onceki && o.onceki.metre, "m") || '') +
+      (Number(o.iptal) > 0 ? '<br>' + tl0(o.iptal) + ' m iptal edilen kuyuda' : ''), true) +
+    kutu("Vardiya başına", tl(o.m_vardiya) + '<small> m</small>', fark(o.m_vardiya, o.onceki && o.onceki.m_vardiya, "m")) +
+    kutu("Delgi hızı", tl(o.m_saat, 2) + '<small> m/saat</small>', tl0(o.delgi) + ' saat delgi') +
+    kutu("Çalışan kule", tl0(o.kule), tl0(o.vardiya) + ' vardiya · ' + tl0(o.santiye) + ' şantiye') + '</div>';
+  h += '<div class="an-iz">';
+  h += kart("Günlük metraj" + (haftalik ? " · haftalık" : ""),
+    enIyiGun ? 'En yüksek ' + (haftalik ? 'hafta ' : 'gün ') + esc(enIyiGun.uzun) + ': ' + tl0(enIyiGun.g + enIyiGun.c) + ' m · gündüz ' + tl0(o.gunduz) + ' m, gece ' + tl0(o.gece) + ' m' : '',
+    dikey(seri, {sonVurgu:true}), {tam:true, ek:'<span class="lj g"></span>gündüz<span class="lj c"></span>gece<span class="lj s"></span>son ' + (haftalik ? 'hafta' : 'gün')});
+  h += kart("Kulelere göre metre",
+    ku.length ? esc(ku[0].kod) + ' önde (' + tl0(ku[0].metre) + ' m)' + (ku.length > 1 ? '; en az ' + esc(ku[ku.length - 1].kod) + ' (' + tl0(ku[ku.length - 1].metre) + ' m)' : '') : '',
+    yatay(ku.map(function(k){ return {ad:k.kod, alt:k.santiye, deger:k.metre, sinif:Number(k.metre) < ortKule * 0.7 ? 'r' : '',
+      de:'<b>' + tl0(k.metre) + ' m</b> <small>' + tl(k.m_vardiya) + ' m/vrd</small>'}; }), {ort:ortKule, sinir:10}),
+    {ek:'┄ ortalama ' + tl0(ortKule) + ' m'});
+  /* ızgara */
+  var kov = D.kovalar || [], iz = D.izgara || [], ay = d.izgara === "ay";
+  var enb = 0; iz.forEach(function(r){ kov.forEach(function(k){ enb = Math.max(enb, Number((r.kovalar || {})[k] || 0)); }); });
+  var dus = null;
+  /* Yarım hafta tam haftayla kıyaslanmaz: son hafta dönemin ya da son
+     verinin içinde 7 gün dolmamışsa kıyas bir önceki iki haftaya kayar. */
+  var sonVeri = (D.gunluk || []).filter(function(x){ return Number(x.gunduz) + Number(x.gece) > 0; }).map(function(x){ return x.gun; }).pop() || "";
+  var gunEkle = function(g, n){ var t = new Date(g + "T12:00:00"); t.setDate(t.getDate() + n); return iso(t); };
+  var son = kov.length - 1;
+  if(son >= 0 && gunEkle(kov[son], 6) > sonVeri) son--;
+  if(!ay && son >= 1){
+    iz.forEach(function(r){
+      var a = Number((r.kovalar || {})[kov[son - 1]] || 0), b = Number((r.kovalar || {})[kov[son]] || 0);
+      if(a > 0 && b < a * 0.6 && (!dus || a - b > dus.f)) dus = {kod:r.kod, f:a - b};
+    });
+  }
+  var izH = iz.length ? '<div class="scroll"><div class="isi" style="grid-template-columns:minmax(90px,120px) repeat(' + kov.length + ',minmax(46px,1fr)) 70px">' +
+    '<span></span>' + kov.map(function(k, i){ return '<span class="h">' + (ay ? ayAd(k) : (i + 1) + '. hafta<br><small>' + gunAd(k) + '</small>') + '</span>'; }).join("") +
+    '<span class="h" style="text-align:right">Toplam</span>' +
+    iz.slice(0, 12).map(function(r){
+      return '<span class="ad" title="' + esc(r.kod) + '">' + esc(r.kod) + '</span>' + kov.map(function(k){
+        var v = Number((r.kovalar || {})[k] || 0);
+        return '<span class="z" style="' + (v > 0 ? oranRenk(v / (enb || 1)) : 'background:var(--line-soft);color:var(--ink-3)') + '">' + (v > 0 ? tl0(v) : '—') + '</span>';
+      }).join("") + '<span class="t">' + tl0(r.toplam) + '</span>'; }).join("") + '</div></div>' : bos("Bu dönemde veri yok.");
+  h += kart(ay ? "Aylık ilerleme" : "Haftalık ilerleme",
+    dus ? esc(dus.kod) + ' ' + (son + 1) + '. haftada belirgin geriledi' : (ay ? 'Kule kule ay ay metre' : 'Kule kule hafta hafta metre'),
+    izH, {ek:'koyu = çok metre' + (iz.length > 12 ? ' · ilk 12 kule' : '')});
+  /* aylar */
+  var aylar = (D.aylik || []);
+  var enAy = aylar.slice().sort(function(a, b){ return b.metre - a.metre; })[0];
+  h += kart("Aylara göre metraj", enAy && Number(enAy.metre) > 0 ? 'Son 12 ayın en yüksek ayı ' + AYLAR[Number(enAy.ay.slice(5, 7)) - 1] + ' ' + enAy.ay.slice(0, 4) + ' (' + tl0(enAy.metre) + ' m)' : '',
+    dikey(aylar.map(function(a){ return {e:ayAd(a.ay), uzun:AYLAR[Number(a.ay.slice(5, 7)) - 1] + ' ' + a.ay.slice(0, 4), g:Number(a.metre), c:0}; }), {tek:true, sonVurgu:true}),
+    {ek:'son 12 ay'});
+  var prg = D.programlar || [], prgTop = prg.reduce(function(t, x){ return t + Number(x.metre); }, 0);
+  var prgYok = prg.length === 1 && prg[0].program === 'program yazılmamış';
+  h += kart("Programlara göre delgi", prgYok ? 'Bu dönemin kuyularına program (maden arama / planlama) yazılmamış'
+      : prg.length ? 'Metrenin ' + yuzde(prg[0].metre / (prgTop || 1) * 100) + '’i ' + esc(prg[0].program) : '',
+    yatay(prg.map(function(x){ return {ad:x.program, deger:x.metre, de:'<b>' + tl0(x.metre) + ' m</b> <small>' + yuzde(x.metre / (prgTop || 1) * 100) + '</small>'}; })),
+    {ek:'maden arama · maden planlama'});
+  h += kart("Vardiya dökümü", "", '<div id="vardiyalar">' + (Number($("#f-proje").value ? 1 : 0)
+      ? '<div class="hint">Yükleniyor…</div>' : bos("Vardiya vardiya döküm için yukarıdan bir şantiye seçin.")) + '</div>',
+    {tam:true, ek:'satıra tıklayınca vardiya kartı açılır', id:"kart-vardiyalar"});
+  h += '</div>';
+  kok.innerHTML = h;
+  if($("#f-proje").value) vardiyalar();
+}
+
+/* Şantiye ayrıntısı'ndan taşındı (144. dosya): vardiya vardiya döküm ve kart */
+function vardiyalar(){
+  var box = $("#vardiyalar"), d = donem(), pid = $("#f-proje").value;
+  sb.rpc("vardiya_listesi", {p_project:pid, p_from:d.bas, p_to:d.bit}).then(function(r){
+    if(!box.isConnected) return;
+    if(r.error){ box.innerHTML = '<div class="note">Vardiyalar okunamadı: ' + esc(r.error.message) + '</div>'; return; }
+    var liste = r.data || [];
+    if(!liste.length){ box.innerHTML = bos("Bu dönemde vardiya kaydı yok."); return; }
+    var sinir = 15;
+    box.innerHTML = '<div class="scroll an-tablo"><table><thead><tr><th>Gün</th><th>Vardiya</th><th>Kuyu</th><th>Kule</th>' +
+      '<th class="num">Metraj</th><th class="num">Mazot</th><th></th></tr></thead><tbody>' +
+      liste.map(function(s, i){
+        return '<tr class="vsat" data-shift="' + esc(s.id) + '" style="cursor:pointer"' + (i >= sinir ? ' data-fazla hidden' : '') + '>' +
+          '<td>' + SP.trd(s.gun) + '</td><td>' + esc(s.vardiya || "") +
+          (s.ilerleme_yok ? ' <span class="pill warn">ilerleme yok</span>' : '') +
+          (s.duzeltildi ? ' <span class="pill">düzeltildi</span>' : '') + '</td>' +
+          '<td>' + esc(s.kuyu || "—") + '</td><td>' + esc(s.makine || "—") + '</td>' +
+          '<td class="num"><b>' + tl(s.metraj) + '</b></td><td class="num">' + (s.mazot == null ? "—" : tl0(s.mazot)) + '</td>' +
+          '<td class="num"><span class="hint">göster</span></td></tr>' +
+          '<tr class="vkart" data-for="' + esc(s.id) + '" hidden><td colspan="7"></td></tr>';
+      }).join("") + '</tbody></table></div>' +
+      (liste.length > sinir ? '<button class="tumu" type="button" data-tumu>Tümü (' + liste.length + ' vardiya) →</button>' : '');
+    tumuBagla(box);
+    $$(".vsat", box).forEach(function(tr){
+      tr.addEventListener("click", function(){
+        var id = tr.dataset.shift, k = box.querySelector('.vkart[data-for="' + id + '"]');
+        $$(".vkart", box).forEach(function(x){ if(x !== k){ x.hidden = true; x.firstChild.innerHTML = ""; } });
+        if(!k.hidden){ k.hidden = true; k.firstChild.innerHTML = ""; return; }
+        k.hidden = false;
+        VKART.ac(sb, id, k.firstChild, function(){
+          var rol = (SP.erisim || {}).rol;
+          if(!/^(manager|tenant_admin|platform_admin)$/.test(rol || "")) return;
+          var dv = document.createElement("div"); dv.className = "vk-duzenle-alt";
+          dv.innerHTML = '<a class="btn ghost sm vk-duzenle" href="index.html?duzenle=' + esc(id) + '">Düzenle</a>';
+          k.firstChild.appendChild(dv);
+        });
+      });
+    });
+  });
+}
+
+/* ===== ZAMAN VE DURUŞ ===== */
+function zaman(kok){
+  var o = D.ozet, ku = (D.kuleler || []).slice(), sb_ = D.durus_sebep || [], hr = D.kayip_harita || [];
+  var enSebep = sb_[0];
+  var h = '<div class="an-kutular">' +
+    kutu("Kule kullanım oranı", yuzde(o.kullanim), 'delgi ' + tl0(o.delgi) + ' sa / vardiya süresi ' + tl0(o.sure) + ' sa', true) +
+    kutu("Toplam duruş", tl0(o.durus) + '<small> saat</small>', fark(o.durus, o.onceki && o.onceki.durus, "sa", true) || ('vardiya süresinin ' + yuzde(o.durus_payi))) +
+    kutu("En çok kaybettiren", enSebep ? esc(enSebep.sebep) : '—', enSebep ? tl0(enSebep.saat) + ' saat · ' + enSebep.adet + ' kez' : 'duruş yazılmamış') +
+    kutu("Kayıtsız saat", tl0(o.kayitsiz) + '<small> saat</small>', 'vardiya süresinin ' + yuzde(o.sure > 0 ? o.kayitsiz / o.sure * 100 : null) + '’i hiçbir işe yazılmamış') + '</div>';
+  /* kule kule zaman */
+  ku.sort(function(a, b){ return (b.durus / (b.sure || 1)) - (a.durus / (a.sure || 1)); });
+  var enCok = ku[0];
+  h += '<div class="an-iz">';
+  h += kart("Zaman nereye gitti?",
+    enCok && enCok.durus > 0 ? esc(enCok.kod) + ' zamanının ' + yuzde(enCok.durus / enCok.sure * 100) + '’ini duruşta geçirdi' : 'Duruş yazılmamış',
+    '<div class="yat">' + ku.map(function(k){
+      var s = Number(k.sure) || 1, p = function(x){ return (Number(x) || 0) / s * 100; };
+      return '<div class="ad" title="' + esc(k.kod) + '">' + esc(k.kod) + '<small>' + tl0(k.vardiya) + ' vardiya</small></div>' +
+        '<div class="yz" title="delgi ' + saat(k.delgi) + ' · duruş ' + saat(k.durus) + ' · diğer ' + saat(k.diger) + ' · kayıtsız ' + saat(k.kayitsiz) + '">' +
+          (p(k.delgi) ? '<i style="width:' + p(k.delgi) + '%"></i>' : '') + (p(k.durus) ? '<b style="width:' + p(k.durus) + '%"></b>' : '') +
+          (p(k.diger) ? '<u style="width:' + p(k.diger) + '%"></u>' : '') + (p(k.kayitsiz) ? '<s style="width:' + p(k.kayitsiz) + '%"></s>' : '') + '</div>' +
+        '<div class="de">' + yuzde(p(k.delgi)) + ' <small>delgi</small></div>';
+    }).join("") + '</div>',
+    {tam:true, ek:'<span class="lj d"></span>delgi<span class="lj r"></span>duruş<span class="lj o"></span>diğer işler<span class="lj k"></span>kayıtsız'});
+  h += kart("Duruş sebepleri", enSebep ? esc(enSebep.sebep) + ' duruşun ' + yuzde(enSebep.saat / (o.durus || 1) * 100) + '’i' : '',
+    yatay(sb_.map(function(x){ return {ad:x.sebep, deger:x.saat, sinif:'r', de:'<b>' + saat(x.saat) + '</b> <small>' + x.adet + ' kez</small>'}; }), {bos:"Bu dönemde duruş yazılmamış."}) +
+    ((D.bekleme_notlari || []).length ? '<h3 style="margin:16px 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Bekleme notlarında en çok geçenler</h3>' +
+      yatay(D.bekleme_notlari.map(function(x){ return {ad:x.not, deger:x.saat, sinif:'r', de:saat(x.saat) + ' <small>' + x.adet + ' kez</small>'}; })) : ''));
+  /* haftanın günü × vardiya */
+  var vards = ["gunduz","gece"], enb = 0, bul = function(g, v){ return hr.filter(function(x){ return x.hg === g && x.vardiya === v; })[0]; };
+  hr.forEach(function(x){ enb = Math.max(enb, Number(x.ort) || 0); });
+  var top = hr.slice().sort(function(a, b){ return b.ort - a.ort; })[0];
+  h += kart("Haftanın günü × vardiya", top && Number(top.ort) > 0 ? HG[top.hg - 1] + ' ' + (top.vardiya === 'gece' ? 'gecesi' : 'gündüzü') + ' en çok kaybettiren: vardiya başına ' + tl(top.ort) + ' saat' : 'Duruş yazılmamış',
+    '<div class="isi" style="grid-template-columns:70px repeat(7,minmax(34px,1fr))"><span></span>' + HG.map(function(g){ return '<span class="h">' + g + '</span>'; }).join("") +
+    vards.map(function(v){ return '<span class="ad">' + (v === 'gece' ? 'Gece' : 'Gündüz') + '</span>' + [1,2,3,4,5,6,7].map(function(g){
+      var x = bul(g, v), val = x ? Number(x.ort) : 0;
+      return '<span class="z" title="' + (x ? x.adet + ' vardiya · ' + saat(x.durus) + ' duruş' : 'vardiya yok') + '" style="' + (x ? kayipRenk(val / (enb || 1)) : 'background:var(--line-soft);color:var(--ink-3)') + '">' + (x ? tl(val) : '—') + '</span>'; }).join(""); }).join("") +
+    '</div>', {ek:'vardiya başına ortalama duruş saati'});
+  /* ortalamadan fazla kaybedenler */
+  var ortPay = o.sure > 0 ? o.durus / o.sure : 0;
+  var fazla = ku.filter(function(k){ return k.sure > 0 && k.durus / k.sure > ortPay * 1.5 && k.durus >= 4; });
+  var sd = (D.sondorler || []).filter(function(s){ return s.vardiya >= 5; });
+  var sdOrt = sd.length ? sd.reduce(function(t, s){ return t + (s.durus_payi || 0); }, 0) / sd.length : 0;
+  var sdFazla = sd.filter(function(s){ return (s.durus_payi || 0) > sdOrt * 1.5 && (s.durus_payi || 0) >= 10; })
+                  .sort(function(a, b){ return b.durus_payi - a.durus_payi; });
+  h += kart("Ortalamadan fazla kaybedenler", (fazla.length + sdFazla.length) ? (fazla.length + sdFazla.length) + ' kayıt şirket ortalamasının 1,5 katından fazla duruşta' : 'Ortalamadan belirgin fazla kaybeden yok',
+    (fazla.length ? yatay(fazla.map(function(k){ return {ad:k.kod, alt:'kule', deger:k.durus / k.sure * 100, sinif:'r', de:'<b>' + yuzde(k.durus / k.sure * 100) + '</b> <small>' + saat(k.durus) + '</small>'}; }), {ort:ortPay * 100}) : '') +
+    (sdFazla.length ? '<div style="margin-top:10px"></div>' + yatay(sdFazla.slice(0, 6).map(function(s){ return {ad:s.ad, alt:'sondör · ' + s.vardiya + ' vardiya', deger:s.durus_payi, sinif:'r', de:'<b>' + yuzde(s.durus_payi) + '</b> <small>vardiyası duruşlu</small>'}; }), {ort:sdOrt}) : '') +
+    ((fazla.length + sdFazla.length) ? '' : bos("Bütün kuleler ve sondörler ortalamaya yakın.")),
+    {ek:'şirket: vardiya süresinin ' + yuzde(ortPay * 100) + '’i duruş'});
+  h += '</div>';
+  kok.innerHTML = h;
+}
+
+/* ===== EKİP ===== */
+function ekip(kok){
+  var sd = D.sondorler || [], gg = D.giris_gecikmesi || [];
+  var ort = sd.length ? sd.reduce(function(t, s){ return t + Number(s.metre); }, 0) / sd.length : 0;
+  var enIyi = sd.slice().filter(function(s){ return s.vardiya >= 3; }).sort(function(a, b){ return b.m_vardiya - a.m_vardiya; })[0];
+  var ggOrt = gg.length ? gg.reduce(function(t, x){ return t + x.ort_saat * x.vardiya; }, 0) / gg.reduce(function(t, x){ return t + x.vardiya; }, 0) : null;
+  var h = '<div class="an-kutular">' +
+    kutu("Çalışan sondör", tl0(sd.length), tl0(sd.reduce(function(t, s){ return t + s.vardiya; }, 0)) + ' sondör-vardiyası', true) +
+    kutu("Sondör başına", tl0(ort) + '<small> m</small>', 'dönem ortalaması') +
+    kutu("Vardiya başına en yüksek", enIyi ? tl(enIyi.m_vardiya) + '<small> m</small>' : '—', enIyi ? esc(enIyi.ad) + ' · ' + enIyi.vardiya + ' vardiya' : '') +
+    kutu("Giriş gecikmesi", ggOrt == null ? '—' : tl(ggOrt) + '<small> saat</small>', 'vardiya bitişinden kayda ortalama') + '</div>';
+  h += '<div class="an-iz">';
+  h += kart("Sondörler", sd.length ? esc(sd[0].ad) + ' önde: ' + tl0(sd[0].metre) + ' m, vardiya başına ' + tl(sd[0].m_vardiya) + ' m' : '',
+    yatay(sd.map(function(s){ return {ad:s.ad, alt:s.vardiya + ' vardiya', deger:s.metre, sinif:Number(s.metre) < ort * 0.6 ? 'r' : '',
+      de:'<b>' + tl0(s.metre) + ' m</b> <small>' + tl(s.m_vardiya) + ' m/vrd</small>'}; }), {ort:ort, sinir:12, bos:"Bu dönemde sondör kaydı yok."}),
+    {ek:'┄ ortalama ' + tl0(ort) + ' m'});
+  var ggEn = gg[0];
+  h += kart("Vardiya giriş gecikmesi", ggEn ? esc(ggEn.santiye) + ' kaydı en geç giriyor: ortalama ' + tl(ggEn.ort_saat) + ' saat' : '',
+    yatay(gg.map(function(x){ return {ad:x.santiye, alt:x.vardiya + ' vardiya', deger:x.ort_saat, sinif:x.ort_saat > 6 ? 'r' : '',
+      de:'<b>' + tl(x.ort_saat) + ' sa</b>' + (x.gec ? ' <small>' + x.gec + ' kayıt 6 saatten geç</small>' : '')}; }), {bos:"Bu dönemde kayıt yok."}),
+    {ek:'kırmızı = 6 saatten geç'});
+  var kov = D.kovalar || [], siz = D.sondor_izgara || [], ay = D.donem.izgara === "ay", enb = 0;
+  siz.forEach(function(r){ kov.forEach(function(k){ enb = Math.max(enb, Number((r.kovalar || {})[k] || 0)); }); });
+  h += kart(ay ? "Sondörler ay ay" : "Sondörler hafta hafta", "",
+    siz.length ? '<div class="scroll"><div class="isi" style="grid-template-columns:minmax(120px,170px) repeat(' + kov.length + ',minmax(46px,1fr)) 70px">' +
+      '<span></span>' + kov.map(function(k, i){ return '<span class="h">' + (ay ? ayAd(k) : (i + 1) + '. hafta<br><small>' + gunAd(k) + '</small>') + '</span>'; }).join("") +
+      '<span class="h" style="text-align:right">Toplam</span>' +
+      siz.map(function(r, i){
+        var f = i >= 12 ? ' data-fazla hidden' : '';
+        return '<span class="ad"' + f + ' title="' + esc(r.ad) + '">' + esc(r.ad) + '</span>' + kov.map(function(k){
+          var v = Number((r.kovalar || {})[k] || 0);
+          return '<span class="z"' + f + ' style="' + (v > 0 ? oranRenk(v / (enb || 1)) : 'background:var(--line-soft);color:var(--ink-3)') + '">' + (v > 0 ? tl0(v) : '—') + '</span>';
+        }).join("") + '<span class="t"' + f + '>' + tl0(r.toplam) + '</span>'; }).join("") + '</div></div>' +
+      (siz.length > 12 ? '<button class="tumu" type="button" data-tumu>Tümü (' + siz.length + ') →</button>' : '')
+    : bos("Bu dönemde sondör kaydı yok."), {tam:true, ek:'iptal edilen kuyular hariç · koyu = çok metre'});
+  h += kart("Sondör tablosu", "", '<div class="an-tablo">' + SP.tablo([
+      ["Sondör", function(s){ return esc(s.ad); }],
+      ['<span class="num">Vardiya</span>', function(s){ return '<span class="num">' + s.vardiya + '</span>'; }],
+      ['<span class="num">Metre</span>', function(s){ return '<span class="num"><b>' + tl(s.metre) + '</b></span>'; }],
+      ['<span class="num">m / vardiya</span>', function(s){ return '<span class="num">' + tl(s.m_vardiya) + '</span>'; }],
+      ['<span class="num">Delgi saati</span>', function(s){ return '<span class="num">' + (s.saat == null ? '—' : tl(s.saat)) + '</span>'; }],
+      ['<span class="num">m / saat</span>', function(s){ return '<span class="num">' + (s.m_saat == null ? '—' : tl(s.m_saat, 2)) + '</span>'; }],
+      ['<span class="num">Duruşlu vardiya</span>', function(s){ return '<span class="num' + ((s.durus_payi || 0) >= 20 ? ' kotu' : '') + '">' + yuzde(s.durus_payi) + '</span>'; }]
+    ], sd, "Bu dönemde sondör kaydı yok.") + '</div>', {tam:true});
+  h += '</div>';
+  kok.innerHTML = h;
+}
+
+/* ===== KUYULAR ===== */
+function kuyuDurum(k){
+  if(k.durum === "completed" || k.durum === "finished" || (k.bitis && k.durum !== "drilling" && k.durum !== "planned")) return ['o', 'bitti' + (k.bitis ? ' ' + gunAd(k.bitis) : '')];
+  if(k.durum === "cancelled") return ['n', 'iptal'];
+  if(k.durum === "planned" && !Number(k.derinlik)) return ['n', 'başlamadı'];
+  if(k.durgun_gun != null && k.durgun_gun >= 3) return ['k', k.durgun_gun + ' gündür duruyor'];
+  if(k.plan > 0 && k.derinlik / k.plan >= 0.9) return ['s', 'bitmek üzere'];
+  return ['o', 'sürüyor'];
+}
+function kuyular(kok){
+  var kw = D.kuyular || [];
+  var acik = kw.filter(function(k){ return k.durum === "planned" || k.durum === "drilling"; });
+  var biten = kw.filter(function(k){ return k.durum === "completed" && k.bitis && k.bitis >= D.donem.bas && k.bitis <= D.donem.bit; })
+                .sort(function(a, b){ return b.bitis.localeCompare(a.bitis); });
+  var duran = acik.filter(function(k){ return k.durgun_gun != null && k.durgun_gun >= 3 && Number(k.derinlik) > 0; });
+  var calisan = acik.filter(function(k){ return Number(k.derinlik) > 0; });
+  var bitecek = calisan.filter(function(k){ return k.plan > 0 && k.derinlik / k.plan >= 0.9; });
+  var h = '<div class="an-kutular">' +
+    kutu("Açık kuyu", tl0(acik.length), tl0(calisan.length) + ' kuyuda delgi başladı', true) +
+    kutu("Dönemde biten", tl0(biten.length), tl0(biten.reduce(function(t, k){ return t + Number(k.derinlik || 0); }, 0)) + ' m teslim edildi') +
+    kutu("Dönem metresi", tl0(kw.reduce(function(t, k){ return t + Number(k.donem_metre || 0); }, 0)) + '<small> m</small>', tl0(kw.filter(function(k){ return k.donem_metre > 0; }).length) + ' kuyuda çalışıldı') +
+    kutu("Duran kuyu", tl0(duran.length), duran.length ? '<span class="kotu">3 gün ve üstü vardiyasız</span>' : 'hepsi çalışıyor') + '</div>';
+  var gos = calisan.slice().sort(function(a, b){ return (b.son_gun || "").localeCompare(a.son_gun || ""); });
+  h += '<div class="an-iz">';
+  h += kart("Kuyular nerede?",
+    calisan.length + ' açık kuyuda delgi var' + (bitecek.length ? '; ' + bitecek.length + ' tanesi bitmek üzere' : '') + (duran.length ? '; ' + duran.length + ' tanesi duruyor' : ''),
+    gos.length ? '<div class="ky">' + gos.map(function(k, i){
+      var pl = Number(k.plan) || 0, de = Number(k.derinlik) || 0, son = Number(k.son_gun_metre) || 0;
+      var enb = Math.max(pl, de) || 1, ds = kuyuDurum(k), f = i >= 12;
+      return '<div' + (f ? ' data-fazla hidden' : '') + '><b>' + esc(k.kod) + '</b></div>' +
+        '<div class="mk"' + (f ? ' data-fazla hidden' : '') + ' title="' + esc(k.santiye) + '">' + esc(k.kule || k.santiye || '') + '</div>' +
+        '<div class="ib"' + (f ? ' data-fazla hidden' : '') + ' title="' + tl(de) + ' / ' + (pl ? tl0(pl) : '?') + ' m"><i style="width:' + ((de - son) / enb * 100) + '%"></i>' +
+          (son > 0 ? '<b style="left:' + ((de - son) / enb * 100) + '%;width:' + (son / enb * 100) + '%"></b>' : '') + '</div>' +
+        '<div class="de"' + (f ? ' data-fazla hidden' : '') + '>' + tl0(de) + ' <em>/ ' + (pl ? tl0(pl) : '?') + ' m</em></div>' +
+        '<span class="pp ' + ds[0] + '"' + (f ? ' data-fazla hidden' : '') + '>' + ds[1] + '</span>';
+    }).join("") + '</div>' + (gos.length > 12 ? '<button class="tumu" type="button" data-tumu>Tümü (' + gos.length + ') →</button>' : '')
+    : bos("Delgisi süren kuyu yok."),
+    {tam:true, ek:'<span class="lj d"></span>önceki<span class="lj s"></span>son çalışılan gün'});
+  h += kart("Biten kuyular", biten.length ? biten.length + ' kuyu bitti, ' + tl0(biten.reduce(function(t, k){ return t + Number(k.derinlik || 0); }, 0)) + ' m' : 'Bu dönemde biten kuyu yok',
+    tabloS([
+      ["Kuyu", function(k){ return '<b>' + esc(k.kod) + '</b><div class="hint">' + esc(k.santiye) + '</div>'; }],
+      ['<span class="num">Derinlik</span>', function(k){ return '<span class="num">' + tl0(k.derinlik) + ' m</span>' + (k.plan && Math.abs(k.plan - k.derinlik) > 1 ? '<div class="hint num">plan ' + tl0(k.plan) + '</div>' : ''); }],
+      ["Bitiş", function(k){ return SP.trd(k.bitis); }]
+    ], biten, "Bu dönemde biten kuyu yok.", 10));
+  /* kuyu kesiti ve matkap zinciri — Şantiye ayrıntısı'ndan */
+  var secenek = kw.filter(function(k){ return Number(k.derinlik) > 0; });
+  h += kart("Kuyu kesiti",
+    '', '<div class="row" style="align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><div class="field" style="margin:0;min-width:220px"><label for="k-sec">Kuyu</label><select id="k-sec"><option value="">— kuyu seçin —</option>' +
+      secenek.map(function(k){ return '<option value="' + k.id + '">' + esc(k.kod) + ' · ' + esc(k.santiye) + ' · ' + tl0(k.derinlik) + ' m</option>'; }).join("") +
+    '</select></div><span class="capler"><span><i class="cap-pq"></i>PQ</span><span><i class="cap-hq"></i>HQ</span><span><i class="cap-nq"></i>NQ</span><span><i class="cap-pw"></i>PW</span></span></div>' +
+    '<div class="kesitalan"><div id="k-cizim"><div class="hint">Kuyu seçin.</div></div><div id="k-bilgi"></div></div><div id="matkap-zincir" style="margin-top:16px"></div>',
+    {tam:true, ek:'kesit, çap geçişleri ve matkap zinciri'});
+  h += '</div>';
+  kok.innerHTML = h;
+  $("#k-sec").addEventListener("change", kuyuCiz);
+}
+var MATKAP_DURUM = {bitti:"Bitti", matris_doktu:"Matris döktü", kullanilir:"Kullanılır", cap_dusuldu:"Çap düşüldü", kuyuda_kaldi:"Kuyuda kaldı"};
+function kuyuCiz(){
+  var id = $("#k-sec").value;
+  matkapZinciri(id);
+  if(!id){ $("#k-cizim").innerHTML = '<div class="hint">Kuyu seçin.</div>'; $("#k-bilgi").innerHTML = ''; return; }
+  $("#k-cizim").innerHTML = '<div class="hint">Yükleniyor…</div>';
+  sb.rpc("well_profile", {p_well:id}).then(function(r){
+    if(r.error || !r.data){ $("#k-cizim").innerHTML = '<div class="hint">Kesit okunamadı.</div>'; return; }
+    var p = r.data;
+    $("#k-cizim").innerHTML = SP.kuyuKesiti(p);
+    var oran = (p.planlanan && Number(p.planlanan) > 0) ? Math.min(100, Number(p.derinlik) / Number(p.planlanan) * 100) : null;
+    $("#k-bilgi").innerHTML = '<div class="an-kutular" style="grid-template-columns:repeat(3,minmax(0,1fr))">' +
+        kutu("Mevcut derinlik", tl(p.derinlik) + '<small> m</small>') + kutu("Planlanan", p.planlanan == null ? '—' : tl0(p.planlanan) + '<small> m</small>') +
+        kutu("Ölçüm", (p.olcumler || []).length) + '</div>' +
+      (oran == null ? '' : '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2)"><span>İlerleme</span><span class="num"><b>%' + tl(oran, 1) + '</b></span></div><div class="ilerle"><i style="width:' + oran + '%"></i></div>') +
+      '<div style="margin-top:12px">' + SP.tablo([
+        ["Çap", function(x){ return '<span class="pill">' + esc(x.cap) + '</span>'; }],
+        ["Başlangıç", function(x){ return '<span class="num">' + tl(x.bas) + '</span>'; }],
+        ["Bitiş", function(x){ return '<span class="num">' + tl(x.son) + '</span>'; }],
+        ["Metre", function(x){ return '<span class="num"><b>' + tl(x.metre) + '</b></span>'; }],
+        ["Gün", function(x){ return x.gun; }]
+      ], p.caplar, "Manevra kaydı yok.") + '</div>';
+  });
+}
+function matkapZinciri(id){
+  var box = $("#matkap-zincir");
+  if(!id){ box.innerHTML = ""; return; }
+  box.innerHTML = '<div class="hint">Matkap zinciri yükleniyor…</div>';
+  sb.rpc("kuyu_matkap_zinciri", {p_well:id}).then(function(r){
+    if(r.error){ box.innerHTML = '<div class="hint">Matkap zinciri okunamadı: ' + esc(r.error.message) + '</div>'; return; }
+    var d = r.data || {}, s = d.satirlar || [];
+    if(!s.length){ box.innerHTML = '<div class="hint">Bu kuyuda matkap kaydı yok.</div>'; return; }
+    var kopuk = s.filter(function(x){ return x.kopuk != null; }).length;
+    box.innerHTML = '<h3 style="margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Matkap zinciri</h3>' +
+      '<div class="hint">' + esc(d.kuyu || "") + ' · ' + s.length + ' matkap · ' + tl(d.toplam) + ' m' + (kopuk ? ' · <b>' + kopuk + ' satırda zincir kopuk</b>' : '') + '</div>' +
+      '<div class="scroll an-tablo"><table><thead><tr><th>No</th><th>Kule</th><th>Çap</th><th>Marka</th><th class="num">Önceki</th><th class="num">Giriş</th><th class="num">Çıkış</th><th class="num">Toplam</th><th>Değişim</th><th>Durum</th></tr></thead><tbody>' +
+      s.map(function(x){
+        return '<tr' + (x.kopuk != null ? ' class="kotu"' : '') + '><td class="num">' + x.no + '</td><td>' + esc(x.makine || "—") + '</td><td>' + esc(x.cap || "—") + '</td>' +
+          '<td>' + (x.marka ? esc(x.marka) : '<span class="hint">marka yazılmamış</span>') + (x.cikma ? ' <span class="pill">çıkma</span>' : '') + '</td>' +
+          '<td class="num">' + (Number(x.onceki) > 0 ? tl(x.onceki) : 'sıfır') + '</td>' +
+          '<td class="num">' + tl(x.giris) + (x.kopuk != null ? '<div class="hint">önceki çıkıştan ' + (Number(x.kopuk) > 0 ? '+' : '') + tl(x.kopuk) + ' m</div>' : '') + '</td>' +
+          '<td class="num">' + (x.acik ? '<span class="hint">takılı</span>' : tl(x.cikis)) + '</td><td class="num"><b>' + (x.acik ? '—' : tl(x.metre)) + '</b></td>' +
+          '<td>' + (x.tarih ? SP.trd(x.tarih) : '—') + '</td><td>' + (x.acik ? '<span class="pill good">takılı</span>' : esc(MATKAP_DURUM[x.durum] || x.durum || "—")) + '</td></tr>';
+      }).join("") + '</tbody><tfoot><tr><td colspan="7">Toplam</td><td class="num"><b>' + tl(d.toplam) + '</b></td><td colspan="2"></td></tr></tfoot></table></div>' +
+      (kopuk ? '<div class="hint" style="margin-top:8px">⚠ <b>Zincir kopuk:</b> bir satırın giriş metresi bir öncekinin çıkışıyla tutmuyor.</div>' : '');
+  });
+}
+
+/* ===== MALİYET ===== */
+function maliyet(kok){
+  var m = D.maliyet || {}, st = m.santiyeler || [], kl = m.kalemler || [], ku = D.kuleler || [];
+  var top = st.reduce(function(t, s){ return t + Number(s.toplam); }, 0), metre = st.reduce(function(t, s){ return t + Number(s.metre); }, 0);
+  var litre = st.reduce(function(t, s){ return t + Number(s.litre); }, 0);
+  if(!top && !metre){ kok.innerHTML = '<div class="an-g">' + bos("Bu dönemde maliyet kaydı yok.") + '</div>'; return; }
+  var mm = metre > 0 ? top / metre : null, enKalem = kl[0];
+  var h = '<div class="an-kutular">' +
+    kutu("Toplam maliyet", tlm(top), tl0(metre) + ' m için', true) +
+    kutu("Metre başı maliyet", mm == null ? '—' : tlm(mm) + '<small> /m</small>', 'mazot, harcama, işçilik, merkez payı') +
+    kutu("Mazot", metre > 0 && litre > 0 ? tl(litre / metre, 2) + '<small> lt/m</small>' : '—', tl0(litre) + ' litre') +
+    kutu("En büyük kalem", enKalem ? esc(enKalem.kalem) : '—', enKalem ? tlm(enKalem.tutar) + ' · ' + yuzde(enKalem.tutar / (top || 1) * 100) : '') + '</div>';
+  h += '<div class="an-iz">';
+  var hy = m.harcama_yontem || {};
+  h += kart("Para nereye gitti?", 'Toplam ' + tlm(top) + (enKalem ? ' · en büyük kalem ' + esc(enKalem.kalem).toLocaleLowerCase("tr") : ''),
+    yatay(kl.map(function(k){ return {ad:k.kalem, deger:k.tutar, de:'<b>' + tlm(k.tutar) + '</b> <small>' + yuzde(k.tutar / (top || 1) * 100) + '</small>'}; }), {sinir:10}),
+    {not:(Number(hy.nakit) + Number(hy.banka) > 0 ? 'Harcamaların ' + tlm(hy.nakit) + '’si nakit (şef girer), ' + tlm(hy.banka) + '’si banka (muhasebe girer).' : '')});
+  if(st.length > 1){
+    var ortMm = mm || 0, enPahali = st.filter(function(s){ return s.m_maliyet != null; }).sort(function(a, b){ return b.m_maliyet - a.m_maliyet; })[0];
+    h += kart("Metre başı maliyet", 'Şirket ortalaması ' + tlm(ortMm) + '/m' + (enPahali ? '; en pahalı ' + esc(enPahali.ad) : ''),
+      yatay(st.filter(function(s){ return s.m_maliyet != null; }).sort(function(a, b){ return b.m_maliyet - a.m_maliyet; }).map(function(s){
+        return {ad:s.ad, alt:tl0(s.metre) + ' m', deger:s.m_maliyet, sinif:s.m_maliyet > ortMm * 1.25 ? 'r' : '', de:'<b>' + tlm(s.m_maliyet) + '</b> <small>/m</small>'}; }), {ort:ortMm}),
+      {ek:'┄ şirket ortalaması'});
+  } else {
+    var s0 = st[0] || {};
+    h += kart("Metre başına kırılım", s0.m_maliyet != null ? esc(s0.ad) + ': metre başı ' + tlm(s0.m_maliyet) : '',
+      yatay([["Mazot", s0.mazot], ["Harcamalar", s0.harcama], ["İşçilik", s0.iscilik], ["Merkez ofis payı", s0.merkez]].filter(function(x){ return Number(x[1]) > 0; })
+        .map(function(x){ return {ad:x[0], deger:x[1], de:'<b>' + tlm(s0.metre > 0 ? x[1] / s0.metre : 0) + '</b> <small>/m</small>'}; })));
+  }
+  var kuL = ku.filter(function(k){ return k.lt_m != null; }).sort(function(a, b){ return b.lt_m - a.lt_m; });
+  var ortL = metre > 0 ? litre / metre : 0;
+  h += kart("Mazot · litre / metre", kuL.length ? 'Metre başına ortalama ' + tl(ortL, 2) + ' lt; en çok yakan ' + esc(kuL[0].kod) : 'Kuleye yazılmış mazot yok',
+    yatay(kuL.map(function(k){ return {ad:k.kod, alt:tl0(k.litre) + ' lt', deger:k.lt_m, sinif:k.lt_m > ortL * 1.3 ? 'r' : '', de:'<b>' + tl(k.lt_m, 2) + '</b> <small>lt/m</small>'}; }), {ort:ortL, sinir:10, bos:"Kuleye yazılmış mazot yok."}),
+    {ek:'┄ ortalama'});
+  var yk = m.yakit || [], ykK = yk.filter(function(x){ return x.kule; }), ykA = yk.filter(function(x){ return !x.kule; });
+  var ykTop = yk.reduce(function(t, x){ return t + Number(x.tutar); }, 0), ykATop = ykA.reduce(function(t, x){ return t + Number(x.tutar); }, 0);
+  h += kart("Mazot kime gitti?", yk.length ? 'Mazotun ' + yuzde((ykTop - ykATop) / (ykTop || 1) * 100) + '’i kulelere, ' + yuzde(ykATop / (ykTop || 1) * 100) + '’i araçlara' : 'Mazot kaydı yok',
+    yatay(yk.map(function(x){ return {ad:x.ad, alt:x.kule ? 'kule' : 'araç', deger:x.tutar, sinif:x.kule ? '' : 'v',
+      de:'<b>' + tlm(x.tutar) + '</b> <small>' + tl0(x.litre) + ' lt</small>'}; }), {sinir:10, bos:"Mazot kaydı yok."}),
+    {ek:'<span class="lj d"></span>kule<span class="lj s"></span>araç'});
+  h += kart("Şantiye şantiye maliyet", "", '<div class="an-tablo">' + SP.tablo([
+      ["Şantiye", function(s){ return esc(s.ad); }],
+      ['<span class="num">Metre</span>', function(s){ return '<span class="num">' + tl0(s.metre) + '</span>'; }],
+      ['<span class="num">Mazot</span>', function(s){ return '<span class="num">' + tlm(s.mazot) + '</span>'; }],
+      ['<span class="num">Harcama</span>', function(s){ return '<span class="num">' + tlm(s.harcama) + '</span>'; }],
+      ['<span class="num">İşçilik</span>', function(s){ return '<span class="num">' + tlm(s.iscilik) + '</span>'; }],
+      ['<span class="num">Merkez payı</span>', function(s){ return '<span class="num">' + tlm(s.merkez) + '</span>'; }],
+      ['<span class="num">Toplam</span>', function(s){ return '<span class="num"><b>' + tlm(s.toplam) + '</b></span>'; }],
+      ['<span class="num">₺ / m</span>', function(s){ return '<span class="num">' + (s.m_maliyet == null ? '—' : tlm(s.m_maliyet)) + '</span>'; }]
+    ], st, "Kayıt yok.") + '</div>', {tam:true});
+  h += '</div>';
+  kok.innerHTML = h;
+}
+
+/* ===== MATKAP VE MALZEME ===== */
+var CIKIS = {bitti:"Bitti", matris_doktu:"Matris döktü", kullanilir:"Kullanılır (söküldü)", cap_dusuldu:"Çap düşüldü", kuyuda_kaldi:"Kuyuda kaldı"};
+function matkap(kok){
+  var mk = D.matkaplar || [], mz = D.malzeme || {}, kl = mz.kalemler || [];
+  var cikan = mk.filter(function(b){ return !b.takili; }), takili = mk.filter(function(b){ return b.takili; });
+  var bitenler = cikan.filter(function(b){ return b.durum === "bitti" || b.durum === "matris_doktu"; });
+  var ortOmur = bitenler.length ? bitenler.reduce(function(t, b){ return t + Number(b.metre); }, 0) / bitenler.length : null;
+  var deger = kl.reduce(function(t, k){ return t + (Number(k.tutar) || 0); }, 0);
+  var tlmOrt = (function(){ var x = cikan.filter(function(b){ return b.tl_m != null; }); return x.length ? x.reduce(function(t, b){ return t + Number(b.tl_m); }, 0) / x.length : null; })();
+  var h = '<div class="an-kutular">' +
+    kutu("Çalışan matkap", tl0(mk.length), tl0(cikan.length) + ' çıktı · ' + tl0(takili.length) + ' hâlâ takılı', true) +
+    kutu("Ortalama ömür", ortOmur == null ? '—' : tl0(ortOmur) + '<small> m</small>', 'biten ya da matris döken ' + bitenler.length + ' matkap') +
+    kutu("Metre başı matkap", tlmOrt == null ? '—' : tlm(tlmOrt) + '<small> /m</small>', tlmOrt == null ? 'matkap alış fiyatı girilmemiş' : 'alış fiyatı ÷ ömür') +
+    kutu("Malzeme değeri", deger ? tlm(deger) : '—', mz.fiyatsiz ? '<span class="kotu">' + mz.fiyatsiz + ' malzemenin alış fiyatı yok</span>' : 'tüketim × alış fiyatı') + '</div>';
+  h += '<div class="an-iz">';
+  /* ömür */
+  var omurSira = mk.slice().sort(function(a, b){ return (a.takili - b.takili) || (b.metre - a.metre); });
+  h += kart("Matkap ömrü", 'Bu dönemde ' + mk.length + ' matkap çalıştı; ' + takili.length + ' tanesi hâlâ takılı',
+    yatay(omurSira.map(function(b){ return {ad:(b.marka || 'marka yok') + ' · ' + (b.cap || ''), alt:(b.seri || '') + (b.kule ? ' · ' + b.kule : ''), deger:b.metre,
+      sinif:b.takili ? 'v' : (ortOmur && b.metre < ortOmur * 0.5 && !b.takili ? 'r' : ''),
+      de:'<b>' + tl0(b.metre) + ' m</b> <small>' + (b.takili ? 'takılı' : esc(CIKIS[b.durum] || b.durum || '')) + '</small>'}; }), {sinir:10, bos:"Bu dönemde matkap kaydı yok."}),
+    {ek:'<span class="lj d"></span>çıktı<span class="lj s"></span>hâlâ takılı<span class="lj r"></span>erken bitti'});
+  /* marka kıyası */
+  var mr = {};
+  cikan.forEach(function(b){ var k = (b.marka || 'marka yok') + ' · ' + (b.cap || '?'); var x = mr[k] = mr[k] || {ad:k, n:0, m:0, tl:[], }; x.n++; x.m += Number(b.metre); if(b.tl_m != null) x.tl.push(Number(b.tl_m)); });
+  var mrL = Object.keys(mr).map(function(k){ var x = mr[k]; x.ort = x.m / x.n; x.tlm = x.tl.length ? x.tl.reduce(function(t, v){ return t + v; }, 0) / x.tl.length : null; return x; })
+            .sort(function(a, b){ return b.ort - a.ort; });
+  h += kart("Marka kıyası", mrL.length ? esc(mrL[0].ad) + ' en uzun ömürlü: ortalama ' + tl0(mrL[0].ort) + ' m' : '',
+    yatay(mrL.map(function(x){ return {ad:x.ad, alt:x.n + ' matkap', deger:x.ort, de:'<b>' + tl0(x.ort) + ' m</b>' + (x.tlm != null ? ' <small>' + tlm(x.tlm) + '/m</small>' : '')}; }), {sinir:10, bos:"Bu dönemde çıkan matkap yok."}));
+  /* çıkış sebebi */
+  var cs = {}; cikan.forEach(function(b){ var k = CIKIS[b.durum] || 'Yazılmamış'; cs[k] = (cs[k] || 0) + 1; });
+  var csL = Object.keys(cs).map(function(k){ return {ad:k, n:cs[k]}; }).sort(function(a, b){ return b.n - a.n; });
+  h += kart("Matkap neden çıktı?", csL.length ? esc(csL[0].ad) + ': ' + csL[0].n + ' matkap' : '',
+    yatay(csL.map(function(x){ return {ad:x.ad, deger:x.n, sinif:/Matris|Kuyuda/.test(x.ad) ? 'r' : '', de:'<b>' + x.n + '</b> <small>' + yuzde(x.n / cikan.length * 100) + '</small>'}; }), {bos:"Bu dönemde çıkan matkap yok."}));
+  /* takılı matkaplar ve stok — Şantiye ayrıntısı'ndan */
+  h += kart("Takılı matkaplar", takili.length ? takili.length + ' matkap şu an kulelerde' : 'Takılı matkap yok',
+    tabloS([
+      ["Matkap", function(b){ return esc(b.marka || '—') + ' · ' + esc(b.cap || '—') + '<div class="hint">' + esc(b.kule || '—') + ' · ' + SP.trd(b.takildi) + '</div>'; }],
+      ['<span class="num">Bu kullanımda</span>', function(b){ return '<span class="num">' + tl0(b.metre) + ' m</span>'; }]
+    ], takili.slice().sort(function(a, b){ return String(a.kule).localeCompare(String(b.kule), "tr"); }), "Takılı matkap yok.", 10));
+  /* malzeme */
+  h += kart("Malzeme tüketimi", kl.length ? '100 metrede ' + tl(kl.filter(function(k){ return /kasa/i.test(k.ad); }).reduce(function(t, k){ return t + Number(k.yuz_m || 0); }, 0)) + ' karot kasası' : '',
+    '<div class="an-tablo">' + SP.tablo([
+      ["Malzeme", function(k){ return esc(k.ad); }],
+      ['<span class="num">Miktar</span>', function(k){ return '<span class="num">' + tl0(k.miktar) + ' ' + esc(k.birim || '') + '</span>'; }],
+      ['<span class="num">100 m başına</span>', function(k){ return '<span class="num"><b>' + (k.yuz_m == null ? '—' : tl(k.yuz_m)) + '</b></span>'; }],
+      ['<span class="num">Alış fiyatı</span>', function(k){ return '<span class="num">' + (k.fiyat == null ? '<span class="hint">girilmemiş</span>' : tlm(k.fiyat)) + '</span>'; }],
+      ['<span class="num">Değer</span>', function(k){ return '<span class="num">' + (k.tutar == null ? '—' : tlm(k.tutar)) + '</span>'; }]
+    ], kl, "Bu dönemde malzeme tüketimi yazılmamış.") + '</div>',
+    {tam:true, not: mz.fiyatsiz ? 'Alış fiyatları Tanımlamalar › Şirket tanımları › Malzeme sekmesinden girilir.' : ''});
+  /* şantiye kıyası */
+  var sk = mz.santiyeler || [];
+  var anaMlz = ["Karot kasası", "Bentonit", "Polimer"].filter(function(a){ return sk.some(function(x){ return x.malzeme === a; }); });
+  if(!$("#f-proje").value && anaMlz.length){
+    var stl = []; sk.forEach(function(x){ if(stl.indexOf(x.santiye) < 0) stl.push(x.santiye); });
+    var bul = function(s, mm){ return sk.filter(function(x){ return x.santiye === s && x.malzeme === mm; })[0]; };
+    h += kart("100 metre başına tüketim · şantiye kıyası", "Ortalamanın 1,3 katından fazla tüketen kırmızı",
+      '<div class="scroll an-tablo"><table><thead><tr><th>Şantiye</th>' + anaMlz.map(function(a){ return '<th class="num">' + esc(a) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      stl.map(function(s){ return '<tr><td>' + esc(s) + '</td>' + anaMlz.map(function(a){
+        var x = bul(s, a), hep = sk.filter(function(y){ return y.malzeme === a && y.yuz_m != null; });
+        var ort = hep.length ? hep.reduce(function(t, y){ return t + Number(y.yuz_m); }, 0) / hep.length : 0;
+        return '<td class="num' + (x && x.yuz_m > ort * 1.3 ? ' kotu' : '') + '">' + (x && x.yuz_m != null ? tl(x.yuz_m) : '—') + '</td>'; }).join("") + '</tr>'; }).join("") +
+      '</tbody></table></div>', {tam:true});
+  }
+  h += '<div class="an-g tam stok-yalniz" id="kart-stok"><h3>Stok durumu</h3><div id="stok">' +
+    ($("#f-proje").value ? '<div class="hint">Yükleniyor…</div>' : bos("Stok için bir şantiye seçin.")) + '</div></div>';
+  h += '</div>';
+  kok.innerHTML = h;
+  if($("#f-proje").value && !document.body.classList.contains("stoksuz")){
+    sb.rpc("stock_status", {p_project:$("#f-proje").value}).then(function(r){
+      var box = $("#stok"); if(!box) return;
+      box.innerHTML = r.error ? '<div class="hint">Stok okunamadı.</div>' : '<div class="an-tablo">' + SP.tablo([
+        ["Malzeme", function(x){ return esc(x.material); }],
+        ['<span class="num">Giriş</span>', function(x){ return '<span class="num">' + tl0(x.giris) + ' ' + esc(x.unit) + '</span>'; }],
+        ['<span class="num">Çıkış</span>', function(x){ return '<span class="num">' + tl0(x.cikis) + '</span>'; }],
+        ['<span class="num">Kalan</span>', function(x){ return '<span class="num"><b>' + tl0(x.kalan) + '</b></span>'; }]
+      ], r.data || [], "Stok hareketi girilmemiş.") + '</div>';
+    });
+  }
+}
+
+})();
+</script>
+</body>
+</html>
